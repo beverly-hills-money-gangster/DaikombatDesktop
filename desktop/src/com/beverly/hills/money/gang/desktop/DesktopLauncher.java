@@ -1,0 +1,39 @@
+package com.beverly.hills.money.gang.desktop;
+
+
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.beverly.hills.money.gang.Configs;
+import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.DaiKombatGame;
+
+
+public class DesktopLauncher {
+
+    // TODO publish to github
+    // TODO test on TV
+    // TODO support alt+tab
+    // TODO configure CI/CD
+    // TODO think about license and copyrights
+    public static void main
+    (final String[] arg) {
+        final Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+        config.setTitle("DAIKOMBAT");
+        config.setBackBufferConfig(8, 8, 8, 8, 24, 8, 0);
+        config.setForegroundFPS(60);
+        config.setInitialBackgroundColor(Constants.FOG_COLOR);
+        config.useVsync(true);
+        config.useOpenGL3(true, 3, 3); // 3.3 Works on MacOSX
+
+        if (Configs.DEV_MODE) {
+            config.setWindowSizeLimits(1024, 768, 7680, 4320); // 8k max
+            config.setResizable(true);
+            config.disableAudio(true);
+        } else {
+            config.setFullscreenMode(Lwjgl3ApplicationConfiguration
+                    .getDisplayMode(Lwjgl3ApplicationConfiguration.getPrimaryMonitor()));
+        }
+
+        new Lwjgl3Application(new DaiKombatGame(), config);
+    }
+}

@@ -66,6 +66,7 @@ com_crashlytics_export_strings.xml
 #/desktop/build/
 /desktop/build/classes/
 /desktop/build/generated/
+/desktop/out/
 /desktop/build/resources/
 /desktop/build/tmp/
 /desktop/build/libs/UltraNightmare.jar
@@ -99,6 +100,8 @@ com_crashlytics_export_strings.xml
 /html/nbdist/
 /ios/nbdist/
 
+/core/assets/*
+
 nbactions.xml
 nb-configuration.xml
 
@@ -115,6 +118,8 @@ gradle-app.setting
 # custom end
 /html/build/
 /ios/build/
+
+
 
 ## OS Specific
 .DS_Store

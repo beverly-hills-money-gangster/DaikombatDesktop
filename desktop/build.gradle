@@ -1,11 +1,11 @@
-sourceCompatibility = 1.7
-sourceSets.main.java.srcDirs = [ "src/" ]
+sourceCompatibility = 14
+sourceSets.main.java.srcDirs = ["src/"]
 sourceSets.main.resources.srcDirs = ["../core/assets"]
 
-project.ext.mainClassName = "mysko.pilzhere.fox3d.desktop.DesktopLauncher"
+project.ext.mainClassName = "com.beverly.hills.money.gang.desktop.DesktopLauncher"
 project.ext.assetsDir = new File("../core/assets")
 
-task run(dependsOn: classes, type: JavaExec) {
+task runGame(dependsOn: classes, type: JavaExec) {
     main = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
@@ -32,9 +32,7 @@ task dist(type: Jar) {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     with jar
+    destinationDirectory = file("$buildDir/lib")
 }
 
-
 dist.dependsOn classes
-
-eclipse.project.name = appName + "-desktop"
