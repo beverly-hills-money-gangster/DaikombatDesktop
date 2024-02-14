@@ -10,7 +10,6 @@ import com.beverly.hills.money.gang.DaiKombatGame;
 
 public class DesktopLauncher {
 
-    // TODO publish to github
     // TODO test on TV
     // TODO support alt+tab
     // TODO configure CI/CD
