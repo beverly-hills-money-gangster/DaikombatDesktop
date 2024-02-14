@@ -62,7 +62,7 @@ jobs:
 workflows:
   compile-verify-test:
     jobs:
-      - test-java:
+      - test-java
   publish-zip:
     jobs:
       - build-and-publish:
