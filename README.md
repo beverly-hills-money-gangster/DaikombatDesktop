@@ -1,6 +1,6 @@
 # Daikombat Desktop
 
-Daikombat Desktop is a Doom-like online shooter game with a non-stop death-match mode. It is built using Maven, LibGdx, and Java 14.
+Daikombat is a Doom-like online shooter game with a non-stop death-match mode. It is built using Maven, LibGdx, and Java 14.
 
 **Warning!** Assets are not included
 
