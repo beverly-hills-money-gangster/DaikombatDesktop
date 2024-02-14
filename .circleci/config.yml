@@ -24,7 +24,50 @@ jobs:
           key: cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}
           paths:
             - ~/.gradle/caches
+  build-and-publish:
+    docker:
+      - image: cimg/openjdk:14.0
+    steps:
+      - checkout
+      - run:
+          name: Install Zip
+          command: sudo apt-get install -y zip
+      - run:
+          name: Create asset folder
+          command: |
+            mkdir -p core/assets
+            mkdir -p windows-executable/runtime
+      - add_ssh_keys:
+          fingerprints:
+            - "SHA256:F2SZAptMlXmPA7W1+cM0Y/XRkGrF34AtEbZLlOJIFuY"
+      - run:
+          name: Download assets
+          command: |
+            git clone git@github.com:beverly-hills-money-gangster/DaikombatDesktopAssets.git private-assets
+            mv private-assets/assets/* core/assets
+            mv private-assets/runtime/windows/x86/* windows-executable/runtime
+      - run:
+          name: Build jar
+          command: ./gradlew desktop:dist
+      - run:
+          name: Create executable
+          command: |
+            mv desktop/build/lib/desktop-*.jar windows-executable/desktop.jar
+            touch windows-executable/run.cmd
+            echo "set GAME_HOST=${GAME_HOST}" > windows-executable/run.cmd
+            echo ".\runtime\jdk-14.0.2+12-jre\bin\java.exe -jar .\desktop.jar > log.txt" >> windows-executable/run.cmd
+            zip -9 -r -P ${GAME_ZIP_PASSWORD} win86-game.zip windows-executable
+      - store_artifacts:
+          path: win86-game.zip
 workflows:
-  build-and-test:
+  compile-verify-test:
     jobs:
-      - test-java
+      - test-java:
+  publish-zip:
+    jobs:
+      - build-and-publish:
+          filters:
+            tags:
+              only: /^(\d+)\.(\d+)\.(\d+)$/
+            branches:
+              ignore: /.*/
