@@ -11,12 +11,15 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.cell.Cell3D;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
-import com.beverly.hills.money.gang.Constants;
-import com.beverly.hills.money.gang.DaiKombatGame;
+import org.apache.commons.math3.util.Precision;
+
+import static com.beverly.hills.money.gang.Constants.FLOAT_COMPARE_EPS;
 
 public class MapBuilder {
 
@@ -109,23 +112,23 @@ public class MapBuilder {
             for (int j = 0; j < cell3DsForWorld.size; j++) {
                 final Cell3D otherCell3D = cell3DsForWorld.get(j);
 
-                if (otherCell3D.position.x == currentCell3D.position.x - 1
-                        && otherCell3D.position.z == currentCell3D.position.z) {
+                if (Precision.equals(otherCell3D.position.x, currentCell3D.position.x - 1, FLOAT_COMPARE_EPS)
+                        && Precision.equals(otherCell3D.position.z, currentCell3D.position.z, FLOAT_COMPARE_EPS)) {
                     currentCell3D.hasWallEast = false;
                 }
 
-                if (otherCell3D.position.x == currentCell3D.position.x + 1
-                        && otherCell3D.position.z == currentCell3D.position.z) {
+                if (Precision.equals(otherCell3D.position.x, currentCell3D.position.x + 1, FLOAT_COMPARE_EPS)
+                        && Precision.equals(otherCell3D.position.z, currentCell3D.position.z, FLOAT_COMPARE_EPS)) {
                     currentCell3D.hasWallWest = false;
                 }
 
-                if (otherCell3D.position.x == currentCell3D.position.x
-                        && otherCell3D.position.z == currentCell3D.position.z - 1) {
+                if (Precision.equals(otherCell3D.position.x, currentCell3D.position.x, FLOAT_COMPARE_EPS)
+                        && Precision.equals(otherCell3D.position.z, currentCell3D.position.z - 1, FLOAT_COMPARE_EPS)) {
                     currentCell3D.hasWallNorth = false;
                 }
 
-                if (otherCell3D.position.x == currentCell3D.position.x
-                        && otherCell3D.position.z == currentCell3D.position.z + 1) {
+                if (Precision.equals(otherCell3D.position.x, currentCell3D.position.x, FLOAT_COMPARE_EPS)
+                        && Precision.equals(otherCell3D.position.z, currentCell3D.position.z + 1, FLOAT_COMPARE_EPS)) {
                     currentCell3D.hasWallSouth = false;
                 }
             }

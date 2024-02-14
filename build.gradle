@@ -1,6 +1,5 @@
 buildscript {
 
-
     repositories {
         mavenLocal()
         mavenCentral()
@@ -10,25 +9,24 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'org.wisepersist:gwt-gradle-plugin:1.0.13'
-        classpath 'org.gretty:gretty:3.0.2'
-
-
+        classpath("com.github.spotbugs.snom:spotbugs-gradle-plugin:4.8.0")
     }
 }
 
 allprojects {
     apply plugin: "eclipse"
+    apply plugin: "com.github.spotbugs"
 
     version = '1.0'
     ext {
-        appName = "fox3d"
+        appName = "daikombat"
         gdxVersion = '1.9.12'
         roboVMVersion = '2.3.11'
         box2DLightsVersion = '1.5'
         ashleyVersion = '1.7.3'
         aiVersion = '1.8.2'
     }
+
 
     repositories {
         mavenLocal()
@@ -44,6 +42,22 @@ allprojects {
 project(":desktop") {
     apply plugin: "java-library"
 
+    spotbugs {
+        ignoreFailures = false // Set to true to ignore failures
+        effort = "max" // Effort level for the analysis, options: 'min', 'default', 'max'
+        reportLevel = "high" // Report level, options: 'low', 'medium', 'high'
+    }
+
+    spotbugsMain {
+        reports {
+            html {
+                enabled = true
+                destination = file("$buildDir/reports/spotbugs/main/spotbugs.html")
+                stylesheet = 'fancy-hist.xsl'
+            }
+        }
+    }
+
     dependencies {
         implementation project(":core")
         api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
@@ -55,6 +69,22 @@ project(":desktop") {
 
 project(":core") {
     apply plugin: "java-library"
+
+    spotbugs {
+        ignoreFailures = false // Set to true to ignore failures
+        effort = "max" // Effort level for the analysis, options: 'min', 'default', 'max'
+        reportLevel = "high" // Report level, options: 'low', 'medium', 'high'
+    }
+
+    spotbugsMain {
+        reports {
+            html {
+                enabled = true
+                destination = file("$buildDir/reports/spotbugs/main/spotbugs.html")
+                stylesheet = 'fancy-hist.xsl'
+            }
+        }
+    }
 
     dependencies {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"

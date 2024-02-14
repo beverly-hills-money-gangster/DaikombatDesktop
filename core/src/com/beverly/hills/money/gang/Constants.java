@@ -6,6 +6,7 @@ import org.apache.commons.lang3.Range;
 
 public interface Constants {
 
+    float FLOAT_COMPARE_EPS = 0.000001f;
     Range<Float> FRONT_RANGE = Range.of(180f - 45, 180f + 45);
     Range<Float> LEFT_RANGE = Range.of(45f, 180f - 44.9f);
     Range<Float> RIGHT_RANGE = Range.of(180 + 45.01f, 320f);

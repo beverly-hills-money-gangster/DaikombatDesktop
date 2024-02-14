@@ -16,6 +16,10 @@ jobs:
           key: cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}
       - run:
           command: ./gradlew check
+      - store_artifacts:
+          path: core/build/reports
+      - store_artifacts:
+          path: desktop/build/reports
       - save_cache:
           key: cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}
           paths:

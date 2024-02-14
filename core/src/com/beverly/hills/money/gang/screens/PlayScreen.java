@@ -31,7 +31,6 @@ import com.beverly.hills.money.gang.screens.ui.PlayScreenUISelection;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -414,7 +413,7 @@ public class PlayScreen extends GameScreen {
         final float optionMainMenuY = halfViewportHeight - glyphLayoutOptionToMainMenu.height / 2f - 128 - 64;
         guiFont64.draw(getGame().getBatch(), Constants.OPTION_TO_MAIN_MENU, optionMainMenuX, optionMainMenuY);
 
-        if (!ArrayUtils.contains(PlayScreenUISelection.DEAD_SELECTION, guiMenuSelection)) {
+        if (!PlayScreenUISelection.isDeadSelection(guiMenuSelection)) {
             // if anything other than DEAD_SELECTION
             guiMenuSelection = PlayScreenUISelection.RESPAWN;
         }
@@ -435,7 +434,7 @@ public class PlayScreen extends GameScreen {
         final float optionMainMenuX = halfViewportWidth - glyphLayoutOptionToMainMenu.width / 2f;
         final float optionMainMenuY = halfViewportHeight - glyphLayoutOptionToMainMenu.height / 2f - 128 - 64;
         guiFont64.draw(getGame().getBatch(), Constants.OPTION_TO_MAIN_MENU, optionMainMenuX, optionMainMenuY);
-        if (!ArrayUtils.contains(PlayScreenUISelection.ALIVE_SELECTION, guiMenuSelection)) {
+        if (!PlayScreenUISelection.isAliveSelection(guiMenuSelection)) {
             guiMenuSelection = PlayScreenUISelection.CONTINUE;
         }
         if (guiMenuSelection == PlayScreenUISelection.QUIT) {
