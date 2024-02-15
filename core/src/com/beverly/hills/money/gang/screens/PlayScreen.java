@@ -233,7 +233,8 @@ public class PlayScreen extends GameScreen {
                 case RESPAWN -> {
                     musicBackground.stop();
                     removeAllEntities();
-                    getGame().setScreen(new LoadingScreen(getGame(), playerLoadedData.getPlayerName()));
+                    getGame().setScreen(new LoadingScreen(getGame(),
+                            playerLoadedData.getPlayerName(), playerLoadedData.getServerPassword()));
                     boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
                 }
                 case QUIT -> {

@@ -20,6 +20,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -34,6 +35,7 @@ public class LoadingScreen extends AbstractMainMenuScreen {
     private final AtomicReference<GameConnection> gameConnectionRef = new AtomicReference<>();
     private static final int MAX_LOADING_DOTS = 3;
     private final String playerName;
+    private final String serverPassword;
 
     private long loadingAnimationSwitchMls = 0;
     private static final long LOADING_ANIMATION_MLS = 250;
@@ -41,16 +43,18 @@ public class LoadingScreen extends AbstractMainMenuScreen {
 
     private final BitmapFont guiFont64;
 
-    public LoadingScreen(final DaiKombatGame game, final String playerName) {
+    public LoadingScreen(final DaiKombatGame game, final String playerName, final String serverPassword) {
         super(game);
+        LOG.info("Player name {}, server password {}", playerName, serverPassword);
         this.playerName = playerName;
+        this.serverPassword = serverPassword;
         Thread connectionInitThread = new Thread(() -> {
             try {
                 gameConnectionRef.set(new GameConnection(GameServerCreds.builder()
                         .hostPort(HostPort.builder()
                                 .host(Configs.HOST)
                                 .port(Configs.PORT).build())
-                        .password(Configs.PASSWORD)
+                        .password(serverPassword)
                         .build()));
                 gameConnectionRef.get().write(JoinGameCommand.newBuilder()
                         .setVersion(ClientConfig.VERSION)
@@ -107,6 +111,7 @@ public class LoadingScreen extends AbstractMainMenuScreen {
                             getGame().setScreen(new PlayScreen(getGame(), gameConnection, PlayerLoadedData.builder()
                                     .playerId(playerId)
                                     .playerName(playerName)
+                                    .serverPassword(serverPassword)
                                     .spawn(Converter.convertToVector2(mySpawnEvent.getPlayer().getPosition()))
                                     .direction(Converter.convertToVector2(mySpawnEvent.getPlayer().getDirection()))
                                     .build()));

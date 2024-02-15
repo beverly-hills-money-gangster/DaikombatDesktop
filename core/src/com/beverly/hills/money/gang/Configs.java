@@ -7,8 +7,6 @@ public interface Configs {
 
     String HOST = StringUtils.defaultIfBlank(System.getenv("GAME_HOST"), "localhost");
 
-    String PASSWORD = StringUtils.defaultIfBlank(System.getenv("GAME_PASSWORD"), "daikombat");
-
     int PORT = NumberUtils.toInt(System.getenv("GAME_PORT"), 7777);
 
     int GAME_ID = NumberUtils.toInt(System.getenv("GAME_ID"), 0);

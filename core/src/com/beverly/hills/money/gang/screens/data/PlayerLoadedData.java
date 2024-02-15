@@ -9,6 +9,7 @@ import lombok.ToString;
 @Builder
 @ToString
 public class PlayerLoadedData {
+    private final String serverPassword;
     private final String playerName;
     private final Vector2 spawn;
     private final Vector2 direction;

@@ -25,7 +25,6 @@ Desktop can be configured using the following environment variables:
 
 - `GAME_HOST` Server host. Default - `localhost`
 - `GAME_PORT` Server port. Default - `7777`
-- `GAME_PASSWORD` Server password. Default - `daikombat`
 - `GAME_ID` Server game id. Default - `0`
 - `DEV_MODE` Dev mode. Default - `false`
 
