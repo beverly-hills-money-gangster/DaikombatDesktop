@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
@@ -118,8 +119,8 @@ public class Player extends Entity {
         Streams.of(getScreen().getGame().getRectMan().getRects())
                 .filter(rect -> rect.getFilter() == RectanglePlusFilter.ENEMY || rect.getFilter() == RectanglePlusFilter.WALL)
                 .filter(rect -> Intersector.intersectSegmentRectangle(playerCam.position.x, playerCam.position.z,
-                        playerCam.position.x + playerCam.direction.x * Constants.SHOOTING_DISTANCE,
-                        playerCam.position.z + playerCam.direction.z * Constants.SHOOTING_DISTANCE, rect))
+                        playerCam.position.x + playerCam.direction.x * Configs.SHOOTING_DISTANCE,
+                        playerCam.position.z + playerCam.direction.z * Configs.SHOOTING_DISTANCE, rect))
                 .min((o1, o2) -> Float.compare(distToPlayer(o1), distToPlayer(o2)))
                 .ifPresent(closestRect -> {
                     if (closestRect.getFilter() == RectanglePlusFilter.ENEMY) {
@@ -153,7 +154,7 @@ public class Player extends Entity {
         if (headbob) {
             onMovementListener.accept(this);
             camY = Constants.DEFAULT_PLAYER_CAM_Y;
-            final float sinOffset = (float) (Math.sin(getScreen().getGame().getTimeSinceLaunch() * Constants.PLAYER_MOVE_SPEED * 4f)
+            final float sinOffset = (float) (Math.sin(getScreen().getGame().getTimeSinceLaunch() * Configs.PLAYER_MOVE_SPEED * 4f)
                     * 0.01875f);
             camY += sinOffset;
 
@@ -165,7 +166,7 @@ public class Player extends Entity {
 
         movementDirVec2.set(movementDir.x, movementDir.z);
         rect.getNewPosition().set(
-                rect.getPosition(new Vector2()).cpy().add(movementDirVec2.nor().cpy().scl(Constants.PLAYER_MOVE_SPEED * delta)));
+                rect.getPosition(new Vector2()).cpy().add(movementDirVec2.nor().cpy().scl(Configs.PLAYER_MOVE_SPEED * delta)));
     }
 
     private void shoot() {

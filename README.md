@@ -23,10 +23,10 @@ Right now, the game is not published to any major platform. Please contact to th
 
 Desktop can be configured using the following environment variables:
 
-- `GAME_HOST` Server host. Default - `localhost`
-- `GAME_PORT` Server port. Default - `7777`
-- `GAME_ID` Server game id. Default - `0`
-- `DEV_MODE` Dev mode. Default - `false`
+- `DESKTOP_GAME_HOST` Server host. Default - `localhost`
+- `DESKTOP_GAME_PORT` Server port. Default - `7777`
+- `DESKTOP_GAME_ID` Server game id. Default - `0`
+- `DESKTOP_DEV_MODE` Dev mode. Default - `false`
 
 ## Development
 

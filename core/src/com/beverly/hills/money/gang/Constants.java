@@ -10,7 +10,6 @@ public interface Constants {
     Range<Float> FRONT_RANGE = Range.of(180f - 45, 180f + 45);
     Range<Float> LEFT_RANGE = Range.of(45f, 180f - 44.9f);
     Range<Float> RIGHT_RANGE = Range.of(180 + 45.01f, 320f);
-    int DEFAULT_SPEED = Constants.PLAYER_MOVE_SPEED;
 
     float PLAYER_RECT_SIZE = 0.25f + 0.425f;
 
@@ -39,10 +38,8 @@ public interface Constants {
     String SELECTED_OPTION_MARK = ">";
 
     int FLUSH_ACTIONS_FREQ_MLS = 100;
-    int PLAYER_MOVE_SPEED = 5;  // TODO make configurable
     float PPU = 1f / 16f;
     float HALF_UNIT = 0.5f;
-    float SHOOTING_DISTANCE = 7.5f; // TODO make configurable
 
     float DEFAULT_MUSIC_VOLUME = 0.5f;
 
