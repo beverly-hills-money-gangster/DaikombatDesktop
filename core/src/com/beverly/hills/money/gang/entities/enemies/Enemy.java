@@ -5,10 +5,10 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
-import com.beverly.hills.money.gang.models.ModelInstanceBB;
-import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.entities.player.Player;
+import com.beverly.hills.money.gang.models.ModelInstanceBB;
+import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.screens.GameScreen;
 import lombok.Getter;
 import lombok.Setter;
@@ -53,6 +53,8 @@ public abstract class Enemy extends Entity {
             return SoundVolumeType.VERY_LOUD;
         } else if (distance < 10f) {
             return SoundVolumeType.LOUD;
+        } else if (distance < 20f) {
+            return SoundVolumeType.NORMAL;
         } else if (distance < 30f) {
             return SoundVolumeType.MEDIUM;
         } else {
