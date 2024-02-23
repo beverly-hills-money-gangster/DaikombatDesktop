@@ -140,11 +140,23 @@ public class MapBuilder {
                     (float) rectObj.getProperties().get("y") / TILE_SIZE,
                     (float) rectObj.getProperties().get("width") / TILE_SIZE,
                     (float) rectObj.getProperties().get("height") / TILE_SIZE, -1, RectanglePlusFilter.WALL);
-
             rect.x = rect.x - halfCurrentMapWidth;
             rect.y = rect.y - halfCurrentMapHeight;
-
-            game.getRectMan().addRect(rect);
+            // we need to split walls into smaller 1x1 walls. otherwise, collision detection breaks.
+            if ((int) rect.getHeight() > 1 || (int) rect.getWidth() > 1) {
+                int verticals = (int) rect.getHeight();
+                int horizontals = (int) rect.getWidth();
+                for (int i = 0; i < verticals; i++) {
+                    for (int j = 0; j < horizontals; j++) {
+                        final RectanglePlus subrect = new RectanglePlus(
+                                rect.x + j, rect.y + i, 1, 1,
+                                -1, RectanglePlusFilter.WALL);
+                        game.getRectMan().addRect(subrect);
+                    }
+                }
+            } else {
+                game.getRectMan().addRect(rect);
+            }
         }
 
         for (final Cell3D cell3d : cell3DsForWorld) {

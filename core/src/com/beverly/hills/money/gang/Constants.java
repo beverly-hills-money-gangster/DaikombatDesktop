@@ -13,12 +13,14 @@ public interface Constants {
 
     float PLAYER_RECT_SIZE = 0.25f + 0.425f;
 
-    float MOUSE_CAMERA_ROTATION_SPEED = 25f;
+    long SHOOTING_SOUND_FREQ_MLS = 500;
+
+    float MOUSE_CAMERA_ROTATION_SPEED = 15f;
     float ARROWS_CAMERA_ROTATION = 2.5f;
     float BLOOD_OVERLAY_ALPHA_MAX = 1f;
     float BLOOD_OVERLAY_ALPHA_MIN = 0f;
     float BLOOD_OVERLAY_ALPHA_SPEED = 5f;
-    long SHOOT_TIMER_DURATION_MLS = 150L;
+    long SHOOT_TIMER_DURATION_MLS = 200L;
     long SHOOT_ANIMATION_DURATION_MLS = 100L;
 
     int LOGO_INDENT = 256;
@@ -26,18 +28,14 @@ public interface Constants {
 
     int MENU_OPTION_INDENT = 64;
 
+    float DEFAULT_ENEMY_Y = 0.5057522f;
+
     Color FOG_COLOR = new Color(66 / 256f, 33 / 256f, 54 / 256f, 1f);
     float DEFAULT_PLAYER_CAM_Y = 0.40f;
     String YOU_DIED = "YOU DIED!";
-    String OPTION_CONTINUE = "CONTINUE";
     String CONNECTING = "CONNECTING";
-    String OPTION_RESPAWN = "RESPAWN";
-    String OPTION_TO_MAIN_MENU = "QUIT TO MAIN MENU";
-    String START_GAME = "START GAME";
-    String OPTION_QUIT_GAME = "QUIT GAME";
     String SELECTED_OPTION_MARK = ">";
 
-    int FLUSH_ACTIONS_FREQ_MLS = 100;
     float PPU = 1f / 16f;
     float HALF_UNIT = 0.5f;
 

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual testing cases</title>
+    <style>
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th, td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  tr:hover {
+    background-color: #f5f5f5;
+  }
+
+    </style>
+</head>
+<body>
+
+<h2>Manual testing scenarios</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>Screen</th>
+        <th>Description</th>
+        <th>Verified</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Enter player name screen</td>
+        <td>If user enters an empty/blank string then it doesn't transition to the next screen when "Enter" is pressed.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Enter password screen</td>
+        <td>If user enters an empty string then it doesn't transition to the next screen when "Enter" is pressed.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Loading screen</td>
+        <td>If game server is down then it takes around 5 seconds before error pops up. The game doesn't crash.</td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Loading screen</td>
+        <td>If game server is up but server pin is incorrect then an error pops up. The game doesn't crash.</td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Loading screen</td>
+        <td>If game server is up and credentials are correct then the player gets connected and shows up on the map.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Loading screen</td>
+        <td>If game server is up but a different player has already connected with the same name then an error pops
+            up. The game doesn't crash.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Loading screen</td>
+        <td>If game server is up but the server is full then an error pops up. The game doesn't crash.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
+        <td>If 2 players are connected then they see each other moving with little-to-no delay. Animation changes
+            smoothly.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
+        <td>If player joins the game but the server goes offline mid-game, then an error pops up. Game doesn't crash.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
+        <td>Player can't move through a wall.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
+        <td>One player can't shoot the other through a wall.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
+        <td>3 players join the game: killer, victim, and observer. Killer shoots victim: killer player sees victim
+            blinking red, victim player screen blinks red, observer player sees killer shooting and victim blinking red.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
+        <td>3 players join the game: killer, victim, and observer. Killer kills victim: killer player sees victim death,
+            victim sees "death" screen, observer player sees killer killing the victim. Killer is on the top of the
+            leader board.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
+        <td>2 players join the game. Player 1 publishes a message to chat. Player 2 sees the message.</td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
+        <td>2 players join the game. Player 1 publishes an empty/blank message to chat. Message is not sent.</td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
+        <td>2 players join the game. Player 1 presses "Esc" and goes to main menu. Player 2 sees player 1 exit the
+            game.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
+        <td>2 players join the game. Player 1 terminates the game(alt+f4). Player 2 sees player 1 exit the
+            game.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
+        <td>2 players join the game. Player 1 doesn't move. Player 2 goes see player 1. Player 2 shoots. Player 1 sees
+            player 2 shooting without changing position on the map.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
+        <td>2 players join the game. Player 1 constantly moves forward. Player 2 kills player 1 while it's still moving.
+            Player 1 one dies. No error pops up.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Settings screen</td>
+        <td>When settings are updated, they persist(after game reboot as well).
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Settings screen</td>
+        <td>If sound volume is increased or decreased then player can hear it immediately.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

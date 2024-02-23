@@ -15,4 +15,7 @@ public interface Configs {
 
     int PLAYER_MOVE_SPEED = NumberUtils.toInt(System.getenv("DESKTOP_PLAYER_MOVE_SPEED"), 5);
     float SHOOTING_DISTANCE = NumberUtils.toFloat(System.getenv("DESKTOP_SHOOTING_DISTANCE"), 7.5f);
+
+    int FLUSH_ACTIONS_FREQ_MLS
+            = NumberUtils.toInt(System.getenv("DESKTOP_FLUSH_ACTIONS_FREQ_MLS"), 50);
 }

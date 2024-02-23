@@ -26,6 +26,7 @@ Desktop can be configured using the following environment variables:
 - `DESKTOP_GAME_HOST` Server host. Default - `localhost`
 - `DESKTOP_GAME_PORT` Server port. Default - `7777`
 - `DESKTOP_GAME_ID` Server game id. Default - `0`
+- `DESKTOP_FLUSH_ACTIONS_FREQ_MLS` Frequency(in milliseconds) at which desktop sends "MOVE" events to server. Default - `50`.
 - `DESKTOP_DEV_MODE` Dev mode. Default - `false`
 
 ## Development
@@ -41,7 +42,7 @@ gradle desktop:dist
 
 ### Testing and QA
 
-To turn dev mode on, please run the game with `DEV_MODE=true` environment variable. Dev mode features:
+To turn dev mode on, please run the game with `DESKTOP_DEV_MODE=true` environment variable. Dev mode features:
 - Smaller window size, so you can run multiple game windows at the same time and see IDE logs on-fly
 - Cursor gets "un-caught" when "Esc" is pressed during death-match, so you can use the mouse to go back to IDE or run one more game window
 - Basic network metrics are rendered on the screen during death-match

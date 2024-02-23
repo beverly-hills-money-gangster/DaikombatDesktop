@@ -2,7 +2,6 @@ package com.beverly.hills.money.gang.entities.player;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Intersector;
@@ -12,11 +11,13 @@ import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
+import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
+import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
-import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.screens.ui.UserSettingsUISelection;
 import lombok.Getter;
 import org.apache.commons.lang3.stream.Streams;
 
@@ -38,7 +39,7 @@ public class Player extends Entity {
     private final Consumer<EnemyPlayer> onEnemyAim;
     private final Vector3 movementDir = new Vector3();
     final Vector2 movementDirVec2 = new Vector2(movementDir.x, movementDir.z);
-    private final Sound sfxShotgun;
+    private final UserSettingSound sfxShotgun;
     private final TextureRegion guiGun, guiGunShoot;
     public boolean gotHit = false;
     public boolean renderBloodOverlay = false;
@@ -99,8 +100,7 @@ public class Player extends Entity {
     }
 
     public Vector2 getCurrent2DPosition() {
-        return new Vector2(this.rect.x + Constants.HALF_UNIT - Constants.PLAYER_RECT_SIZE / 2f,
-                this.rect.y + Constants.HALF_UNIT - Constants.PLAYER_RECT_SIZE / 2f);
+        return new Vector2(this.rect.x, this.rect.y);
     }
 
     @Override
@@ -115,9 +115,8 @@ public class Player extends Entity {
 
 
     public final void getEnemyRectInRangeFromCam(final Consumer<EnemyPlayer> onEnemyIntersect) {
-
         Streams.of(getScreen().getGame().getRectMan().getRects())
-                .filter(rect -> rect.getFilter() == RectanglePlusFilter.ENEMY || rect.getFilter() == RectanglePlusFilter.WALL)
+                .filter(rect -> (rect.getFilter() == RectanglePlusFilter.ENEMY || rect.getFilter() == RectanglePlusFilter.WALL))
                 .filter(rect -> Intersector.intersectSegmentRectangle(playerCam.position.x, playerCam.position.z,
                         playerCam.position.x + playerCam.direction.x * Configs.SHOOTING_DISTANCE,
                         playerCam.position.z + playerCam.direction.z * Configs.SHOOTING_DISTANCE, rect))
@@ -147,7 +146,8 @@ public class Player extends Entity {
         }
         // otherwise the screen goes 180 degrees on startup if you don't move the mouse on main menu screens
         if (Math.abs(Gdx.input.getDeltaX()) < 500) {
-            playerCam.rotate(Vector3.Y, Gdx.input.getDeltaX() * -Constants.MOUSE_CAMERA_ROTATION_SPEED * delta);
+            playerCam.rotate(Vector3.Y, Gdx.input.getDeltaX() * -Constants.MOUSE_CAMERA_ROTATION_SPEED
+                    * UserSettingsUISelection.MOUSE_SENS.getState().getNormalized() * delta);
         }
         handleArrows();
         handleWASD();

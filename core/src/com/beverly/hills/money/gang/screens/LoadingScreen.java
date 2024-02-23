@@ -97,32 +97,33 @@ public class LoadingScreen extends AbstractMainMenuScreen {
                 .ifPresentOrElse(errorMessage -> {
                     stopLoading = true;
                     getGame().setScreen(new ErrorScreen(getGame(), errorMessage));
-                }, () -> Optional.ofNullable(gameConnectionRef.get()).ifPresent(gameConnection -> {
-                    gameConnection.getResponse().poll().ifPresentOrElse(response -> {
-                        if (response.hasErrorEvent()) {
-                            errorMessageRef.set(response.getErrorEvent().getMessage());
-                        } else if (response.hasGameEvents()) {
-                            removeAllEntities();
-                            stopBgMusic();
-                            var mySpawnEvent = response.getGameEvents().getEvents(0);
-                            LOG.info("My spawn {}", mySpawnEvent);
-                            int playerId = mySpawnEvent.getPlayer().getPlayerId();
-                            getGame().setScreen(new PlayScreen(getGame(), gameConnection, PlayerLoadedData.builder()
-                                    .playerId(playerId)
-                                    .playerName(playerName)
-                                    .serverPassword(serverPassword)
-                                    .spawn(Converter.convertToVector2(mySpawnEvent.getPlayer().getPosition()))
-                                    .direction(Converter.convertToVector2(mySpawnEvent.getPlayer().getDirection()))
-                                    .build()));
-                        } else {
-                            errorMessageRef.set("Can't join to server");
-                            gameConnection.disconnect();
-                        }
-                    }, () -> gameConnection.getErrors().poll().ifPresent(throwable -> {
+                }, () -> Optional.ofNullable(gameConnectionRef.get()).ifPresent(gameConnection
+                        -> gameConnection.getResponse().poll().ifPresentOrElse(response -> {
+                    if (response.hasErrorEvent()) {
+                        errorMessageRef.set(response.getErrorEvent().getMessage());
+                    } else if (response.hasGameEvents()) {
+                        removeAllEntities();
+                        stopBgMusic();
+                        var mySpawnEvent = response.getGameEvents().getEvents(0);
+                        LOG.info("My spawn {}", mySpawnEvent);
+                        int playerId = mySpawnEvent.getPlayer().getPlayerId();
+                        getGame().setScreen(new PlayScreen(getGame(), gameConnection, PlayerLoadedData.builder()
+                                .playerId(playerId)
+                                .playerName(playerName)
+                                .serverPassword(serverPassword)
+                                .spawn(Converter.convertToVector2(mySpawnEvent.getPlayer().getPosition()))
+                                .direction(Converter.convertToVector2(mySpawnEvent.getPlayer().getDirection()))
+                                .leaderBoardItemList(mySpawnEvent.getLeaderBoard().getItemsList())
+                                .build()));
+                    } else {
+                        errorMessageRef.set("Can't join to server");
                         gameConnection.disconnect();
-                        errorMessageRef.set(throwable.getMessage());
-                    }));
-                }));
+                    }
+                }, () -> gameConnection.getErrors().poll().ifPresent(throwable -> {
+                    LOG.error("Error while loading", throwable);
+                    gameConnection.disconnect();
+                    errorMessageRef.set((ExceptionUtils.getMessage(throwable)));
+                }))));
 
         getGame().getBatch().end();
     }

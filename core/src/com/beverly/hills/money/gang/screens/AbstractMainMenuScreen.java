@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.config.ClientConfig;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
@@ -25,7 +26,7 @@ public abstract class AbstractMainMenuScreen extends GameScreen {
     private final GlyphLayout glyphLayoutNetworkClient;
     private final BitmapFont guiFont32;
 
-    private static Sound MUSIC_BACKGROUND;
+    private static UserSettingSound MUSIC_BACKGROUND;
     private final TextureRegion skyBg;
     private final TextureRegion guiTitle;
 

@@ -12,7 +12,6 @@ public class DesktopLauncher {
 
     // TODO test on TV
     // TODO support alt+tab
-    // TODO configure CI/CD
     // TODO think about license and copyrights
     public static void main
     (final String[] arg) {
@@ -25,8 +24,9 @@ public class DesktopLauncher {
         config.useOpenGL3(true, 3, 3); // 3.3 Works on MacOSX
 
         if (Configs.DEV_MODE) {
-            config.setWindowSizeLimits(1024, 768, 7680, 4320); // 8k max
-            config.setResizable(true);
+            config.setWindowSizeLimits(1024, 768, 1024, 768);
+            config.setResizable(false);
+            config.setWindowedMode(1024, 768);
             config.disableAudio(true);
         } else {
             config.setFullscreenMode(Lwjgl3ApplicationConfiguration

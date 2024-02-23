@@ -9,6 +9,7 @@ import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
+import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.input.TextInputProcessor;
 import org.apache.commons.lang3.StringUtils;
 
@@ -18,7 +19,7 @@ public class EnterYourNameScreen extends AbstractMainMenuScreen {
     private static final String ENTER_YOUR_NAME_MSG = "ENTER YOUR NAME";
 
     private final BitmapFont guiFont64;
-    private final Sound boomSound2;
+    private final UserSettingSound boomSound2;
     private final TextInputProcessor nameTextInputProcessor;
 
 
@@ -33,7 +34,7 @@ public class EnterYourNameScreen extends AbstractMainMenuScreen {
 
     @Override
     public void handleInput(final float delta) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) && StringUtils.isNotEmpty(nameTextInputProcessor.getText())) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) && StringUtils.isNotBlank(nameTextInputProcessor.getText())) {
             removeAllEntities();
             boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
             getGame().setScreen(new EnterServerPasswordScreen(getGame(), nameTextInputProcessor.getText()));

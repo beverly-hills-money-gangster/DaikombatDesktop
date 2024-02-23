@@ -4,7 +4,8 @@ import com.beverly.hills.money.gang.assets.managers.sound.PseudoRandomSoundSeque
 import lombok.Getter;
 
 public enum SoundRegistry {
-
+    YOU_LEAD("sfx/you_lead.mp3"),
+    LOST_LEAD("sfx/lost_lead.mp3"),
     BELL("sfx/bell.mp3"),
     BATTLE("music/battle.wav"),
     BATTLE2("music/battle2.wav"),

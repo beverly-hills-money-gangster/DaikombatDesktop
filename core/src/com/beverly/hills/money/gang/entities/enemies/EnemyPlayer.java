@@ -14,10 +14,10 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
-import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.screens.GameScreen;
 import lombok.Getter;
 
@@ -37,6 +37,7 @@ public class EnemyPlayer extends Enemy {
     private final String name;
     private long redUntil;
     private long movingAnimationUntil;
+
     private long shootingAnimationUntil;
     private int currentStep;
     private final float speed;
@@ -46,30 +47,29 @@ public class EnemyPlayer extends Enemy {
     @Getter
     private final int enemyPlayerId;
 
-    public EnemyPlayer(final Player player, final int enemyPlayerId, final Vector3 position, Vector2 direction, final GameScreen screen, final String name,
+    public EnemyPlayer(final Player player,
+                       final int enemyPlayerId,
+                       final Vector3 position, Vector2 direction, final GameScreen screen, final String name,
                        final Consumer<Enemy> onDeath, final Consumer<Enemy> onGetShot, final Consumer<Enemy> onShooting) {
+
+
         super(position, screen, player, onDeath, onGetShot, onShooting);
         this.enemyPlayerId = enemyPlayerId;
         lastDirection = direction;
         enemyTextures = new EnemyTextures(screen.getGame().getAssMan());
         speed = Configs.PLAYER_MOVE_SPEED;
         this.name = name;
-        this.getPosition().add(Constants.HALF_UNIT, 0, Constants.HALF_UNIT);
         super.setMdlInst(new ModelInstanceBB(screen.getGame().getCellBuilder().getMdlEnemy()));
-
-
         Attributes attributes = getMdlInst().materials.get(0);
-
         attributes.set(TextureAttribute.createDiffuse(enemyTextures.getEnemyPlayerTextureRegion(EnemyTextureRegistry.IDLETEXFRONTREG)));
         attributes.set(new ColorAttribute(ColorAttribute.Diffuse, Color.WHITE));
         attributes.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
         attributes.set(new FloatAttribute(FloatAttribute.AlphaTest));
 
-        setRect(new RectanglePlus(this.getPosition().x, this.getPosition().z, Constants.HALF_UNIT, Constants.HALF_UNIT, getEntityId(),
+        setRect(new RectanglePlus(this.getPosition().x, this.getPosition().z, Constants.PLAYER_RECT_SIZE, Constants.PLAYER_RECT_SIZE, getEntityId(),
                 RectanglePlusFilter.ENEMY));
-        getRect().setPosition(getPosition().x - getRect().getWidth() / 2, getPosition().z - getRect().getHeight() / 2);
+        getRect().setPosition(getRect().x, getRect().y );
         screen.getGame().getRectMan().addRect(getRect());
-
         getRect().getOldPosition().set(getRect().x, getRect().y);
         getRect().getNewPosition().set(getRect().x, getRect().y);
     }

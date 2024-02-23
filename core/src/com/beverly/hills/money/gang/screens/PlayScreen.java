@@ -2,7 +2,6 @@ package com.beverly.hills.money.gang.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -17,7 +16,9 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.MapRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
+import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.player.Player;
+import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
 import com.beverly.hills.money.gang.handler.PlayScreenGameConnectionHandler;
 import com.beverly.hills.money.gang.input.TextInputProcessor;
 import com.beverly.hills.money.gang.log.ChatLog;
@@ -27,18 +28,18 @@ import com.beverly.hills.money.gang.proto.PushChatEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand;
 import com.beverly.hills.money.gang.proto.ServerResponse;
 import com.beverly.hills.money.gang.screens.data.PlayerLoadedData;
-import com.beverly.hills.money.gang.screens.ui.PlayScreenUISelection;
+import com.beverly.hills.money.gang.screens.ui.ActivePlayUISelection;
+import com.beverly.hills.money.gang.screens.ui.DeadPlayUISelection;
+import com.beverly.hills.money.gang.screens.ui.UISelection;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Locale;
-import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Getter
 public class PlayScreen extends GameScreen {
@@ -53,15 +54,28 @@ public class PlayScreen extends GameScreen {
     private final TextInputProcessor chatTextInputProcessor;
     private final BitmapFont guiFont64;
     private final BitmapFont guiFont32;
-    private final GlyphLayout glyphLayoutOptionContinue;
     private final GlyphLayout glyphLayoutHeadsupDead;
     private final GlyphLayout glyphLayoutAim;
-    private final GlyphLayout glyphLayoutOptionToMainMenu;
-    private final Sound fightSound;
-    private final Sound musicBackground;
-    private final Sound dingSound1;
-    private final Sound boomSound1;
-    private final Sound boomSound2;
+    private final UserSettingSound fightSound;
+    private final UserSettingSound musicBackground;
+    private final UserSettingSound dingSound1;
+    private final UserSettingSound boomSound1;
+    private final UserSettingSound boomSound2;
+    private final UserSettingSound youLead;
+    private final UserSettingSound lostLead;
+
+    private final UISelection<ActivePlayUISelection> activePlayUISelectionUISelection
+            = new UISelection<>(ActivePlayUISelection.values());
+
+    private final UISelection<DeadPlayUISelection> deadPlayUISelectionUISelection
+            = new UISelection<>(DeadPlayUISelection.values());
+
+    @Setter
+    private String errorMessage;
+
+    @Getter
+    private final UILeaderBoard uiLeaderBoard;
+    private boolean showLeaderBoard;
 
     private long nextTimeToFlushPlayerActions;
     private boolean chatMode;
@@ -74,9 +88,6 @@ public class PlayScreen extends GameScreen {
 
     private final ChatLog chatLog = new ChatLog();
     private final PlayerKillLog playerKillLog;
-
-    private int menuSelectionCounter;
-    private PlayScreenUISelection guiMenuSelection;
 
     private final GameConnection gameConnection;
 
@@ -103,8 +114,6 @@ public class PlayScreen extends GameScreen {
         guiFont64 = getGame().getAssMan().getFont(FontRegistry.FONT_64);
         guiFont32 = getGame().getAssMan().getFont(FontRegistry.FONT_32);
 
-        glyphLayoutOptionContinue = new GlyphLayout(guiFont64, Constants.OPTION_CONTINUE);
-        glyphLayoutOptionToMainMenu = new GlyphLayout(guiFont64, Constants.OPTION_TO_MAIN_MENU);
         glyphLayoutHeadsupDead = new GlyphLayout(guiFont64, Constants.YOU_DIED);
         glyphLayoutAim = new GlyphLayout(guiFont64, "+");
 
@@ -112,6 +121,8 @@ public class PlayScreen extends GameScreen {
         fightSound = getGame().getAssMan().getSound(SoundRegistry.FIGHT);
         boomSound1 = getGame().getAssMan().getSound(SoundRegistry.BOOM_1);
         boomSound2 = getGame().getAssMan().getSound(SoundRegistry.BOOM_2);
+        youLead = getGame().getAssMan().getSound(SoundRegistry.YOU_LEAD);
+        lostLead = getGame().getAssMan().getSound(SoundRegistry.LOST_LEAD);
         fightSound.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
 
         getGame().getMapBuilder().buildMap(getGame().getAssMan().getMap(MapRegistry.ONLINE_MAP));
@@ -146,6 +157,7 @@ public class PlayScreen extends GameScreen {
                     if (System.currentTimeMillis() > nextTimeToFlushPlayerActions) {
                         if (gameConnection.isConnected()) {
                             sendCurrentPlayerPosition();
+                            nextTimeToFlushPlayerActions = System.currentTimeMillis() + Configs.FLUSH_ACTIONS_FREQ_MLS;
                         }
                     }
 
@@ -158,12 +170,28 @@ public class PlayScreen extends GameScreen {
         getViewport().setCamera(getCurrentCam());
         Gdx.input.setCursorCatched(true);
         musicBackground.loop(Constants.DEFAULT_MUSIC_VOLUME);
-
+        uiLeaderBoard = new UILeaderBoard(
+                playerLoadedData.getPlayerId(),
+                playerLoadedData.getLeaderBoardItemList().stream()
+                        .map(leaderBoardItem -> UILeaderBoard.LeaderBoardPlayer.builder()
+                                .name(leaderBoardItem.getPlayerName())
+                                .id(leaderBoardItem.getPlayerId())
+                                .kills(leaderBoardItem.getKills()).build()).collect(Collectors.toList()),
+                () -> {
+                    LOG.info("You have taken the lead");
+                    youLead.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
+                },
+                () -> {
+                    LOG.info("You have lost the lead");
+                    lostLead.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
+                }
+        );
         playScreenGameConnectionHandler = new PlayScreenGameConnectionHandler(this);
     }
 
     @Override
     public void handleInput(final float delta) {
+        showLeaderBoard = false;
         if (getPlayer().isDead()) {
             showGuiMenu = true;
             chatMode = false;
@@ -177,13 +205,15 @@ public class PlayScreen extends GameScreen {
                 } else {
                     Gdx.input.setCursorCatched(true);
                     showGuiMenu = !showGuiMenu;
-                    menuSelectionCounter = 0;
                 }
             } else if (chatMode) {
                 handleChatInput();
             } else {
                 if (showGuiMenu) {
                     handleAliveGuiInput();
+                }
+                if (Gdx.input.isKeyPressed(Input.Keys.TAB)) {
+                    showLeaderBoard = true;
                 }
                 getPlayer().handleInput(delta);
             }
@@ -195,15 +225,13 @@ public class PlayScreen extends GameScreen {
             Gdx.input.setCursorCatched(false);
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            menuSelectionCounter++;
             dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-            guiMenuSelection = PlayScreenUISelection.getAliveSelection(menuSelectionCounter);
+            activePlayUISelectionUISelection.up();
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            menuSelectionCounter++;
             dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-            guiMenuSelection = PlayScreenUISelection.getAliveSelection(menuSelectionCounter);
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            switch (guiMenuSelection) {
+            activePlayUISelectionUISelection.down();
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+            switch (activePlayUISelectionUISelection.getSelectedOption()) {
                 case CONTINUE -> {
                     Gdx.input.setCursorCatched(true);
                     boomSound1.play(Constants.DEFAULT_SFX_VOLUME);
@@ -221,15 +249,13 @@ public class PlayScreen extends GameScreen {
 
     private void handleDeadGuiInput() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            menuSelectionCounter++;
+            deadPlayUISelectionUISelection.up();
             dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-            guiMenuSelection = PlayScreenUISelection.getDeadSelection(menuSelectionCounter);
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            menuSelectionCounter++;
+            deadPlayUISelectionUISelection.down();
             dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-            guiMenuSelection = PlayScreenUISelection.getDeadSelection(menuSelectionCounter);
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            switch (guiMenuSelection) {
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+            switch (deadPlayUISelectionUISelection.getSelectedOption()) {
                 case RESPAWN -> {
                     musicBackground.stop();
                     removeAllEntities();
@@ -249,7 +275,7 @@ public class PlayScreen extends GameScreen {
 
 
     private void handleChatInput() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) && StringUtils.isNotEmpty(chatTextInputProcessor.getText())) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) && StringUtils.isNotBlank(chatTextInputProcessor.getText())) {
             chatMode = false;
             gameConnection.write(PushChatEventCommand.newBuilder()
                     .setMessage(chatTextInputProcessor.getText())
@@ -279,27 +305,25 @@ public class PlayScreen extends GameScreen {
                 .setDirection(PushGameEventCommand.Vector.newBuilder()
                         .setX(currentDirection.x).setY(currentDirection.y).build())
                 .build());
-        nextTimeToFlushPlayerActions = System.currentTimeMillis() + Constants.FLUSH_ACTIONS_FREQ_MLS;
     }
 
     @Override
     public void render(final float delta) {
         super.render(delta);
-        if (gameConnection.isDisconnected() && !isExiting() && !getPlayer().isDead() && gameConnection.getResponse().size() == 0) {
+        playScreenGameConnectionHandler.handle();
+        if (gameConnection.isDisconnected() && !isExiting() && !getPlayer().isDead()) {
+            // finish processing all error events
+            gameConnection.getResponse().list().stream()
+                    .filter(ServerResponse::hasErrorEvent).forEach(playScreenGameConnectionHandler::handleErrorEvent);
+            // finish processing all exceptions
+            gameConnection.getErrors().list().forEach(playScreenGameConnectionHandler::handleException);
+
             musicBackground.stop();
             removeAllEntities();
-            String errorMessage = gameConnection.getResponse().list().stream()
-                    .filter(ServerResponse::hasErrorEvent)
-                    .map(ServerResponse::getErrorEvent)
-                    .map(ServerResponse.ErrorEvent::getMessage).findFirst()
-                    .or((Supplier<Optional<String>>) () -> gameConnection.getErrors().poll().stream()
-                            .findFirst().map(ExceptionUtils::getMessage)).orElse("Connection is lost");
-            getGame().setScreen(new ErrorScreen(getGame(), errorMessage));
+            getGame().setScreen(new ErrorScreen(getGame(), StringUtils.defaultIfBlank(errorMessage, "Connection lost")));
             boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
             return;
-
         }
-        playScreenGameConnectionHandler.handle();
 
         getCurrentCam().update();
 
@@ -350,8 +374,7 @@ public class PlayScreen extends GameScreen {
                 String killerMessage = playerKillLog.getKillerMessage();
                 guiFont64.draw(getGame().getBatch(), killerMessage, 32, 128 - 32);
             }
-            String killsCount = playerKillLog.getKillCount();
-
+            String killsCount = uiLeaderBoard.getMyKillsMessage();
             guiFont64.draw(getGame().getBatch(), killsCount, getViewport().getWorldWidth() - 32 - new GlyphLayout(guiFont64, killsCount).width, 128 - 32);
 
         }
@@ -393,6 +416,13 @@ public class PlayScreen extends GameScreen {
                 renderAliveGui();
             }
         }
+        if (showLeaderBoard) {
+            String leaderBoard = getUiLeaderBoard().toString();
+            var glyphLayoutRecSentMessages = new GlyphLayout(guiFont64, leaderBoard);
+            guiFont64.draw(getGame().getBatch(),
+                    leaderBoard, getViewport().getWorldWidth() / 2f - glyphLayoutRecSentMessages.width / 2f,
+                    getViewport().getWorldHeight() - Constants.MENU_OPTION_INDENT * 2);
+        }
         getGame().getBatch().end();
 
     }
@@ -405,44 +435,13 @@ public class PlayScreen extends GameScreen {
         String killedBy = "KILLED BY " + getPlayer().getKilledBy().toUpperCase();
         GlyphLayout glyphLayoutKilledBy = new GlyphLayout(guiFont64, killedBy);
         final float killedByX = halfViewportWidth - glyphLayoutKilledBy.width / 2f;
-        guiFont64.draw(getGame().getBatch(), killedBy, killedByX, halfViewportHeight - glyphLayoutKilledBy.height / 2f - 64);
-
-        final float optionRespawnX = halfViewportWidth - glyphLayoutOptionContinue.width / 2f;
-        final float optionRespawnY = halfViewportHeight - glyphLayoutOptionContinue.height / 2f - 128;
-        guiFont64.draw(getGame().getBatch(), Constants.OPTION_RESPAWN, optionRespawnX, optionRespawnY);
-        final float optionMainMenuX = halfViewportWidth - glyphLayoutOptionToMainMenu.width / 2f;
-        final float optionMainMenuY = halfViewportHeight - glyphLayoutOptionToMainMenu.height / 2f - 128 - 64;
-        guiFont64.draw(getGame().getBatch(), Constants.OPTION_TO_MAIN_MENU, optionMainMenuX, optionMainMenuY);
-
-        if (!PlayScreenUISelection.isDeadSelection(guiMenuSelection)) {
-            // if anything other than DEAD_SELECTION
-            guiMenuSelection = PlayScreenUISelection.RESPAWN;
-        }
-        if (guiMenuSelection == PlayScreenUISelection.QUIT) {
-            guiFont64.draw(getGame().getBatch(), Constants.SELECTED_OPTION_MARK, optionMainMenuX - 32, optionMainMenuY);
-        } else if (guiMenuSelection == PlayScreenUISelection.RESPAWN) {
-            guiFont64.draw(getGame().getBatch(), Constants.SELECTED_OPTION_MARK, optionRespawnX - 32, optionRespawnY);
-        }
-
+        final float killedByY = halfViewportHeight - glyphLayoutKilledBy.height / 2f - 64;
+        guiFont64.draw(getGame().getBatch(), killedBy, killedByX, killedByY);
+        deadPlayUISelectionUISelection.render(guiFont64, this, 128);
     }
 
     private void renderAliveGui() {
-        float halfViewportHeight = getViewport().getWorldHeight() / 2f;
-        float halfViewportWidth = getViewport().getWorldWidth() / 2f;
-        final float optionContinueX = halfViewportWidth - glyphLayoutOptionContinue.width / 2f;
-        final float optionContinueY = halfViewportHeight - glyphLayoutOptionContinue.height / 2f - 128;
-        guiFont64.draw(getGame().getBatch(), Constants.OPTION_CONTINUE, optionContinueX, optionContinueY);
-        final float optionMainMenuX = halfViewportWidth - glyphLayoutOptionToMainMenu.width / 2f;
-        final float optionMainMenuY = halfViewportHeight - glyphLayoutOptionToMainMenu.height / 2f - 128 - 64;
-        guiFont64.draw(getGame().getBatch(), Constants.OPTION_TO_MAIN_MENU, optionMainMenuX, optionMainMenuY);
-        if (!PlayScreenUISelection.isAliveSelection(guiMenuSelection)) {
-            guiMenuSelection = PlayScreenUISelection.CONTINUE;
-        }
-        if (guiMenuSelection == PlayScreenUISelection.QUIT) {
-            guiFont64.draw(getGame().getBatch(), Constants.SELECTED_OPTION_MARK, optionMainMenuX - 32, optionMainMenuY);
-        } else if (guiMenuSelection == PlayScreenUISelection.CONTINUE) {
-            guiFont64.draw(getGame().getBatch(), Constants.SELECTED_OPTION_MARK, optionContinueX - 32, optionContinueY);
-        }
+        activePlayUISelectionUISelection.render(guiFont64, this, 64);
     }
 
     private void renderBloodOverlay01() {

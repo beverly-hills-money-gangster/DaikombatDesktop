@@ -13,15 +13,15 @@ import com.beverly.hills.money.gang.filters.OverlapFilterManager;
 import com.beverly.hills.money.gang.input.GameInputProcessor;
 import com.beverly.hills.money.gang.maps.MapBuilder;
 import com.beverly.hills.money.gang.models.ModelMaker;
+import com.beverly.hills.money.gang.pref.UserPreference;
 import com.beverly.hills.money.gang.rect.RectManager;
-import com.beverly.hills.money.gang.utils.EntityManager;
 import com.beverly.hills.money.gang.screens.GameScreen;
 import com.beverly.hills.money.gang.screens.MainMenuScreen;
+import com.beverly.hills.money.gang.screens.ui.UserSettingsUISelection;
+import com.beverly.hills.money.gang.utils.EntityManager;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.File;
-import java.util.List;
 import java.util.Optional;
 
 @Getter
@@ -58,7 +58,10 @@ public class DaiKombatGame extends Game {
         mapBuilder = new MapBuilder(this);
 
         Gdx.input.setInputProcessor(new GameInputProcessor());
-
+        // restore user configs
+        UserPreference userPreference = new UserPreference();
+        UserSettingsUISelection.MOUSE_SENS.getState().setSetting(userPreference.getMouseSensitivity());
+        UserSettingsUISelection.SOUND.getState().setSetting(userPreference.getSoundVolume());
 
         setScreen(new MainMenuScreen(this));
 
