@@ -70,9 +70,9 @@ public class UILeaderBoard {
             if (item.id == myPlayerId) {
                 myKills = item.kills;
                 myPlace = i + 1;
-                if (myPlace == 1 && oldPlace > myPlace) {
+                if (myPlace == 1 && myKills > 0 && oldPlace > myPlace) {
                     onTakenTheLead.run();
-                } else if (oldPlace == 1 && myPlace != 1) {
+                } else if (oldPlace == 1 && myKills > 0 && myPlace != 1) {
                     onLostTheLead.run();
                 }
                 return;

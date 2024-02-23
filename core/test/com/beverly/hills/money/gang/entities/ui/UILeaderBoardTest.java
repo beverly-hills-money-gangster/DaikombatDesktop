@@ -281,5 +281,38 @@ public class UILeaderBoardTest {
         verify(lostLeadRunnable, never()).run();
     }
 
+    @Test
+    public void testRegisterKillFirstKillWontLooseLead() {
+        int myPlayerId = 10;
+        UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
+                List.of(UILeaderBoard.LeaderBoardPlayer
+                                .builder()
+                                .kills(0).id(myPlayerId).name("my name")
+                                .build(),
+                        UILeaderBoard.LeaderBoardPlayer
+                                .builder()
+                                .kills(0).id(999).name("top dog")
+                                .build(),
+                        UILeaderBoard.LeaderBoardPlayer
+                                .builder()
+                                .kills(0).id(777).name("victim")
+                                .build()),
+                youLeadRunnable, lostLeadRunnable);
+
+        assertEquals(1, leaderBoard.getMyPlace(), "My place should be 1st with no kill for this test to work");
+
+        leaderBoard.registerKill(999, 777);
+
+        assertEquals(0, leaderBoard.getMyKills());
+        assertEquals(2, leaderBoard.getMyPlace());
+        assertEquals("NO KILL", leaderBoard.getMyKillsMessage());
+        assertEquals("# 1    1 KILL    TOP DOG\n" +
+                "# 2    NO KILL    MY NAME  < YOU\n", leaderBoard.toString());
+
+        // I don't lead and I don't lose lead
+        verify(youLeadRunnable, never()).run();
+        verify(lostLeadRunnable, never()).run();
+    }
+
 
 }
