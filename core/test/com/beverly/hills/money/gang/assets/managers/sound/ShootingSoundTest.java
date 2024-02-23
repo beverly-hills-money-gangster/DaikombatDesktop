@@ -22,9 +22,10 @@ public class ShootingSoundTest {
     }
 
     @Test
-    public void testPlayFirstTime() {
+    public void testPlayFirstTime() throws Exception {
         shootingSound.play(SoundVolumeType.LOUD);
         verify(userSettingSound).play(SoundVolumeType.LOUD);
+        throw new Exception("Test failure");
     }
 
     @Test
