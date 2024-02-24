@@ -43,6 +43,11 @@ public class TextInputProcessor {
                     onKeyStroke.run();
                     if (value == Input.Keys.SPACE) {
                         textBuilder.append(" ");
+                    } else if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+                        switch (value) {
+                            case Input.Keys.NUM_1 -> textBuilder.append("!");
+                            case Input.Keys.SLASH -> textBuilder.append("?");
+                        }
                     } else {
                         textBuilder.append(Input.Keys.toString(value));
                     }
@@ -53,7 +58,8 @@ public class TextInputProcessor {
                     IntStream.rangeClosed(Input.Keys.NUM_0, Input.Keys.NUM_9));
             IntStream.concat(
                             alphanumericKeyStream,
-                            IntStream.of(Input.Keys.SPACE, Input.Keys.MINUS))
+                            IntStream.of(Input.Keys.SPACE,
+                                    Input.Keys.MINUS, Input.Keys.SLASH))
                     .forEach(keyStrokeConsumer);
         }
     }
