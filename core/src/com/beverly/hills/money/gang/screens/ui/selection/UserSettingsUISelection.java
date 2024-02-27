@@ -1,4 +1,4 @@
-package com.beverly.hills.money.gang.screens.ui;
+package com.beverly.hills.money.gang.screens.ui.selection;
 
 import lombok.Getter;
 import lombok.Setter;

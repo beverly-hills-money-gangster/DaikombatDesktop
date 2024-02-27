@@ -1,7 +1,7 @@
 package com.beverly.hills.money.gang.assets.managers.sound;
 
 import com.badlogic.gdx.audio.Sound;
-import com.beverly.hills.money.gang.screens.ui.UserSettingsUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -46,4 +46,3 @@ To turn dev mode on, please run the game with `DESKTOP_DEV_MODE=true` environmen
 - Smaller window size, so you can run multiple game windows at the same time and see IDE logs on-fly
 - Cursor gets "un-caught" when "Esc" is pressed during death-match, so you can use the mouse to go back to IDE or run one more game window
 - Basic network metrics are rendered on the screen during death-match
-- No sound, so you can listen to music while coding

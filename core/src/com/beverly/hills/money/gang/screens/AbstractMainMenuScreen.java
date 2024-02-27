@@ -1,7 +1,6 @@
 package com.beverly.hills.money.gang.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -9,13 +8,13 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
-import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
-import com.beverly.hills.money.gang.config.ClientConfig;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
+import com.beverly.hills.money.gang.assets.managers.sound.LoopingUserSettingSound;
+import com.beverly.hills.money.gang.config.ClientConfig;
 
 import java.util.Locale;
 
@@ -26,11 +25,11 @@ public abstract class AbstractMainMenuScreen extends GameScreen {
     private final GlyphLayout glyphLayoutNetworkClient;
     private final BitmapFont guiFont32;
 
-    private static UserSettingSound MUSIC_BACKGROUND;
+    private static LoopingUserSettingSound MUSIC_BACKGROUND;
     private final TextureRegion skyBg;
     private final TextureRegion guiTitle;
 
-    public AbstractMainMenuScreen(final DaiKombatGame game) {
+    protected AbstractMainMenuScreen(final DaiKombatGame game) {
         super(game, new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         Environment env = new Environment();
         env.set(new ColorAttribute(ColorAttribute.AmbientLight, 1, 1, 1, 1f));
@@ -48,8 +47,14 @@ public abstract class AbstractMainMenuScreen extends GameScreen {
 
     private void startBgMusic() {
         if (MUSIC_BACKGROUND == null) {
-            MUSIC_BACKGROUND = getGame().getAssMan().getSound(SoundRegistry.MAIN_MENU);
+            MUSIC_BACKGROUND = new LoopingUserSettingSound(getGame().getAssMan().getSound(SoundRegistry.MAIN_MENU));
             MUSIC_BACKGROUND.loop(Constants.DEFAULT_MUSIC_VOLUME);
+        }
+    }
+
+    protected void refreshBgMusicVolume() {
+        if (MUSIC_BACKGROUND != null) {
+            MUSIC_BACKGROUND.refreshVolume();
         }
     }
 

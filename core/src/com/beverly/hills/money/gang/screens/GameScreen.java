@@ -53,7 +53,7 @@ public abstract class GameScreen implements Screen {
     private void checkOverlapX(final RectanglePlus rect) {
         rect.setX(rect.getNewPosition().x);
 
-        rect.setOverlapX( game.getRectMan().checkCollision(rect));
+        rect.setOverlapX(game.getRectMan().checkCollision(rect));
 
         if (rect.isOverlapX()) {
             rect.getNewPosition().x = rect.getOldPosition().x;
@@ -114,6 +114,9 @@ public abstract class GameScreen implements Screen {
 
     @Override
     public void render(final float delta) {
+        if (exiting) {
+            return;
+        }
         handleInput(delta);
         tick(delta);
     }

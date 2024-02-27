@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
+// TODO cover all inputs with tests
 public class TextInputProcessor {
 
     private final int maxLength;
@@ -47,6 +48,7 @@ public class TextInputProcessor {
                         switch (value) {
                             case Input.Keys.NUM_1 -> textBuilder.append("!");
                             case Input.Keys.SLASH -> textBuilder.append("?");
+                            default -> textBuilder.append(Input.Keys.toString(value));
                         }
                     } else {
                         textBuilder.append(Input.Keys.toString(value));

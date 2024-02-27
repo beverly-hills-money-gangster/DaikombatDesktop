@@ -14,7 +14,6 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.MapRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
-import com.beverly.hills.money.gang.assets.managers.sound.ShootingSound;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 
 import java.util.Arrays;
@@ -55,8 +54,12 @@ public class DaiKombatAssetsManager {
         return assetManager.get(mapRegistry.getFileName());
     }
 
-    public UserSettingSound getSound(final SoundRegistry soundRegistry) {
+    public UserSettingSound getUserSettingSound(final SoundRegistry soundRegistry) {
         return new UserSettingSound(assetManager.get(soundRegistry.getFileName()));
+    }
+
+    public Sound getSound(final SoundRegistry soundRegistry) {
+        return assetManager.get(soundRegistry.getFileName());
     }
 
     public void loadFonts() {

@@ -17,7 +17,7 @@ import com.beverly.hills.money.gang.pref.UserPreference;
 import com.beverly.hills.money.gang.rect.RectManager;
 import com.beverly.hills.money.gang.screens.GameScreen;
 import com.beverly.hills.money.gang.screens.MainMenuScreen;
-import com.beverly.hills.money.gang.screens.ui.UserSettingsUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
 import com.beverly.hills.money.gang.utils.EntityManager;
 import lombok.Getter;
 import lombok.Setter;
@@ -95,8 +95,8 @@ public class DaiKombatGame extends Game {
 
     public void setScreen(GameScreen screen) {
         Optional.ofNullable(getScreen())
-                .filter(currentScreen -> currentScreen instanceof GameScreen)
-                .map(currentScreen -> (GameScreen) currentScreen).ifPresent(GameScreen::exit);
+                .filter(GameScreen.class::isInstance)
+                .map(GameScreen.class::cast).ifPresent(GameScreen::exit);
 
         super.setScreen(screen);
     }

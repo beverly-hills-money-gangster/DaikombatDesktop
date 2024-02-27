@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
-import com.beverly.hills.money.gang.assets.managers.sound.ShootingSound;
+import com.beverly.hills.money.gang.assets.managers.sound.AttackingSound;
 import com.beverly.hills.money.gang.entities.enemies.Enemy;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerAction;
@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import static com.beverly.hills.money.gang.Constants.DEFAULT_ENEMY_Y;
 
+// TODO review this
 @RequiredArgsConstructor
 public class PlayScreenGameConnectionHandler {
 
@@ -33,7 +34,6 @@ public class PlayScreenGameConnectionHandler {
     private final EnemiesRegistry enemiesRegistry = new EnemiesRegistry();
 
     public void handle() {
-
         playScreen.getGameConnection().getResponse().poll().ifPresent(serverResponse -> {
             if (serverResponse.hasChatEvents()) {
                 handleChat(serverResponse);
@@ -51,9 +51,7 @@ public class PlayScreenGameConnectionHandler {
         var chatEvent = serverResponse.getChatEvents();
         String playerName = enemiesRegistry.getEnemy(chatEvent.getPlayerId())
                 .map(EnemyPlayer::getName).orElse("no-name");
-        playScreen.getChatLog().addMessage(playerName, chatEvent.getMessage(),
-                () -> playScreen.getGame().getAssMan().getSound(SoundRegistry.PING)
-                        .play(Constants.DEFAULT_SFX_VOLUME));
+        playScreen.getChatLog().addMessage(playerName, chatEvent.getMessage());
     }
 
     private void handleGameEvent(ServerResponse serverResponse) {
@@ -65,10 +63,10 @@ public class PlayScreenGameConnectionHandler {
             switch (gameEvent.getEventType()) {
                 case SPAWN -> handleSpawn(gameEvent);
                 case EXIT -> handleExit(gameEvent);
-                case DEATH -> handleDeath(gameEvent);
+                case KILL_PUNCHING, KILL_SHOOTING -> handleDeath(gameEvent);
                 case MOVE -> handleMove(gameEvent);
-                case SHOOT -> handleShoot(gameEvent);
-                case GET_SHOT -> handleGetShot(gameEvent);
+                case SHOOT, PUNCH -> handleHit(gameEvent);
+                case GET_SHOT, GET_PUNCHED -> handleGetHit(gameEvent);
                 case PING -> handlePing();
             }
         });
@@ -83,24 +81,12 @@ public class PlayScreenGameConnectionHandler {
             return;
         }
         LOG.info("SPAWN event {}", gameEvent);
-
-
         EnemyPlayer enemyPlayer = new EnemyPlayer(playScreen.getPlayer(),
                 gameEvent.getPlayer().getPlayerId(),
                 new Vector3(gameEvent.getPlayer().getPosition().getX(),
                         DEFAULT_ENEMY_Y, gameEvent.getPlayer().getPosition().getY()),
                 new Vector2(gameEvent.getPlayer().getDirection().getX(), gameEvent.getPlayer().getDirection().getY()),
-                playScreen, gameEvent.getPlayer().getPlayerName(),
-                enemy -> {
-                    int kills = playScreen.getUiLeaderBoard().getMyKills();
-                    if (kills > 1 && kills % 3 == 0) {
-                        playScreen.getGame().getAssMan().getSound(SoundRegistry.WINNING_SOUND_SEQ.getNextSound()).play(Constants.QUAKE_NARRATOR_FX_VOLUME);
-                    }
-                    playScreen.getGame().getAssMan().getSound(SoundRegistry.ENEMY_DEATH_SOUND_SEQ.getNextSound()).play(enemy.getSFXVolume());
-                },
-                enemy -> playScreen.getGame().getAssMan().getSound(SoundRegistry.ENEMY_GET_SHOT_SOUND_SEQ.getNextSound()).play(enemy.getSFXVolume()),
-                enemy -> new ShootingSound(playScreen.getGame().getAssMan().getSound(SoundRegistry.SHOTGUN))
-                        .play(enemy.getSFXVolume()));
+                playScreen, gameEvent.getPlayer().getPlayerName(), createEnemyListeners());
         playScreen.getGame().getEntMan().addEntity(enemyPlayer);
         enemiesRegistry.addEnemy(gameEvent.getPlayer().getPlayerId(), enemyPlayer);
         playScreen.getUiLeaderBoard().addNewPlayer(UILeaderBoard.LeaderBoardPlayer.builder()
@@ -117,8 +103,7 @@ public class PlayScreenGameConnectionHandler {
         enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
                 .map(EnemyPlayer::getName)
                 .ifPresent(playerName -> {
-                    playScreen.getChatLog().addMessage("game log", playerName + " has left the game",
-                            () -> playScreen.getGame().getAssMan().getSound(SoundRegistry.PING).play(Constants.DEFAULT_SFX_VOLUME));
+                    playScreen.getChatLog().addMessage("game log", playerName + " has left the game");
                     enemiesRegistry.removeEnemy(gameEvent.getPlayer().getPlayerId())
                             .ifPresent(Enemy::destroy);
                 });
@@ -136,71 +121,101 @@ public class PlayScreenGameConnectionHandler {
                         .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build()));
     }
 
-    private void handleShoot(ServerResponse.GameEvent gameEvent) {
+    private void handleHit(ServerResponse.GameEvent gameEvent) {
         if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerLoadedData().getPlayerId()) {
             return;
         }
-        LOG.info("SHOOT event {}", gameEvent);
-
+        EnemyPlayerActionType enemyPlayerActionType;
+        switch (gameEvent.getEventType()) {
+            // if we missed the punch then we just move to the position
+            case PUNCH -> enemyPlayerActionType = EnemyPlayerActionType.MOVE;
+            case SHOOT -> enemyPlayerActionType = EnemyPlayerActionType.SHOOT;
+            default -> throw new IllegalArgumentException("Not supported event type " + gameEvent.getEventType());
+        }
         enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
                 .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
-                        .enemyPlayerActionType(EnemyPlayerActionType.SHOOT)
+                        .enemyPlayerActionType(enemyPlayerActionType)
                         .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
                         .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build()));
     }
 
-    private void handleGetShot(ServerResponse.GameEvent gameEvent) {
-        // if I shoot somebody, then do nothing. the animation is played one client immediately
+    private void handleGetHit(ServerResponse.GameEvent gameEvent) {
+        EnemyPlayerActionType enemyPlayerActionType;
+        switch (gameEvent.getEventType()) {
+            case GET_SHOT -> enemyPlayerActionType = EnemyPlayerActionType.SHOOT;
+            case GET_PUNCHED -> enemyPlayerActionType = EnemyPlayerActionType.PUNCH;
+            default -> throw new IllegalArgumentException("Not supported event type " + gameEvent.getEventType());
+        }
+
+        // if I hit somebody, then do nothing. the animation is played one client immediately
         if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getPlayerLoadedData().getPlayerId()) {
-            // if I get shot
-            playScreen.getPlayer().getShot(gameEvent.getAffectedPlayer().getHealth(),
-                    () -> playScreen.getGame().getAssMan().getSound(SoundRegistry
-                            .GET_SHOT_SOUND_SEQ.getNextSound()).play(Constants.PLAYER_FX_VOLUME));
-        } else if (gameEvent.getPlayer().getPlayerId() != playScreen.getPlayerLoadedData().getPlayerId()) {
-            // enemies shooting each other
+            // if I get hit
+            playScreen.getPlayer().getHit(gameEvent.getAffectedPlayer().getHealth());
+            playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
+                    .GET_HIT_SOUND_SEQ.getNextSound()).play(Constants.PLAYER_FX_VOLUME);
+
             enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
                     .ifPresent(enemyPlayer -> {
                         enemyPlayer.queueAction(EnemyPlayerAction.builder()
-                                .enemyPlayerActionType(EnemyPlayerActionType.SHOOT)
+                                .enemyPlayerActionType(enemyPlayerActionType)
+                                .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
+                                .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build());
+                    });
+        } else if (gameEvent.getPlayer().getPlayerId() != playScreen.getPlayerLoadedData().getPlayerId()) {
+
+            // enemies hitting each other
+            enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
+                    .ifPresent(enemyPlayer -> {
+                        enemyPlayer.queueAction(EnemyPlayerAction.builder()
+                                .enemyPlayerActionType(enemyPlayerActionType)
                                 .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
                                 .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build());
                     });
             enemiesRegistry.getEnemy(gameEvent.getAffectedPlayer().getPlayerId())
-                    .ifPresent(EnemyPlayer::getShot);
+                    .ifPresent(EnemyPlayer::getHit);
         }
     }
 
+
     private void handleDeath(ServerResponse.GameEvent gameEvent) {
+        EnemyPlayerActionType enemyPlayerActionType;
+        switch (gameEvent.getEventType()) {
+            case KILL_PUNCHING -> enemyPlayerActionType = EnemyPlayerActionType.PUNCH;
+            case KILL_SHOOTING -> enemyPlayerActionType = EnemyPlayerActionType.SHOOT;
+            default -> throw new IllegalArgumentException("Not supported event type " + gameEvent.getEventType());
+        }
+
         if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getPlayerLoadedData().getPlayerId()) {
             playScreen.getUiLeaderBoard().registerKill(gameEvent.getPlayer().getPlayerId(), gameEvent.getAffectedPlayer().getPlayerId());
             String killedBy = enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
                     .map(EnemyPlayer::getName).orElse("killer");
-            playScreen.getPlayer().die(killedBy,
-                    () -> {
-                        playScreen.getGame().getAssMan().getSound(SoundRegistry.LOOSING_SOUND_SEQ.getNextSound()).play(Constants.MK_NARRATOR_FX_VOLUME);
-                        playScreen.getGame().getAssMan().getSound(SoundRegistry.BELL).play(Constants.DEFAULT_SFX_VOLUME);
-                    });
-            enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
-                    .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
-                            .enemyPlayerActionType(EnemyPlayerActionType.SHOOT)
-                            .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
-                            .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
-                            .build()));
+            playScreen.getPlayer().die(killedBy);
+
+            playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
+                    .GET_HIT_SOUND_SEQ.getNextSound()).play(Constants.PLAYER_FX_VOLUME);
+            switch (gameEvent.getEventType()) {
+                case KILL_PUNCHING ->
+                        playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.PUNCH_HIT).play(Constants.DEFAULT_SFX_VOLUME * 1.5f);
+                case KILL_SHOOTING ->
+                        playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.SHOTGUN).play(Constants.DEFAULT_SFX_VOLUME * 1.5f);
+
+            }
+            playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.LOOSING_SOUND_SEQ.getNextSound()).play(Constants.MK_NARRATOR_FX_VOLUME);
+            playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.BELL).play(Constants.DEFAULT_SFX_VOLUME);
+
+            LOG.info("I'm dead");
         } else if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerLoadedData().getPlayerId()) {
             playScreen.getUiLeaderBoard().registerKill(gameEvent.getPlayer().getPlayerId(), gameEvent.getAffectedPlayer().getPlayerId());
             var victimPlayerOpt = enemiesRegistry.getEnemy(gameEvent.getAffectedPlayer().getPlayerId());
             victimPlayerOpt.ifPresent(EnemyPlayer::die);
-            playScreen.getPlayerKillLog().myPlayerKill(victimPlayerOpt.map(EnemyPlayer::getName).orElse("victim"));
+            playScreen.getMyPlayerKillLog().myPlayerKill(victimPlayerOpt.map(EnemyPlayer::getName).orElse("victim"));
         } else {
             playScreen.getUiLeaderBoard().registerKill(gameEvent.getPlayer().getPlayerId(), gameEvent.getAffectedPlayer().getPlayerId());
             var victimPlayerOpt = enemiesRegistry.getEnemy(gameEvent.getAffectedPlayer().getPlayerId());
             victimPlayerOpt.ifPresent(EnemyPlayer::die);
-            playScreen.getPlayerKillLog().otherPlayerKill(
-                    playScreen.getPlayerLoadedData().getPlayerName(),
-                    victimPlayerOpt.map(EnemyPlayer::getName).orElse("victim"));
             enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
                     .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
-                            .enemyPlayerActionType(EnemyPlayerActionType.SHOOT)
+                            .enemyPlayerActionType(enemyPlayerActionType)
                             .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
                             .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build()));
         }
@@ -221,6 +236,24 @@ public class PlayScreenGameConnectionHandler {
     public void handleException(Throwable error) {
         LOG.error("Got error", error);
         playScreen.setErrorMessage(ExceptionUtils.getMessage(error));
+    }
+
+    private Enemy.EnemyListeners createEnemyListeners() {
+        return Enemy.EnemyListeners
+                .builder()
+                .onDeath(enemy -> {
+                    int kills = playScreen.getUiLeaderBoard().getMyKills();
+                    if (kills > 1 && kills % 3 == 0) {
+                        playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.WINNING_SOUND_SEQ.getNextSound()).play(Constants.QUAKE_NARRATOR_FX_VOLUME);
+                    }
+                    playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.ENEMY_DEATH_SOUND_SEQ.getNextSound()).play(enemy.getSFXVolume());
+                })
+                .onGetShot(enemy -> playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.ENEMY_GET_HIT_SOUND_SEQ.getNextSound())
+                        .play(enemy.getSFXVolume()))
+                .onShooting(enemy -> new AttackingSound(playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.SHOTGUN))
+                        .play(enemy.getSFXVolume())
+                ).onPunching(enemy -> new AttackingSound(playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.PUNCH_HIT))
+                        .play(enemy.getSFXVolume())).build();
     }
 
 }

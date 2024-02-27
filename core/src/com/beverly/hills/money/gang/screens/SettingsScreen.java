@@ -9,8 +9,8 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.pref.UserPreference;
-import com.beverly.hills.money.gang.screens.ui.UISelection;
-import com.beverly.hills.money.gang.screens.ui.UserSettingsUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
 
 public class SettingsScreen extends AbstractMainMenuScreen {
 
@@ -25,7 +25,7 @@ public class SettingsScreen extends AbstractMainMenuScreen {
     public SettingsScreen(final DaiKombatGame game) {
         super(game);
         guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
-        dingSound1 = game.getAssMan().getSound(SoundRegistry.DING_1);
+        dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
     }
 
     @Override
@@ -45,13 +45,13 @@ public class SettingsScreen extends AbstractMainMenuScreen {
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
             var setting = settingsSelection.getSelectedOption().getState();
             setting.decrease();
+            this.refreshBgMusicVolume();
             dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
             var setting = settingsSelection.getSelectedOption().getState();
             setting.increase();
+            this.refreshBgMusicVolume();
             dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-
         }
     }
 

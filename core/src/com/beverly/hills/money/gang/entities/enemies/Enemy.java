@@ -10,6 +10,7 @@ import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,10 +21,8 @@ public abstract class Enemy extends Entity {
     @Getter
     private final Player player;
 
-    private final Consumer<Enemy> onDeath;
-    private final Consumer<Enemy> onGetShot;
     @Getter
-    private final Consumer<Enemy> onShooting;
+    private final EnemyListeners enemyListeners;
 
     @Getter
     private final Vector3 position;
@@ -37,13 +36,11 @@ public abstract class Enemy extends Entity {
     private boolean isDead;
 
     public Enemy(final Vector3 position, final GameScreen screen, final Player player,
-                 final Consumer<Enemy> onDeath, final Consumer<Enemy> onGetShot, final Consumer<Enemy> onShooting) {
+                 final EnemyListeners enemyListeners) {
         super(screen);
         this.player = player;
         this.position = position;
-        this.onGetShot = onGetShot;
-        this.onDeath = onDeath;
-        this.onShooting = onShooting;
+        this.enemyListeners = enemyListeners;
     }
 
 
@@ -85,12 +82,21 @@ public abstract class Enemy extends Entity {
         }
     }
 
-    public void getShot() {
-        onGetShot.accept(this);
+    public void getHit() {
+        enemyListeners.onGetShot.accept(this);
     }
 
     public void die() {
         isDead = true;
-        onDeath.accept(this);
+        enemyListeners.onDeath.accept(this);
+    }
+
+    @Getter
+    @Builder
+    public static class EnemyListeners {
+        private final Consumer<Enemy> onDeath;
+        private final Consumer<Enemy> onGetShot;
+        private final Consumer<Enemy> onShooting;
+        private final Consumer<Enemy> onPunching;
     }
 }

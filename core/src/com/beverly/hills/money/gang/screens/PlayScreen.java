@@ -22,15 +22,14 @@ import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
 import com.beverly.hills.money.gang.handler.PlayScreenGameConnectionHandler;
 import com.beverly.hills.money.gang.input.TextInputProcessor;
 import com.beverly.hills.money.gang.log.ChatLog;
-import com.beverly.hills.money.gang.log.PlayerKillLog;
+import com.beverly.hills.money.gang.log.MyPlayerKillLog;
 import com.beverly.hills.money.gang.network.GameConnection;
 import com.beverly.hills.money.gang.proto.PushChatEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand;
-import com.beverly.hills.money.gang.proto.ServerResponse;
 import com.beverly.hills.money.gang.screens.data.PlayerLoadedData;
-import com.beverly.hills.money.gang.screens.ui.ActivePlayUISelection;
-import com.beverly.hills.money.gang.screens.ui.DeadPlayUISelection;
-import com.beverly.hills.money.gang.screens.ui.UISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.ActivePlayUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.DeadPlayUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.io.FileUtils;
@@ -45,6 +44,8 @@ import java.util.stream.Collectors;
 public class PlayScreen extends GameScreen {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlayScreen.class);
+
+    private GameScreen screenToTransition;
 
     private static final int MAX_CHAT_MSG_LEN = 32;
     private static final float BLOOD_OVERLAY_ALPHA_SWITCH = 0.5f;
@@ -86,8 +87,8 @@ public class PlayScreen extends GameScreen {
     @Setter
     private int playersOnline;
 
-    private final ChatLog chatLog = new ChatLog();
-    private final PlayerKillLog playerKillLog;
+    private final ChatLog chatLog;
+    private final MyPlayerKillLog myPlayerKillLog;
 
     private final GameConnection gameConnection;
 
@@ -98,15 +99,15 @@ public class PlayScreen extends GameScreen {
                       final PlayerLoadedData playerLoadedData) {
         super(game, new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         this.gameConnection = gameConnection;
-        dingSound1 = getGame().getAssMan().getSound(SoundRegistry.DING_1);
+        dingSound1 = getGame().getAssMan().getUserSettingSound(SoundRegistry.DING_1);
         this.playerLoadedData = playerLoadedData;
-        playerKillLog = new PlayerKillLog(playerLoadedData.getPlayerName());
+        myPlayerKillLog = new MyPlayerKillLog();
         env = new Environment();
         env.set(new ColorAttribute(ColorAttribute.AmbientLight, 1, 1, 1, 1f));
         env.set(new ColorAttribute(ColorAttribute.Fog, Constants.FOG_COLOR));
 
         chatTextInputProcessor = new TextInputProcessor(MAX_CHAT_MSG_LEN,
-                () -> getGame().getAssMan().getSound(SoundRegistry.TYPING_SOUND_SEQ.getNextSound()).play(Constants.DEFAULT_SFX_TYPING_VOLUME));
+                () -> getGame().getAssMan().getUserSettingSound(SoundRegistry.TYPING_SOUND_SEQ.getNextSound()).play(Constants.DEFAULT_SFX_TYPING_VOLUME));
         texRegBloodOverlay = getGame().getAssMan().getTextureRegion(TexturesRegistry.ATLAS, 0, 0, 2, 2);
         texRegBlackOverlay = getGame().getAssMan().getTextureRegion(TexturesRegistry.ATLAS, 3, 0, 2, 2);
 
@@ -117,40 +118,53 @@ public class PlayScreen extends GameScreen {
         glyphLayoutHeadsupDead = new GlyphLayout(guiFont64, Constants.YOU_DIED);
         glyphLayoutAim = new GlyphLayout(guiFont64, "+");
 
-        musicBackground = getGame().getAssMan().getSound(SoundRegistry.BATTLE_BG_SEQ.getNextSound());
-        fightSound = getGame().getAssMan().getSound(SoundRegistry.FIGHT);
-        boomSound1 = getGame().getAssMan().getSound(SoundRegistry.BOOM_1);
-        boomSound2 = getGame().getAssMan().getSound(SoundRegistry.BOOM_2);
-        youLead = getGame().getAssMan().getSound(SoundRegistry.YOU_LEAD);
-        lostLead = getGame().getAssMan().getSound(SoundRegistry.LOST_LEAD);
+        musicBackground = getGame().getAssMan().getUserSettingSound(SoundRegistry.BATTLE_BG_SEQ.getNextSound());
+        fightSound = getGame().getAssMan().getUserSettingSound(SoundRegistry.FIGHT);
+        boomSound1 = getGame().getAssMan().getUserSettingSound(SoundRegistry.BOOM_1);
+        boomSound2 = getGame().getAssMan().getUserSettingSound(SoundRegistry.BOOM_2);
+        youLead = getGame().getAssMan().getUserSettingSound(SoundRegistry.YOU_LEAD);
+        lostLead = getGame().getAssMan().getUserSettingSound(SoundRegistry.LOST_LEAD);
         fightSound.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
 
         getGame().getMapBuilder().buildMap(getGame().getAssMan().getMap(MapRegistry.ONLINE_MAP));
 
+        chatLog = new ChatLog(() -> getGame().getAssMan().getUserSettingSound(SoundRegistry.PING)
+                .play(Constants.DEFAULT_SFX_VOLUME));
 
         setPlayer(new Player(this,
-                player -> {
+                playerWeapon -> {
+                    PushGameEventCommand.GameEventType eventType;
+                    switch (playerWeapon.getWeapon()) {
+                        case GAUNTLET -> eventType = PushGameEventCommand.GameEventType.PUNCH;
+                        case SHOTGUN -> eventType = PushGameEventCommand.GameEventType.SHOOT;
+                        default ->
+                                throw new IllegalArgumentException("Not supported weapon " + playerWeapon.getWeapon());
+                    }
                     var direction = getPlayer().getCurrent2DDirection();
                     var position = getPlayer().getCurrent2DPosition();
-                    getPlayer().getEnemyRectInRangeFromCam(enemy -> {
-                        enemy.getShot();
+                    boolean hitEnemy = getPlayer().getEnemyRectInRangeFromCam(enemy -> {
+
+                        enemy.getHit();
+                        playerWeapon.getPlayer().playWeaponHitSound(playerWeapon.getWeapon());
                         gameConnection.write(PushGameEventCommand.newBuilder()
                                 .setGameId(Configs.GAME_ID)
                                 .setPlayerId(playerLoadedData.getPlayerId())
                                 .setDirection(PushGameEventCommand.Vector.newBuilder().setX(direction.x).setY(direction.y).build())
                                 .setPosition(PushGameEventCommand.Vector.newBuilder().setX(position.x).setY(position.y).build())
                                 .setAffectedPlayerId(enemy.getEnemyPlayerId())
-                                .setEventType(PushGameEventCommand.GameEventType.SHOOT)
+                                .setEventType(eventType)
                                 .build());
-                    });
-
-                    gameConnection.write(PushGameEventCommand.newBuilder()
-                            .setGameId(Configs.GAME_ID)
-                            .setPlayerId(playerLoadedData.getPlayerId())
-                            .setDirection(PushGameEventCommand.Vector.newBuilder().setX(direction.x).setY(direction.y).build())
-                            .setPosition(PushGameEventCommand.Vector.newBuilder().setX(position.x).setY(position.y).build())
-                            .setEventType(PushGameEventCommand.GameEventType.SHOOT)
-                            .build());
+                    }, playerWeapon.getPlayer().getWeaponDistance(playerWeapon.getWeapon()));
+                    if (!hitEnemy) {
+                        // if we haven't hit anybody
+                        gameConnection.write(PushGameEventCommand.newBuilder()
+                                .setGameId(Configs.GAME_ID)
+                                .setPlayerId(playerLoadedData.getPlayerId())
+                                .setDirection(PushGameEventCommand.Vector.newBuilder().setX(direction.x).setY(direction.y).build())
+                                .setPosition(PushGameEventCommand.Vector.newBuilder().setX(position.x).setY(position.y).build())
+                                .setEventType(eventType)
+                                .build());
+                    }
                 },
                 enemy -> enemyAimName = enemy.getName(),
                 player -> {
@@ -193,8 +207,6 @@ public class PlayScreen extends GameScreen {
     public void handleInput(final float delta) {
         showLeaderBoard = false;
         if (getPlayer().isDead()) {
-            showGuiMenu = true;
-            chatMode = false;
             handleDeadGuiInput();
         } else {
             if (Gdx.input.isKeyJustPressed(Input.Keys.valueOf("`"))) {
@@ -230,45 +242,37 @@ public class PlayScreen extends GameScreen {
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
             dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
             activePlayUISelectionUISelection.down();
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             switch (activePlayUISelectionUISelection.getSelectedOption()) {
                 case CONTINUE -> {
                     Gdx.input.setCursorCatched(true);
                     boomSound1.play(Constants.DEFAULT_SFX_VOLUME);
                     showGuiMenu = false;
                 }
-                case QUIT -> {
-                    musicBackground.stop();
-                    removeAllEntities();
-                    getGame().setScreen(new MainMenuScreen(getGame()));
-                    boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
-                }
+                case QUIT -> screenToTransition = new MainMenuScreen(getGame());
             }
         }
     }
 
     private void handleDeadGuiInput() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+        showLeaderBoard = false;
+        if (Gdx.input.isKeyPressed(Input.Keys.TAB)) {
+            showLeaderBoard = true;
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
             deadPlayUISelectionUISelection.up();
             dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
             deadPlayUISelectionUISelection.down();
             dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)
+                || Gdx.input.isKeyJustPressed(Input.Keys.ALT_RIGHT)
+                || Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_RIGHT)
+                || Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)
+                || Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             switch (deadPlayUISelectionUISelection.getSelectedOption()) {
-                case RESPAWN -> {
-                    musicBackground.stop();
-                    removeAllEntities();
-                    getGame().setScreen(new LoadingScreen(getGame(),
-                            playerLoadedData.getPlayerName(), playerLoadedData.getServerPassword()));
-                    boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
-                }
-                case QUIT -> {
-                    musicBackground.stop();
-                    removeAllEntities();
-                    getGame().setScreen(new MainMenuScreen(getGame()));
-                    boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
-                }
+                case RESPAWN -> screenToTransition = new LoadingScreen(getGame(),
+                        playerLoadedData.getPlayerName(), playerLoadedData.getServerPassword());
+                case QUIT -> screenToTransition = new MainMenuScreen(getGame());
             }
         }
     }
@@ -282,8 +286,7 @@ public class PlayScreen extends GameScreen {
                     .setPlayerId(playerLoadedData.getPlayerId())
                     .setGameId(Configs.GAME_ID)
                     .build());
-            chatLog.addMessage(playerLoadedData.getPlayerName(), chatTextInputProcessor.getText(),
-                    () -> getGame().getAssMan().getSound(SoundRegistry.PING).play(Constants.DEFAULT_SFX_VOLUME));
+            chatLog.addMessage(playerLoadedData.getPlayerName(), chatTextInputProcessor.getText());
             chatTextInputProcessor.clear();
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             chatMode = false;
@@ -310,21 +313,10 @@ public class PlayScreen extends GameScreen {
     @Override
     public void render(final float delta) {
         super.render(delta);
-        playScreenGameConnectionHandler.handle();
-        if (gameConnection.isDisconnected() && !isExiting() && !getPlayer().isDead()) {
-            // finish processing all error events
-            gameConnection.getResponse().list().stream()
-                    .filter(ServerResponse::hasErrorEvent).forEach(playScreenGameConnectionHandler::handleErrorEvent);
-            // finish processing all exceptions
-            gameConnection.getErrors().list().forEach(playScreenGameConnectionHandler::handleException);
-
-            musicBackground.stop();
-            removeAllEntities();
-            getGame().setScreen(new ErrorScreen(getGame(), StringUtils.defaultIfBlank(errorMessage, "Connection lost")));
-            boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
-            return;
+        if (getPlayer().isDead()) {
+            showGuiMenu = true;
+            chatMode = false;
         }
-
         getCurrentCam().update();
 
         getGame().getFbo().begin();
@@ -344,9 +336,12 @@ public class PlayScreen extends GameScreen {
         getGame().getBatch().draw(getGame().getFbo().getColorBufferTexture(), 0, 0, getViewport().getWorldWidth(),
                 getViewport().getWorldHeight());
 
-        float gunWidth = getViewport().getWorldWidth() * 0.35f;
-        float gunHeight = getViewport().getWorldHeight() * 0.40f;
-        getGame().getBatch().draw(getPlayer().getGuiCurrentGun(), getViewport().getWorldWidth() * 0.5f, (int) getPlayer().getGunY(),
+        var activeWeapon = getPlayer().getActiveWeaponRenderingData();
+        float gunWidth = getViewport().getWorldWidth() * activeWeapon.getScreenRatioX();
+        float gunHeight = getViewport().getWorldHeight() * activeWeapon.getScreenRatioY();
+        getGame().getBatch().draw(activeWeapon.getTextureRegion(),
+                getViewport().getWorldWidth() * 0.5f + activeWeapon.getPositioning().x,
+                (int) getPlayer().getWeaponY() + activeWeapon.getPositioning().y,
                 gunWidth, gunHeight);
         renderBloodOverlay02();
 
@@ -359,23 +354,26 @@ public class PlayScreen extends GameScreen {
             var glyphLayoutRecSentMessages = new GlyphLayout(guiFont32, recvSentMessages);
             guiFont32.draw(getGame().getBatch(),
                     recvSentMessages, getViewport().getWorldWidth() / 2f - glyphLayoutRecSentMessages.width / 2f,
-                    getViewport().getWorldHeight() - Constants.MENU_OPTION_INDENT);
+                    getViewport().getWorldHeight() - 32);
         }
 
         if (playersOnline > 0) {
             String playersOnlineText = playersOnline + " ONLINE";
-            var onlineGlyph = new GlyphLayout(guiFont32, playersOnlineText);
-            guiFont32.draw(getGame().getBatch(), playersOnlineText,
+            var onlineGlyph = new GlyphLayout(guiFont64, playersOnlineText);
+            guiFont64.draw(getGame().getBatch(), playersOnlineText,
                     getViewport().getWorldWidth() - 32 - onlineGlyph.width,
                     getViewport().getWorldHeight() - 32 - onlineGlyph.height);
         }
         if (!getPlayer().isDead()) {
-            if (playerKillLog.hasKillerMessage()) {
-                String killerMessage = playerKillLog.getKillerMessage();
-                guiFont64.draw(getGame().getBatch(), killerMessage, 32, 128 - 32);
+            if (myPlayerKillLog.hasKillerMessage()) {
+                String killerMessage = myPlayerKillLog.getKillerMessage();
+                GlyphLayout glyphLayoutKillerMessage = new GlyphLayout(guiFont32, killerMessage);
+                guiFont32.draw(getGame().getBatch(), killerMessage, getViewport().getWorldWidth() / 2f - glyphLayoutKillerMessage.width / 2f,
+                        getViewport().getWorldHeight() / 2f - glyphLayoutKillerMessage.height / 2f + 128);
             }
-            String killsCount = uiLeaderBoard.getMyKillsMessage();
-            guiFont64.draw(getGame().getBatch(), killsCount, getViewport().getWorldWidth() - 32 - new GlyphLayout(guiFont64, killsCount).width, 128 - 32);
+            String killStats = uiLeaderBoard.getMyStatsMessage();
+            guiFont64.draw(getGame().getBatch(), killStats,
+                    getViewport().getWorldWidth() - 32 - new GlyphLayout(guiFont64, killStats).width, 128 - 32);
 
         }
         if (chatMode) {
@@ -405,26 +403,46 @@ public class PlayScreen extends GameScreen {
                     getViewport().getWorldHeight() / 2f - glyphLayoutAim.height / 2f);
         }
 
-        // gui menu
-        if (showGuiMenu) {
-            if (getPlayer().isDead()) {
-                getGame().setGameIsPaused(true);
-                getGame().getBatch().setColor(1, 0, 0, 0.6f);
-                getGame().getBatch().draw(texRegBlackOverlay, 0, 0, getViewport().getWorldWidth(), getViewport().getWorldHeight());
-                renderDeadGui();
-            } else {
-                renderAliveGui();
-            }
-        }
+
         if (showLeaderBoard) {
             String leaderBoard = getUiLeaderBoard().toString();
             var glyphLayoutRecSentMessages = new GlyphLayout(guiFont64, leaderBoard);
             guiFont64.draw(getGame().getBatch(),
                     leaderBoard, getViewport().getWorldWidth() / 2f - glyphLayoutRecSentMessages.width / 2f,
                     getViewport().getWorldHeight() - Constants.MENU_OPTION_INDENT * 2);
+        } else {
+            // gui menu
+            if (showGuiMenu) {
+                if (getPlayer().isDead()) {
+                    getGame().setGameIsPaused(true);
+                    getGame().getBatch().setColor(1, 0, 0, 0.6f);
+                    getGame().getBatch().draw(texRegBlackOverlay, 0, 0, getViewport().getWorldWidth(), getViewport().getWorldHeight());
+                    renderDeadGui();
+                } else {
+                    renderAliveGui();
+                }
+            }
+        }
+
+        if (!getPlayer().isDead()) {
+            if (getGameConnection().isConnected()) {
+                playScreenGameConnectionHandler.handle();
+            } else if (!isExiting()) {
+                while (gameConnection.getResponse().size() != 0 || gameConnection.getErrors().size() != 0) {
+                    playScreenGameConnectionHandler.handle();
+                }
+                if (!getPlayer().isDead()) {
+                    screenToTransition = new ErrorScreen(getGame(), StringUtils.defaultIfBlank(errorMessage, "Connection lost"));
+                }
+            }
         }
         getGame().getBatch().end();
-
+        if (screenToTransition != null) {
+            musicBackground.stop();
+            removeAllEntities();
+            getGame().setScreen(screenToTransition);
+            boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
+        }
     }
 
     private void renderDeadGui() {
@@ -438,6 +456,11 @@ public class PlayScreen extends GameScreen {
         final float killedByY = halfViewportHeight - glyphLayoutKilledBy.height / 2f - 64;
         guiFont64.draw(getGame().getBatch(), killedBy, killedByX, killedByY);
         deadPlayUISelectionUISelection.render(guiFont64, this, 128);
+        String pressTabToSeeLeaderboard = "PRESS [TAB] TO SEE LEADERBOARD";
+        GlyphLayout glyphLayoutLeaderBoardHint = new GlyphLayout(guiFont32, pressTabToSeeLeaderboard);
+        guiFont32.draw(getGame().getBatch(), pressTabToSeeLeaderboard,
+                halfViewportWidth - glyphLayoutLeaderBoardHint.width / 2f,
+                halfViewportHeight - glyphLayoutLeaderBoardHint.height / 2f + 128);
     }
 
     private void renderAliveGui() {

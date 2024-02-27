@@ -2,7 +2,6 @@ package com.beverly.hills.money.gang.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.beverly.hills.money.gang.Constants;
@@ -28,10 +27,10 @@ public class EnterServerPasswordScreen extends AbstractMainMenuScreen {
         super(game);
         this.playerName = playerName;
         guiFont64 = getGame().getAssMan().getFont(FontRegistry.FONT_64);
-        boomSound2 = getGame().getAssMan().getSound(SoundRegistry.BOOM_2);
+        boomSound2 = getGame().getAssMan().getUserSettingSound(SoundRegistry.BOOM_2);
         passwordTextInputProcessor = new TextInputProcessor(MAX_PASS_LEN,
                 () -> getGame().getAssMan().
-                        getSound(SoundRegistry.TYPING_SOUND_SEQ.getNextSound())
+                        getUserSettingSound(SoundRegistry.TYPING_SOUND_SEQ.getNextSound())
                         .play(Constants.DEFAULT_SFX_TYPING_VOLUME));
     }
 

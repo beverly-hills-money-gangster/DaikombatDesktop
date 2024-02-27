@@ -13,7 +13,8 @@ public enum SoundRegistry {
     LAUGH("sfx/losing/laugh.mp3"),
     LAUGH_2("sfx/losing/laugh_2.mp3"),
     LAUGH_3("sfx/losing/laugh_3.mp3"),
-
+    PUNCH_HIT("sfx/punch_hit.mp3"),
+    PUNCH_THROWN("sfx/punch_thrown.mp3"),
     FIGHT("sfx/fight.mp3"),
     DING_1("sfx/ui/ding_1.mp3"),
     DING_2("sfx/ui/ding_2.mp3"),
@@ -26,14 +27,13 @@ public enum SoundRegistry {
     IMPRESSIVE("sfx/winning/impressive.wav"),
     YOU_WIN("sfx/winning/you_win.wav"),
     PERFECT("sfx/winning/perfect.wav"),
-    VOICE_GET_SHOT("voice/pain/voice_get_shot.mp3"),
-    VOICE_GET_SHOT_2("voice/pain/voice_get_shot_2.mp3"),
-    VOICE_GET_SHOT_3("voice/pain/voice_get_shot_2.mp3"),
+    VOICE_GET_HIT("voice/pain/voice_get_shot.mp3"),
+    VOICE_GET_HIT_2("voice/pain/voice_get_shot_2.mp3"),
 
-    VOICE_ENEMY_GET_SHOT("voice/enemy/pain/oof.mp3"),
-    VOICE_ENEMY_GET_SHOT_2("voice/enemy/pain/oof_2.mp3"),
-    VOICE_ENEMY_GET_SHOT_3("voice/enemy/pain/oof_3.mp3"),
-    VOICE_ENEMY_GET_SHOT_4("voice/enemy/pain/oof_4.mp3"),
+    VOICE_ENEMY_GET_HIT("voice/enemy/pain/oof.mp3"),
+    VOICE_ENEMY_GET_HIT_2("voice/enemy/pain/oof_2.mp3"),
+    VOICE_ENEMY_GET_HIT_3("voice/enemy/pain/oof_3.mp3"),
+    VOICE_ENEMY_GET_HIT_4("voice/enemy/pain/oof_4.mp3"),
 
     VOICE_ENEMY_DEATH("voice/enemy/death/death.mp3"),
     VOICE_ENEMY_DEATH_2("voice/enemy/death/death_2.mp3"),
@@ -54,12 +54,12 @@ public enum SoundRegistry {
             = new PseudoRandomSoundSequence(LAUGH, LAUGH_2, LAUGH_3);
     public static final PseudoRandomSoundSequence WINNING_SOUND_SEQ
             = new PseudoRandomSoundSequence(EXCELLENT, HUMILIATION, HOLY_SHIT, IMPRESSIVE, PERFECT, YOU_WIN);
-    public static final PseudoRandomSoundSequence GET_SHOT_SOUND_SEQ
-            = new PseudoRandomSoundSequence(VOICE_GET_SHOT, VOICE_GET_SHOT_2);
+    public static final PseudoRandomSoundSequence GET_HIT_SOUND_SEQ
+            = new PseudoRandomSoundSequence(VOICE_GET_HIT, VOICE_GET_HIT_2);
 
-    public static final PseudoRandomSoundSequence ENEMY_GET_SHOT_SOUND_SEQ
-            = new PseudoRandomSoundSequence(VOICE_ENEMY_GET_SHOT, VOICE_ENEMY_GET_SHOT_2,
-            VOICE_ENEMY_GET_SHOT_3, VOICE_ENEMY_GET_SHOT_4);
+    public static final PseudoRandomSoundSequence ENEMY_GET_HIT_SOUND_SEQ
+            = new PseudoRandomSoundSequence(VOICE_ENEMY_GET_HIT, VOICE_ENEMY_GET_HIT_2,
+            VOICE_ENEMY_GET_HIT_3, VOICE_ENEMY_GET_HIT_4);
 
     public static final PseudoRandomSoundSequence BATTLE_BG_SEQ
             = new PseudoRandomSoundSequence(BATTLE, BATTLE2);

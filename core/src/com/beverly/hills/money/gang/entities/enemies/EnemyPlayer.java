@@ -23,7 +23,6 @@ import lombok.Getter;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.function.Consumer;
 
 public class EnemyPlayer extends Enemy {
 
@@ -49,11 +48,10 @@ public class EnemyPlayer extends Enemy {
 
     public EnemyPlayer(final Player player,
                        final int enemyPlayerId,
-                       final Vector3 position, Vector2 direction, final GameScreen screen, final String name,
-                       final Consumer<Enemy> onDeath, final Consumer<Enemy> onGetShot, final Consumer<Enemy> onShooting) {
+                       final Vector3 position, Vector2 direction, final GameScreen screen, final String name, EnemyListeners enemyListeners
+    ) {
 
-
-        super(position, screen, player, onDeath, onGetShot, onShooting);
+        super(position, screen, player, enemyListeners);
         this.enemyPlayerId = enemyPlayerId;
         lastDirection = direction;
         enemyTextures = new EnemyTextures(screen.getGame().getAssMan());
@@ -68,7 +66,7 @@ public class EnemyPlayer extends Enemy {
 
         setRect(new RectanglePlus(this.getPosition().x, this.getPosition().z, Constants.PLAYER_RECT_SIZE, Constants.PLAYER_RECT_SIZE, getEntityId(),
                 RectanglePlusFilter.ENEMY));
-        getRect().setPosition(getRect().x, getRect().y );
+        getRect().setPosition(getRect().x, getRect().y);
         screen.getGame().getRectMan().addRect(getRect());
         getRect().getOldPosition().set(getRect().x, getRect().y);
         getRect().getNewPosition().set(getRect().x, getRect().y);
@@ -91,7 +89,11 @@ public class EnemyPlayer extends Enemy {
 
     public void shoot() {
         shootingAnimationUntil = System.currentTimeMillis() + 100;
-        getOnShooting().accept(this);
+        getEnemyListeners().getOnShooting().accept(this);
+    }
+
+    public void punch() {
+        getEnemyListeners().getOnPunching().accept(this);
     }
 
     @Override
@@ -104,8 +106,8 @@ public class EnemyPlayer extends Enemy {
     }
 
     @Override
-    public void getShot() {
-        super.getShot();
+    public void getHit() {
+        super.getHit();
         redUntil = getAnimationTimeoutMls();
     }
 
@@ -140,9 +142,12 @@ public class EnemyPlayer extends Enemy {
             if (isTooClose(getRect().getOldPosition(), targetPosition)) {
                 // if we are close to the target destination then we are here
                 actions.remove();
-                if (action.getEnemyPlayerActionType() == EnemyPlayerActionType.SHOOT) {
-                    shoot();
+
+                switch (action.getEnemyPlayerActionType()) {
+                    case SHOOT -> shoot();
+                    case PUNCH -> punch();
                 }
+
             }
         } else {
             isIdle = true;

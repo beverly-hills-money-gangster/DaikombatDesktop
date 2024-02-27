@@ -27,7 +27,6 @@ public class DesktopLauncher {
             config.setWindowSizeLimits(1024, 768, 1024, 768);
             config.setResizable(false);
             config.setWindowedMode(1024, 768);
-            config.disableAudio(true);
         } else {
             config.setFullscreenMode(Lwjgl3ApplicationConfiguration
                     .getDisplayMode(Lwjgl3ApplicationConfiguration.getPrimaryMonitor()));

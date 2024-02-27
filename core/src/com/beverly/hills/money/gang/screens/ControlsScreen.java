@@ -10,15 +10,16 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 
 public class ControlsScreen extends AbstractMainMenuScreen {
 
-    private static final String[] CONTROLS_MAPPING = {"MOVE - WASD", "SHOOT - LMC/SPACE", "CHAT - TILDA", "LEADERBOARD - TAB"};
-
-
-    private final BitmapFont guiFont32;
+    private static final String[] CONTROLS_MAPPING = {
+            "MOVE - WASD",
+            "SHOOT - LMC/RIGHT ALT",
+            "PUNCH - RMC/RIGHT CTRL",
+            "CHAT - TILDA",
+            "LEADERBOARD - TAB"};
     private final BitmapFont guiFont64;
 
     public ControlsScreen(final DaiKombatGame game) {
         super(game);
-        guiFont32 = game.getAssMan().getFont(FontRegistry.FONT_32);
         guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
     }
 

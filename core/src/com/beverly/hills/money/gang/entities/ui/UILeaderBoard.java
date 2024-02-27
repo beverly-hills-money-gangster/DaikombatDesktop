@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class UILeaderBoard {
@@ -52,9 +53,25 @@ public class UILeaderBoard {
         return getKillsMessage(myKills);
     }
 
+    // TODO cover with tests
+    public String getMyStatsMessage() {
+        if (getMyPlace() > 0) {
+            return this.getMyKillsMessage() + " | " + getMyPlace() + " PLACE";
+        } else {
+            return this.getMyKillsMessage();
+        }
+    }
+
+    // TODO render it somehow
+    public String getTopOtherPlayersString() {
+        return constructToString(leaderBoardItems.stream()
+                .filter(leaderBoardPlayer -> leaderBoardPlayer.getId() != myPlayerId)
+                .limit(3).collect(Collectors.toList()));
+    }
+
     private String getKillsMessage(int kills) {
         if (kills == 0) {
-            return "NO KILL";
+            return "0 KILL";
         }
         if (kills == 1) {
             return "1 KILL";
@@ -120,9 +137,15 @@ public class UILeaderBoard {
         if (!needRefresh) {
             return cachedToString;
         }
+        cachedToString = constructToString(leaderBoardItems);
+        needRefresh = false;
+        return cachedToString;
+    }
+
+    private String constructToString(List<LeaderBoardPlayer> leaderBoard) {
         StringBuilder sb = new StringBuilder();
         int place = 1;
-        for (LeaderBoardPlayer leaderBoardItem : leaderBoardItems) {
+        for (LeaderBoardPlayer leaderBoardItem : leaderBoard) {
             sb.append("# ")
                     .append(place).append("    ")
                     .append(getKillsMessage(leaderBoardItem.getKills())).append("    ")
@@ -133,9 +156,7 @@ public class UILeaderBoard {
             sb.append("\n");
             place++;
         }
-        cachedToString = sb.toString().toUpperCase(Locale.ENGLISH);
-        needRefresh = false;
-        return cachedToString;
+        return sb.toString().toUpperCase(Locale.ENGLISH);
     }
 
 

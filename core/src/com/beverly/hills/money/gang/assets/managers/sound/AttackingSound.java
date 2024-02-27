@@ -1,22 +1,22 @@
 package com.beverly.hills.money.gang.assets.managers.sound;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import static com.beverly.hills.money.gang.Constants.SHOOTING_SOUND_FREQ_MLS;
 
-public class ShootingSound {
+public class AttackingSound {
 
     private final UserSettingSound sound;
 
-    private static final Map<SoundVolumeType, Long> LAST_PLAYED = new HashMap<>();
+    private static final Map<SoundVolumeType, Long> LAST_PLAYED = new EnumMap<>(SoundVolumeType.class);
 
     static {
         init();
     }
 
-    public ShootingSound(UserSettingSound sound) {
+    public AttackingSound(UserSettingSound sound) {
         this.sound = sound;
     }
 

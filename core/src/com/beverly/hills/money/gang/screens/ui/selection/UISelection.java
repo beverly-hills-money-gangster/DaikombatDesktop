@@ -1,4 +1,4 @@
-package com.beverly.hills.money.gang.screens.ui;
+package com.beverly.hills.money.gang.screens.ui.selection;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;

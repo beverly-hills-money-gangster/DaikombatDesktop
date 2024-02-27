@@ -8,32 +8,32 @@ import java.util.Arrays;
 import static com.beverly.hills.money.gang.Constants.SHOOTING_SOUND_FREQ_MLS;
 import static org.mockito.Mockito.*;
 
-public class ShootingSoundTest {
+public class AttackingSoundTest {
 
-    private ShootingSound shootingSound;
+    private AttackingSound attackingSound;
 
     private UserSettingSound userSettingSound;
 
     @BeforeEach
     public void setUp() {
         userSettingSound = mock(UserSettingSound.class);
-        shootingSound = new ShootingSound(userSettingSound);
-        ShootingSound.init();
+        attackingSound = new AttackingSound(userSettingSound);
+        AttackingSound.init();
     }
 
     @Test
     public void testPlayFirstTime() {
-        shootingSound.play(SoundVolumeType.LOUD);
+        attackingSound.play(SoundVolumeType.LOUD);
         verify(userSettingSound).play(SoundVolumeType.LOUD);
     }
 
     @Test
     public void testPlayTooOften() {
         // played recently
-        shootingSound.play(SoundVolumeType.LOUD);
+        attackingSound.play(SoundVolumeType.LOUD);
 
         // play again
-        shootingSound.play(SoundVolumeType.LOUD);
+        attackingSound.play(SoundVolumeType.LOUD);
 
         verify(userSettingSound, times(1)).play(SoundVolumeType.LOUD); // play only once
     }
@@ -41,12 +41,12 @@ public class ShootingSoundTest {
     @Test
     public void testPlayWait() throws InterruptedException {
         // played recently
-        shootingSound.play(SoundVolumeType.LOUD);
+        attackingSound.play(SoundVolumeType.LOUD);
 
         Thread.sleep(SHOOTING_SOUND_FREQ_MLS + 10);
 
         // play again
-        shootingSound.play(SoundVolumeType.LOUD);
+        attackingSound.play(SoundVolumeType.LOUD);
 
         verify(userSettingSound, times(2)).play(SoundVolumeType.LOUD); // play twice
     }
@@ -54,7 +54,7 @@ public class ShootingSoundTest {
     @Test
     public void testPlayDifferentSounds() {
         Arrays.stream(SoundVolumeType.values())
-                .forEach(soundVolumeType -> shootingSound.play(soundVolumeType));
+                .forEach(soundVolumeType -> attackingSound.play(soundVolumeType));
 
         Arrays.stream(SoundVolumeType.values())
                 .forEach(soundVolumeType -> verify(userSettingSound).play(soundVolumeType));
@@ -65,11 +65,11 @@ public class ShootingSoundTest {
     public void testPlayDifferentSoundsTwice() {
         // first time
         Arrays.stream(SoundVolumeType.values())
-                .forEach(soundVolumeType -> shootingSound.play(soundVolumeType));
+                .forEach(soundVolumeType -> attackingSound.play(soundVolumeType));
 
         // second time
         Arrays.stream(SoundVolumeType.values())
-                .forEach(soundVolumeType -> shootingSound.play(soundVolumeType));
+                .forEach(soundVolumeType -> attackingSound.play(soundVolumeType));
 
 
         // played once only
@@ -83,13 +83,13 @@ public class ShootingSoundTest {
     public void testPlayDifferentSoundsWait() throws InterruptedException {
         // first time
         Arrays.stream(SoundVolumeType.values())
-                .forEach(soundVolumeType -> shootingSound.play(soundVolumeType));
+                .forEach(soundVolumeType -> attackingSound.play(soundVolumeType));
 
         Thread.sleep(SHOOTING_SOUND_FREQ_MLS + 10);
 
         // second time
         Arrays.stream(SoundVolumeType.values())
-                .forEach(soundVolumeType -> shootingSound.play(soundVolumeType));
+                .forEach(soundVolumeType -> attackingSound.play(soundVolumeType));
 
 
         // played once only

@@ -41,7 +41,7 @@ public interface Constants {
 
     float DEFAULT_MUSIC_VOLUME = 0.5f;
 
-    float DEFAULT_SFX_VOLUME = 0.4f;
+    float DEFAULT_SFX_VOLUME = 0.5f;
 
     float DEFAULT_SFX_TYPING_VOLUME = 0.5f;
 

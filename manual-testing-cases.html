@@ -83,7 +83,14 @@
     </tr>
     <tr>
         <td>Play screen</td>
+        <td>If player pressed "Quit", then we go to the main screen. No error pops up.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
         <td>If player joins the game but the server goes offline mid-game, then an error pops up. Game doesn't crash.
+            Can be tested by running 3-5 instances of the game at a time.
         </td>
         <td><input type="checkbox"></td>
     </tr>
@@ -108,9 +115,33 @@
     </tr>
     <tr>
         <td>Play screen</td>
-        <td>3 players join the game: killer, victim, and observer. Killer kills victim: killer player sees victim death,
+        <td>3 players join the game: killer, victim, and observer. Killer shoots victim to death: killer player sees
+            victim death,
             victim sees "death" screen, observer player sees killer killing the victim. Killer is on the top of the
-            leader board.
+            leader board. Killer and observer hear victim death sounds. Victim makes a death sound.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
+        <td>3 players join the game: killer, victim, and observer. Killer punches victim to death: killer player sees
+            victim death,
+            victim sees "death" screen, observer player sees killer punching the victim. Killer is on the top of the
+            leader board. Killer and observer hear victim death sounds. Victim makes a death sound.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
+        <td>2 players join the game: cheater and observer. When cheater punches/shoots observer from too far away, then
+            cheater stays connected but observer can't see any shooting/punching events coming from cheater.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
+        <td>5 players join the game. Player 1 kills player 2. When player 3 kills player 4 and 5, then player 1 hears
+            "you have lost the lead" and player 3 hears "you have taken the lead".
         </td>
         <td><input type="checkbox"></td>
     </tr>
@@ -147,8 +178,16 @@
     </tr>
     <tr>
         <td>Play screen</td>
+        <td>2 players join the game. Player 1 kills player 2 ten times in a row. Player 2 sees "Death" screen every
+            time.
+            No error pops up.
+        </td>
+        <td><input type="checkbox"></td>
+    </tr>
+    <tr>
+        <td>Play screen</td>
         <td>2 players join the game. Player 1 constantly moves forward. Player 2 kills player 1 while it's still moving.
-            Player 1 one dies. No error pops up.
+            Player 1 dies. No error pops up.
         </td>
         <td><input type="checkbox"></td>
     </tr>
