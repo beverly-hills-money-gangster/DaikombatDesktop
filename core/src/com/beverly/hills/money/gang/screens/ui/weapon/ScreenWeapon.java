@@ -59,7 +59,7 @@ public class ScreenWeapon {
         return isNoAnimation();
     }
 
-    private boolean isNoAnimation(){
+    private boolean isNoAnimation() {
         return Optional.ofNullable(weaponStates.get(weaponBeingUsed))
                 .map(weaponState -> weaponState.animationStartMls + weaponState.animationDelayMls < System.currentTimeMillis())
                 .orElse(true);
@@ -70,18 +70,20 @@ public class ScreenWeapon {
     }
 
     public WeaponRenderData getActiveWeaponForRendering() {
-        var currentActiveWeaponState = weaponStates.get(weaponBeingUsed);
         if (isNoAnimation()) {
             weaponBeingUsed = null;
             return getIdleWeaponRendering();
         }
-        return WeaponRenderData.builder().textureRegion(currentActiveWeaponState.fireTexture)
-                .distance(currentActiveWeaponState.distance)
-                .positioning(currentActiveWeaponState.weaponScreenPositioning
-                        .apply(System.currentTimeMillis() - currentActiveWeaponState.animationStartMls))
-                .screenRatioX(currentActiveWeaponState.getScreenRatioX())
-                .screenRatioY(currentActiveWeaponState.screenRatioY)
-                .build();
+        return Optional.ofNullable(weaponStates.get(weaponBeingUsed))
+                .map(currentActiveWeaponState
+                        -> WeaponRenderData.builder().textureRegion(currentActiveWeaponState.fireTexture)
+                        .distance(currentActiveWeaponState.distance)
+                        .positioning(currentActiveWeaponState.weaponScreenPositioning
+                                .apply(System.currentTimeMillis() - currentActiveWeaponState.animationStartMls))
+                        .screenRatioX(currentActiveWeaponState.getScreenRatioX())
+                        .screenRatioY(currentActiveWeaponState.screenRatioY)
+                        .build())
+                .orElse(getIdleWeaponRendering());
     }
 
     private WeaponRenderData getIdleWeaponRendering() {
@@ -105,7 +107,7 @@ public class ScreenWeapon {
     }
 
 
-    public void registerHit(Weapon weapon,float volume) {
+    public void registerHit(Weapon weapon, float volume) {
         Optional.ofNullable(weaponStates.get(weapon))
                 .map(weaponState -> weaponState.hitTargetSound)
                 .ifPresent(userSettingSound -> userSettingSound.play(volume));

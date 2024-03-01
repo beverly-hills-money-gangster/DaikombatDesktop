@@ -52,8 +52,7 @@ public class UILeaderBoard {
     public String getMyKillsMessage() {
         return getKillsMessage(myKills);
     }
-
-    // TODO cover with tests
+    
     public String getMyStatsMessage() {
         if (getMyPlace() > 0) {
             return this.getMyKillsMessage() + " | " + getMyPlace() + " PLACE";
@@ -62,12 +61,6 @@ public class UILeaderBoard {
         }
     }
 
-    // TODO render it somehow
-    public String getTopOtherPlayersString() {
-        return constructToString(leaderBoardItems.stream()
-                .filter(leaderBoardPlayer -> leaderBoardPlayer.getId() != myPlayerId)
-                .limit(3).collect(Collectors.toList()));
-    }
 
     private String getKillsMessage(int kills) {
         if (kills == 0) {

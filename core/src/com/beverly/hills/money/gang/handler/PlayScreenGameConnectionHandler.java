@@ -65,7 +65,7 @@ public class PlayScreenGameConnectionHandler {
                 case EXIT -> handleExit(gameEvent);
                 case KILL_PUNCHING, KILL_SHOOTING -> handleDeath(gameEvent);
                 case MOVE -> handleMove(gameEvent);
-                case SHOOT, PUNCH -> handleHit(gameEvent);
+                case SHOOT, PUNCH -> handleAttackMiss(gameEvent);
                 case GET_SHOT, GET_PUNCHED -> handleGetHit(gameEvent);
                 case PING -> handlePing();
             }
@@ -121,7 +121,7 @@ public class PlayScreenGameConnectionHandler {
                         .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build()));
     }
 
-    private void handleHit(ServerResponse.GameEvent gameEvent) {
+    private void handleAttackMiss(ServerResponse.GameEvent gameEvent) {
         if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerLoadedData().getPlayerId()) {
             return;
         }
