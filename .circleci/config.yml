@@ -56,9 +56,15 @@ jobs:
             touch windows-executable/run.cmd
             echo "set DESKTOP_GAME_HOST=${GAME_HOST}" > windows-executable/run.cmd
             echo ".\runtime\jdk-14.0.2+12-jre\bin\java.exe -jar .\desktop.jar > log.txt" >> windows-executable/run.cmd
-            zip -9 -r -P ${GAME_ZIP_PASSWORD} win86-game.zip windows-executable
-      - store_artifacts:
-          path: win86-game.zip
+            zip -9 -r win86-game.zip windows-executable
+      - run:
+          name: Upload to dropbox
+          command: |
+            curl --fail -X POST https://content.dropboxapi.com/2/files/upload \
+                --header "Authorization: Bearer ${DROPBOX_ACCESS_TOKEN}" \
+                --header "Content-Type: application/octet-stream" \
+                --header "Dropbox-API-Arg: {\"path\": \"/win86-game.zip\",\"mode\": \"overwrite\",\"mute\": false}" \
+                --data-binary "@win86-game.zip"
 workflows:
   compile-verify-test:
     jobs:
