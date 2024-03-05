@@ -201,6 +201,24 @@ public class PlayScreen extends GameScreen {
                 }
         );
         playScreenGameConnectionHandler = new PlayScreenGameConnectionHandler(this);
+        if (Configs.DEV_MODE && Configs.MIMIC_CONSTANT_NETWORK_ACTIVITY) {
+            mimicNetworkActivity();
+        }
+    }
+
+    private void mimicNetworkActivity() {
+        new Thread(() -> {
+            while (!isExiting()) {
+                try {
+                    Thread.sleep(5);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                sendCurrentPlayerPosition();
+
+            }
+        }).start();
+
     }
 
     @Override
@@ -313,10 +331,8 @@ public class PlayScreen extends GameScreen {
     @Override
     public void render(final float delta) {
         super.render(delta);
-        if (getPlayer().isDead()) {
-            showGuiMenu = true;
-            chatMode = false;
-        }
+
+
         getCurrentCam().update();
 
         getGame().getFbo().begin();
@@ -423,19 +439,23 @@ public class PlayScreen extends GameScreen {
                 }
             }
         }
-
-        if (!getPlayer().isDead()) {
-            if (getGameConnection().isConnected()) {
+        if (getPlayer().isDead()) {
+            showGuiMenu = true;
+            chatMode = false;
+            if (gameConnection.isConnected()) {
+                gameConnection.disconnect();
+            }
+        } else {
+            if (gameConnection.isDisconnected()) {
+                while (gameConnection.getErrors().size() != 0) {
+                    gameConnection.getErrors().poll().ifPresent(playScreenGameConnectionHandler::handleException);
+                }
+                screenToTransition = new ErrorScreen(getGame(), StringUtils.defaultIfBlank(errorMessage, "Connection lost"));
+            } else {
                 playScreenGameConnectionHandler.handle();
-            } else if (!isExiting()) {
-                while (gameConnection.getResponse().size() != 0 || gameConnection.getErrors().size() != 0) {
-                    playScreenGameConnectionHandler.handle();
-                }
-                if (!getPlayer().isDead()) {
-                    screenToTransition = new ErrorScreen(getGame(), StringUtils.defaultIfBlank(errorMessage, "Connection lost"));
-                }
             }
         }
+
         getGame().getBatch().end();
         if (screenToTransition != null) {
             musicBackground.stop();

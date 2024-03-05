@@ -186,8 +186,9 @@
     </tr>
     <tr>
         <td>Play screen</td>
-        <td>2 players join the game. Player 1 constantly moves forward. Player 2 kills player 1 while it's still moving.
-            Player 1 dies. No error pops up.
+        <td>2 players join the game on the remote server. Player 2 constantly publishes MOVE
+            events(DESKTOP_MIMIC_CONSTANT_NETWORK_ACTIVITY=true). Player 1 kills player 2 ten times in a row.
+            Player 2 dies. No error pops up.
         </td>
         <td><input type="checkbox"></td>
     </tr>

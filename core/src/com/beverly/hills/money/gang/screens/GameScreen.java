@@ -13,6 +13,8 @@ import com.beverly.hills.money.gang.rect.RectanglePlus;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public abstract class GameScreen implements Screen {
 
     @Getter
@@ -28,14 +30,17 @@ public abstract class GameScreen implements Screen {
     @Setter
     private Player player;
 
-    @Getter
-    private boolean exiting;
+    private AtomicBoolean exiting = new AtomicBoolean(false);
 
     public GameScreen(final DaiKombatGame game, final Viewport viewport) {
         this.game = game;
         this.viewport = viewport;
         this.game.setGameIsPaused(false);
         game.getEntMan().setScreen(this);
+    }
+
+    public boolean isExiting() {
+        return exiting.get();
     }
 
 
@@ -114,7 +119,7 @@ public abstract class GameScreen implements Screen {
 
     @Override
     public void render(final float delta) {
-        if (exiting) {
+        if (exiting.get()) {
             return;
         }
         handleInput(delta);
@@ -145,7 +150,7 @@ public abstract class GameScreen implements Screen {
     }
 
     public final void exit() {
-        exiting = true;
+        exiting.set(true);
         onExitScreen();
     }
 

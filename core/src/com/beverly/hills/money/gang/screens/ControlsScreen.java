@@ -8,6 +8,8 @@ import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 
+import static com.beverly.hills.money.gang.Constants.DEFAULT_SELECTION_INDENT;
+
 public class ControlsScreen extends AbstractMainMenuScreen {
 
     private static final String[] CONTROLS_MAPPING = {
@@ -43,7 +45,7 @@ public class ControlsScreen extends AbstractMainMenuScreen {
             guiFont64.draw(getGame().getBatch(), controlMapping,
                     getViewport().getWorldWidth() / 2f - glyphLayoutControlsMapping.width / 2f,
                     getViewport().getWorldHeight() / 2f - glyphLayoutControlsMapping.height / 2f - Constants.LOGO_INDENT - indent);
-            indent += Constants.MENU_OPTION_INDENT;
+            indent += DEFAULT_SELECTION_INDENT;
         }
         getGame().getBatch().end();
     }
