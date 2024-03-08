@@ -18,5 +18,6 @@ public class PlayerLoadedData {
     private final Vector2 direction;
     private final int playerId;
     private final List<ServerResponse.LeaderBoardItem> leaderBoardItemList;
+    private final int playersOnline;
 
 }

@@ -72,6 +72,9 @@ public class PlayScreen extends GameScreen {
             = new UISelection<>(DeadPlayUISelection.values());
 
     @Setter
+    private int playersOnline;
+
+    @Setter
     private String errorMessage;
 
     @Getter
@@ -83,9 +86,6 @@ public class PlayScreen extends GameScreen {
     private boolean showGuiMenu;
 
     private final PlayScreenGameConnectionHandler playScreenGameConnectionHandler;
-
-    @Setter
-    private int playersOnline;
 
     private final ChatLog chatLog;
     private final MyPlayerKillLog myPlayerKillLog;
@@ -101,6 +101,7 @@ public class PlayScreen extends GameScreen {
         this.gameConnection = gameConnection;
         dingSound1 = getGame().getAssMan().getUserSettingSound(SoundRegistry.DING_1);
         this.playerLoadedData = playerLoadedData;
+        this.playersOnline = playerLoadedData.getPlayersOnline();
         myPlayerKillLog = new MyPlayerKillLog();
         env = new Environment();
         env.set(new ColorAttribute(ColorAttribute.AmbientLight, 1, 1, 1, 1f));
@@ -373,13 +374,17 @@ public class PlayScreen extends GameScreen {
                     getViewport().getWorldHeight() - 32);
         }
 
-        if (playersOnline > 0) {
-            String playersOnlineText = playersOnline + " ONLINE";
-            var onlineGlyph = new GlyphLayout(guiFont64, playersOnlineText);
-            guiFont64.draw(getGame().getBatch(), playersOnlineText,
-                    getViewport().getWorldWidth() - 32 - onlineGlyph.width,
-                    getViewport().getWorldHeight() - 32 - onlineGlyph.height);
+
+        StringBuilder serverStats = new StringBuilder();
+        serverStats.append(playersOnline).append(" ONLINE ");
+        if (gameConnection.getNetworkStats().getPingMls() >= 0) {
+            serverStats.append("| PING ").append(gameConnection.getNetworkStats().getPingMls()).append(" MLS");
         }
+        var serverStatsGlyph = new GlyphLayout(guiFont64, serverStats);
+        guiFont64.draw(getGame().getBatch(), serverStats,
+                getViewport().getWorldWidth() - 32 - serverStatsGlyph.width,
+                getViewport().getWorldHeight() - 32 - serverStatsGlyph.height);
+
         if (!getPlayer().isDead()) {
             if (myPlayerKillLog.hasKillerMessage()) {
                 String killerMessage = myPlayerKillLog.getKillerMessage();

@@ -13,6 +13,8 @@ public class DesktopLauncher {
     // TODO test on TV
     // TODO support alt+tab
     // TODO think about license and copyrights
+    // TODO fix walls in the new map
+    // TODO upload new map
     public static void main
     (final String[] arg) {
         final Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();

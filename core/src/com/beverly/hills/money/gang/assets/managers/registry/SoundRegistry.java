@@ -38,7 +38,10 @@ public enum SoundRegistry {
     VOICE_ENEMY_DEATH("voice/enemy/death/death.mp3"),
     VOICE_ENEMY_DEATH_2("voice/enemy/death/death_2.mp3"),
     VOICE_ENEMY_DEATH_3("voice/enemy/death/death_3.mp3"),
-    SHOTGUN("sfx/shotgun.mp3");
+    SHOTGUN("sfx/shotgun.mp3"),
+    SPAWN1("sfx/spawn/spawn1.mp3"),
+    SPAWN2("sfx/spawn/spawn2.mp3"),
+    SPAWN3("sfx/spawn/spawn3.mp3");
 
     @Getter
     private final String fileName;
@@ -52,6 +55,9 @@ public enum SoundRegistry {
             = new PseudoRandomSoundSequence(DING_1, DING_2);
     public static final PseudoRandomSoundSequence LOOSING_SOUND_SEQ
             = new PseudoRandomSoundSequence(LAUGH, LAUGH_2, LAUGH_3);
+
+    public static final PseudoRandomSoundSequence SPAWN_SOUND_SEQ
+            = new PseudoRandomSoundSequence(SPAWN1, SPAWN2, SPAWN3);
     public static final PseudoRandomSoundSequence WINNING_SOUND_SEQ
             = new PseudoRandomSoundSequence(EXCELLENT, HUMILIATION, HOLY_SHIT, IMPRESSIVE, PERFECT, YOU_WIN);
     public static final PseudoRandomSoundSequence GET_HIT_SOUND_SEQ

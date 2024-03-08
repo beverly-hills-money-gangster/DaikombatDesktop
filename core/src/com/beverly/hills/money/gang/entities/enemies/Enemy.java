@@ -46,16 +46,18 @@ public abstract class Enemy extends Entity {
 
     public SoundVolumeType getSFXVolume() {
         float distance = Vector2.dst2(player.getRect().x, player.getRect().y, getRect().x, getRect().y);
-        if (distance < 2f) {
+        if (distance < 3f) {
             return SoundVolumeType.VERY_LOUD;
         } else if (distance < 10f) {
             return SoundVolumeType.LOUD;
-        } else if (distance < 20f) {
+        } else if (distance < 50) {
             return SoundVolumeType.NORMAL;
-        } else if (distance < 30f) {
+        } else if (distance < 100) {
             return SoundVolumeType.MEDIUM;
-        } else {
+        } else if (distance < 250) {
             return SoundVolumeType.QUITE;
+        } else {
+            return SoundVolumeType.MUTE;
         }
     }
 

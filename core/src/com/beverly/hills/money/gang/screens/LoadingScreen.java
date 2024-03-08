@@ -109,6 +109,7 @@ public class LoadingScreen extends AbstractMainMenuScreen {
                         int playerId = mySpawnEvent.getPlayer().getPlayerId();
                         getGame().setScreen(new PlayScreen(getGame(), gameConnection, PlayerLoadedData.builder()
                                 .playerId(playerId)
+                                .playersOnline(response.getGameEvents().getPlayersOnline())
                                 .playerName(playerName)
                                 .serverPassword(serverPassword)
                                 .spawn(Converter.convertToVector2(mySpawnEvent.getPlayer().getPosition()))
