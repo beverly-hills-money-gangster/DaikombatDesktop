@@ -522,4 +522,9 @@ public class PlayScreen extends GameScreen {
         gameConnection.disconnect();
     }
 
+    @Override
+    public void dispose() {
+        gameConnection.disconnect();
+    }
+
 }
