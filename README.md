@@ -8,11 +8,15 @@ Daikombat is a Doom-like online shooter game with a non-stop death-match mode. I
 
 Right now, the game is not published to any major platform. Please contact to the dev team to get a game archive.
 
-## Screenshots
+## Gameplay
+
+[![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white)](http://www.youtube.com/watch?v=4c-oMjbMRY4)
+
 
 ![Main menu](/screenshot-main-menu.png)
 
 ![Gameplay](/screenshot-gameplay.png)
+
 
 ## Prerequisites
 
