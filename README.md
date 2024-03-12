@@ -2,11 +2,19 @@
 
 Daikombat is a Doom-like online shooter game with a non-stop death-match mode. It is built using Maven, LibGdx, and Java 14.
 
-**Warning!** Assets are not included
 
-## Distribution
+## Plot
 
-Right now, the game is not published to any major platform. Please contact to the dev team to get a game archive.
+In a world where the boundaries between heaven and hell blur, the once-heroic Doom Guy finds himself plunged into an eternal nightmare.
+Consumed by his lust for power and vengeance, he defied the divine order, earning the wrath of God himself.
+Cursed with immortality and condemned to an existence as a vampire, Doom Guy is trapped in a perpetual cycle of violence and suffering.
+
+As his punishment, he is thrust into the depths of an otherworldly arena, where sinners and fallen warriors alike
+are condemned to an eternal deathmatch. Here, amidst the swirling chaos and bloodshed, Doom Guy must confront his
+own inner demons while battling against the vilest of sinners.
+
+Each match is a brutal struggle for survival, with the stakes higher than ever before. Every victory brings him closer
+to redemption, yet every defeat plunges him deeper into the abyss of his own damnation.
 
 ## Gameplay
 
@@ -50,3 +58,7 @@ To turn dev mode on, please run the game with `DESKTOP_DEV_MODE=true` environmen
 - Smaller window size, so you can run multiple game windows at the same time and see IDE logs on-fly
 - Cursor gets "un-caught" when "Esc" is pressed during death-match, so you can use the mouse to go back to IDE or run one more game window
 - Basic network metrics are rendered on the screen during death-match
+
+## Distribution
+
+Right now, the game can be downloaded from the [official web-site](https://beverly-hills-money-gangster.github.io/DaikombatDesktop/).
