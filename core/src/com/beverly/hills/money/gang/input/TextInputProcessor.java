@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Locale;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
@@ -22,6 +23,11 @@ public class TextInputProcessor {
         }
         this.maxLength = maxLength;
         this.onKeyStroke = onKeyStroke;
+    }
+
+    public void setText(String text) {
+        clear();
+        textBuilder.append(text.toLowerCase(Locale.ENGLISH));
     }
 
     public void clear() {
@@ -44,10 +50,12 @@ public class TextInputProcessor {
                     onKeyStroke.run();
                     if (value == Input.Keys.SPACE) {
                         textBuilder.append(" ");
+                    } else if (value == Input.Keys.SEMICOLON) {
+                        textBuilder.append(":");
                     } else if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
                         switch (value) {
                             case Input.Keys.NUM_1 -> textBuilder.append("!");
-                            case Input.Keys.SLASH -> textBuilder.append("?");
+                            case Input.Keys.MINUS -> textBuilder.append("_");
                             default -> textBuilder.append(Input.Keys.toString(value));
                         }
                     } else {
@@ -61,7 +69,8 @@ public class TextInputProcessor {
             IntStream.concat(
                             alphanumericKeyStream,
                             IntStream.of(Input.Keys.SPACE,
-                                    Input.Keys.MINUS, Input.Keys.SLASH))
+                                    Input.Keys.MINUS, Input.Keys.SLASH, Input.Keys.SEMICOLON, Input.Keys.COLON,
+                                    Input.Keys.PERIOD))
                     .forEach(keyStrokeConsumer);
         }
     }

@@ -26,7 +26,7 @@ import com.beverly.hills.money.gang.log.MyPlayerKillLog;
 import com.beverly.hills.money.gang.network.GameConnection;
 import com.beverly.hills.money.gang.proto.PushChatEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand;
-import com.beverly.hills.money.gang.screens.data.PlayerLoadedData;
+import com.beverly.hills.money.gang.screens.data.PlayerContextData;
 import com.beverly.hills.money.gang.screens.ui.selection.ActivePlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.DeadPlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
@@ -38,15 +38,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
 public class PlayScreen extends GameScreen {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlayScreen.class);
+    private static final int DEAD_SCREEN_INPUT_DELAY_MLS = 1_000;
 
     private GameScreen screenToTransition;
-
     private static final int MAX_CHAT_MSG_LEN = 32;
     private static final float BLOOD_OVERLAY_ALPHA_SWITCH = 0.5f;
     private final TextureRegion texRegBloodOverlay, texRegBlackOverlay;
@@ -92,16 +93,16 @@ public class PlayScreen extends GameScreen {
 
     private final GameConnection gameConnection;
 
-    private final PlayerLoadedData playerLoadedData;
+    private final PlayerContextData playerContextData;
 
     public PlayScreen(final DaiKombatGame game,
                       final GameConnection gameConnection,
-                      final PlayerLoadedData playerLoadedData) {
+                      final PlayerContextData playerContextData) {
         super(game, new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         this.gameConnection = gameConnection;
         dingSound1 = getGame().getAssMan().getUserSettingSound(SoundRegistry.DING_1);
-        this.playerLoadedData = playerLoadedData;
-        this.playersOnline = playerLoadedData.getPlayersOnline();
+        this.playerContextData = playerContextData;
+        this.playersOnline = playerContextData.getPlayersOnline();
         myPlayerKillLog = new MyPlayerKillLog();
         env = new Environment();
         env.set(new ColorAttribute(ColorAttribute.AmbientLight, 1, 1, 1, 1f));
@@ -149,7 +150,7 @@ public class PlayScreen extends GameScreen {
                         playerWeapon.getPlayer().playWeaponHitSound(playerWeapon.getWeapon());
                         gameConnection.write(PushGameEventCommand.newBuilder()
                                 .setGameId(Configs.GAME_ID)
-                                .setPlayerId(playerLoadedData.getPlayerId())
+                                .setPlayerId(playerContextData.getPlayerId())
                                 .setDirection(PushGameEventCommand.Vector.newBuilder().setX(direction.x).setY(direction.y).build())
                                 .setPosition(PushGameEventCommand.Vector.newBuilder().setX(position.x).setY(position.y).build())
                                 .setAffectedPlayerId(enemy.getEnemyPlayerId())
@@ -160,7 +161,7 @@ public class PlayScreen extends GameScreen {
                         // if we haven't hit anybody
                         gameConnection.write(PushGameEventCommand.newBuilder()
                                 .setGameId(Configs.GAME_ID)
-                                .setPlayerId(playerLoadedData.getPlayerId())
+                                .setPlayerId(playerContextData.getPlayerId())
                                 .setDirection(PushGameEventCommand.Vector.newBuilder().setX(direction.x).setY(direction.y).build())
                                 .setPosition(PushGameEventCommand.Vector.newBuilder().setX(position.x).setY(position.y).build())
                                 .setEventType(eventType)
@@ -177,8 +178,8 @@ public class PlayScreen extends GameScreen {
                     }
 
                 },
-                playerLoadedData.getSpawn(),
-                playerLoadedData.getDirection()));
+                playerContextData.getSpawn(),
+                playerContextData.getDirection()));
         getGame().getEntMan().addEntity(getPlayer());
 
         setCurrentCam(getPlayer().getPlayerCam());
@@ -186,8 +187,8 @@ public class PlayScreen extends GameScreen {
         Gdx.input.setCursorCatched(true);
         musicBackground.loop(Constants.DEFAULT_MUSIC_VOLUME);
         uiLeaderBoard = new UILeaderBoard(
-                playerLoadedData.getPlayerId(),
-                playerLoadedData.getLeaderBoardItemList().stream()
+                playerContextData.getPlayerId(),
+                playerContextData.getLeaderBoardItemList().stream()
                         .map(leaderBoardItem -> UILeaderBoard.LeaderBoardPlayer.builder()
                                 .name(leaderBoardItem.getPlayerName())
                                 .id(leaderBoardItem.getPlayerId())
@@ -216,7 +217,6 @@ public class PlayScreen extends GameScreen {
                     throw new RuntimeException(e);
                 }
                 sendCurrentPlayerPosition();
-
             }
         }).start();
 
@@ -274,6 +274,10 @@ public class PlayScreen extends GameScreen {
     }
 
     private void handleDeadGuiInput() {
+        if (System.currentTimeMillis() < getPlayer().getDeathTimeMls() + DEAD_SCREEN_INPUT_DELAY_MLS) {
+            // we put a small delay. otherwise, players respawn too quickly
+            return;
+        }
         showLeaderBoard = false;
         if (Gdx.input.isKeyPressed(Input.Keys.TAB)) {
             showLeaderBoard = true;
@@ -289,8 +293,8 @@ public class PlayScreen extends GameScreen {
                 || Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)
                 || Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             switch (deadPlayUISelectionUISelection.getSelectedOption()) {
-                case RESPAWN -> screenToTransition = new LoadingScreen(getGame(),
-                        playerLoadedData.getPlayerName(), playerLoadedData.getServerPassword());
+                case RESPAWN ->
+                        screenToTransition = new LoadingScreen(getGame(), playerContextData.getPlayerServerInfoContextData());
                 case QUIT -> screenToTransition = new MainMenuScreen(getGame());
             }
         }
@@ -302,10 +306,11 @@ public class PlayScreen extends GameScreen {
             chatMode = false;
             gameConnection.write(PushChatEventCommand.newBuilder()
                     .setMessage(chatTextInputProcessor.getText())
-                    .setPlayerId(playerLoadedData.getPlayerId())
+                    .setPlayerId(playerContextData.getPlayerId())
                     .setGameId(Configs.GAME_ID)
                     .build());
-            chatLog.addMessage(playerLoadedData.getPlayerName(), chatTextInputProcessor.getText());
+            chatLog.addMessage(
+                    playerContextData.getPlayerServerInfoContextData().getPlayerName(), chatTextInputProcessor.getText());
             chatTextInputProcessor.clear();
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             chatMode = false;
@@ -319,7 +324,7 @@ public class PlayScreen extends GameScreen {
         var currentPosition = getPlayer().getCurrent2DPosition();
         var currentDirection = getPlayer().getCurrent2DDirection();
         gameConnection.write(PushGameEventCommand.newBuilder()
-                .setPlayerId(playerLoadedData.getPlayerId())
+                .setPlayerId(playerContextData.getPlayerId())
                 .setEventType(PushGameEventCommand.GameEventType.MOVE)
                 .setGameId(Configs.GAME_ID)
                 .setPosition(PushGameEventCommand.Vector.newBuilder()
@@ -361,30 +366,7 @@ public class PlayScreen extends GameScreen {
                 (int) getPlayer().getWeaponY() + activeWeapon.getPositioning().y,
                 gunWidth, gunHeight);
         renderBloodOverlay02();
-
-        if (Configs.DEV_MODE) {
-            String recvSentMessages = String.format(Locale.ENGLISH, "NETWORK: RECV %s MSG | SENT %s MSG | INBOUND %s | OUTBOUND %s",
-                            gameConnection.getNetworkStats().getReceivedMessages(), gameConnection.getNetworkStats().getSentMessages(),
-                            FileUtils.byteCountToDisplaySize(gameConnection.getNetworkStats().getInboundPayloadBytes()),
-                            FileUtils.byteCountToDisplaySize(gameConnection.getNetworkStats().getOutboundPayloadBytes()))
-                    .toUpperCase();
-            var glyphLayoutRecSentMessages = new GlyphLayout(guiFont32, recvSentMessages);
-            guiFont32.draw(getGame().getBatch(),
-                    recvSentMessages, getViewport().getWorldWidth() / 2f - glyphLayoutRecSentMessages.width / 2f,
-                    getViewport().getWorldHeight() - 32);
-        }
-
-
-        StringBuilder serverStats = new StringBuilder();
-        serverStats.append(playersOnline).append(" ONLINE ");
-        if (gameConnection.getNetworkStats().getPingMls() >= 0) {
-            serverStats.append("| PING ").append(gameConnection.getNetworkStats().getPingMls()).append(" MLS");
-        }
-        var serverStatsGlyph = new GlyphLayout(guiFont64, serverStats);
-        guiFont64.draw(getGame().getBatch(), serverStats,
-                getViewport().getWorldWidth() - 32 - serverStatsGlyph.width,
-                getViewport().getWorldHeight() - 32 - serverStatsGlyph.height);
-
+        renderGameTechStats();
         if (!getPlayer().isDead()) {
             if (myPlayerKillLog.hasKillerMessage()) {
                 String killerMessage = myPlayerKillLog.getKillerMessage();
@@ -469,6 +451,39 @@ public class PlayScreen extends GameScreen {
             boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
         }
     }
+
+    private void renderGameTechStats() {
+        StringBuilder gameTechStats = new StringBuilder();
+        gameTechStats.append(playersOnline).append(" ONLINE ");
+        gameTechStats.append("| PING ")
+                .append(Optional.of(gameConnection.getNetworkStats().getPingMls())
+                        .filter(ping -> ping >= 0)
+                        .map(String::valueOf).orElse("-"))
+                .append(" MLS | ");
+        gameTechStats.append(Gdx.graphics.getFramesPerSecond()).append(" FPS");
+
+        var gameTechStatsGlyph = new GlyphLayout(guiFont64, gameTechStats);
+        guiFont64.draw(getGame().getBatch(), gameTechStats,
+                getViewport().getWorldWidth() - 32 - gameTechStatsGlyph.width,
+                getViewport().getWorldHeight() - 32 - gameTechStatsGlyph.height);
+
+        if (Configs.DEV_MODE) {
+            renderDevModeGameTechStats();
+        }
+    }
+
+    private void renderDevModeGameTechStats() {
+        String networkStats = String.format(Locale.ENGLISH, "NETWORK: RECV %s MSG | SENT %s MSG | INBOUND %s | OUTBOUND %s",
+                        gameConnection.getNetworkStats().getReceivedMessages(), gameConnection.getNetworkStats().getSentMessages(),
+                        FileUtils.byteCountToDisplaySize(gameConnection.getNetworkStats().getInboundPayloadBytes()),
+                        FileUtils.byteCountToDisplaySize(gameConnection.getNetworkStats().getOutboundPayloadBytes()))
+                .toUpperCase();
+        var glyphNetStatsMessages = new GlyphLayout(guiFont32, networkStats);
+        guiFont32.draw(getGame().getBatch(),
+                networkStats, getViewport().getWorldWidth() / 2f - glyphNetStatsMessages.width / 2f,
+                getViewport().getWorldHeight() - 32);
+    }
+
 
     private void renderDeadGui() {
         float halfViewportWidth = getViewport().getWorldWidth() / 2f;

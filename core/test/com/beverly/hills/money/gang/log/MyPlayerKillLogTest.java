@@ -21,13 +21,13 @@ public class MyPlayerKillLogTest {
 
     @Test
     public void testHasKillerMessage() {
-        killLog.myPlayerKill("XXX");
+        killLog.myPlayerKill("XXX", 20);
         assertTrue(killLog.hasKillerMessage());
     }
 
     @Test
     public void testHasKillerMessageAfterDelay() throws InterruptedException {
-        killLog.myPlayerKill("XXX");
+        killLog.myPlayerKill("XXX", 20);
         // wait a little
         Thread.sleep(MyPlayerKillLog.MAX_MSG_DURATION_MLS + 50);
         assertFalse(killLog.hasKillerMessage(), "After big delay, there should be no message");
@@ -40,7 +40,13 @@ public class MyPlayerKillLogTest {
 
     @Test
     public void testGetKillerMessage() {
-        killLog.myPlayerKill("XXX");
+        killLog.myPlayerKill("XXX", 20);
+        assertEquals("YOU KILLED XXX. VAMPIRE HP BUFF +20 HP", killLog.getKillerMessage());
+    }
+
+    @Test
+    public void testGetKillerMessageNoBuff() {
+        killLog.myPlayerKill("XXX", 0);
         assertEquals("YOU KILLED XXX", killLog.getKillerMessage());
     }
 }

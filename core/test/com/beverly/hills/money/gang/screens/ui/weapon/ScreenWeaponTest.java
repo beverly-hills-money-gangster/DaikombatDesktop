@@ -44,7 +44,7 @@ public class ScreenWeaponTest {
 
         daiKombatAssetsManager = mock(DaiKombatAssetsManager.class);
 
-        doReturn(shotgunFireSound).when(daiKombatAssetsManager).getUserSettingSound(SoundRegistry.SHOTGUN);
+        doReturn(shotgunFireSound).when(daiKombatAssetsManager).getUserSettingSound(SoundRegistry.ENEMY_SHOTGUN);
         doReturn(punchSound).when(daiKombatAssetsManager).getUserSettingSound(SoundRegistry.PUNCH_THROWN);
         doReturn(punchHitSound).when(daiKombatAssetsManager).getUserSettingSound(SoundRegistry.PUNCH_HIT);
 

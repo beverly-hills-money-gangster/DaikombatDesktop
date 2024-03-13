@@ -4,12 +4,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class UILeaderBoard {
@@ -52,7 +52,7 @@ public class UILeaderBoard {
     public String getMyKillsMessage() {
         return getKillsMessage(myKills);
     }
-    
+
     public String getMyStatsMessage() {
         if (getMyPlace() > 0) {
             return this.getMyKillsMessage() + " | " + getMyPlace() + " PLACE";
@@ -139,9 +139,10 @@ public class UILeaderBoard {
         StringBuilder sb = new StringBuilder();
         int place = 1;
         for (LeaderBoardPlayer leaderBoardItem : leaderBoard) {
+            // TODO test it
             sb.append("# ")
-                    .append(place).append("    ")
-                    .append(getKillsMessage(leaderBoardItem.getKills())).append("    ")
+                    .append(StringUtils.rightPad(String.valueOf(place), 5, " "))
+                    .append(StringUtils.rightPad(getKillsMessage(leaderBoardItem.getKills()), 10, " "))
                     .append(leaderBoardItem.getName());
             if (leaderBoardItem.id == myPlayerId) {
                 sb.append("  < YOU");

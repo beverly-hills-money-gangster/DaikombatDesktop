@@ -25,6 +25,9 @@ import java.util.function.Consumer;
 public class Player extends Entity {
 
     @Getter
+    private long deathTimeMls;
+
+    @Getter
     private final PerspectiveCamera playerCam;
     @Getter
     private final RectanglePlus rect;
@@ -210,11 +213,19 @@ public class Player extends Entity {
         gotHit = true;
     }
 
+    public void buffHp(final int newHp) {
+        if (newHp <= 0) {
+            throw new IllegalArgumentException("New HP can't be less or equal to zero");
+        }
+        this.currentHP = newHp;
+    }
+
     public void die(final String killedBy) {
         this.currentHP = 0;
         this.killedBy = killedBy;
         gotHit = true;
         isDead = true;
+        this.deathTimeMls = System.currentTimeMillis();
     }
 
     public ScreenWeapon.WeaponRenderData getActiveWeaponRenderingData() {

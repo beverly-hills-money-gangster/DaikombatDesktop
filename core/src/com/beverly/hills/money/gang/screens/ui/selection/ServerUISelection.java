@@ -2,13 +2,13 @@ package com.beverly.hills.money.gang.screens.ui.selection;
 
 import lombok.Getter;
 
-public enum MainMenuUISelection {
-    PLAY("START GAME"), CONTROLS("CONTROLS"), SETTINGS("SETTINGS"), QUIT("QUIT GAME");
+public enum ServerUISelection {
+    OFFICIAL("OFFICIAL SERVER"), CUSTOM("CUSTOM SERVER");
 
     @Getter
     private final String title;
 
-    MainMenuUISelection(String title) {
+    ServerUISelection(String title) {
         this.title = title;
     }
 

@@ -13,7 +13,8 @@ import com.beverly.hills.money.gang.entity.GameServerCreds;
 import com.beverly.hills.money.gang.entity.HostPort;
 import com.beverly.hills.money.gang.network.GameConnection;
 import com.beverly.hills.money.gang.proto.JoinGameCommand;
-import com.beverly.hills.money.gang.screens.data.PlayerLoadedData;
+import com.beverly.hills.money.gang.screens.data.PlayerContextData;
+import com.beverly.hills.money.gang.screens.data.PlayerServerInfoContextData;
 import com.beverly.hills.money.gang.utils.Converter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -33,8 +34,8 @@ public class LoadingScreen extends AbstractMainMenuScreen {
 
     private final AtomicReference<GameConnection> gameConnectionRef = new AtomicReference<>();
     private static final int MAX_LOADING_DOTS = 3;
-    private final String playerName;
-    private final String serverPassword;
+
+    private final PlayerServerInfoContextData playerServerInfoContextData;
 
     private long loadingAnimationSwitchMls = 0;
     private static final long LOADING_ANIMATION_MLS = 250;
@@ -42,23 +43,21 @@ public class LoadingScreen extends AbstractMainMenuScreen {
 
     private final BitmapFont guiFont64;
 
-    public LoadingScreen(final DaiKombatGame game, final String playerName, final String serverPassword) {
+    public LoadingScreen(final DaiKombatGame game, final PlayerServerInfoContextData playerServerInfoContextData) {
         super(game);
-        LOG.info("Player name {}, server password {}", playerName, serverPassword);
-        this.playerName = playerName;
-        this.serverPassword = serverPassword;
+        this.playerServerInfoContextData = playerServerInfoContextData;
         Thread connectionInitThread = new Thread(() -> {
             try {
                 gameConnectionRef.set(new GameConnection(GameServerCreds.builder()
                         .hostPort(HostPort.builder()
-                                .host(Configs.HOST)
-                                .port(Configs.PORT).build())
-                        .password(serverPassword)
+                                .host(playerServerInfoContextData.getServerHost())
+                                .port(playerServerInfoContextData.getServerPort()).build())
+                        .password(playerServerInfoContextData.getServerPassword())
                         .build()));
                 gameConnectionRef.get().write(JoinGameCommand.newBuilder()
                         .setVersion(ClientConfig.VERSION)
                         .setGameId(Configs.GAME_ID)
-                        .setPlayerName(playerName)
+                        .setPlayerName(playerServerInfoContextData.getPlayerName())
                         .build());
             } catch (Throwable e) {
                 LOG.error("Can't create connection", e);
@@ -107,11 +106,10 @@ public class LoadingScreen extends AbstractMainMenuScreen {
                         var mySpawnEvent = response.getGameEvents().getEvents(0);
                         LOG.info("My spawn {}", mySpawnEvent);
                         int playerId = mySpawnEvent.getPlayer().getPlayerId();
-                        getGame().setScreen(new PlayScreen(getGame(), gameConnection, PlayerLoadedData.builder()
+                        getGame().setScreen(new PlayScreen(getGame(), gameConnection, PlayerContextData.builder()
                                 .playerId(playerId)
                                 .playersOnline(response.getGameEvents().getPlayersOnline())
-                                .playerName(playerName)
-                                .serverPassword(serverPassword)
+                                .playerServerInfoContextData(playerServerInfoContextData)
                                 .spawn(Converter.convertToVector2(mySpawnEvent.getPlayer().getPosition()))
                                 .direction(Converter.convertToVector2(mySpawnEvent.getPlayer().getDirection()))
                                 .leaderBoardItemList(mySpawnEvent.getLeaderBoard().getItemsList())

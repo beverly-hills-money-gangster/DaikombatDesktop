@@ -32,7 +32,7 @@ public class ScreenWeapon {
         idleWeapon = assetsManager.getTextureRegion(TexturesRegistry.GUN_IDLE, 0, 0, 149, 117);
         weaponStates.put(Weapon.SHOTGUN, WeaponState.builder()
                 .distance(Configs.SHOOTING_DISTANCE)
-                .fireSound(assetsManager.getUserSettingSound(SoundRegistry.SHOTGUN))
+                .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PLAYER_SHOTGUN))
                 .hitTargetSound(null)
                 .screenRatioX(0.35f)
                 .screenRatioY(0.40f)

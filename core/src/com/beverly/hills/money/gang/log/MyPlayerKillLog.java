@@ -9,8 +9,11 @@ public class MyPlayerKillLog {
     private long expireTime;
 
 
-    public void myPlayerKill(String victim) {
+    public void myPlayerKill(String victim, int vampireHpBuff) {
         killerMessage = StringUtils.upperCase("YOU KILLED " + victim);
+        if (vampireHpBuff != 0) {
+            killerMessage += " +" + vampireHpBuff + " HP";
+        }
         expireTime = System.currentTimeMillis() + MAX_MSG_DURATION_MLS;
     }
 

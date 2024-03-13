@@ -38,7 +38,8 @@ public enum SoundRegistry {
     VOICE_ENEMY_DEATH("voice/enemy/death/death.mp3"),
     VOICE_ENEMY_DEATH_2("voice/enemy/death/death_2.mp3"),
     VOICE_ENEMY_DEATH_3("voice/enemy/death/death_3.mp3"),
-    SHOTGUN("sfx/shotgun.mp3"),
+    ENEMY_SHOTGUN("sfx/shotgun.mp3"),
+    PLAYER_SHOTGUN("sfx/player_shotgun.mp3"),
     SPAWN1("sfx/spawn/spawn1.mp3"),
     SPAWN2("sfx/spawn/spawn2.mp3"),
     SPAWN3("sfx/spawn/spawn3.mp3");

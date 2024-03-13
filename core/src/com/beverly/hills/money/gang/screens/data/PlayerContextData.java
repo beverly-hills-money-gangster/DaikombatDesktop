@@ -11,9 +11,8 @@ import java.util.List;
 @Getter
 @Builder
 @ToString
-public class PlayerLoadedData {
-    private final String serverPassword;
-    private final String playerName;
+public class PlayerContextData {
+    private final PlayerServerInfoContextData playerServerInfoContextData;
     private final Vector2 spawn;
     private final Vector2 direction;
     private final int playerId;

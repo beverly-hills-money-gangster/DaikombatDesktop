@@ -3,25 +3,25 @@ package com.beverly.hills.money.gang.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
-import com.beverly.hills.money.gang.screens.ui.selection.MainMenuUISelection;
+import com.beverly.hills.money.gang.screens.data.PlayerServerInfoContextData;
+import com.beverly.hills.money.gang.screens.ui.selection.ServerUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 
-public class MainMenuScreen extends AbstractMainMenuScreen {
+public class ChooseServerScreen extends AbstractMainMenuScreen {
 
     private final BitmapFont guiFont64;
     private final UserSettingSound boomSound1;
     private final UserSettingSound dingSound1;
-
-    private final UISelection<MainMenuUISelection> menuSelection
-            = new UISelection<>(MainMenuUISelection.values());
+    private final UISelection<ServerUISelection> serverSelection = new UISelection<>(ServerUISelection.values());
 
 
-    public MainMenuScreen(final DaiKombatGame game) {
+    public ChooseServerScreen(final DaiKombatGame game) {
         super(game);
         guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
 
@@ -34,29 +34,30 @@ public class MainMenuScreen extends AbstractMainMenuScreen {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             boomSound1.play(Constants.DEFAULT_SFX_VOLUME);
-            switch (menuSelection.getSelectedOption()) {
-                case PLAY -> {
+            switch (serverSelection.getSelectedOption()) {
+                case OFFICIAL -> {
                     removeAllEntities();
-                    getGame().setScreen(new ChooseServerScreen(getGame()));
+                    getGame().setScreen(new EnterYourNameScreen(getGame(),
+                            PlayerServerInfoContextData.builder()
+                                    .serverHost(Configs.HOST)
+                                    .serverPort(Configs.PORT)));
                 }
-                case CONTROLS -> {
+                case CUSTOM -> {
                     removeAllEntities();
-                    getGame().setScreen(new ControlsScreen(getGame()));
+                    getGame().setScreen(new EnterServerAddressScreen(getGame()));
                 }
-                case SETTINGS -> {
-                    removeAllEntities();
-                    getGame().setScreen(new SettingsScreen(getGame()));
-                }
+
                 default -> Gdx.app.exit();
 
             }
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            Gdx.app.exit();
+            removeAllEntities();
+            getGame().setScreen(new MainMenuScreen(getGame()));
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            menuSelection.up();
+            serverSelection.up();
             dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            menuSelection.down();
+            serverSelection.down();
             dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
         }
     }
@@ -66,7 +67,7 @@ public class MainMenuScreen extends AbstractMainMenuScreen {
     public void render(final float delta) {
         super.render(delta);
         getGame().getBatch().begin();
-        menuSelection.render(guiFont64, this, Constants.LOGO_INDENT);
+        serverSelection.render(guiFont64, this, Constants.LOGO_INDENT);
         getGame().getBatch().end();
     }
 

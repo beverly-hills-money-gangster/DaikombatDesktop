@@ -10,6 +10,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.input.TextInputProcessor;
+import com.beverly.hills.money.gang.screens.data.PlayerServerInfoContextData;
 import org.apache.commons.lang3.StringUtils;
 
 public class EnterServerPasswordScreen extends AbstractMainMenuScreen {
@@ -21,11 +22,12 @@ public class EnterServerPasswordScreen extends AbstractMainMenuScreen {
     private final UserSettingSound boomSound2;
     private final TextInputProcessor passwordTextInputProcessor;
 
-    private final String playerName;
+    private final PlayerServerInfoContextData.PlayerServerInfoContextDataBuilder playerServerInfoContextDataBuilder;
 
-    public EnterServerPasswordScreen(final DaiKombatGame game, final String playerName) {
+    public EnterServerPasswordScreen(final DaiKombatGame game,
+                                     final PlayerServerInfoContextData.PlayerServerInfoContextDataBuilder playerServerInfoContextDataBuilder) {
         super(game);
-        this.playerName = playerName;
+        this.playerServerInfoContextDataBuilder = playerServerInfoContextDataBuilder;
         guiFont64 = getGame().getAssMan().getFont(FontRegistry.FONT_64);
         boomSound2 = getGame().getAssMan().getUserSettingSound(SoundRegistry.BOOM_2);
         passwordTextInputProcessor = new TextInputProcessor(MAX_PASS_LEN,
@@ -39,7 +41,8 @@ public class EnterServerPasswordScreen extends AbstractMainMenuScreen {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) && StringUtils.isNotEmpty(passwordTextInputProcessor.getText())) {
             removeAllEntities();
             boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
-            getGame().setScreen(new LoadingScreen(getGame(), playerName, passwordTextInputProcessor.getText()));
+            playerServerInfoContextDataBuilder.serverPassword(passwordTextInputProcessor.getText());
+            getGame().setScreen(new LoadingScreen(getGame(), playerServerInfoContextDataBuilder.build()));
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             removeAllEntities();
             getGame().setScreen(new MainMenuScreen(getGame()));
