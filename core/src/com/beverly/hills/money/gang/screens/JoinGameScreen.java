@@ -24,9 +24,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class LoadingScreen extends AbstractMainMenuScreen {
+public class JoinGameScreen extends AbstractMainMenuScreen {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LoadingScreen.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JoinGameScreen.class);
 
     private boolean stopLoading;
 
@@ -43,7 +43,7 @@ public class LoadingScreen extends AbstractMainMenuScreen {
 
     private final BitmapFont guiFont64;
 
-    public LoadingScreen(final DaiKombatGame game, final PlayerServerInfoContextData playerServerInfoContextData) {
+    public JoinGameScreen(final DaiKombatGame game, final PlayerServerInfoContextData playerServerInfoContextData) {
         super(game);
         this.playerServerInfoContextData = playerServerInfoContextData;
         Thread connectionInitThread = new Thread(() -> {
@@ -106,6 +106,7 @@ public class LoadingScreen extends AbstractMainMenuScreen {
                         var mySpawnEvent = response.getGameEvents().getEvents(0);
                         LOG.info("My spawn {}", mySpawnEvent);
                         int playerId = mySpawnEvent.getPlayer().getPlayerId();
+                        LOG.info("My player id {}", playerId);
                         getGame().setScreen(new PlayScreen(getGame(), gameConnection, PlayerContextData.builder()
                                 .playerId(playerId)
                                 .playersOnline(response.getGameEvents().getPlayersOnline())

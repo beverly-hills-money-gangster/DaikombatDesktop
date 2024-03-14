@@ -21,7 +21,7 @@ public class ScreenWeaponTest {
 
     private DaiKombatAssetsManager daiKombatAssetsManager;
 
-    private UserSettingSound shotgunFireSound;
+    private UserSettingSound playerShotgunFireSound;
     private UserSettingSound punchSound;
     private UserSettingSound punchHitSound;
 
@@ -38,13 +38,13 @@ public class ScreenWeaponTest {
         shotgunFireTexture = mock(TextureRegion.class);
         punchTexture = mock(TextureRegion.class);
 
-        shotgunFireSound = mock(UserSettingSound.class);
+        playerShotgunFireSound = mock(UserSettingSound.class);
         punchSound = mock(UserSettingSound.class);
         punchHitSound = mock(UserSettingSound.class);
 
         daiKombatAssetsManager = mock(DaiKombatAssetsManager.class);
 
-        doReturn(shotgunFireSound).when(daiKombatAssetsManager).getUserSettingSound(SoundRegistry.ENEMY_SHOTGUN);
+        doReturn(playerShotgunFireSound).when(daiKombatAssetsManager).getUserSettingSound(SoundRegistry.PLAYER_SHOTGUN);
         doReturn(punchSound).when(daiKombatAssetsManager).getUserSettingSound(SoundRegistry.PUNCH_THROWN);
         doReturn(punchHitSound).when(daiKombatAssetsManager).getUserSettingSound(SoundRegistry.PUNCH_HIT);
 
@@ -98,7 +98,7 @@ public class ScreenWeaponTest {
     public void testAttackShotgun() {
         float volume = 0.5f;
         assertTrue(screenWeapon.attack(ScreenWeapon.Weapon.SHOTGUN, volume));
-        verify(shotgunFireSound).play(volume);
+        verify(playerShotgunFireSound).play(volume);
         assertEquals(ScreenWeapon.Weapon.SHOTGUN, screenWeapon.weaponBeingUsed);
 
     }
@@ -117,7 +117,7 @@ public class ScreenWeaponTest {
         assertTrue(screenWeapon.attack(ScreenWeapon.Weapon.SHOTGUN, volume));
         assertFalse(screenWeapon.attack(ScreenWeapon.Weapon.SHOTGUN, volume),
                 "If no delay, then we shouldn't be able to attack");
-        verify(shotgunFireSound).play(volume);
+        verify(playerShotgunFireSound).play(volume);
     }
 
     @Test
@@ -128,14 +128,14 @@ public class ScreenWeaponTest {
         Thread.sleep(screenWeapon.weaponStates.get(ScreenWeapon.Weapon.SHOTGUN).getAnimationDelayMls() + 50);
         assertTrue(screenWeapon.attack(ScreenWeapon.Weapon.SHOTGUN, volume),
                 "If we have a  delay, then we SHOULD be able to attack");
-        verify(shotgunFireSound, times(2)).play(volume);
+        verify(playerShotgunFireSound, times(2)).play(volume);
     }
 
     @Test
     public void testRegisterHitShotgun() {
         screenWeapon.registerHit(ScreenWeapon.Weapon.SHOTGUN, 0.5f);
         // nothing happens. there is no hit sound for shotgun
-        verifyNoInteractions(shotgunFireSound, punchSound, punchHitSound);
+        verifyNoInteractions(playerShotgunFireSound, punchSound, punchHitSound);
     }
 
     @Test

@@ -33,7 +33,8 @@ public class UILeaderBoardTest {
         assertEquals(0, leaderBoard.getMyKills());
         assertEquals(1, leaderBoard.getMyPlace());
         assertEquals("0 KILL", leaderBoard.getMyKillsMessage());
-        assertEquals("# 1    0 KILL    MY NAME  < YOU\n", leaderBoard.toString());
+        assertEquals("0 DEATH", leaderBoard.getMyDeathsMessage());
+        assertEquals("# 1    0 KILL        0 DEATH       MY NAME  < YOU\n", leaderBoard.toString());
         verify(youLeadRunnable, never()).run();
         verify(lostLeadRunnable, never()).run();
     }
@@ -44,7 +45,7 @@ public class UILeaderBoardTest {
         UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
                 List.of(UILeaderBoard.LeaderBoardPlayer
                                 .builder()
-                                .kills(2).id(myPlayerId).name("my name")
+                                .kills(2).id(myPlayerId).name("my name").deaths(10)
                                 .build(),
                         UILeaderBoard.LeaderBoardPlayer
                                 .builder()
@@ -59,10 +60,11 @@ public class UILeaderBoardTest {
         assertEquals(2, leaderBoard.getMyKills());
         assertEquals(3, leaderBoard.getMyPlace());
         assertEquals("2 KILLS", leaderBoard.getMyKillsMessage());
+        assertEquals("10 DEATHS", leaderBoard.getMyDeathsMessage());
         assertEquals(
-                "# 1    10 KILLS    TOP DOG\n" +
-                        "# 2    5 KILLS    OTHER PLAYER\n" +
-                        "# 3    2 KILLS    MY NAME  < YOU\n", leaderBoard.toString());
+                "# 1    10 KILLS      0 DEATH       TOP DOG\n" +
+                        "# 2    5 KILLS       0 DEATH       OTHER PLAYER\n" +
+                        "# 3    2 KILLS       10 DEATHS     MY NAME  < YOU\n", leaderBoard.toString());
         verify(youLeadRunnable, never()).run();
         verify(lostLeadRunnable, never()).run();
     }
@@ -89,11 +91,12 @@ public class UILeaderBoardTest {
 
 
         assertEquals(3, leaderBoard.getMyKills());
-        assertEquals(2, leaderBoard.getMyPlace());
+        assertEquals(3, leaderBoard.getMyPlace());
         assertEquals("3 KILLS", leaderBoard.getMyKillsMessage());
         assertEquals(
-                "# 1    5 KILLS    OTHER PLAYER\n" +
-                        "# 2    3 KILLS    MY NAME  < YOU\n", leaderBoard.toString());
+                "# 1    10 KILLS      1 DEATH       TOP DOG\n" +
+                        "# 2    5 KILLS       0 DEATH       OTHER PLAYER\n" +
+                        "# 3    3 KILLS       0 DEATH       MY NAME  < YOU\n", leaderBoard.toString());
         verify(youLeadRunnable, never()).run();
         verify(lostLeadRunnable, never()).run();
     }
@@ -123,8 +126,9 @@ public class UILeaderBoardTest {
         assertEquals(1, leaderBoard.getMyPlace());
         assertEquals("3 KILLS", leaderBoard.getMyKillsMessage());
         assertEquals(
-                "# 1    3 KILLS    MY NAME  < YOU\n" +
-                        "# 2    0 KILL    OTHER PLAYER\n", leaderBoard.toString());
+                "# 1    3 KILLS       0 DEATH       MY NAME  < YOU\n" +
+                        "# 2    3 KILLS       1 DEATH       TOP DOG\n" +
+                        "# 3    0 KILL        0 DEATH       OTHER PLAYER\n", leaderBoard.toString());
 
         verify(youLeadRunnable).run(); // my player leads
         verify(lostLeadRunnable, never()).run();
@@ -144,7 +148,7 @@ public class UILeaderBoardTest {
                                 .build(),
                         UILeaderBoard.LeaderBoardPlayer
                                 .builder()
-                                .kills(0).id(666).name("other player")
+                                .kills(1).id(666).name("other player")
                                 .build(),
                         UILeaderBoard.LeaderBoardPlayer
                                 .builder()
@@ -160,8 +164,10 @@ public class UILeaderBoardTest {
         assertEquals(2, leaderBoard.getMyPlace());
         assertEquals("4 KILLS", leaderBoard.getMyKillsMessage());
         assertEquals(
-                "# 1    5 KILLS    TOP DOG\n" +
-                        "# 2    4 KILLS    MY NAME  < YOU\n", leaderBoard.toString());
+                "# 1    5 KILLS       0 DEATH       TOP DOG\n" +
+                        "# 2    4 KILLS       0 DEATH       MY NAME  < YOU\n" +
+                        "# 3    1 KILL        1 DEATH       OTHER PLAYER\n" +
+                        "# 4    0 KILL        1 DEATH       ONE MORE OTHER PLAYER\n", leaderBoard.toString());
 
         verify(youLeadRunnable, never()).run();
         verify(lostLeadRunnable).run(); // I have lost lead
@@ -199,11 +205,11 @@ public class UILeaderBoardTest {
         assertEquals(1, leaderBoard.getMyPlace());
         assertEquals("4 KILLS", leaderBoard.getMyKillsMessage());
         assertEquals(
-                "# 1    4 KILLS    MY NAME  < YOU\n" +
-                        "# 2    3 KILLS    TOP DOG\n" +
-                        "# 3    2 KILLS    OTHER PLAYER\n" +
-                        "# 4    1 KILL    ONE MORE OTHER PLAYER\n" +
-                        "# 5    0 KILL    NEW PLAYER\n", leaderBoard.toString());
+                "# 1    4 KILLS       0 DEATH       MY NAME  < YOU\n" +
+                        "# 2    3 KILLS       0 DEATH       TOP DOG\n" +
+                        "# 3    2 KILLS       0 DEATH       OTHER PLAYER\n" +
+                        "# 4    1 KILL        0 DEATH       ONE MORE OTHER PLAYER\n" +
+                        "# 5    0 KILL        0 DEATH       NEW PLAYER\n", leaderBoard.toString());
 
         verify(youLeadRunnable, never()).run();
         verify(lostLeadRunnable, never()).run();
@@ -246,11 +252,11 @@ public class UILeaderBoardTest {
         assertEquals(1, leaderBoard.getMyPlace());
         assertEquals("4 KILLS", leaderBoard.getMyKillsMessage());
         assertEquals(
-                "# 1    4 KILLS    MY NAME  < YOU\n" +
-                        "# 2    3 KILLS    TOP DOG\n" +
-                        "# 3    2 KILLS    OTHER PLAYER\n" +
-                        "# 4    1 KILL    ONE MORE OTHER PLAYER\n" +
-                        "# 5    0 KILL    NEW PLAYER\n", leaderBoard.toString());
+                "# 1    4 KILLS       0 DEATH       MY NAME  < YOU\n" +
+                        "# 2    3 KILLS       0 DEATH       TOP DOG\n" +
+                        "# 3    2 KILLS       0 DEATH       OTHER PLAYER\n" +
+                        "# 4    1 KILL        0 DEATH       ONE MORE OTHER PLAYER\n" +
+                        "# 5    0 KILL        0 DEATH       NEW PLAYER\n", leaderBoard.toString());
 
         verify(youLeadRunnable, never()).run();
         verify(lostLeadRunnable, never()).run();
@@ -275,7 +281,9 @@ public class UILeaderBoardTest {
         assertEquals(4, leaderBoard.getMyKills());
         assertEquals(1, leaderBoard.getMyPlace());
         assertEquals("4 KILLS", leaderBoard.getMyKillsMessage());
-        assertEquals("# 1    4 KILLS    MY NAME  < YOU\n", leaderBoard.toString());
+        assertEquals(
+                "# 1    4 KILLS       0 DEATH       MY NAME  < YOU\n",
+                leaderBoard.toString());
 
         verify(youLeadRunnable).run(); // I'm leading now
         verify(lostLeadRunnable, never()).run();
@@ -306,8 +314,9 @@ public class UILeaderBoardTest {
         assertEquals(0, leaderBoard.getMyKills());
         assertEquals(2, leaderBoard.getMyPlace());
         assertEquals("0 KILL", leaderBoard.getMyKillsMessage());
-        assertEquals("# 1    1 KILL    TOP DOG\n" +
-                "# 2    0 KILL    MY NAME  < YOU\n", leaderBoard.toString());
+        assertEquals("# 1    1 KILL        0 DEATH       TOP DOG\n" +
+                "# 2    0 KILL        0 DEATH       MY NAME  < YOU\n" +
+                "# 3    0 KILL        1 DEATH       VICTIM\n", leaderBoard.toString());
 
         // I don't lead and I don't lose lead
         verify(youLeadRunnable, never()).run();

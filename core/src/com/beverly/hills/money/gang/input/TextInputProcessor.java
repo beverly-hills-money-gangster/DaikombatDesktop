@@ -25,9 +25,14 @@ public class TextInputProcessor {
         this.onKeyStroke = onKeyStroke;
     }
 
-    public void setText(String text) {
-        clear();
-        textBuilder.append(text.toLowerCase(Locale.ENGLISH));
+    public void append(String text) {
+        if (text == null) {
+            return;
+        }
+        int charsLeft = maxLength - textBuilder.length();
+        if (charsLeft != 0) {
+            textBuilder.append(text.toLowerCase(Locale.ENGLISH), 0, Math.min(text.length(), charsLeft));
+        }
     }
 
     public void clear() {
@@ -50,12 +55,12 @@ public class TextInputProcessor {
                     onKeyStroke.run();
                     if (value == Input.Keys.SPACE) {
                         textBuilder.append(" ");
-                    } else if (value == Input.Keys.SEMICOLON) {
-                        textBuilder.append(":");
                     } else if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
                         switch (value) {
                             case Input.Keys.NUM_1 -> textBuilder.append("!");
                             case Input.Keys.MINUS -> textBuilder.append("_");
+                            case Input.Keys.SLASH -> textBuilder.append("?");
+                            case Input.Keys.SEMICOLON -> textBuilder.append(":");
                             default -> textBuilder.append(Input.Keys.toString(value));
                         }
                     } else {

@@ -21,6 +21,8 @@ public class UILeaderBoard {
 
     private int myKills;
 
+    private int myDeaths;
+
     private final Runnable onTakenTheLead;
 
     private final Runnable onLostTheLead;
@@ -53,11 +55,15 @@ public class UILeaderBoard {
         return getKillsMessage(myKills);
     }
 
+    public String getMyDeathsMessage() {
+        return getDeathsMessage(myDeaths);
+    }
+
     public String getMyStatsMessage() {
         if (getMyPlace() > 0) {
-            return this.getMyKillsMessage() + " | " + getMyPlace() + " PLACE";
+            return this.getMyKillsMessage() + " | " + this.getMyDeathsMessage() + " | " + getMyPlace() + " PLACE";
         } else {
-            return this.getMyKillsMessage();
+            return this.getMyKillsMessage() + " | " + this.getMyDeathsMessage();
         }
     }
 
@@ -72,21 +78,34 @@ public class UILeaderBoard {
         return kills + " KILLS";
     }
 
+    private String getDeathsMessage(int deaths) {
+        if (deaths == 0) {
+            return "0 DEATH";
+        }
+        if (deaths == 1) {
+            return "1 DEATH";
+        }
+        return deaths + " DEATHS";
+    }
+
 
     private void setMyStats() {
         int oldPlace = myPlace;
         for (int i = 0; i < leaderBoardItems.size(); i++) {
             var item = leaderBoardItems.get(i);
-            if (item.id == myPlayerId) {
-                myKills = item.kills;
-                myPlace = i + 1;
-                if (myPlace == 1 && myKills > 0 && oldPlace > myPlace) {
-                    onTakenTheLead.run();
-                } else if (oldPlace == 1 && myKills > 0 && myPlace != 1) {
-                    onLostTheLead.run();
-                }
-                return;
+            if (item.id != myPlayerId) {
+                continue;
             }
+            myKills = item.kills;
+            myDeaths = item.deaths;
+            myPlace = i + 1;
+            if (myPlace == 1 && myKills > 0 && oldPlace > myPlace) {
+                onTakenTheLead.run();
+            } else if (oldPlace == 1 && myKills > 0 && myPlace != 1) {
+                onLostTheLead.run();
+            }
+            return;
+
         }
     }
 
@@ -97,21 +116,31 @@ public class UILeaderBoard {
     }
 
     public void registerKill(int killerPlayerId, int victimPlayerId) {
-        removePlayer(victimPlayerId);
-        leaderBoardItems.stream().filter(leaderBoardPlayer -> leaderBoardPlayer.getId() == killerPlayerId)
-                .findFirst().ifPresent(leaderBoardPlayer -> {
+        leaderBoardItems.stream()
+                .filter(leaderBoardPlayer -> leaderBoardPlayer.getId() == killerPlayerId)
+                .findFirst()
+                .ifPresent(leaderBoardPlayer -> {
                     removePlayer(leaderBoardPlayer.id);
                     addNewPlayer(LeaderBoardPlayer.builder()
                             .id(leaderBoardPlayer.id)
+                            .deaths(leaderBoardPlayer.deaths)
                             .kills(leaderBoardPlayer.kills + 1)
                             .name(leaderBoardPlayer.name).build());
                 });
-        if (victimPlayerId == myPlayerId) {
-            myKills = 0;
-            myPlace = 0;
-        } else {
-            setMyStats();
-        }
+
+        leaderBoardItems.stream()
+                .filter(leaderBoardPlayer -> leaderBoardPlayer.getId() == victimPlayerId)
+                .findFirst()
+                .ifPresent(leaderBoardPlayer -> {
+                    removePlayer(leaderBoardPlayer.id);
+                    addNewPlayer(LeaderBoardPlayer.builder()
+                            .id(leaderBoardPlayer.id)
+                            .kills(leaderBoardPlayer.kills)
+                            .deaths(leaderBoardPlayer.deaths + 1)
+                            .name(leaderBoardPlayer.name).build());
+                });
+
+        setMyStats();
         needRefresh = true;
     }
 
@@ -138,13 +167,13 @@ public class UILeaderBoard {
     private String constructToString(List<LeaderBoardPlayer> leaderBoard) {
         StringBuilder sb = new StringBuilder();
         int place = 1;
-        for (LeaderBoardPlayer leaderBoardItem : leaderBoard) {
-            // TODO test it
+        for (LeaderBoardPlayer item : leaderBoard) {
             sb.append("# ")
                     .append(StringUtils.rightPad(String.valueOf(place), 5, " "))
-                    .append(StringUtils.rightPad(getKillsMessage(leaderBoardItem.getKills()), 10, " "))
-                    .append(leaderBoardItem.getName());
-            if (leaderBoardItem.id == myPlayerId) {
+                    .append(StringUtils.rightPad(getKillsMessage(item.getKills()), 14, " "))
+                    .append(StringUtils.rightPad(getDeathsMessage(item.getDeaths()), 14, " "))
+                    .append(item.getName());
+            if (item.id == myPlayerId) {
                 sb.append("  < YOU");
             }
             sb.append("\n");
@@ -161,13 +190,18 @@ public class UILeaderBoard {
         private final String name;
         private final int id;
         private final int kills;
-
+        private final int deaths;
     }
 
     private static class PlayerComparator implements Comparator<LeaderBoardPlayer> {
         @Override
         public int compare(LeaderBoardPlayer player1, LeaderBoardPlayer player2) {
-            return -Integer.compare(player1.getKills(), player2.getKills());
+            int killsCompare = -Integer.compare(player1.getKills(), player2.getKills());
+            if (killsCompare == 0) {
+                return Integer.compare(player1.getDeaths(), player2.getDeaths());
+            } else {
+                return killsCompare;
+            }
         }
     }
 

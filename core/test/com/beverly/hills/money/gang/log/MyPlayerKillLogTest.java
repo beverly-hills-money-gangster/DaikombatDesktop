@@ -41,7 +41,7 @@ public class MyPlayerKillLogTest {
     @Test
     public void testGetKillerMessage() {
         killLog.myPlayerKill("XXX", 20);
-        assertEquals("YOU KILLED XXX. VAMPIRE HP BUFF +20 HP", killLog.getKillerMessage());
+        assertEquals("YOU KILLED XXX +20 HP", killLog.getKillerMessage());
     }
 
     @Test

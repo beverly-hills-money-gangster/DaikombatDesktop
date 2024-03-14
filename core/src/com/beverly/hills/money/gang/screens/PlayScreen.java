@@ -192,6 +192,7 @@ public class PlayScreen extends GameScreen {
                         .map(leaderBoardItem -> UILeaderBoard.LeaderBoardPlayer.builder()
                                 .name(leaderBoardItem.getPlayerName())
                                 .id(leaderBoardItem.getPlayerId())
+                                .deaths(leaderBoardItem.getDeaths())
                                 .kills(leaderBoardItem.getKills()).build()).collect(Collectors.toList()),
                 () -> {
                     LOG.info("You have taken the lead");
@@ -225,20 +226,21 @@ public class PlayScreen extends GameScreen {
     @Override
     public void handleInput(final float delta) {
         showLeaderBoard = false;
-        if (getPlayer().isDead()) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.valueOf("`"))) {
+            chatMode = !chatMode;
+        }
+        if (chatMode) {
+            handleChatInput();
+        } else if (getPlayer().isDead()) {
             handleDeadGuiInput();
         } else {
-            if (Gdx.input.isKeyJustPressed(Input.Keys.valueOf("`"))) {
-                chatMode = !chatMode;
-            } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
                 if (chatMode) {
                     chatMode = false;
                 } else {
                     Gdx.input.setCursorCatched(true);
                     showGuiMenu = !showGuiMenu;
                 }
-            } else if (chatMode) {
-                handleChatInput();
             } else {
                 if (showGuiMenu) {
                     handleAliveGuiInput();
@@ -293,8 +295,7 @@ public class PlayScreen extends GameScreen {
                 || Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)
                 || Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             switch (deadPlayUISelectionUISelection.getSelectedOption()) {
-                case RESPAWN ->
-                        screenToTransition = new LoadingScreen(getGame(), playerContextData.getPlayerServerInfoContextData());
+                case RESPAWN -> screenToTransition = new RespawnScreen(getGame(), playerContextData, gameConnection);
                 case QUIT -> screenToTransition = new MainMenuScreen(getGame());
             }
         }
@@ -355,6 +356,10 @@ public class PlayScreen extends GameScreen {
 
         renderBloodOverlay01();
 
+        if (getPlayer().isDead()) {
+            getGame().getBatch().setColor(1, 0, 0, 0.6f);
+        }
+
         getGame().getBatch().draw(getGame().getFbo().getColorBufferTexture(), 0, 0, getViewport().getWorldWidth(),
                 getViewport().getWorldHeight());
 
@@ -399,9 +404,8 @@ public class PlayScreen extends GameScreen {
 
 
         getGame().getBatch().setColor(1, 1, 1, 1); // Never cover HUD in blood.
-        guiFont64.draw(getGame().getBatch(), "+" + getPlayer().getCurrentHP(), 32, 42);
-
         if (!getPlayer().isDead()) {
+            guiFont64.draw(getGame().getBatch(), getPlayer().getCurrentHP() + " HP", 32, 128 - 32);
             guiFont64.draw(getGame().getBatch(), "+", getViewport().getWorldWidth() / 2f - glyphLayoutAim.width / 2f,
                     getViewport().getWorldHeight() / 2f - glyphLayoutAim.height / 2f);
         }
@@ -417,9 +421,6 @@ public class PlayScreen extends GameScreen {
             // gui menu
             if (showGuiMenu) {
                 if (getPlayer().isDead()) {
-                    getGame().setGameIsPaused(true);
-                    getGame().getBatch().setColor(1, 0, 0, 0.6f);
-                    getGame().getBatch().draw(texRegBlackOverlay, 0, 0, getViewport().getWorldWidth(), getViewport().getWorldHeight());
                     renderDeadGui();
                 } else {
                     renderAliveGui();
@@ -428,23 +429,21 @@ public class PlayScreen extends GameScreen {
         }
         if (getPlayer().isDead()) {
             showGuiMenu = true;
-            chatMode = false;
-            if (gameConnection.isConnected()) {
-                gameConnection.disconnect();
+        }
+        if (gameConnection.isDisconnected()) {
+            while (gameConnection.getErrors().size() != 0) {
+                gameConnection.getErrors().poll().ifPresent(playScreenGameConnectionHandler::handleException);
             }
+            screenToTransition = new ErrorScreen(getGame(), StringUtils.defaultIfBlank(errorMessage, "Connection lost"));
         } else {
-            if (gameConnection.isDisconnected()) {
-                while (gameConnection.getErrors().size() != 0) {
-                    gameConnection.getErrors().poll().ifPresent(playScreenGameConnectionHandler::handleException);
-                }
-                screenToTransition = new ErrorScreen(getGame(), StringUtils.defaultIfBlank(errorMessage, "Connection lost"));
-            } else {
-                playScreenGameConnectionHandler.handle();
-            }
+            playScreenGameConnectionHandler.handle();
         }
 
         getGame().getBatch().end();
         if (screenToTransition != null) {
+            if (!(screenToTransition instanceof RespawnScreen)) {
+                gameConnection.disconnect();
+            }
             musicBackground.stop();
             removeAllEntities();
             getGame().setScreen(screenToTransition);
@@ -531,14 +530,9 @@ public class PlayScreen extends GameScreen {
         super.tick(delta);
     }
 
-
-    @Override
-    public void onExitScreen() {
-        gameConnection.disconnect();
-    }
-
     @Override
     public void dispose() {
+        LOG.info("DISPOSE!");
         gameConnection.disconnect();
     }
 

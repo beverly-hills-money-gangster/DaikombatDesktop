@@ -42,7 +42,7 @@ public class EnterServerPasswordScreen extends AbstractMainMenuScreen {
             removeAllEntities();
             boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
             playerServerInfoContextDataBuilder.serverPassword(passwordTextInputProcessor.getText());
-            getGame().setScreen(new LoadingScreen(getGame(), playerServerInfoContextDataBuilder.build()));
+            getGame().setScreen(new JoinGameScreen(getGame(), playerServerInfoContextDataBuilder.build()));
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             removeAllEntities();
             getGame().setScreen(new MainMenuScreen(getGame()));

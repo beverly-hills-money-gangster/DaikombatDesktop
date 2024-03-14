@@ -48,13 +48,14 @@ public class EnemyPlayer extends Enemy {
 
     public EnemyPlayer(final Player player,
                        final int enemyPlayerId,
-                       final Vector3 position, Vector2 direction, final GameScreen screen, final String name, EnemyListeners enemyListeners
-    ) {
+                       final Vector3 position,
+                       final Vector2 direction,
+                       final GameScreen screen, final String name, EnemyListeners enemyListeners) {
 
         super(position, screen, player, enemyListeners);
         this.enemyPlayerId = enemyPlayerId;
         lastDirection = direction;
-        enemyTextures = new EnemyTextures(screen.getGame().getAssMan());
+        enemyTextures = new EnemyTextures(screen.getGame().getAssMan(), name.hashCode());
         speed = Configs.PLAYER_MOVE_SPEED;
         this.name = name;
         super.setMdlInst(new ModelInstanceBB(screen.getGame().getCellBuilder().getMdlEnemy()));

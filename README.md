@@ -2,6 +2,7 @@
 
 Daikombat is a Doom-like online shooter game with a non-stop death-match mode. It is built using Maven, LibGdx, and Java 14.
 
+**WARNING** The game is NOT for commercial use. This repository is for educational purposes only.
 
 ## Plot
 

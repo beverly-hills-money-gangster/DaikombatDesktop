@@ -7,12 +7,21 @@ import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry.*;
+
 public class EnemyTextures {
+
+    private static final TexturesRegistry[] ENEMY_SPRITES = {
+            ENEMY_PLAYER_SPRITES_GREEN,
+            ENEMY_PLAYER_SPRITES_BLUE,
+            ENEMY_PLAYER_SPRITES_ORANGE,
+            ENEMY_PLAYER_SPRITES_PURPLE,
+            ENEMY_PLAYER_SPRITES_YELLOW};
 
     private final TexturesRegistry texturesRegistry;
 
     private static final int ENEMY_PLAYER_SPRITE_HEIGHT = 66;
-    private static final int ENEMY_PLAYER_SPRITE_WIDTH = 55 ;
+    private static final int ENEMY_PLAYER_SPRITE_WIDTH = 55;
     private final Map<EnemyTextureRegistry, TextureRegion> textures = new HashMap<>();
 
     private static final EnemyTextureRegistry[] FRONT_THREE_STEP = {EnemyTextureRegistry.MOVING1TEXFRONTREG, EnemyTextureRegistry.MOVING2TEXFRONTREG, EnemyTextureRegistry.MOVING3TEXFRONTREG};
@@ -22,9 +31,9 @@ public class EnemyTextures {
 
     private final DaiKombatAssetsManager assetsManager;
 
-    public EnemyTextures(DaiKombatAssetsManager assetsManager) {
+    public EnemyTextures(DaiKombatAssetsManager assetsManager, int enemyId) {
         this.assetsManager = assetsManager;
-        this.texturesRegistry = TexturesRegistry.ENEMY_PLAYER_SPRITES_GREEN;//ENEMY_SPRITES[Math.abs(enemyId) % ENEMY_SPRITES.length];
+        this.texturesRegistry = ENEMY_SPRITES[Math.abs(enemyId) % ENEMY_SPRITES.length];
         textures.put(EnemyTextureRegistry.IDLETEXFRONTREG, getEnemyPlayerTextureRegion(0));
         textures.put(EnemyTextureRegistry.MOVING1TEXFRONTREG, getEnemyPlayerTextureRegion(11));
         textures.put(EnemyTextureRegistry.MOVING2TEXFRONTREG, getEnemyPlayerTextureRegion(14));

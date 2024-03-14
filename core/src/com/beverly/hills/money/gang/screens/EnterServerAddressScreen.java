@@ -11,10 +11,10 @@ import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.input.TextInputProcessor;
 import com.beverly.hills.money.gang.screens.data.PlayerServerInfoContextData;
+import com.beverly.hills.money.gang.validator.HostPortValidator;
+import com.beverly.hills.money.gang.validator.Validator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.commons.validator.routines.DomainValidator;
-import org.apache.commons.validator.routines.InetAddressValidator;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -22,6 +22,8 @@ import java.util.Optional;
 public class EnterServerAddressScreen extends AbstractMainMenuScreen {
 
     private static final int MAX_SERVER_NAME_LEN = 32;
+
+    private final Validator<String> hostPortValidator = new HostPortValidator();
 
     private static final String INSTRUCTION = "HOST:PORT COMBINATION MUST BE PROVIDED. USE CTRL+V TO COPY-PASTE";
     private static final String ENTER_SERVER_NAME_MSG = "ENTER HOST AND PORT";
@@ -47,32 +49,22 @@ public class EnterServerAddressScreen extends AbstractMainMenuScreen {
     @Override
     public void handleInput(final float delta) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) && StringUtils.isNotBlank(nameTextInputProcessor.getText())) {
-            // TODO cover validation with tests
+            var validationResult = hostPortValidator.validate(nameTextInputProcessor.getText());
+            if (!validationResult.isValid()) {
+                errorMessage = validationResult.getMessage();
+                return;
+            }
             String[] hostPort = nameTextInputProcessor.getText().toLowerCase(Locale.ENGLISH).split(":");
-            if (hostPort.length != 2) {
-                errorMessage = "INVALID HOST:PORT";
-                return;
-            }
-            String host = hostPort[0];
-            if (!DomainValidator.getInstance().isValid(host) && !InetAddressValidator.getInstance().isValid(host)) {
-                errorMessage = "INVALID HOST";
-                return;
-            }
-            int port = NumberUtils.toInt(hostPort[1], -1);
-            if (port < 0 || port > 65_536) {
-                errorMessage = "INVALID PORT";
-                return;
-            }
             removeAllEntities();
             boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
             getGame().setScreen(new EnterYourNameScreen(getGame(),
-                    PlayerServerInfoContextData.builder().serverHost(host).serverPort(port)));
+                    PlayerServerInfoContextData.builder().serverHost(hostPort[0]).serverPort(NumberUtils.toInt(hostPort[1]))));
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             removeAllEntities();
             getGame().setScreen(new MainMenuScreen(getGame()));
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.V)
                 && (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT))) {
-            nameTextInputProcessor.setText(Gdx.app.getClipboard().getContents());
+            nameTextInputProcessor.append(Gdx.app.getClipboard().getContents());
         } else {
             nameTextInputProcessor.handleInput();
         }

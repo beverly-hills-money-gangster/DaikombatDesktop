@@ -238,7 +238,9 @@ public class Player extends Entity {
 
     @Override
     public void tick(final float delta) {
-
+        if (isDead) {
+            return;
+        }
         getEnemyRectInRangeFromCam(onEnemyAim, Configs.SHOOTING_DISTANCE);
         if (gotHit) {
             renderBloodOverlay = true;

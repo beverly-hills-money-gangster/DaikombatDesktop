@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import static com.beverly.hills.money.gang.Constants.DEFAULT_ENEMY_Y;
 
-// TODO lower player shotgun sound
 @RequiredArgsConstructor
 public class PlayScreenGameConnectionHandler {
 
@@ -36,7 +35,10 @@ public class PlayScreenGameConnectionHandler {
     private final EnemiesRegistry enemiesRegistry = new EnemiesRegistry();
 
     public void handle() {
-
+        if (playScreen.isExiting()) {
+            LOG.info("Stop handling");
+            return;
+        }
         playScreen.getGameConnection().getResponse().poll(EVENTS_TO_POLL).forEach(serverResponse -> {
             if (serverResponse.hasChatEvents()) {
                 handleChat(serverResponse);
@@ -80,6 +82,7 @@ public class PlayScreenGameConnectionHandler {
 
     private void handleSpawn(ServerResponse.GameEvent gameEvent) {
         if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerContextData().getPlayerId()) {
+            LOG.warn("This is my own spawn");
             return;
         } else if (enemiesRegistry.exists(gameEvent.getPlayer().getPlayerId())) {
             // this might happen when players spawn at the same time
@@ -194,8 +197,8 @@ public class PlayScreenGameConnectionHandler {
             default -> throw new IllegalArgumentException("Not supported event type " + gameEvent.getEventType());
         }
 
+        playScreen.getUiLeaderBoard().registerKill(gameEvent.getPlayer().getPlayerId(), gameEvent.getAffectedPlayer().getPlayerId());
         if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getPlayerContextData().getPlayerId()) {
-            playScreen.getUiLeaderBoard().registerKill(gameEvent.getPlayer().getPlayerId(), gameEvent.getAffectedPlayer().getPlayerId());
             String killedBy = enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
                     .map(EnemyPlayer::getName).orElse("killer");
             playScreen.getPlayer().die(killedBy);
@@ -204,17 +207,18 @@ public class PlayScreenGameConnectionHandler {
                     .GET_HIT_SOUND_SEQ.getNextSound()).play(Constants.PLAYER_FX_VOLUME);
             switch (gameEvent.getEventType()) {
                 case KILL_PUNCHING ->
-                        playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.PUNCH_HIT).play(Constants.DEFAULT_SFX_VOLUME * 1.5f);
+                        playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.PUNCH_HIT)
+                                .play(Constants.DEFAULT_SFX_VOLUME * 1.5f);
                 case KILL_SHOOTING ->
-                        playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.ENEMY_SHOTGUN).play(Constants.DEFAULT_SFX_VOLUME * 1.5f);
+                        playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.ENEMY_SHOTGUN)
+                                .play(Constants.DEFAULT_SFX_VOLUME * 1.5f);
 
             }
-            playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.LOOSING_SOUND_SEQ.getNextSound()).play(Constants.MK_NARRATOR_FX_VOLUME);
+            playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.LOOSING_SOUND_SEQ.getNextSound())
+                    .play(Constants.MK_NARRATOR_FX_VOLUME);
             playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.BELL).play(Constants.DEFAULT_SFX_VOLUME);
-
             LOG.info("I'm dead");
         } else if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerContextData().getPlayerId()) {
-            playScreen.getUiLeaderBoard().registerKill(gameEvent.getPlayer().getPlayerId(), gameEvent.getAffectedPlayer().getPlayerId());
             var victimPlayerOpt = enemiesRegistry.removeEnemy(gameEvent.getAffectedPlayer().getPlayerId());
             victimPlayerOpt.ifPresent(EnemyPlayer::die);
             int oldHealth = playScreen.getPlayer().getCurrentHP();
@@ -223,7 +227,6 @@ public class PlayScreenGameConnectionHandler {
             int buff = newHealth - oldHealth;
             playScreen.getMyPlayerKillLog().myPlayerKill(victimPlayerOpt.map(EnemyPlayer::getName).orElse("victim"), buff);
         } else {
-            playScreen.getUiLeaderBoard().registerKill(gameEvent.getPlayer().getPlayerId(), gameEvent.getAffectedPlayer().getPlayerId());
             var victimPlayerOpt = enemiesRegistry.removeEnemy(gameEvent.getAffectedPlayer().getPlayerId());
             victimPlayerOpt.ifPresent(EnemyPlayer::die);
             enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
@@ -233,7 +236,6 @@ public class PlayScreenGameConnectionHandler {
                             .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build()));
         }
     }
-
 
     public void handleErrorEvent(ServerResponse serverResponse) {
         playScreen.setErrorMessage(serverResponse.getErrorEvent().getMessage());
