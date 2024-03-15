@@ -46,8 +46,8 @@ public class Player extends Entity {
 
     @Getter
     private String killedBy;
-    @Getter
-    private boolean isDead;
+
+    private final AtomicBoolean isDead = new AtomicBoolean(false);
 
     @Getter
     private float weaponY;
@@ -224,7 +224,7 @@ public class Player extends Entity {
         this.currentHP = 0;
         this.killedBy = killedBy;
         gotHit = true;
-        isDead = true;
+        isDead.set(true);
         this.deathTimeMls = System.currentTimeMillis();
     }
 
@@ -236,9 +236,13 @@ public class Player extends Entity {
         return screenWeapon.getWeaponDistance(weapon);
     }
 
+    public boolean isDead() {
+        return isDead.get();
+    }
+
     @Override
     public void tick(final float delta) {
-        if (isDead) {
+        if (isDead.get()) {
             return;
         }
         getEnemyRectInRangeFromCam(onEnemyAim, Configs.SHOOTING_DISTANCE);

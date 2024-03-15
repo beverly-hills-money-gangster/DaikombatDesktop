@@ -211,7 +211,7 @@ public class PlayScreen extends GameScreen {
 
     private void mimicNetworkActivity() {
         new Thread(() -> {
-            while (!isExiting()) {
+            while (!isExiting() && !getPlayer().isDead()) {
                 try {
                     Thread.sleep(5);
                 } catch (InterruptedException e) {
