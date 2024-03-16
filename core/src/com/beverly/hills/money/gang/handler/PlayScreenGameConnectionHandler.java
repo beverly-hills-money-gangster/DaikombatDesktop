@@ -205,18 +205,15 @@ public class PlayScreenGameConnectionHandler {
 
             playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
                     .GET_HIT_SOUND_SEQ.getNextSound()).play(Constants.PLAYER_FX_VOLUME);
-            switch (gameEvent.getEventType()) {
-                case KILL_PUNCHING ->
-                        playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.PUNCH_HIT)
-                                .play(Constants.DEFAULT_SFX_VOLUME * 1.5f);
-                case KILL_SHOOTING ->
-                        playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.ENEMY_SHOTGUN)
-                                .play(Constants.DEFAULT_SFX_VOLUME * 1.5f);
-
-            }
             playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.LOOSING_SOUND_SEQ.getNextSound())
                     .play(Constants.MK_NARRATOR_FX_VOLUME);
             playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.BELL).play(Constants.DEFAULT_SFX_VOLUME);
+            enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
+                    .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
+                            .enemyPlayerActionType(enemyPlayerActionType)
+                            .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
+                            .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build()));
+
             LOG.info("I'm dead");
         } else if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerContextData().getPlayerId()) {
             var victimPlayerOpt = enemiesRegistry.removeEnemy(gameEvent.getAffectedPlayer().getPlayerId());

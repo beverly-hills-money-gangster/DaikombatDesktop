@@ -39,7 +39,7 @@ public class EnemyPlayer extends Enemy {
 
     private long shootingAnimationUntil;
     private int currentStep;
-    private final float speed;
+    private float speed;
     private Vector2 lastDirection;
     private boolean isIdle = true;
 
@@ -75,6 +75,12 @@ public class EnemyPlayer extends Enemy {
 
 
     public void queueAction(EnemyPlayerAction enemyPlayerAction) {
+        if (actions.size() > 2) {
+            // if the queue gets clogged
+            speed = Configs.PLAYER_MOVE_SPEED * 1.2f;
+        } else {
+            speed = Configs.PLAYER_MOVE_SPEED;
+        }
         actions.add(enemyPlayerAction);
     }
 
