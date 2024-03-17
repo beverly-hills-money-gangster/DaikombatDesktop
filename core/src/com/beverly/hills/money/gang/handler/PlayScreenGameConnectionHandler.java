@@ -247,6 +247,7 @@ public class PlayScreenGameConnectionHandler {
         return Enemy.EnemyListeners
                 .builder()
                 .onDeath(enemy -> {
+                    // TODO what if it wasn't me?
                     int kills = playScreen.getUiLeaderBoard().getMyKills();
                     if (kills > 1 && kills % 3 == 0) {
                         playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.WINNING_SOUND_SEQ.getNextSound()).play(Constants.QUAKE_NARRATOR_FX_VOLUME);
