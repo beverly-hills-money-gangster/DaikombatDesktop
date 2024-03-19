@@ -15,60 +15,61 @@ import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 
 public class ChooseServerScreen extends AbstractMainMenuScreen {
 
-    private final BitmapFont guiFont64;
-    private final UserSettingSound boomSound1;
-    private final UserSettingSound dingSound1;
-    private final UISelection<ServerUISelection> serverSelection = new UISelection<>(ServerUISelection.values());
+  private final BitmapFont guiFont64;
+  private final UserSettingSound boomSound1;
+  private final UserSettingSound dingSound1;
+  private final UISelection<ServerUISelection> serverSelection = new UISelection<>(
+      ServerUISelection.values());
 
 
-    public ChooseServerScreen(final DaiKombatGame game) {
-        super(game);
-        guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
+  public ChooseServerScreen(final DaiKombatGame game) {
+    super(game);
+    guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
 
-        boomSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.BOOM_1);
-        dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
-    }
+    boomSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.BOOM_1);
+    dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
+  }
 
-    @Override
-    public void handleInput(final float delta) {
+  @Override
+  public void handleInput(final float delta) {
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            boomSound1.play(Constants.DEFAULT_SFX_VOLUME);
-            switch (serverSelection.getSelectedOption()) {
-                case OFFICIAL -> {
-                    removeAllEntities();
-                    getGame().setScreen(new EnterYourNameScreen(getGame(),
-                            PlayerServerInfoContextData.builder()
-                                    .serverHost(Configs.HOST)
-                                    .serverPort(Configs.PORT)));
-                }
-                case CUSTOM -> {
-                    removeAllEntities();
-                    getGame().setScreen(new EnterServerAddressScreen(getGame()));
-                }
-
-                default -> Gdx.app.exit();
-
-            }
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            removeAllEntities();
-            getGame().setScreen(new MainMenuScreen(getGame()));
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            serverSelection.up();
-            dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            serverSelection.down();
-            dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
+    if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+      boomSound1.play(Constants.DEFAULT_SFX_VOLUME);
+      switch (serverSelection.getSelectedOption()) {
+        case OFFICIAL -> {
+          removeAllEntities();
+          getGame().setScreen(new EnterYourNameScreen(getGame(),
+              PlayerServerInfoContextData.builder()
+                  .serverHost(Configs.HOST)
+                  .serverPort(Configs.PORT)));
         }
+        case CUSTOM -> {
+          removeAllEntities();
+          getGame().setScreen(new EnterServerAddressScreen(getGame()));
+        }
+
+        default -> Gdx.app.exit();
+
+      }
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+      removeAllEntities();
+      getGame().setScreen(new MainMenuScreen(getGame()));
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+      serverSelection.up();
+      dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+      serverSelection.down();
+      dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     }
+  }
 
 
-    @Override
-    public void render(final float delta) {
-        super.render(delta);
-        getGame().getBatch().begin();
-        serverSelection.render(guiFont64, this, Constants.LOGO_INDENT);
-        getGame().getBatch().end();
-    }
+  @Override
+  public void render(final float delta) {
+    super.render(delta);
+    getGame().getBatch().begin();
+    serverSelection.render(guiFont64, this, Constants.LOGO_INDENT);
+    getGame().getBatch().end();
+  }
 
 }

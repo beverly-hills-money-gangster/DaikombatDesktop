@@ -8,8 +8,8 @@ import lombok.Getter;
 @Builder
 public class EnemyPlayerAction {
 
-    private final Vector2 route;
-    private final Vector2 direction;
-    private final EnemyPlayerActionType enemyPlayerActionType;
+  private final Vector2 route;
+  private final Vector2 direction;
+  private final EnemyPlayerActionType enemyPlayerActionType;
 
 }

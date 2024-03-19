@@ -8,8 +8,9 @@ import lombok.ToString;
 @Builder
 @ToString
 public class PlayerServerInfoContextData {
-    private final String serverHost;
-    private final int serverPort;
-    private final String serverPassword;
-    private final String playerName;
+
+  private final String serverHost;
+  private final int serverPort;
+  private final String serverPassword;
+  private final String playerName;
 }

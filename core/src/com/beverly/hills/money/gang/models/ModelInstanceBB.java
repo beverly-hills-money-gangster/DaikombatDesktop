@@ -9,29 +9,29 @@ import lombok.Setter;
 
 public class ModelInstanceBB extends ModelInstance {
 
-    @Getter
-    private final Vector3 center = new Vector3(); // for sphere
-    @Getter
-    private final Vector3 dimensions = new Vector3(); // for sphere
-    @Getter
-    private final float radius; // for sphere
-    @Getter
-    private final BoundingBox renderBox = new BoundingBox();
+  @Getter
+  private final Vector3 center = new Vector3(); // for sphere
+  @Getter
+  private final Vector3 dimensions = new Vector3(); // for sphere
+  @Getter
+  private final float radius; // for sphere
+  @Getter
+  private final BoundingBox renderBox = new BoundingBox();
 
-    @Setter
-    @Getter
-    private boolean isInFrustum;
+  @Setter
+  @Getter
+  private boolean isInFrustum;
 
-    public ModelInstanceBB(final Model model) {
-        super(model);
+  public ModelInstanceBB(final Model model) {
+    super(model);
 
-        calculateTransforms();
-        calculateBoundingBox(renderBox);
-        renderBox.mul(transform);
+    calculateTransforms();
+    calculateBoundingBox(renderBox);
+    renderBox.mul(transform);
 
-        renderBox.getCenter(center);
-        renderBox.getDimensions(dimensions);
-        radius = dimensions.len() / 2f;
-    }
+    renderBox.getCenter(center);
+    renderBox.getDimensions(dimensions);
+    radius = dimensions.len() / 2f;
+  }
 
 }

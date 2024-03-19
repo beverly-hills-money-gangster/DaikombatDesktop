@@ -14,56 +14,57 @@ import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection
 
 public class SettingsScreen extends AbstractMainMenuScreen {
 
-    private final UserPreference userPreference = new UserPreference();
-    private final UserSettingSound dingSound1;
+  private final UserPreference userPreference = new UserPreference();
+  private final UserSettingSound dingSound1;
 
-    private final UISelection<UserSettingsUISelection> settingsSelection
-            = new UISelection<>(UserSettingsUISelection.values());
+  private final UISelection<UserSettingsUISelection> settingsSelection
+      = new UISelection<>(UserSettingsUISelection.values());
 
-    private final BitmapFont guiFont64;
+  private final BitmapFont guiFont64;
 
-    public SettingsScreen(final DaiKombatGame game) {
-        super(game);
-        guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
-        dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
+  public SettingsScreen(final DaiKombatGame game) {
+    super(game);
+    guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
+    dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
+  }
+
+  @Override
+  public void handleInput(final float delta) {
+    if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+      userPreference.setMouseSensitivity(
+          UserSettingsUISelection.MOUSE_SENS.getState().getSetting());
+      userPreference.setSoundVolume(UserSettingsUISelection.SOUND.getState().getSetting());
+      userPreference.flush();
+      removeAllEntities();
+      getGame().setScreen(new MainMenuScreen(getGame()));
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+      settingsSelection.up();
+      dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+      settingsSelection.down();
+      dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
+      var setting = settingsSelection.getSelectedOption().getState();
+      setting.decrease();
+      this.refreshBgMusicVolume();
+      dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+      var setting = settingsSelection.getSelectedOption().getState();
+      setting.increase();
+      this.refreshBgMusicVolume();
+      dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     }
-
-    @Override
-    public void handleInput(final float delta) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            userPreference.setMouseSensitivity(UserSettingsUISelection.MOUSE_SENS.getState().getSetting());
-            userPreference.setSoundVolume(UserSettingsUISelection.SOUND.getState().getSetting());
-            userPreference.flush();
-            removeAllEntities();
-            getGame().setScreen(new MainMenuScreen(getGame()));
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            settingsSelection.up();
-            dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            settingsSelection.down();
-            dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
-            var setting = settingsSelection.getSelectedOption().getState();
-            setting.decrease();
-            this.refreshBgMusicVolume();
-            dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
-            var setting = settingsSelection.getSelectedOption().getState();
-            setting.increase();
-            this.refreshBgMusicVolume();
-            dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-        }
-    }
+  }
 
 
-    @Override
-    public void render(final float delta) {
-        super.render(delta);
-        getGame().getBatch().begin();
+  @Override
+  public void render(final float delta) {
+    super.render(delta);
+    getGame().getBatch().begin();
 
-        settingsSelection.render(guiFont64, this, Constants.LOGO_INDENT);
-        getGame().getBatch().end();
-    }
+    settingsSelection.render(guiFont64, this, Constants.LOGO_INDENT);
+    getGame().getBatch().end();
+  }
 
 
 }

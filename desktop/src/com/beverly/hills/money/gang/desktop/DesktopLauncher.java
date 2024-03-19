@@ -10,30 +10,30 @@ import com.beverly.hills.money.gang.DaiKombatGame;
 
 public class DesktopLauncher {
 
-    // TODO test on TV
-    // TODO support alt+tab
-    // TODO think about license and copyrights
-    // TODO fix walls in the new map
-    // TODO upload new map
-    public static void main
-    (final String[] arg) {
-        final Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-        config.setTitle("DAIKOMBAT");
-        config.setBackBufferConfig(8, 8, 8, 8, 24, 8, 0);
-        config.setForegroundFPS(60);
-        config.setInitialBackgroundColor(Constants.FOG_COLOR);
-        config.useVsync(true);
-        config.useOpenGL3(true, 3, 3); // 3.3 Works on MacOSX
+  // TODO test on TV
+  // TODO support alt+tab
+  // TODO think about license and copyrights
+  // TODO fix walls in the new map
+  // TODO upload new map
+  public static void main
+  (final String[] arg) {
+    final Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+    config.setTitle("DAIKOMBAT");
+    config.setBackBufferConfig(8, 8, 8, 8, 24, 8, 0);
+    config.setForegroundFPS(60);
+    config.setInitialBackgroundColor(Constants.FOG_COLOR);
+    config.useVsync(true);
+    config.useOpenGL3(true, 3, 3); // 3.3 Works on MacOSX
 
-        if (Configs.DEV_MODE) {
-            config.setWindowSizeLimits(1024, 768, 1024, 768);
-            config.setResizable(false);
-            config.setWindowedMode(1024, 768);
-        } else {
-            config.setFullscreenMode(Lwjgl3ApplicationConfiguration
-                    .getDisplayMode(Lwjgl3ApplicationConfiguration.getPrimaryMonitor()));
-        }
-
-        new Lwjgl3Application(new DaiKombatGame(), config);
+    if (Configs.DEV_MODE) {
+      config.setWindowSizeLimits(1024, 768, 1024, 768);
+      config.setResizable(false);
+      config.setWindowedMode(1024, 768);
+    } else {
+      config.setFullscreenMode(Lwjgl3ApplicationConfiguration
+          .getDisplayMode(Lwjgl3ApplicationConfiguration.getPrimaryMonitor()));
     }
+
+    new Lwjgl3Application(new DaiKombatGame(), config);
+  }
 }

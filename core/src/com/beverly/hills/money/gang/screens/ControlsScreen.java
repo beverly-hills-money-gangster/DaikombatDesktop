@@ -1,5 +1,7 @@
 package com.beverly.hills.money.gang.screens;
 
+import static com.beverly.hills.money.gang.Constants.DEFAULT_SELECTION_INDENT;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -8,47 +10,46 @@ import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 
-import static com.beverly.hills.money.gang.Constants.DEFAULT_SELECTION_INDENT;
-
 public class ControlsScreen extends AbstractMainMenuScreen {
 
-    private static final String[] CONTROLS_MAPPING = {
-            "MOVE - WASD",
-            "SHOOT - LMC/RIGHT ALT",
-            "PUNCH - RMC/RIGHT CTRL",
-            "CHAT - TILDA",
-            "LEADERBOARD - TAB"};
-    private final BitmapFont guiFont64;
+  private static final String[] CONTROLS_MAPPING = {
+      "MOVE - WASD",
+      "SHOOT - LMC/RIGHT ALT",
+      "PUNCH - RMC/RIGHT CTRL",
+      "CHAT - TILDA",
+      "LEADERBOARD - TAB"};
+  private final BitmapFont guiFont64;
 
-    public ControlsScreen(final DaiKombatGame game) {
-        super(game);
-        guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
+  public ControlsScreen(final DaiKombatGame game) {
+    super(game);
+    guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
+  }
+
+  @Override
+  public void handleInput(final float delta) {
+    if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+      removeAllEntities();
+      getGame().setScreen(new MainMenuScreen(getGame()));
     }
+  }
 
-    @Override
-    public void handleInput(final float delta) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            removeAllEntities();
-            getGame().setScreen(new MainMenuScreen(getGame()));
-        }
+
+  @Override
+  public void render(final float delta) {
+    super.render(delta);
+    getGame().getBatch().begin();
+
+    int indent = 0;
+    for (String controlMapping : CONTROLS_MAPPING) {
+      GlyphLayout glyphLayoutControlsMapping = new GlyphLayout(guiFont64, controlMapping);
+      guiFont64.draw(getGame().getBatch(), controlMapping,
+          getViewport().getWorldWidth() / 2f - glyphLayoutControlsMapping.width / 2f,
+          getViewport().getWorldHeight() / 2f - glyphLayoutControlsMapping.height / 2f
+              - Constants.LOGO_INDENT - indent);
+      indent += DEFAULT_SELECTION_INDENT;
     }
-
-
-    @Override
-    public void render(final float delta) {
-        super.render(delta);
-        getGame().getBatch().begin();
-
-        int indent = 0;
-        for (String controlMapping : CONTROLS_MAPPING) {
-            GlyphLayout glyphLayoutControlsMapping = new GlyphLayout(guiFont64, controlMapping);
-            guiFont64.draw(getGame().getBatch(), controlMapping,
-                    getViewport().getWorldWidth() / 2f - glyphLayoutControlsMapping.width / 2f,
-                    getViewport().getWorldHeight() / 2f - glyphLayoutControlsMapping.height / 2f - Constants.LOGO_INDENT - indent);
-            indent += DEFAULT_SELECTION_INDENT;
-        }
-        getGame().getBatch().end();
-    }
+    getGame().getBatch().end();
+  }
 
 
 }

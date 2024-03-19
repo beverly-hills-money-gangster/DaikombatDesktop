@@ -15,58 +15,63 @@ import org.apache.commons.lang3.StringUtils;
 
 public class EnterYourNameScreen extends AbstractMainMenuScreen {
 
-    private static final int MAX_NAME_LEN = 16;
-    private static final String ENTER_YOUR_NAME_MSG = "ENTER YOUR NAME";
+  private static final int MAX_NAME_LEN = 16;
+  private static final String ENTER_YOUR_NAME_MSG = "ENTER YOUR NAME";
 
-    private final BitmapFont guiFont64;
-    private final UserSettingSound boomSound2;
-    private final TextInputProcessor nameTextInputProcessor;
+  private final BitmapFont guiFont64;
+  private final UserSettingSound boomSound2;
+  private final TextInputProcessor nameTextInputProcessor;
 
-    private final PlayerServerInfoContextData.PlayerServerInfoContextDataBuilder playerServerInfoContextDataBuilder;
+  private final PlayerServerInfoContextData.PlayerServerInfoContextDataBuilder playerServerInfoContextDataBuilder;
 
 
-    public EnterYourNameScreen(final DaiKombatGame game,
-                               final PlayerServerInfoContextData.PlayerServerInfoContextDataBuilder playerServerInfoContextDataBuilder) {
-        super(game);
-        this.playerServerInfoContextDataBuilder = playerServerInfoContextDataBuilder;
-        guiFont64 = getGame().getAssMan().getFont(FontRegistry.FONT_64);
-        boomSound2 = getGame().getAssMan().getUserSettingSound(SoundRegistry.BOOM_2);
-        nameTextInputProcessor = new TextInputProcessor(MAX_NAME_LEN,
-                () -> getGame().getAssMan().
-                        getUserSettingSound(SoundRegistry.TYPING_SOUND_SEQ.getNextSound()).play(Constants.DEFAULT_SFX_TYPING_VOLUME));
+  public EnterYourNameScreen(final DaiKombatGame game,
+      final PlayerServerInfoContextData.PlayerServerInfoContextDataBuilder playerServerInfoContextDataBuilder) {
+    super(game);
+    this.playerServerInfoContextDataBuilder = playerServerInfoContextDataBuilder;
+    guiFont64 = getGame().getAssMan().getFont(FontRegistry.FONT_64);
+    boomSound2 = getGame().getAssMan().getUserSettingSound(SoundRegistry.BOOM_2);
+    nameTextInputProcessor = new TextInputProcessor(MAX_NAME_LEN,
+        () -> getGame().getAssMan().
+            getUserSettingSound(SoundRegistry.TYPING_SOUND_SEQ.getNextSound())
+            .play(Constants.DEFAULT_SFX_TYPING_VOLUME));
+  }
+
+  @Override
+  public void handleInput(final float delta) {
+    if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) && StringUtils.isNotBlank(
+        nameTextInputProcessor.getText())) {
+      removeAllEntities();
+      boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
+      playerServerInfoContextDataBuilder.playerName(nameTextInputProcessor.getText());
+      getGame().setScreen(
+          new EnterServerPasswordScreen(getGame(), playerServerInfoContextDataBuilder));
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+      removeAllEntities();
+      getGame().setScreen(new MainMenuScreen(getGame()));
+    } else {
+      nameTextInputProcessor.handleInput();
     }
-
-    @Override
-    public void handleInput(final float delta) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) && StringUtils.isNotBlank(nameTextInputProcessor.getText())) {
-            removeAllEntities();
-            boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
-            playerServerInfoContextDataBuilder.playerName(nameTextInputProcessor.getText());
-            getGame().setScreen(new EnterServerPasswordScreen(getGame(), playerServerInfoContextDataBuilder));
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            removeAllEntities();
-            getGame().setScreen(new MainMenuScreen(getGame()));
-        } else {
-            nameTextInputProcessor.handleInput();
-        }
-    }
+  }
 
 
-    @Override
-    public void render(final float delta) {
-        super.render(delta);
-        getGame().getBatch().begin();
-        GlyphLayout glyphLayoutEnterYourName = new GlyphLayout(guiFont64, ENTER_YOUR_NAME_MSG);
-        guiFont64.draw(getGame().getBatch(), ENTER_YOUR_NAME_MSG,
-                getViewport().getWorldWidth() / 2f - glyphLayoutEnterYourName.width / 2f,
-                getViewport().getWorldHeight() / 2f - glyphLayoutEnterYourName.height / 2f - Constants.LOGO_INDENT);
+  @Override
+  public void render(final float delta) {
+    super.render(delta);
+    getGame().getBatch().begin();
+    GlyphLayout glyphLayoutEnterYourName = new GlyphLayout(guiFont64, ENTER_YOUR_NAME_MSG);
+    guiFont64.draw(getGame().getBatch(), ENTER_YOUR_NAME_MSG,
+        getViewport().getWorldWidth() / 2f - glyphLayoutEnterYourName.width / 2f,
+        getViewport().getWorldHeight() / 2f - glyphLayoutEnterYourName.height / 2f
+            - Constants.LOGO_INDENT);
 
-        String playerNameInput = ">" + nameTextInputProcessor.getText();
-        GlyphLayout glyphLayoutPlayerInput = new GlyphLayout(guiFont64, playerNameInput);
-        guiFont64.draw(getGame().getBatch(), playerNameInput,
-                getViewport().getWorldWidth() / 2f - glyphLayoutPlayerInput.width / 2f,
-                getViewport().getWorldHeight() / 2f - glyphLayoutPlayerInput.height / 2f - Constants.LOGO_INDENT
-                        - Constants.MENU_OPTION_INDENT);
-        getGame().getBatch().end();
-    }
+    String playerNameInput = ">" + nameTextInputProcessor.getText();
+    GlyphLayout glyphLayoutPlayerInput = new GlyphLayout(guiFont64, playerNameInput);
+    guiFont64.draw(getGame().getBatch(), playerNameInput,
+        getViewport().getWorldWidth() / 2f - glyphLayoutPlayerInput.width / 2f,
+        getViewport().getWorldHeight() / 2f - glyphLayoutPlayerInput.height / 2f
+            - Constants.LOGO_INDENT
+            - Constants.MENU_OPTION_INDENT);
+    getGame().getBatch().end();
+  }
 }

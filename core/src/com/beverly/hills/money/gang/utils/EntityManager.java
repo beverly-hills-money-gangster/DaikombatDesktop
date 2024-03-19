@@ -7,55 +7,57 @@ import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.screens.GameScreen;
 
 public class EntityManager {
-    public final Array<Entity> entities = new Array<>();
-    private int nextId;
-    private GameScreen screen;
 
-    public void addEntity(final Entity ent) {
-        entities.add(ent);
+  public final Array<Entity> entities = new Array<>();
+  private int nextId;
+  private GameScreen screen;
+
+  public void addEntity(final Entity ent) {
+    entities.add(ent);
+  }
+
+  public int assignId() {
+    nextId++;
+    return nextId - 1;
+  }
+
+  public Entity getEntityFromId(final int id) {
+    for (int i = 0; i < entities.size; i++) {
+      if (entities.get(i).getEntityId() == id) {
+        return entities.get(i);
+      }
     }
 
-    public int assignId() {
-        nextId++;
-        return nextId - 1;
-    }
+    return null;
+  }
 
-    public Entity getEntityFromId(final int id) {
-        for (int i = 0; i < entities.size; i++) {
-            if (entities.get(i).getEntityId() == id) {
-                return entities.get(i);
-            }
-        }
+  public GameScreen getScreen() {
+    return screen;
+  }
 
-        return null;
-    }
+  public void setScreen(final GameScreen screen) {
+    this.screen = screen;
+  }
 
-    public GameScreen getScreen() {
-        return screen;
+  public void removeEntity(final int id) {
+    for (int i = 0; i < entities.size; i++) {
+      if (id == entities.get(i).getEntityId()) {
+        entities.removeIndex(i);
+        break;
+      }
     }
+  }
 
-    public void setScreen(final GameScreen screen) {
-        this.screen = screen;
+  public void render3DAllEntities(final ModelBatch mdlBatch, final Environment env,
+      final float delta) {
+    for (final Entity ent : entities) {
+      ent.render3D(mdlBatch, env, delta);
     }
+  }
 
-    public void removeEntity(final int id) {
-        for (int i = 0; i < entities.size; i++) {
-            if (id == entities.get(i).getEntityId()) {
-                entities.removeIndex(i);
-                break;
-            }
-        }
+  public void tickAllEntities(final float delta) {
+    for (final Entity ent : entities) {
+      ent.tick(delta);
     }
-
-    public void render3DAllEntities(final ModelBatch mdlBatch, final Environment env, final float delta) {
-        for (final Entity ent : entities) {
-            ent.render3D(mdlBatch, env, delta);
-        }
-    }
-
-    public void tickAllEntities(final float delta) {
-        for (final Entity ent : entities) {
-            ent.tick(delta);
-        }
-    }
+  }
 }

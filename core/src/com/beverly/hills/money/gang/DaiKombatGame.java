@@ -19,85 +19,85 @@ import com.beverly.hills.money.gang.screens.GameScreen;
 import com.beverly.hills.money.gang.screens.MainMenuScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
 import com.beverly.hills.money.gang.utils.EntityManager;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Optional;
-
 @Getter
 public class DaiKombatGame extends Game {
-    @Setter
-    private boolean gameIsPaused;
-    private SpriteBatch batch;
-    private ModelBatch mdlBatch;
-    private FrameBuffer fbo;
-    private DaiKombatAssetsManager assMan;
-    private EntityManager entMan;
-    private RectManager rectMan;
-    private ModelMaker cellBuilder;
-    private OverlapFilterManager overlapFilterMan;
-    private MapBuilder mapBuilder;
-    private float timeSinceLaunch;
 
-    @Override
-    public void create() {
-        batch = new SpriteBatch();
-        mdlBatch = new ModelBatch();
-        createNewMainFbo(Constants.FBO_WIDTH_ORIGINAL, Constants.FBO_HEIGHT_ORIGINAL);
+  @Setter
+  private boolean gameIsPaused;
+  private SpriteBatch batch;
+  private ModelBatch mdlBatch;
+  private FrameBuffer fbo;
+  private DaiKombatAssetsManager assMan;
+  private EntityManager entMan;
+  private RectManager rectMan;
+  private ModelMaker cellBuilder;
+  private OverlapFilterManager overlapFilterMan;
+  private MapBuilder mapBuilder;
+  private float timeSinceLaunch;
 
-        assMan = new DaiKombatAssetsManager();
-        assMan.finishLoading();
+  @Override
+  public void create() {
+    batch = new SpriteBatch();
+    mdlBatch = new ModelBatch();
+    createNewMainFbo(Constants.FBO_WIDTH_ORIGINAL, Constants.FBO_HEIGHT_ORIGINAL);
 
-        overlapFilterMan = new OverlapFilterManager();
+    assMan = new DaiKombatAssetsManager();
+    assMan.finishLoading();
 
-        cellBuilder = new ModelMaker(this); // builds models...
+    overlapFilterMan = new OverlapFilterManager();
 
-        entMan = new EntityManager();
-        rectMan = new RectManager(this);
+    cellBuilder = new ModelMaker(this); // builds models...
 
-        mapBuilder = new MapBuilder(this);
+    entMan = new EntityManager();
+    rectMan = new RectManager(this);
 
-        Gdx.input.setInputProcessor(new GameInputProcessor());
-        // restore user configs
-        UserPreference userPreference = new UserPreference();
-        UserSettingsUISelection.MOUSE_SENS.getState().setSetting(userPreference.getMouseSensitivity());
-        UserSettingsUISelection.SOUND.getState().setSetting(userPreference.getSoundVolume());
+    mapBuilder = new MapBuilder(this);
 
-        setScreen(new MainMenuScreen(this));
+    Gdx.input.setInputProcessor(new GameInputProcessor());
+    // restore user configs
+    UserPreference userPreference = new UserPreference();
+    UserSettingsUISelection.MOUSE_SENS.getState().setSetting(userPreference.getMouseSensitivity());
+    UserSettingsUISelection.SOUND.getState().setSetting(userPreference.getSoundVolume());
 
-    }
+    setScreen(new MainMenuScreen(this));
 
-    public void createNewMainFbo(final int width, final int height) {
-        fbo = new FrameBuffer(Format.RGB888, width, height, true);
-        fbo.getColorBufferTexture().setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
-    }
+  }
 
-    @Override
-    public void dispose() {
-        getScreen().dispose();
-        batch.dispose();
-        mdlBatch.dispose();
-        fbo.dispose();
+  public void createNewMainFbo(final int width, final int height) {
+    fbo = new FrameBuffer(Format.RGB888, width, height, true);
+    fbo.getColorBufferTexture().setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+  }
 
-        assMan.dispose();
-    }
+  @Override
+  public void dispose() {
+    getScreen().dispose();
+    batch.dispose();
+    mdlBatch.dispose();
+    fbo.dispose();
+
+    assMan.dispose();
+  }
 
 
-    @Override
-    public void render() {
-        timeSinceLaunch += Gdx.graphics.getDeltaTime();
+  @Override
+  public void render() {
+    timeSinceLaunch += Gdx.graphics.getDeltaTime();
 
-        Gdx.gl.glClearColor(1, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+    Gdx.gl.glClearColor(1, 0, 0, 1);
+    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        getScreen().render(Gdx.graphics.getDeltaTime());
-    }
+    getScreen().render(Gdx.graphics.getDeltaTime());
+  }
 
-    public void setScreen(GameScreen screen) {
-        Optional.ofNullable(getScreen())
-                .filter(GameScreen.class::isInstance)
-                .map(GameScreen.class::cast).ifPresent(GameScreen::exit);
+  public void setScreen(GameScreen screen) {
+    Optional.ofNullable(getScreen())
+        .filter(GameScreen.class::isInstance)
+        .map(GameScreen.class::cast).ifPresent(GameScreen::exit);
 
-        super.setScreen(screen);
-    }
+    super.setScreen(screen);
+  }
 }

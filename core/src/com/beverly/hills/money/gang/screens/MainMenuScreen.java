@@ -13,61 +13,61 @@ import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 
 public class MainMenuScreen extends AbstractMainMenuScreen {
 
-    private final BitmapFont guiFont64;
-    private final UserSettingSound boomSound1;
-    private final UserSettingSound dingSound1;
+  private final BitmapFont guiFont64;
+  private final UserSettingSound boomSound1;
+  private final UserSettingSound dingSound1;
 
-    private final UISelection<MainMenuUISelection> menuSelection
-            = new UISelection<>(MainMenuUISelection.values());
+  private final UISelection<MainMenuUISelection> menuSelection
+      = new UISelection<>(MainMenuUISelection.values());
 
 
-    public MainMenuScreen(final DaiKombatGame game) {
-        super(game);
-        guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
+  public MainMenuScreen(final DaiKombatGame game) {
+    super(game);
+    guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
 
-        boomSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.BOOM_1);
-        dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
-    }
+    boomSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.BOOM_1);
+    dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
+  }
 
-    @Override
-    public void handleInput(final float delta) {
+  @Override
+  public void handleInput(final float delta) {
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            boomSound1.play(Constants.DEFAULT_SFX_VOLUME);
-            switch (menuSelection.getSelectedOption()) {
-                case PLAY -> {
-                    removeAllEntities();
-                    getGame().setScreen(new ChooseServerScreen(getGame()));
-                }
-                case CONTROLS -> {
-                    removeAllEntities();
-                    getGame().setScreen(new ControlsScreen(getGame()));
-                }
-                case SETTINGS -> {
-                    removeAllEntities();
-                    getGame().setScreen(new SettingsScreen(getGame()));
-                }
-                default -> Gdx.app.exit();
-
-            }
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            Gdx.app.exit();
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            menuSelection.up();
-            dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-            menuSelection.down();
-            dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
+    if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+      boomSound1.play(Constants.DEFAULT_SFX_VOLUME);
+      switch (menuSelection.getSelectedOption()) {
+        case PLAY -> {
+          removeAllEntities();
+          getGame().setScreen(new ChooseServerScreen(getGame()));
         }
+        case CONTROLS -> {
+          removeAllEntities();
+          getGame().setScreen(new ControlsScreen(getGame()));
+        }
+        case SETTINGS -> {
+          removeAllEntities();
+          getGame().setScreen(new SettingsScreen(getGame()));
+        }
+        default -> Gdx.app.exit();
+
+      }
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+      Gdx.app.exit();
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+      menuSelection.up();
+      dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
+    } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+      menuSelection.down();
+      dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     }
+  }
 
 
-    @Override
-    public void render(final float delta) {
-        super.render(delta);
-        getGame().getBatch().begin();
-        menuSelection.render(guiFont64, this, Constants.LOGO_INDENT);
-        getGame().getBatch().end();
-    }
+  @Override
+  public void render(final float delta) {
+    super.render(delta);
+    getGame().getBatch().begin();
+    menuSelection.render(guiFont64, this, Constants.LOGO_INDENT);
+    getGame().getBatch().end();
+  }
 
 }
