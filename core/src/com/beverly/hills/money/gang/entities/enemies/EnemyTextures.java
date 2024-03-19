@@ -3,6 +3,7 @@ package com.beverly.hills.money.gang.entities.enemies;
 import static com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry.ENEMY_PLAYER_SPRITES_BLUE;
 import static com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry.ENEMY_PLAYER_SPRITES_GREEN;
 import static com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry.ENEMY_PLAYER_SPRITES_ORANGE;
+import static com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry.ENEMY_PLAYER_SPRITES_PINK;
 import static com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry.ENEMY_PLAYER_SPRITES_PURPLE;
 import static com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry.ENEMY_PLAYER_SPRITES_YELLOW;
 
@@ -19,7 +20,8 @@ public class EnemyTextures {
       ENEMY_PLAYER_SPRITES_BLUE,
       ENEMY_PLAYER_SPRITES_ORANGE,
       ENEMY_PLAYER_SPRITES_PURPLE,
-      ENEMY_PLAYER_SPRITES_YELLOW};
+      ENEMY_PLAYER_SPRITES_YELLOW,
+      ENEMY_PLAYER_SPRITES_PINK};
 
   private final TexturesRegistry texturesRegistry;
 

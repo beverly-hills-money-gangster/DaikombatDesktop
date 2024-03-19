@@ -65,6 +65,10 @@ public class PlayScreen extends GameScreen {
   private final UserSettingSound youLead;
   private final UserSettingSound lostLead;
 
+  @Getter
+  @Setter
+  private boolean gameOver;
+
   private final UISelection<ActivePlayUISelection> activePlayUISelectionUISelection
       = new UISelection<>(ActivePlayUISelection.values());
 
@@ -203,14 +207,18 @@ public class PlayScreen extends GameScreen {
                 .name(leaderBoardItem.getPlayerName())
                 .id(leaderBoardItem.getPlayerId())
                 .deaths(leaderBoardItem.getDeaths())
-                .kills(leaderBoardItem.getKills()).build()).collect(Collectors.toList()),
+                .kills(leaderBoardItem.getKills())
+                .build())
+            .collect(Collectors.toList()),
         () -> {
-          LOG.info("You have taken the lead");
-          youLead.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
+          if (!gameOver) {
+            youLead.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
+          }
         },
         () -> {
-          LOG.info("You have lost the lead");
-          lostLead.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
+          if (!gameOver) {
+            lostLead.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
+          }
         }
     );
     playScreenGameConnectionHandler = new PlayScreenGameConnectionHandler(this);
@@ -448,7 +456,10 @@ public class PlayScreen extends GameScreen {
     if (getPlayer().isDead()) {
       showGuiMenu = true;
     }
-    if (gameConnection.isDisconnected()) {
+    if (gameOver) {
+      screenToTransition = new GameOverScreen(getGame(), uiLeaderBoard,
+          playerContextData.getPlayerServerInfoContextData());
+    } else if (gameConnection.isDisconnected()) {
       while (gameConnection.getErrors().size() != 0) {
         gameConnection.getErrors().poll()
             .ifPresent(playScreenGameConnectionHandler::handleException);

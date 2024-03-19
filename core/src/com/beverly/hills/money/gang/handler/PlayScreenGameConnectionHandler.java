@@ -16,6 +16,7 @@ import com.beverly.hills.money.gang.proto.ServerResponse;
 import com.beverly.hills.money.gang.registry.EnemiesRegistry;
 import com.beverly.hills.money.gang.screens.PlayScreen;
 import com.beverly.hills.money.gang.utils.Converter;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -41,11 +42,13 @@ public class PlayScreenGameConnectionHandler {
     }
     playScreen.getGameConnection().getResponse().poll(EVENTS_TO_POLL).forEach(serverResponse -> {
       if (serverResponse.hasChatEvents()) {
-        handleChat(serverResponse);
+        handleChat(serverResponse.getChatEvents());
       } else if (serverResponse.hasGameEvents()) {
-        handleGameEvent(serverResponse);
+        handleGameEvent(serverResponse.getGameEvents());
+      } else if (serverResponse.hasGameOver()) {
+        handleGameOver(serverResponse.getGameOver());
       } else if (serverResponse.hasErrorEvent()) {
-        handleErrorEvent(serverResponse);
+        handleErrorEvent(serverResponse.getErrorEvent());
       }
     });
 
@@ -56,15 +59,11 @@ public class PlayScreenGameConnectionHandler {
     }
   }
 
-  private void handleChat(ServerResponse serverResponse) {
-    var chatEvent = serverResponse.getChatEvents();
-    String playerName = enemiesRegistry.getEnemy(chatEvent.getPlayerId())
-        .map(EnemyPlayer::getName).orElse("no-name");
-    playScreen.getChatLog().addMessage(playerName, chatEvent.getMessage());
+  private void handleChat(ServerResponse.ChatEvent chatEvent) {
+    playScreen.getChatLog().addMessage(chatEvent.getName(), chatEvent.getMessage());
   }
 
-  private void handleGameEvent(ServerResponse serverResponse) {
-    var gameEvents = serverResponse.getGameEvents();
+  private void handleGameEvent(ServerResponse.GameEvents gameEvents) {
     if (gameEvents.hasPlayersOnline()) {
       playScreen.setPlayersOnline(gameEvents.getPlayersOnline());
     }
@@ -78,6 +77,18 @@ public class PlayScreenGameConnectionHandler {
         case GET_SHOT, GET_PUNCHED -> handleGetHit(gameEvent);
       }
     });
+  }
+
+  private void handleGameOver(ServerResponse.GameOver gameOver) {
+    playScreen.setGameOver(true);
+    playScreen.getUiLeaderBoard().set(gameOver.getLeaderBoard().getItemsList().stream()
+        .map(leaderBoardItem -> UILeaderBoard.LeaderBoardPlayer.builder()
+            .name(leaderBoardItem.getPlayerName())
+            .id(leaderBoardItem.getPlayerId())
+            .deaths(leaderBoardItem.getDeaths())
+            .kills(leaderBoardItem.getKills())
+            .build())
+        .collect(Collectors.toList()));
   }
 
   private void handleSpawn(ServerResponse.GameEvent gameEvent) {
@@ -238,6 +249,12 @@ public class PlayScreenGameConnectionHandler {
       int buff = newHealth - oldHealth;
       playScreen.getMyPlayerKillLog()
           .myPlayerKill(victimPlayerOpt.map(EnemyPlayer::getName).orElse("victim"), buff);
+      int kills = playScreen.getUiLeaderBoard().getMyKills();
+      if (kills > 1 && kills % 3 == 0) {
+        playScreen.getGame().getAssMan()
+            .getUserSettingSound(SoundRegistry.WINNING_SOUND_SEQ.getNextSound())
+            .play(Constants.QUAKE_NARRATOR_FX_VOLUME);
+      }
     } else {
       var victimPlayerOpt = enemiesRegistry.removeEnemy(
           gameEvent.getAffectedPlayer().getPlayerId());
@@ -250,8 +267,8 @@ public class PlayScreenGameConnectionHandler {
     }
   }
 
-  public void handleErrorEvent(ServerResponse serverResponse) {
-    playScreen.setErrorMessage(serverResponse.getErrorEvent().getMessage());
+  public void handleErrorEvent(ServerResponse.ErrorEvent errorEvent) {
+    playScreen.setErrorMessage(errorEvent.getMessage());
   }
 
   public void handleException(Throwable error) {
@@ -262,18 +279,9 @@ public class PlayScreenGameConnectionHandler {
   private Enemy.EnemyListeners createEnemyListeners() {
     return Enemy.EnemyListeners
         .builder()
-        .onDeath(enemy -> {
-          // TODO what if it wasn't me?
-          int kills = playScreen.getUiLeaderBoard().getMyKills();
-          if (kills > 1 && kills % 3 == 0) {
-            playScreen.getGame().getAssMan()
-                .getUserSettingSound(SoundRegistry.WINNING_SOUND_SEQ.getNextSound())
-                .play(Constants.QUAKE_NARRATOR_FX_VOLUME);
-          }
-          playScreen.getGame().getAssMan()
-              .getUserSettingSound(SoundRegistry.ENEMY_DEATH_SOUND_SEQ.getNextSound())
-              .play(enemy.getSFXVolume());
-        })
+        .onDeath(enemy -> playScreen.getGame().getAssMan()
+            .getUserSettingSound(SoundRegistry.ENEMY_DEATH_SOUND_SEQ.getNextSound())
+            .play(enemy.getSFXVolume()))
         .onGetShot(enemy -> playScreen.getGame().getAssMan()
             .getUserSettingSound(SoundRegistry.ENEMY_GET_HIT_SOUND_SEQ.getNextSound())
             .play(enemy.getSFXVolume()))

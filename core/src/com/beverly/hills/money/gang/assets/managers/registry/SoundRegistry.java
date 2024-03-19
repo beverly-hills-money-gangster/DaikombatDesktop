@@ -10,6 +10,7 @@ public enum SoundRegistry {
   BATTLE("music/battle.wav"),
   BATTLE2("music/battle2.wav"),
   MAIN_MENU("music/main_menu.mp3"),
+  WIN_MUSIC("music/win_music.mp3"),
   LAUGH("sfx/losing/laugh.mp3"),
   LAUGH_2("sfx/losing/laugh_2.mp3"),
   LAUGH_3("sfx/losing/laugh_3.mp3"),
@@ -60,8 +61,7 @@ public enum SoundRegistry {
   public static final PseudoRandomSoundSequence SPAWN_SOUND_SEQ
       = new PseudoRandomSoundSequence(SPAWN1, SPAWN2, SPAWN3);
   public static final PseudoRandomSoundSequence WINNING_SOUND_SEQ
-      = new PseudoRandomSoundSequence(EXCELLENT, HUMILIATION, HOLY_SHIT, IMPRESSIVE, PERFECT,
-      YOU_WIN);
+      = new PseudoRandomSoundSequence(EXCELLENT, HUMILIATION, HOLY_SHIT, IMPRESSIVE, PERFECT);
   public static final PseudoRandomSoundSequence GET_HIT_SOUND_SEQ
       = new PseudoRandomSoundSequence(VOICE_GET_HIT, VOICE_GET_HIT_2);
 

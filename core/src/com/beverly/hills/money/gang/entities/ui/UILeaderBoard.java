@@ -22,6 +22,7 @@ public class UILeaderBoard {
 
   private int myDeaths;
 
+
   private final Runnable onTakenTheLead;
 
   private final Runnable onLostTheLead;
@@ -44,6 +45,23 @@ public class UILeaderBoard {
     this.onLostTheLead = onLostTheLead;
     setMyStats();
     needRefresh = true;
+  }
+
+  public void set(final List<LeaderBoardPlayer> leaderBoardItems) {
+    this.leaderBoardItems.clear();
+    this.leaderBoardItems.addAll(leaderBoardItems);
+    this.leaderBoardItems.sort(COMPARATOR);
+    setMyStats();
+    needRefresh = true;
+  }
+
+  public String getFirstPlaceStats() {
+    if (leaderBoardItems.isEmpty()) {
+      return "";
+    }
+    var leader = leaderBoardItems.get(0);
+    return leader.name + " | " + getKillsMessage(leader.kills) + " | " + getDeathsMessage(
+        leader.getDeaths());
   }
 
   public int getMyKills() {

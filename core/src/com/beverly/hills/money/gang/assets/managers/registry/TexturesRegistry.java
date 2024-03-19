@@ -8,7 +8,7 @@ public enum TexturesRegistry {
   ENEMY_PLAYER_SPRITES_ORANGE("enemy_player_sprites_orange.png"),
   ENEMY_PLAYER_SPRITES_PURPLE("enemy_player_sprites_purple.png"),
   ENEMY_PLAYER_SPRITES_YELLOW("enemy_player_sprites_yellow.png"),
-
+  ENEMY_PLAYER_SPRITES_PINK("enemy_player_sprites_pink.png"),
   GUN_IDLE("gun_idle.png"),
   GUN_SHOOT("gun_shot.png"),
   PUNCH("punch.png"),
