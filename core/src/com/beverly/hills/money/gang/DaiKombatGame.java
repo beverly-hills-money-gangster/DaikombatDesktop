@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.filters.OverlapFilterManager;
-import com.beverly.hills.money.gang.input.GameInputProcessor;
 import com.beverly.hills.money.gang.maps.MapBuilder;
 import com.beverly.hills.money.gang.models.ModelMaker;
 import com.beverly.hills.money.gang.pref.UserPreference;
@@ -57,7 +56,6 @@ public class DaiKombatGame extends Game {
 
     mapBuilder = new MapBuilder(this);
 
-    Gdx.input.setInputProcessor(new GameInputProcessor());
     // restore user configs
     UserPreference userPreference = new UserPreference();
     UserSettingsUISelection.MOUSE_SENS.getState().setSetting(userPreference.getMouseSensitivity());

@@ -21,6 +21,4 @@ public interface Configs {
 
   float MELEE_DISTANCE = NumberUtils.toFloat(System.getenv("DESKTOP_MELEE_DISTANCE"), 0.35f);
 
-  int FLUSH_ACTIONS_FREQ_MLS
-      = NumberUtils.toInt(System.getenv("DESKTOP_FLUSH_ACTIONS_FREQ_MLS"), 50);
 }

@@ -10,7 +10,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.input.TextInputProcessor;
-import com.beverly.hills.money.gang.screens.data.PlayerServerInfoContextData;
+import com.beverly.hills.money.gang.screens.data.JoinGameData;
 import com.beverly.hills.money.gang.validator.HostPortValidator;
 import com.beverly.hills.money.gang.validator.Validator;
 import java.util.Locale;
@@ -59,7 +59,7 @@ public class EnterServerAddressScreen extends AbstractMainMenuScreen {
       removeAllEntities();
       boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
       getGame().setScreen(new EnterYourNameScreen(getGame(),
-          PlayerServerInfoContextData.builder().serverHost(hostPort[0])
+          JoinGameData.builder().serverHost(hostPort[0])
               .serverPort(NumberUtils.toInt(hostPort[1]))));
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       removeAllEntities();

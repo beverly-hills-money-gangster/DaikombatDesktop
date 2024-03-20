@@ -92,7 +92,7 @@ public class PlayScreenGameConnectionHandler {
   }
 
   private void handleSpawn(ServerResponse.GameEvent gameEvent) {
-    if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerContextData().getPlayerId()) {
+    if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData().getPlayerId()) {
       LOG.warn("This is my own spawn");
       return;
     } else if (enemiesRegistry.exists(gameEvent.getPlayer().getPlayerId())) {
@@ -123,7 +123,7 @@ public class PlayScreenGameConnectionHandler {
   }
 
   private void handleExit(ServerResponse.GameEvent gameEvent) {
-    if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerContextData().getPlayerId()) {
+    if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData().getPlayerId()) {
       return;
     }
     enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
@@ -137,7 +137,7 @@ public class PlayScreenGameConnectionHandler {
   }
 
   private void handleMove(ServerResponse.GameEvent gameEvent) {
-    if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerContextData().getPlayerId()) {
+    if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData().getPlayerId()) {
       return;
     }
     enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
@@ -148,7 +148,7 @@ public class PlayScreenGameConnectionHandler {
   }
 
   private void handleAttackMiss(ServerResponse.GameEvent gameEvent) {
-    if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerContextData().getPlayerId()) {
+    if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData().getPlayerId()) {
       return;
     }
     EnemyPlayerActionType enemyPlayerActionType;
@@ -176,7 +176,7 @@ public class PlayScreenGameConnectionHandler {
     }
 
     // if I hit somebody, then do nothing. the animation is played one client immediately
-    if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getPlayerContextData()
+    if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
         .getPlayerId()) {
       // if I get hit
       playScreen.getPlayer().getHit(gameEvent.getAffectedPlayer().getHealth());
@@ -190,7 +190,7 @@ public class PlayScreenGameConnectionHandler {
                 .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
                 .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build());
           });
-    } else if (gameEvent.getPlayer().getPlayerId() != playScreen.getPlayerContextData()
+    } else if (gameEvent.getPlayer().getPlayerId() != playScreen.getPlayerConnectionContextData()
         .getPlayerId()) {
 
       // enemies hitting each other
@@ -218,7 +218,7 @@ public class PlayScreenGameConnectionHandler {
 
     playScreen.getUiLeaderBoard().registerKill(gameEvent.getPlayer().getPlayerId(),
         gameEvent.getAffectedPlayer().getPlayerId());
-    if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getPlayerContextData()
+    if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
         .getPlayerId()) {
       String killedBy = enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
           .map(EnemyPlayer::getName).orElse("killer");
@@ -238,7 +238,7 @@ public class PlayScreenGameConnectionHandler {
               .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build()));
 
       LOG.info("I'm dead");
-    } else if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerContextData()
+    } else if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
         .getPlayerId()) {
       var victimPlayerOpt = enemiesRegistry.removeEnemy(
           gameEvent.getAffectedPlayer().getPlayerId());

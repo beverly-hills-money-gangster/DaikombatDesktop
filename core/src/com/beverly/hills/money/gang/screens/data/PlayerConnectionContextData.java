@@ -10,13 +10,15 @@ import lombok.ToString;
 @Getter
 @Builder
 @ToString
-public class PlayerContextData {
+public class PlayerConnectionContextData {
 
-  private final PlayerServerInfoContextData playerServerInfoContextData;
+  private final JoinGameData joinGameData;
   private final Vector2 spawn;
   private final Vector2 direction;
   private final int playerId;
   private final List<ServerResponse.LeaderBoardItem> leaderBoardItemList;
   private final int playersOnline;
+  private final int fragsToWin;
+  private final int movesUpdateFreqMls;
 
 }

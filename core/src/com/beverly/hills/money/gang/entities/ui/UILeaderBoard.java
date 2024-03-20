@@ -76,13 +76,17 @@ public class UILeaderBoard {
     return getDeathsMessage(myDeaths);
   }
 
-  public String getMyStatsMessage() {
+  public String getMyStatsMessage(int fragsToWin) {
+    StringBuilder statsMessage = new StringBuilder();
     if (getMyPlace() > 0) {
-      return this.getMyKillsMessage() + " | " + this.getMyDeathsMessage() + " | " + getMyPlace()
-          + " PLACE";
+      statsMessage.append(getMyKillsMessage())
+          .append(" OUT OF ").append(fragsToWin)
+          .append(" | ").append(getMyDeathsMessage())
+          .append(" | ").append(getMyPlace()).append(" PLACE");
     } else {
-      return this.getMyKillsMessage() + " | " + this.getMyDeathsMessage();
+      statsMessage.append(getMyKillsMessage()).append(" | ").append(getMyDeathsMessage());
     }
+    return statsMessage.toString();
   }
 
 

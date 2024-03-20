@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
+import java.util.Locale;
 
 public class ErrorScreen extends AbstractMainMenuScreen {
 
@@ -18,7 +19,7 @@ public class ErrorScreen extends AbstractMainMenuScreen {
 
   public ErrorScreen(final DaiKombatGame game, final String errorMessage) {
     super(game);
-    this.errorMessage = errorMessage.toUpperCase();
+    this.errorMessage = errorMessage.toUpperCase(Locale.ENGLISH);
     guiFont32 = game.getAssMan().getFont(FontRegistry.FONT_32);
     guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
   }
