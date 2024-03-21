@@ -281,16 +281,16 @@ public class PlayScreenGameConnectionHandler {
         .builder()
         .onDeath(enemy -> playScreen.getGame().getAssMan()
             .getUserSettingSound(SoundRegistry.ENEMY_DEATH_SOUND_SEQ.getNextSound())
-            .play(enemy.getSFXVolume()))
+            .play(enemy.getSFXVolume(), enemy.getSFXPan()))
         .onGetShot(enemy -> playScreen.getGame().getAssMan()
             .getUserSettingSound(SoundRegistry.ENEMY_GET_HIT_SOUND_SEQ.getNextSound())
-            .play(enemy.getSFXVolume()))
+            .play(enemy.getSFXVolume(), enemy.getSFXPan()))
         .onShooting(enemy -> new AttackingSound(
             playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.ENEMY_SHOTGUN))
-            .play(enemy.getSFXVolume())
+            .play(enemy.getSFXVolume(), enemy.getSFXPan())
         ).onPunching(enemy -> new AttackingSound(
-            playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.PUNCH_HIT))
-            .play(enemy.getSFXVolume()))
+            playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.ENEMY_PUNCH_HIT))
+            .play(enemy.getSFXVolume(), enemy.getSFXPan()))
         .build();
   }
 
