@@ -22,8 +22,12 @@ import com.beverly.hills.money.gang.screens.GameScreen;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EnemyPlayer extends Enemy {
+
+  private static final Logger LOG = LoggerFactory.getLogger(EnemyPlayer.class);
 
   private final EnemyTextures enemyTextures;
 
@@ -77,9 +81,15 @@ public class EnemyPlayer extends Enemy {
 
 
   public void queueAction(EnemyPlayerAction enemyPlayerAction) {
-    if (actions.size() > 2) {
-      // if the queue gets clogged
-      speed = Configs.PLAYER_MOVE_SPEED * 1.2f;
+    if (actions.size() > 10) {
+      LOG.info("Action queue is very clogged. Size {}", actions.size());
+      speed = Configs.PLAYER_MOVE_SPEED * 1.5f;
+    } else if (actions.size() >= 5) {
+      LOG.info("Action queue is clogged. Size {}", actions.size());
+      speed = Configs.PLAYER_MOVE_SPEED * 1.25f;
+    } else if (actions.size() > 2) {
+      LOG.info("Action queue is slightly clogged. Size {}", actions.size());
+      speed = Configs.PLAYER_MOVE_SPEED * 1.1f;
     } else {
       speed = Configs.PLAYER_MOVE_SPEED;
     }
