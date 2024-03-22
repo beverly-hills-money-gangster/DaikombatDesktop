@@ -21,9 +21,9 @@ public class AttackingSound {
     this.sound = sound;
   }
 
-  public void play(SoundVolumeType volumeType) {
+  public void play(SoundVolumeType volumeType, float pan) {
     if (System.currentTimeMillis() - LAST_PLAYED.get(volumeType) > SHOOTING_SOUND_FREQ_MLS) {
-      sound.play(volumeType);
+      sound.play(volumeType, pan);
       LAST_PLAYED.put(volumeType, System.currentTimeMillis());
     }
   }

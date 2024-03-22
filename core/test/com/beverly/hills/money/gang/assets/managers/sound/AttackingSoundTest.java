@@ -24,41 +24,41 @@ public class AttackingSoundTest {
 
   @Test
   public void testPlayFirstTime() {
-    attackingSound.play(SoundVolumeType.LOUD);
-    verify(userSettingSound).play(SoundVolumeType.LOUD);
+    attackingSound.play(SoundVolumeType.LOUD, 1);
+    verify(userSettingSound).play(SoundVolumeType.LOUD, 1);
   }
 
   @Test
   public void testPlayTooOften() {
     // played recently
-    attackingSound.play(SoundVolumeType.LOUD);
+    attackingSound.play(SoundVolumeType.LOUD, 1);
 
     // play again
-    attackingSound.play(SoundVolumeType.LOUD);
+    attackingSound.play(SoundVolumeType.LOUD, 1);
 
-    verify(userSettingSound, times(1)).play(SoundVolumeType.LOUD); // play only once
+    verify(userSettingSound, times(1)).play(SoundVolumeType.LOUD, 1); // play only once
   }
 
   @Test
   public void testPlayWait() throws InterruptedException {
     // played recently
-    attackingSound.play(SoundVolumeType.LOUD);
+    attackingSound.play(SoundVolumeType.LOUD, -1);
 
     Thread.sleep(SHOOTING_SOUND_FREQ_MLS + 10);
 
     // play again
-    attackingSound.play(SoundVolumeType.LOUD);
+    attackingSound.play(SoundVolumeType.LOUD, -1);
 
-    verify(userSettingSound, times(2)).play(SoundVolumeType.LOUD); // play twice
+    verify(userSettingSound, times(2)).play(SoundVolumeType.LOUD, -1); // play twice
   }
 
   @Test
   public void testPlayDifferentSounds() {
     Arrays.stream(SoundVolumeType.values())
-        .forEach(soundVolumeType -> attackingSound.play(soundVolumeType));
+        .forEach(soundVolumeType -> attackingSound.play(soundVolumeType, 0));
 
     Arrays.stream(SoundVolumeType.values())
-        .forEach(soundVolumeType -> verify(userSettingSound).play(soundVolumeType));
+        .forEach(soundVolumeType -> verify(userSettingSound).play(soundVolumeType, 0));
 
   }
 
@@ -66,16 +66,16 @@ public class AttackingSoundTest {
   public void testPlayDifferentSoundsTwice() {
     // first time
     Arrays.stream(SoundVolumeType.values())
-        .forEach(soundVolumeType -> attackingSound.play(soundVolumeType));
+        .forEach(soundVolumeType -> attackingSound.play(soundVolumeType, 1));
 
     // second time
     Arrays.stream(SoundVolumeType.values())
-        .forEach(soundVolumeType -> attackingSound.play(soundVolumeType));
+        .forEach(soundVolumeType -> attackingSound.play(soundVolumeType, 1));
 
     // played once only
     Arrays.stream(SoundVolumeType.values())
         .forEach(soundVolumeType -> verify(userSettingSound, times(1))
-            .play(soundVolumeType));
+            .play(soundVolumeType, 1));
 
   }
 
@@ -83,18 +83,18 @@ public class AttackingSoundTest {
   public void testPlayDifferentSoundsWait() throws InterruptedException {
     // first time
     Arrays.stream(SoundVolumeType.values())
-        .forEach(soundVolumeType -> attackingSound.play(soundVolumeType));
+        .forEach(soundVolumeType -> attackingSound.play(soundVolumeType, 1));
 
     Thread.sleep(SHOOTING_SOUND_FREQ_MLS + 10);
 
     // second time
     Arrays.stream(SoundVolumeType.values())
-        .forEach(soundVolumeType -> attackingSound.play(soundVolumeType));
+        .forEach(soundVolumeType -> attackingSound.play(soundVolumeType, 1));
 
     // played once only
     Arrays.stream(SoundVolumeType.values())
         .forEach(soundVolumeType -> verify(userSettingSound, times(2))
-            .play(soundVolumeType));
+            .play(soundVolumeType, 1));
 
   }
 }

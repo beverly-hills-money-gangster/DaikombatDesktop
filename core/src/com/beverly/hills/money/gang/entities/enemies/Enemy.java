@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.entities.player.Player;
@@ -58,6 +59,19 @@ public abstract class Enemy extends Entity {
     } else {
       return SoundVolumeType.MUTE;
     }
+  }
+
+  public final float getSFXPan() {
+    var camDir2D = new Vector2(getPlayer().getPlayerCam().direction.x,
+        getPlayer().getPlayerCam().direction.z);
+    float angle = camDir2D.angleDeg(
+        getRect().getNewPosition().cpy().sub(getPlayer().getCurrent2DPosition()));
+    if (Constants.LEFT_RANGE.contains(angle)) {
+      return -0.8f;
+    } else if (Constants.RIGHT_RANGE.contains(angle)) {
+      return 0.8f;
+    }
+    return 0;
   }
 
   @Override
