@@ -10,7 +10,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.input.TextInputProcessor;
-import com.beverly.hills.money.gang.screens.data.PlayerServerInfoContextData;
+import com.beverly.hills.money.gang.screens.data.JoinGameData;
 import org.apache.commons.lang3.StringUtils;
 
 public class EnterYourNameScreen extends AbstractMainMenuScreen {
@@ -22,13 +22,13 @@ public class EnterYourNameScreen extends AbstractMainMenuScreen {
   private final UserSettingSound boomSound2;
   private final TextInputProcessor nameTextInputProcessor;
 
-  private final PlayerServerInfoContextData.PlayerServerInfoContextDataBuilder playerServerInfoContextDataBuilder;
+  private final JoinGameData.JoinGameDataBuilder joinGameDataBuilder;
 
 
   public EnterYourNameScreen(final DaiKombatGame game,
-      final PlayerServerInfoContextData.PlayerServerInfoContextDataBuilder playerServerInfoContextDataBuilder) {
+      final JoinGameData.JoinGameDataBuilder joinGameDataBuilder) {
     super(game);
-    this.playerServerInfoContextDataBuilder = playerServerInfoContextDataBuilder;
+    this.joinGameDataBuilder = joinGameDataBuilder;
     guiFont64 = getGame().getAssMan().getFont(FontRegistry.FONT_64);
     boomSound2 = getGame().getAssMan().getUserSettingSound(SoundRegistry.BOOM_2);
     nameTextInputProcessor = new TextInputProcessor(MAX_NAME_LEN,
@@ -43,9 +43,9 @@ public class EnterYourNameScreen extends AbstractMainMenuScreen {
         nameTextInputProcessor.getText())) {
       removeAllEntities();
       boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
-      playerServerInfoContextDataBuilder.playerName(nameTextInputProcessor.getText());
+      joinGameDataBuilder.playerName(nameTextInputProcessor.getText());
       getGame().setScreen(
-          new EnterServerPasswordScreen(getGame(), playerServerInfoContextDataBuilder));
+          new EnterServerPasswordScreen(getGame(), joinGameDataBuilder));
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));

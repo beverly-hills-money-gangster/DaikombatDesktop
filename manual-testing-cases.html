@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manual testing cases</title>
-    <style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual testing cases</title>
+  <style>
   table {
     width: 100%;
     border-collapse: collapse;
@@ -18,7 +18,8 @@
     background-color: #f5f5f5;
   }
 
-    </style>
+
+  </style>
 </head>
 <body>
 
@@ -26,239 +27,282 @@
 <h3>All tests must be performed against a remote gamer server</h3>
 
 <table>
-    <thead>
-    <tr>
-        <th>Screen</th>
-        <th>Description</th>
-        <th>Verified</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-        <td>Enter player name screen</td>
-        <td>If user enters an empty/blank string then it doesn't transition to the next screen when "Enter" is pressed.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Enter password screen</td>
-        <td>If user enters an empty string then it doesn't transition to the next screen when "Enter" is pressed.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Loading screen</td>
-        <td>If game server is down then it takes around 5 seconds before error pops up. The game doesn't crash.</td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Loading screen</td>
-        <td>If game server is up but server pin is incorrect then an error pops up. The game doesn't crash.</td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Loading screen</td>
-        <td>If game server is up and credentials are correct then the player gets connected and shows up on the map.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Loading screen</td>
-        <td>If game server is up but a different player has already connected with the same name then an error pops
-            up. The game doesn't crash.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Loading screen</td>
-        <td>If game server is up but the server is full then an error pops up. The game doesn't crash.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>If 2 players are connected then they see each other moving with little-to-no delay. Animation changes
-            smoothly.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>If player joins the game but the server goes offline mid-game, then an error pops up. Game doesn't crash.
-            Can be tested by running 3-5 instances of the game at a time.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>Player can't move through a wall.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>One player can't shoot the other through a wall.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>3 players join the game: killer, victim, and observer. Killer shoots victim: killer player sees victim
-            blinking red, victim player screen blinks red, observer player sees killer shooting and victim blinking red.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>3 players join the game: killer, victim, and observer. Killer shoots victim to death: killer player sees
-            victim death,
-            victim sees "death" screen, observer player sees killer killing the victim. Killer is on the top of the
-            leader board. Killer and observer hear victim death sounds. Victim makes a death sound.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>3 players join the game: killer, victim, and observer. Killer punches victim to death: killer player sees
-            victim death,
-            victim sees "death" screen, observer player sees killer punching the victim. Killer is on the top of the
-            leader board. Killer and observer hear victim death sounds. Victim makes a death sound.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>2 players join the game: cheater and observer. When cheater punches/shoots observer from too far away, then
-            cheater stays connected but observer can't see any shooting/punching events coming from cheater.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>5 players join the game. Player 1 kills player 2. When player 3 kills player 4 and 5, then player 1 hears
-            "you have lost the lead" and player 3 hears "you have taken the lead".
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>2 players join the game. Player 1 publishes a message to chat. Player 2 sees the message.</td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>2 players join the game. Player 1 publishes an empty/blank message to chat. Message is not sent.</td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>2 players join the game. Player 1 presses "Esc" and goes to main menu. Player 2 sees player 1 exit the
-            game.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>2 players join the game. Player 1 terminates the game(alt+f4). Player 2 sees player 1 exit the
-            game.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>2 players join the game. Player 1 doesn't move. Player 2 goes see player 1. Player 2 shoots. Player 1 sees
-            player 2 shooting without changing position on the map.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>2 players join the game. Player 2 constantly publishes MOVE
-            events(DESKTOP_MIMIC_CONSTANT_NETWORK_ACTIVITY=true). Player 1 kills player 2 twenty times in a row.
-            Player 2 dies twenty times. Player 1 has 20 kills in the leader board. No error pops up.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>2 players join the game. Player 1 shoots player 2. Then player 2 kills player 1. After that, player 2 health
-            is buffed +20.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>2 players join the game. Player 1 kills player 2. While player 2 is dead, he can't move but can observe the
-            game scene, get leaderboard updated and push chat messages. Dead player doesn't get disconnected. Sound is
-            consistent while seeing death screen.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>2 players join the game. Player 1 kills player 2 twenty times in a row. Player 2 respawns successfully.
-            Player 2 stats(deaths and kills) are persisted.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>2 players join the game. Player 1 kills player 2 and the game server goes offline. Both players see error
-            screen. Game doesn't crash though.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Play screen</td>
-        <td>20 bots are spawned on the screen(chaos testing). Player see the bots. Game doesn't crash.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Settings screen</td>
-        <td>When settings are updated, they persist(after game reboot as well).
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Settings screen</td>
-        <td>If sound volume is increased or decreased then player can hear it immediately.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Custom server screen</td>
-        <td>If empty or blank text is typed then the game doesn't transition to the next screen.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Custom server screen</td>
-        <td>If invalid host:port is typed in then the game doesn't transition to the next screen and an error message
-            pops up.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Custom server screen</td>
-        <td>If valid ipv4 or domain is typed in then the game transition to the next screen. No error pops up.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Custom server screen</td>
-        <td>Copy server host:port and then open the game. Press Ctrl+V on the custom server screen. Copied host:port
-            must be pasted into the text input.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    <tr>
-        <td>Custom server screen</td>
-        <td>Player connects to local server. Dies and respawns on the local server.
-        </td>
-        <td><input type="checkbox"></td>
-    </tr>
-    </tbody>
+  <thead>
+  <tr>
+    <th>Screen</th>
+    <th>Description</th>
+    <th>Verified</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td>Enter player name screen</td>
+    <td>If user enters an empty/blank string then it doesn't transition to the next screen when
+      "Enter" is pressed.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Enter password screen</td>
+    <td>If user enters an empty string then it doesn't transition to the next screen when "Enter" is
+      pressed.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Loading screen</td>
+    <td>If game server is down then it takes around 5 seconds before error pops up. The game doesn't
+      crash.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Loading screen</td>
+    <td>If game server is up but server pin is incorrect then an error pops up. The game doesn't
+      crash.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Loading screen</td>
+    <td>If game server is up and credentials are correct then the player gets connected and shows up
+      on the map.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Loading screen</td>
+    <td>If game server is up but a different player has already connected with the same name then an
+      error pops
+      up. The game doesn't crash.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Loading screen</td>
+    <td>If game server is up but the server is full then an error pops up. The game doesn't crash.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>If 2 players are connected then they see each other moving with little-to-no delay.
+      Animation changes
+      smoothly.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>If player joins the game but the server goes offline mid-game, then an error pops up. Game
+      doesn't crash.
+      Can be tested by running 3-5 instances of the game at a time.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>Player can't move through a wall.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>One player can't shoot the other through a wall.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>3 players join the game: killer, victim, and observer. Killer shoots victim: killer player
+      sees victim
+      blinking red, victim player screen blinks red, observer player sees killer shooting and victim
+      blinking red.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>3 players join the game: killer, victim, and observer. Killer shoots victim to death: killer
+      player sees
+      victim death,
+      victim sees "death" screen, observer player sees killer killing the victim. Killer is on the
+      top of the
+      leader board. Killer and observer hear victim death sounds. Victim makes a death sound.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>3 players join the game: killer, victim, and observer. Killer punches victim to death:
+      killer player sees
+      victim death,
+      victim sees "death" screen, observer player sees killer punching the victim. Killer is on the
+      top of the
+      leader board. Killer and observer hear victim death sounds. Victim makes a death sound.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>2 players join the game: cheater and observer. When cheater punches/shoots observer from too
+      far away, then
+      cheater stays connected but observer can't see any shooting/punching events coming from
+      cheater.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>5 players join the game. Player 1 kills player 2. When player 3 kills player 4 and 5, then
+      player 1 hears
+      "you have lost the lead" and player 3 hears "you have taken the lead".
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>2 players join the game. Player 1 publishes a message to chat. Player 2 sees the message.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>2 players join the game. Player 1 publishes an empty/blank message to chat. Message is not
+      sent.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>2 players join the game. Player 1 presses "Esc" and goes to main menu. Player 2 sees player
+      1 exit the
+      game.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>2 players join the game. Player 1 terminates the game(alt+f4). Player 2 sees player 1 exit
+      the
+      game.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>2 players join the game. Player 1 doesn't move. Player 2 goes see player 1. Player 2 shoots.
+      Player 1 sees
+      player 2 shooting without changing position on the map.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>2 players join the game. Player 2 constantly publishes MOVE
+      events(DESKTOP_MIMIC_CONSTANT_NETWORK_ACTIVITY=true). Player 1 kills player 2 twenty times in
+      a row.
+      Player 2 dies twenty times. Player 1 has 20 kills in the leader board. No error pops up.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>2 players join the game. Player 1 shoots player 2. Then player 2 kills player 1. After that,
+      player 2 health
+      is buffed +20.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>2 players join the game. Player 1 kills player 2. While player 2 is dead, he can't move but
+      can observe the
+      game scene, get leaderboard updated and push chat messages. Dead player doesn't get
+      disconnected. Sound is
+      consistent while seeing death screen.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>2 players join the game. Player 1 kills player 2 twenty times in a row. Player 2 respawns
+      successfully.
+      Player 2 stats(deaths and kills) are persisted.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>2 players join the game. Player 1 kills player 2 and the game server goes offline. Both
+      players see error
+      screen. Game doesn't crash though.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>20 bots are spawned on the screen(chaos testing). Player see the bots. Game doesn't crash.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>Server requires 5 frags to win. 3 players join the game. Player 1 kills player 2 four times.
+      Player 2 kills player 1 five times. The game stops for all players. Player 2 is declared the
+      winner with 5 kills and 4 deaths. Player 1 is the second in the leaderboard with 4 kills and 5
+      deaths. Player 3 is at the bottom with 0 kill and 0 death counts.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Settings screen</td>
+    <td>When settings are updated, they persist(after game reboot as well).
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Settings screen</td>
+    <td>If sound volume is increased or decreased then player can hear it immediately.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Custom server screen</td>
+    <td>If empty or blank text is typed then the game doesn't transition to the next screen.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Custom server screen</td>
+    <td>If invalid host:port is typed in then the game doesn't transition to the next screen and an
+      error message
+      pops up.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Custom server screen</td>
+    <td>If valid ipv4 or domain is typed in then the game transition to the next screen. No error
+      pops up.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Custom server screen</td>
+    <td>Copy server host:port and then open the game. Press Ctrl+V on the custom server screen.
+      Copied host:port
+      must be pasted into the text input.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Custom server screen</td>
+    <td>Player connects to local server. Dies and respawns on the local server.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  </tbody>
 </table>
 
 </body>

@@ -7,7 +7,7 @@ import lombok.ToString;
 @Getter
 @Builder
 @ToString
-public class PlayerServerInfoContextData {
+public class JoinGameData {
 
   private final String serverHost;
   private final int serverPort;

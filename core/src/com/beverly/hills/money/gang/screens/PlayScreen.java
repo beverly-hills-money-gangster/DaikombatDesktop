@@ -26,7 +26,7 @@ import com.beverly.hills.money.gang.log.MyPlayerKillLog;
 import com.beverly.hills.money.gang.network.GameConnection;
 import com.beverly.hills.money.gang.proto.PushChatEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand;
-import com.beverly.hills.money.gang.screens.data.PlayerContextData;
+import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.screens.ui.selection.ActivePlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.DeadPlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
@@ -96,16 +96,16 @@ public class PlayScreen extends GameScreen {
 
   private final GameConnection gameConnection;
 
-  private final PlayerContextData playerContextData;
+  private final PlayerConnectionContextData playerConnectionContextData;
 
   public PlayScreen(final DaiKombatGame game,
       final GameConnection gameConnection,
-      final PlayerContextData playerContextData) {
+      final PlayerConnectionContextData playerConnectionContextData) {
     super(game, new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
     this.gameConnection = gameConnection;
     dingSound1 = getGame().getAssMan().getUserSettingSound(SoundRegistry.DING_1);
-    this.playerContextData = playerContextData;
-    this.playersOnline = playerContextData.getPlayersOnline();
+    this.playerConnectionContextData = playerConnectionContextData;
+    this.playersOnline = playerConnectionContextData.getPlayersOnline();
     myPlayerKillLog = new MyPlayerKillLog();
     env = new Environment();
     env.set(new ColorAttribute(ColorAttribute.AmbientLight, 1, 1, 1, 1f));
@@ -155,7 +155,7 @@ public class PlayScreen extends GameScreen {
             playerWeapon.getPlayer().playWeaponHitSound(playerWeapon.getWeapon());
             gameConnection.write(PushGameEventCommand.newBuilder()
                 .setGameId(Configs.GAME_ID)
-                .setPlayerId(playerContextData.getPlayerId())
+                .setPlayerId(playerConnectionContextData.getPlayerId())
                 .setDirection(
                     PushGameEventCommand.Vector.newBuilder().setX(direction.x).setY(direction.y)
                         .build())
@@ -170,7 +170,7 @@ public class PlayScreen extends GameScreen {
             // if we haven't hit anybody
             gameConnection.write(PushGameEventCommand.newBuilder()
                 .setGameId(Configs.GAME_ID)
-                .setPlayerId(playerContextData.getPlayerId())
+                .setPlayerId(playerConnectionContextData.getPlayerId())
                 .setDirection(
                     PushGameEventCommand.Vector.newBuilder().setX(direction.x).setY(direction.y)
                         .build())
@@ -183,17 +183,17 @@ public class PlayScreen extends GameScreen {
         },
         enemy -> enemyAimName = enemy.getName(),
         player -> {
-          if (System.currentTimeMillis() > nextTimeToFlushPlayerActions) {
-            if (gameConnection.isConnected()) {
-              sendCurrentPlayerPosition();
-              nextTimeToFlushPlayerActions =
-                  System.currentTimeMillis() + Configs.FLUSH_ACTIONS_FREQ_MLS;
-            }
+          if (System.currentTimeMillis() < nextTimeToFlushPlayerActions
+              || gameConnection.isDisconnected()) {
+            return;
           }
+          sendCurrentPlayerPosition();
+          nextTimeToFlushPlayerActions =
+              System.currentTimeMillis() + playerConnectionContextData.getMovesUpdateFreqMls();
 
         },
-        playerContextData.getSpawn(),
-        playerContextData.getDirection()));
+        playerConnectionContextData.getSpawn(),
+        playerConnectionContextData.getDirection()));
     getGame().getEntMan().addEntity(getPlayer());
 
     setCurrentCam(getPlayer().getPlayerCam());
@@ -201,8 +201,8 @@ public class PlayScreen extends GameScreen {
     Gdx.input.setCursorCatched(true);
     musicBackground.loop(Constants.DEFAULT_MUSIC_VOLUME);
     uiLeaderBoard = new UILeaderBoard(
-        playerContextData.getPlayerId(),
-        playerContextData.getLeaderBoardItemList().stream()
+        playerConnectionContextData.getPlayerId(),
+        playerConnectionContextData.getLeaderBoardItemList().stream()
             .map(leaderBoardItem -> UILeaderBoard.LeaderBoardPlayer.builder()
                 .name(leaderBoardItem.getPlayerName())
                 .id(leaderBoardItem.getPlayerId())
@@ -315,7 +315,8 @@ public class PlayScreen extends GameScreen {
         || Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
       switch (deadPlayUISelectionUISelection.getSelectedOption()) {
         case RESPAWN ->
-            screenToTransition = new RespawnScreen(getGame(), playerContextData, gameConnection);
+            screenToTransition = new RespawnScreen(getGame(), playerConnectionContextData,
+                gameConnection);
         case QUIT -> screenToTransition = new MainMenuScreen(getGame());
       }
     }
@@ -328,11 +329,11 @@ public class PlayScreen extends GameScreen {
       chatMode = false;
       gameConnection.write(PushChatEventCommand.newBuilder()
           .setMessage(chatTextInputProcessor.getText())
-          .setPlayerId(playerContextData.getPlayerId())
+          .setPlayerId(playerConnectionContextData.getPlayerId())
           .setGameId(Configs.GAME_ID)
           .build());
       chatLog.addMessage(
-          playerContextData.getPlayerServerInfoContextData().getPlayerName(),
+          playerConnectionContextData.getJoinGameData().getPlayerName(),
           chatTextInputProcessor.getText());
       chatTextInputProcessor.clear();
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
@@ -347,7 +348,7 @@ public class PlayScreen extends GameScreen {
     var currentPosition = getPlayer().getCurrent2DPosition();
     var currentDirection = getPlayer().getCurrent2DDirection();
     gameConnection.write(PushGameEventCommand.newBuilder()
-        .setPlayerId(playerContextData.getPlayerId())
+        .setPlayerId(playerConnectionContextData.getPlayerId())
         .setEventType(PushGameEventCommand.GameEventType.MOVE)
         .setGameId(Configs.GAME_ID)
         .setPosition(PushGameEventCommand.Vector.newBuilder()
@@ -402,7 +403,7 @@ public class PlayScreen extends GameScreen {
             getViewport().getWorldWidth() / 2f - glyphLayoutKillerMessage.width / 2f,
             getViewport().getWorldHeight() / 2f - glyphLayoutKillerMessage.height / 2f + 128);
       }
-      String killStats = uiLeaderBoard.getMyStatsMessage();
+      String killStats = uiLeaderBoard.getMyStatsMessage(playerConnectionContextData.getFragsToWin());
       guiFont64.draw(getGame().getBatch(), killStats,
           getViewport().getWorldWidth() - 32 - new GlyphLayout(guiFont64, killStats).width,
           128 - 32);
@@ -458,7 +459,7 @@ public class PlayScreen extends GameScreen {
     }
     if (gameOver) {
       screenToTransition = new GameOverScreen(getGame(), uiLeaderBoard,
-          playerContextData.getPlayerServerInfoContextData());
+          playerConnectionContextData.getJoinGameData());
     } else if (gameConnection.isDisconnected()) {
       while (gameConnection.getErrors().size() != 0) {
         gameConnection.getErrors().poll()
