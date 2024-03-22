@@ -43,6 +43,7 @@ jobs:
       - run:
           name: Download assets
           command: |
+            export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
             git clone git@github.com:beverly-hills-money-gangster/DaikombatDesktopAssets.git private-assets
             mv private-assets/assets/* core/assets
             mv private-assets/runtime/windows/x86/* windows-executable/runtime
