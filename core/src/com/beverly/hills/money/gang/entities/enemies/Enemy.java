@@ -67,9 +67,9 @@ public abstract class Enemy extends Entity {
     float angle = camDir2D.angleDeg(
         getRect().getNewPosition().cpy().sub(getPlayer().getCurrent2DPosition()));
     if (Constants.LEFT_RANGE.contains(angle)) {
-      return -0.8f;
+      return -0.65f;
     } else if (Constants.RIGHT_RANGE.contains(angle)) {
-      return 0.8f;
+      return 0.65f;
     }
     return 0;
   }
