@@ -40,6 +40,7 @@ public class UILeaderBoardTest {
     verify(lostLeadRunnable, never()).run();
   }
 
+
   @Test
   public void testConstructorManyPlayers() {
     int myPlayerId = 10;
@@ -100,6 +101,35 @@ public class UILeaderBoardTest {
     verify(youLeadRunnable, never()).run();
     verify(lostLeadRunnable, never()).run();
   }
+
+
+  @Test
+  public void testRegisterKillNotLosingOrTakingLead() {
+    int myPlayerId = 10;
+    UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
+        List.of(UILeaderBoard.LeaderBoardPlayer
+                .builder()
+                .kills(4).id(999).name("killer man")
+                .build(),
+            UILeaderBoard.LeaderBoardPlayer
+                .builder()
+                .kills(0).id(myPlayerId).name("my name")
+                .build()),
+        youLeadRunnable, lostLeadRunnable);
+
+    leaderBoard.registerKill(myPlayerId, 999);
+
+    assertEquals(1, leaderBoard.getMyKills());
+    assertEquals(2, leaderBoard.getMyPlace());
+
+    assertEquals(
+        "# 1    4 KILLS       1 DEATH       KILLER MAN\n" +
+            "# 2    1 KILL        0 DEATH       MY NAME  < YOU\n", leaderBoard.toString());
+
+    verify(youLeadRunnable, never()).run();
+    verify(lostLeadRunnable, never()).run();
+  }
+
 
   @Test
   public void testRegisterTakingLead() {
@@ -260,7 +290,7 @@ public class UILeaderBoardTest {
   }
 
   @Test
-  public void testRemovePlayerGettingLead() {
+  public void testRemovePlayerNotGettingLead() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(UILeaderBoard.LeaderBoardPlayer
@@ -282,7 +312,7 @@ public class UILeaderBoardTest {
         "# 1    4 KILLS       0 DEATH       MY NAME  < YOU\n",
         leaderBoard.toString());
 
-    verify(youLeadRunnable).run(); // I'm leading now
+    verify(youLeadRunnable, never()).run(); // you don't get the lead just because somebody left
     verify(lostLeadRunnable, never()).run();
   }
 

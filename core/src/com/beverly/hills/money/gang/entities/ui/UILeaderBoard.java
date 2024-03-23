@@ -112,7 +112,6 @@ public class UILeaderBoard {
 
 
   private void setMyStats() {
-    int oldPlace = myPlace;
     for (int i = 0; i < leaderBoardItems.size(); i++) {
       var item = leaderBoardItems.get(i);
       if (item.id != myPlayerId) {
@@ -121,13 +120,7 @@ public class UILeaderBoard {
       myKills = item.kills;
       myDeaths = item.deaths;
       myPlace = i + 1;
-      if (myPlace == 1 && myKills > 0 && oldPlace > myPlace) {
-        onTakenTheLead.run();
-      } else if (oldPlace == 1 && myKills > 0 && myPlace != 1) {
-        onLostTheLead.run();
-      }
       return;
-
     }
   }
 
@@ -138,6 +131,7 @@ public class UILeaderBoard {
   }
 
   public void registerKill(int killerPlayerId, int victimPlayerId) {
+    int myOldPlace = myPlace;
     leaderBoardItems.stream()
         .filter(leaderBoardPlayer -> leaderBoardPlayer.getId() == killerPlayerId)
         .findFirst()
@@ -162,8 +156,12 @@ public class UILeaderBoard {
               .name(leaderBoardPlayer.name).build());
         });
 
-    setMyStats();
     needRefresh = true;
+    if (myPlace == 1 && myKills > 0 && myOldPlace > myPlace) {
+      onTakenTheLead.run();
+    } else if (myOldPlace == 1 && myKills > 0 && myPlace != 1) {
+      onLostTheLead.run();
+    }
   }
 
   public void addNewPlayer(LeaderBoardPlayer newLeaderBoardPlayer) {

@@ -20,7 +20,7 @@ public class DesktopLauncher {
     config.setBackBufferConfig(8, 8, 8, 8, 24, 8, 0);
     config.setForegroundFPS(60);
     config.setInitialBackgroundColor(Constants.FOG_COLOR);
-    config.useVsync(true);
+    config.useVsync(false);
     config.useOpenGL3(true, 3, 3); // 3.3 Works on MacOSX
 
     if (Configs.DEV_MODE) {

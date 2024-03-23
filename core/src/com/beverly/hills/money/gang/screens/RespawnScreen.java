@@ -94,6 +94,8 @@ public class RespawnScreen extends AbstractLoadingScreen {
         .spawn(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
         .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
         .leaderBoardItemList(gameEvent.getLeaderBoard().getItemsList())
+        .fragsToWin(oldPlayerConnectionContextData.getFragsToWin())
+        .movesUpdateFreqMls(oldPlayerConnectionContextData.getMovesUpdateFreqMls())
         .build();
   }
 
