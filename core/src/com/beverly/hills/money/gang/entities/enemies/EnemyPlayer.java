@@ -164,7 +164,7 @@ public class EnemyPlayer extends Enemy {
       if (isTooClose(getRect().getOldPosition(), targetPosition)) {
         // if we are close to the target destination then we are here
         actions.remove();
-
+        action.getOnComplete().run();
         switch (action.getEnemyPlayerActionType()) {
           case SHOOT -> shoot();
           case PUNCH -> punch();
