@@ -531,7 +531,7 @@ public class PlayScreen extends GameScreen {
     final float killedByY = halfViewportHeight - glyphLayoutKilledBy.height / 2f - 64;
     guiFont64.draw(getGame().getBatch(), killedBy, killedByX, killedByY);
     deadPlayUISelectionUISelection.render(guiFont64, this, 128);
-    String pressTabToSeeLeaderboard = "PRESS [TAB] TO SEE LEADERBOARD";
+    String pressTabToSeeLeaderboard = "PRESS TAB TO SEE LEADERBOARD";
     GlyphLayout glyphLayoutLeaderBoardHint = new GlyphLayout(guiFont32, pressTabToSeeLeaderboard);
     guiFont32.draw(getGame().getBatch(), pressTabToSeeLeaderboard,
         halfViewportWidth - glyphLayoutLeaderBoardHint.width / 2f,
