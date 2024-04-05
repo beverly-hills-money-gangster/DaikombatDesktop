@@ -49,7 +49,7 @@ public interface Constants {
 
   float MK_NARRATOR_FX_VOLUME = 1f;
 
-  int FBO_WIDTH_ORIGINAL = 1024; // 160
-  int FBO_HEIGHT_ORIGINAL = 1024; // 120
+  int FBO_WIDTH_ORIGINAL = 800; // 160
+  int FBO_HEIGHT_ORIGINAL = 600; // 120
 
 }
