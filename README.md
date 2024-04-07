@@ -19,7 +19,7 @@ to redemption, yet every defeat plunges him deeper into the abyss of his own dam
 
 ## Gameplay
 
-[![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white)](https://youtu.be/Oe7XlpEs4mY)
+[![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white)](https://youtu.be/b0ZATG3TXaQ)
 
 
 ![Main menu](/screenshot-main-menu.png)
