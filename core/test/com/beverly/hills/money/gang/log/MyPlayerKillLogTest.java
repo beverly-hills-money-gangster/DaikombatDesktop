@@ -51,4 +51,10 @@ public class MyPlayerKillLogTest {
     killLog.myPlayerKill("XXX", 0);
     assertEquals("YOU KILLED XXX", killLog.getKillerMessage());
   }
+
+  @Test
+  public void testGetKillerMessageNegativeBuff() {
+    killLog.myPlayerKill("XXX", -9);
+    assertEquals("YOU KILLED XXX", killLog.getKillerMessage());
+  }
 }
