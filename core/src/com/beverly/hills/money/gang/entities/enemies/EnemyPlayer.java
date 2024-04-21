@@ -81,19 +81,25 @@ public class EnemyPlayer extends Enemy {
 
 
   public void queueAction(EnemyPlayerAction enemyPlayerAction) {
-    if (actions.size() > 10) {
+    this.speed = getSpeed(actions);
+    actions.add(enemyPlayerAction);
+  }
+
+  static float getSpeed(final Queue<EnemyPlayerAction> actions) {
+    if (actions.size() > 15) {
+      LOG.info("Action queue is super clogged. Size {}", actions.size());
+      return Configs.PLAYER_MOVE_SPEED * 3f;
+    } else if (actions.size() > 10) {
       LOG.info("Action queue is very clogged. Size {}", actions.size());
-      speed = Configs.PLAYER_MOVE_SPEED * 1.5f;
+      return Configs.PLAYER_MOVE_SPEED * 2f;
     } else if (actions.size() >= 5) {
       LOG.info("Action queue is clogged. Size {}", actions.size());
-      speed = Configs.PLAYER_MOVE_SPEED * 1.25f;
+      return Configs.PLAYER_MOVE_SPEED * 1.25f;
     } else if (actions.size() > 2) {
-      LOG.info("Action queue is slightly clogged. Size {}", actions.size());
-      speed = Configs.PLAYER_MOVE_SPEED * 1.1f;
+      return Configs.PLAYER_MOVE_SPEED * 1.15f;
     } else {
-      speed = Configs.PLAYER_MOVE_SPEED;
+      return Configs.PLAYER_MOVE_SPEED;
     }
-    actions.add(enemyPlayerAction);
   }
 
 
