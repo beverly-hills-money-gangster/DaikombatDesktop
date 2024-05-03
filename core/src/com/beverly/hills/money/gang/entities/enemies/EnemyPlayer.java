@@ -33,6 +33,8 @@ public class EnemyPlayer extends Enemy {
 
   private long dieAnimationEndMls = Long.MAX_VALUE;
 
+  private static final int MAX_ACTION_QUEUE_CLOGGING = 30;
+
   private final Queue<EnemyPlayerAction> actions = new ArrayDeque<>();
 
   @Getter
@@ -79,9 +81,12 @@ public class EnemyPlayer extends Enemy {
     getRect().getNewPosition().set(getRect().x, getRect().y);
   }
 
-
   public void queueAction(EnemyPlayerAction enemyPlayerAction) {
-    this.speed = getSpeed(actions);
+    if (actions.size() >= MAX_ACTION_QUEUE_CLOGGING) {
+      throw new IllegalStateException("Can't queue enemy action");
+    } else {
+      this.speed = getSpeed(actions);
+    }
     actions.add(enemyPlayerAction);
   }
 
