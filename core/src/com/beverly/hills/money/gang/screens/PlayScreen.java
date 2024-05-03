@@ -403,7 +403,8 @@ public class PlayScreen extends GameScreen {
             getViewport().getWorldWidth() / 2f - glyphLayoutKillerMessage.width / 2f,
             getViewport().getWorldHeight() / 2f - glyphLayoutKillerMessage.height / 2f + 128);
       }
-      String killStats = uiLeaderBoard.getMyStatsMessage(playerConnectionContextData.getFragsToWin());
+      String killStats = uiLeaderBoard.getMyStatsMessage(
+          playerConnectionContextData.getFragsToWin());
       guiFont64.draw(getGame().getBatch(), killStats,
           getViewport().getWorldWidth() - 32 - new GlyphLayout(guiFont64, killStats).width,
           128 - 32);
@@ -468,7 +469,15 @@ public class PlayScreen extends GameScreen {
       screenToTransition = new ErrorScreen(getGame(),
           StringUtils.defaultIfBlank(errorMessage, "Connection lost"));
     } else {
-      playScreenGameConnectionHandler.handle();
+      try {
+        playScreenGameConnectionHandler.handle();
+      } catch (Exception e) {
+        LOG.error("Can't handle screen actions", e);
+        screenToTransition = new ErrorScreen(getGame(),
+            StringUtils.defaultIfEmpty(e.getMessage(), "Can't handle connection")
+                + ". Check internet signal. Last ping " + gameConnection.getNetworkStats().getPingMls()
+                + " mls.");
+      }
     }
 
     getGame().getBatch().end();
