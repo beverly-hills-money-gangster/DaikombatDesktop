@@ -29,7 +29,7 @@ public abstract class GameScreen implements Screen {
   @Setter
   private Player player;
 
-  private AtomicBoolean exiting = new AtomicBoolean(false);
+  private final AtomicBoolean exiting = new AtomicBoolean(false);
 
   public GameScreen(final DaiKombatGame game, final Viewport viewport) {
     this.game = game;

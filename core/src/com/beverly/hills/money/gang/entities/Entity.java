@@ -26,8 +26,11 @@ public class Entity {
 
   }
 
-
   public void tick(final float delta) {
+
+  }
+
+  public void onCollision() {
 
   }
 

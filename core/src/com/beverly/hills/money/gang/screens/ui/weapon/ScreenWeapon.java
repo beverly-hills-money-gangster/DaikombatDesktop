@@ -7,6 +7,7 @@ import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
+import com.beverly.hills.money.gang.entities.player.Player;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
@@ -21,6 +22,8 @@ public class ScreenWeapon {
 
   private static final int PUNCH_ANIMATION_MLS = 200;
 
+  private final UserSettingSound quadDamageAttack;
+
   final Map<Weapon, WeaponState> weaponStates = new EnumMap<>(Weapon.class);
 
   protected Weapon weaponBeingUsed;
@@ -28,6 +31,7 @@ public class ScreenWeapon {
   private final TextureRegion idleWeapon;
 
   public ScreenWeapon(DaiKombatAssetsManager assetsManager) {
+    quadDamageAttack = assetsManager.getUserSettingSound(SoundRegistry.QUAD_DAMAGE_ATTACK);
     idleWeapon = assetsManager.getTextureRegion(TexturesRegistry.GUN_IDLE, 0, 0, 149, 117);
     weaponStates.put(Weapon.SHOTGUN, WeaponState.builder()
         .distance(Configs.SHOOTING_DISTANCE)
@@ -95,12 +99,15 @@ public class ScreenWeapon {
         .positioning(Vector2.Zero).build();
   }
 
-  public boolean attack(Weapon weapon, float soundVolume) {
+  public boolean attack(Player player, Weapon weapon, float soundVolume) {
     if (canAttack()) {
       var state = weaponStates.get(weapon);
       state.animationStartMls = System.currentTimeMillis();
       weaponBeingUsed = weapon;
       state.fireSound.play(soundVolume);
+      if (player.isQuadDamageEffectActive()) {
+        quadDamageAttack.play(soundVolume);
+      }
       return true;
     } else {
       return false;
@@ -108,7 +115,7 @@ public class ScreenWeapon {
   }
 
 
-  public void registerHit(Weapon weapon, float volume) {
+  public void registerHit( Weapon weapon, float volume) {
     Optional.ofNullable(weaponStates.get(weapon))
         .map(weaponState -> weaponState.hitTargetSound)
         .ifPresent(userSettingSound -> userSettingSound.play(volume));

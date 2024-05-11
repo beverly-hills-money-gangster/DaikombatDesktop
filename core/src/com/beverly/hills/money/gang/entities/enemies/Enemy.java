@@ -1,12 +1,11 @@
 package com.beverly.hills.money.gang.entities.enemies;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Vector3;
-import com.beverly.hills.money.gang.Constants;
-import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
-import com.beverly.hills.money.gang.entities.Entity;
+import com.beverly.hills.money.gang.entities.SoundMakingEntity;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
@@ -16,13 +15,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-public abstract class Enemy extends Entity {
+public abstract class Enemy extends SoundMakingEntity {
 
   @Getter
   private final Player player;
 
   @Getter
   private final EnemyListeners enemyListeners;
+
+  @Getter
+  private long dieAnimationEndMls = Long.MIN_VALUE;
 
   @Getter
   private final Vector3 position;
@@ -35,6 +37,9 @@ public abstract class Enemy extends Entity {
   @Getter
   private boolean isDead;
 
+  private long redUntil;
+  private long quadDamageUntil;
+
   public Enemy(final Vector3 position, final GameScreen screen, final Player player,
       final EnemyListeners enemyListeners) {
     super(screen);
@@ -43,36 +48,20 @@ public abstract class Enemy extends Entity {
     this.enemyListeners = enemyListeners;
   }
 
-
-  public SoundVolumeType getSFXVolume() {
-    float distance = Vector2.dst2(player.getRect().x, player.getRect().y, getRect().x, getRect().y);
-    if (distance < 3f) {
-      return SoundVolumeType.VERY_LOUD;
-    } else if (distance < 10f) {
-      return SoundVolumeType.LOUD;
-    } else if (distance < 50) {
-      return SoundVolumeType.NORMAL;
-    } else if (distance < 100) {
-      return SoundVolumeType.MEDIUM;
-    } else if (distance < 250) {
-      return SoundVolumeType.QUITE;
+  protected void colorEffects() {
+    final ColorAttribute colorAttribute = (ColorAttribute) getMdlInst().materials.get(0)
+        .get(ColorAttribute.Diffuse);
+    if (isBeignAttacked()) {
+      colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.RED, 1));
+    } else if (isQuadDamageEffectActive()) {
+      colorAttribute.color.set(Color.SKY.cpy()
+          .lerp(Color.WHITE, (float) Math.sin(getScreen().getGame().getTimeSinceLaunch() * 20)));
     } else {
-      return SoundVolumeType.MUTE;
+      colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.RED, 0));
+      colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.SKY, 0));
     }
   }
 
-  public final float getSFXPan() {
-    var camDir2D = new Vector2(getPlayer().getPlayerCam().direction.x,
-        getPlayer().getPlayerCam().direction.z);
-    float angle = camDir2D.angleDeg(
-        getRect().getNewPosition().cpy().sub(getPlayer().getCurrent2DPosition()));
-    if (Constants.LEFT_RANGE.contains(angle)) {
-      return -0.65f;
-    } else if (Constants.RIGHT_RANGE.contains(angle)) {
-      return 0.65f;
-    }
-    return 0;
-  }
 
   @Override
   public void destroy() {
@@ -99,11 +88,31 @@ public abstract class Enemy extends Entity {
 
   public void getHit() {
     enemyListeners.onGetShot.accept(this);
+    redUntil = getAnimationTimeoutMls();
   }
+
+  protected long getAnimationTimeoutMls() {
+    return System.currentTimeMillis() + 100;
+  }
+
+  public void quadDamage(int effectTimeoutMls) {
+    quadDamageUntil = System.currentTimeMillis() + effectTimeoutMls;
+  }
+
 
   public void die() {
     isDead = true;
     enemyListeners.onDeath.accept(this);
+    dieAnimationEndMls = getAnimationTimeoutMls();
+  }
+
+  public boolean isBeignAttacked() {
+    return System.currentTimeMillis() < redUntil;
+  }
+
+
+  public boolean isQuadDamageEffectActive() {
+    return System.currentTimeMillis() < quadDamageUntil;
   }
 
   @Getter

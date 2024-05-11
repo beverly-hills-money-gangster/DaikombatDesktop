@@ -18,6 +18,7 @@ import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
+import com.beverly.hills.money.gang.entities.player.Player;
 import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,8 @@ public class ScreenWeaponTest {
   private UserSettingSound playerShotgunFireSound;
   private UserSettingSound punchSound;
   private UserSettingSound punchHitSound;
+
+  private UserSettingSound quadDamageAttackSound;
 
   private TextureRegion shotgunFireTexture;
 
@@ -48,6 +51,7 @@ public class ScreenWeaponTest {
     playerShotgunFireSound = mock(UserSettingSound.class);
     punchSound = mock(UserSettingSound.class);
     punchHitSound = mock(UserSettingSound.class);
+    quadDamageAttackSound = mock(UserSettingSound.class);
 
     daiKombatAssetsManager = mock(DaiKombatAssetsManager.class);
 
@@ -57,6 +61,8 @@ public class ScreenWeaponTest {
         .getUserSettingSound(SoundRegistry.PUNCH_THROWN);
     doReturn(punchHitSound).when(daiKombatAssetsManager)
         .getUserSettingSound(SoundRegistry.PUNCH_HIT);
+    doReturn(quadDamageAttackSound).when(daiKombatAssetsManager)
+        .getUserSettingSound(SoundRegistry.QUAD_DAMAGE_ATTACK);
 
     doReturn(shotgunIdleTexture).when(daiKombatAssetsManager).getTextureRegion(
         eq(TexturesRegistry.GUN_IDLE), anyInt(), anyInt(), anyInt(), anyInt());
@@ -84,14 +90,14 @@ public class ScreenWeaponTest {
 
   @Test
   public void testCanAttackAfterRecentAttack() {
-    screenWeapon.attack(ScreenWeapon.Weapon.SHOTGUN, 0);
+    screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, 0);
     assertFalse(screenWeapon.canAttack(),
         "You can't attack right after. There must be some cool down");
   }
 
   @Test
   public void testCanAttackAfterWait() throws InterruptedException {
-    screenWeapon.attack(ScreenWeapon.Weapon.SHOTGUN, 0);
+    screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, 0);
     // wait a little
     Thread.sleep(
         screenWeapon.weaponStates.get(ScreenWeapon.Weapon.SHOTGUN).getAnimationDelayMls() + 50);
@@ -109,16 +115,27 @@ public class ScreenWeaponTest {
   @Test
   public void testAttackShotgun() {
     float volume = 0.5f;
-    assertTrue(screenWeapon.attack(ScreenWeapon.Weapon.SHOTGUN, volume));
+    assertTrue(screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, volume));
     verify(playerShotgunFireSound).play(volume);
     assertEquals(ScreenWeapon.Weapon.SHOTGUN, screenWeapon.weaponBeingUsed);
+    verifyNoInteractions(quadDamageAttackSound);
+  }
 
+  @Test
+  public void testAttackShotgunQuadDamage() {
+    float volume = 0.5f;
+    var player = mock(Player.class);
+    doReturn(true).when(player).isQuadDamageEffectActive();
+    assertTrue(screenWeapon.attack(player, ScreenWeapon.Weapon.SHOTGUN, volume));
+    verify(playerShotgunFireSound).play(volume);
+    verify(quadDamageAttackSound).play(volume);
+    assertEquals(ScreenWeapon.Weapon.SHOTGUN, screenWeapon.weaponBeingUsed);
   }
 
   @Test
   public void testAttackPunch() {
     float volume = 0.7f;
-    assertTrue(screenWeapon.attack(ScreenWeapon.Weapon.GAUNTLET, volume));
+    assertTrue(screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.GAUNTLET, volume));
     verify(punchSound).play(volume);
     assertEquals(ScreenWeapon.Weapon.GAUNTLET, screenWeapon.weaponBeingUsed);
   }
@@ -126,8 +143,8 @@ public class ScreenWeaponTest {
   @Test
   public void testAttackTwiceNoDelay() {
     float volume = 0.5f;
-    assertTrue(screenWeapon.attack(ScreenWeapon.Weapon.SHOTGUN, volume));
-    assertFalse(screenWeapon.attack(ScreenWeapon.Weapon.SHOTGUN, volume),
+    assertTrue(screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, volume));
+    assertFalse(screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, volume),
         "If no delay, then we shouldn't be able to attack");
     verify(playerShotgunFireSound).play(volume);
   }
@@ -135,11 +152,11 @@ public class ScreenWeaponTest {
   @Test
   public void testAttackTwiceDelay() throws InterruptedException {
     float volume = 0.5f;
-    assertTrue(screenWeapon.attack(ScreenWeapon.Weapon.SHOTGUN, volume));
+    assertTrue(screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, volume));
     // wait a little
     Thread.sleep(
         screenWeapon.weaponStates.get(ScreenWeapon.Weapon.SHOTGUN).getAnimationDelayMls() + 50);
-    assertTrue(screenWeapon.attack(ScreenWeapon.Weapon.SHOTGUN, volume),
+    assertTrue(screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, volume),
         "If we have a  delay, then we SHOULD be able to attack");
     verify(playerShotgunFireSound, times(2)).play(volume);
   }
@@ -166,21 +183,21 @@ public class ScreenWeaponTest {
 
   @Test
   public void testGetActiveWeaponForRenderingShotgun() {
-    screenWeapon.attack(ScreenWeapon.Weapon.SHOTGUN, 0.5f);
+    screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, 0.5f);
     var renderingData = screenWeapon.getActiveWeaponForRendering();
     assertEquals(shotgunFireTexture, renderingData.getTextureRegion());
   }
 
   @Test
   public void testGetActiveWeaponForRenderingPunch() {
-    screenWeapon.attack(ScreenWeapon.Weapon.GAUNTLET, 0.5f);
+    screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.GAUNTLET, 0.5f);
     var renderingData = screenWeapon.getActiveWeaponForRendering();
     assertEquals(punchTexture, renderingData.getTextureRegion());
   }
 
   @Test
   public void testGetActiveWeaponForRenderingWaitAnimationFinish() throws InterruptedException {
-    screenWeapon.attack(ScreenWeapon.Weapon.SHOTGUN, 0.5f);
+    screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, 0.5f);
     // wait a little
     Thread.sleep(
         screenWeapon.weaponStates.get(ScreenWeapon.Weapon.SHOTGUN).getAnimationDelayMls() + 50);

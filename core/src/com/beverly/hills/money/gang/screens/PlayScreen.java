@@ -2,12 +2,15 @@ package com.beverly.hills.money.gang.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.Constants;
@@ -17,6 +20,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.MapRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
+import com.beverly.hills.money.gang.entities.item.QuadDamagePowerUp;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
 import com.beverly.hills.money.gang.handler.PlayScreenGameConnectionHandler;
@@ -26,6 +30,7 @@ import com.beverly.hills.money.gang.log.MyPlayerKillLog;
 import com.beverly.hills.money.gang.network.GameConnection;
 import com.beverly.hills.money.gang.proto.PushChatEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand;
+import com.beverly.hills.money.gang.proto.PushGameEventCommand.GameEventType;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.screens.ui.selection.ActivePlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.DeadPlayUISelection;
@@ -93,10 +98,10 @@ public class PlayScreen extends GameScreen {
 
   private final ChatLog chatLog;
   private final MyPlayerKillLog myPlayerKillLog;
-
   private final GameConnection gameConnection;
-
   private final PlayerConnectionContextData playerConnectionContextData;
+
+  private QuadDamagePowerUp quadDamagePowerUp;
 
   public PlayScreen(final DaiKombatGame game,
       final GameConnection gameConnection,
@@ -225,6 +230,36 @@ public class PlayScreen extends GameScreen {
     if (Configs.DEV_MODE && Configs.MIMIC_CONSTANT_NETWORK_ACTIVITY) {
       mimicNetworkActivity();
     }
+  }
+
+  public void spawnQuadDamage(Vector2 position) {
+    if (quadDamagePowerUp != null) {
+      return;
+    }
+    quadDamagePowerUp = new QuadDamagePowerUp(new Vector3(position.x, 0.0f, position.y), this,
+        getPlayer(),
+        () -> {
+          var currentPosition = getPlayer().getCurrent2DPosition();
+          var currentDirection = getPlayer().getCurrent2DDirection();
+          gameConnection.write(PushGameEventCommand.newBuilder()
+              .setPlayerId(playerConnectionContextData.getPlayerId())
+              .setEventType(GameEventType.QUAD_DAMAGE_POWER_UP)
+              .setGameId(Configs.GAME_ID)
+              .setPosition(PushGameEventCommand.Vector.newBuilder()
+                  .setX(currentPosition.x).setY(currentPosition.y).build())
+              .setDirection(PushGameEventCommand.Vector.newBuilder()
+                  .setX(currentDirection.x).setY(currentDirection.y).build())
+              .build());
+        });
+    getGame().getEntMan().addEntity(quadDamagePowerUp);
+  }
+
+  public void removeQuadDamageOrb() {
+    if (quadDamagePowerUp == null) {
+      return;
+    }
+    quadDamagePowerUp.destroy();
+    quadDamagePowerUp = null;
   }
 
   private void mimicNetworkActivity() {
@@ -379,13 +414,19 @@ public class PlayScreen extends GameScreen {
     renderBloodOverlay01();
 
     if (getPlayer().isDead()) {
-      getGame().getBatch().setColor(1, 0, 0, 0.6f);
+      getGame().getBatch().setColor(1, 0, 0, 1f);
     }
 
     getGame().getBatch()
         .draw(getGame().getFbo().getColorBufferTexture(), 0, 0, getViewport().getWorldWidth(),
             getViewport().getWorldHeight());
 
+    getGame().getBatch().end();
+    getGame().getBatch().begin();
+    if (getPlayer().isQuadDamageEffectActive() && !getPlayer().isDead()) {
+      getGame().getBatch().setColor(Color.SKY.cpy()
+          .lerp(Color.WHITE, (float) Math.sin(getGame().getTimeSinceLaunch() * 20)));
+    }
     var activeWeapon = getPlayer().getActiveWeaponRenderingData();
     float gunWidth = getViewport().getWorldWidth() * activeWeapon.getScreenRatioX();
     float gunHeight = getViewport().getWorldHeight() * activeWeapon.getScreenRatioY();
@@ -393,6 +434,9 @@ public class PlayScreen extends GameScreen {
         getViewport().getWorldWidth() * 0.5f + activeWeapon.getPositioning().x,
         (int) getPlayer().getWeaponY() + activeWeapon.getPositioning().y,
         gunWidth, gunHeight);
+
+    getGame().getBatch().end();
+    getGame().getBatch().begin();
     renderBloodOverlay02();
     renderGameTechStats();
     if (!getPlayer().isDead()) {
@@ -475,8 +519,8 @@ public class PlayScreen extends GameScreen {
         LOG.error("Can't handle screen actions", e);
         screenToTransition = new ErrorScreen(getGame(),
             StringUtils.defaultIfEmpty(e.getMessage(), "Can't handle connection")
-                + ". Check internet signal. Last ping " + gameConnection.getNetworkStats().getPingMls()
-                + " mls.");
+                + ". Check internet signal. Last ping " + gameConnection.getNetworkStats()
+                .getPingMls() + " mls.");
       }
     }
 
