@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -17,32 +18,36 @@ public class UILeaderBoard {
 
   @Getter
   private int myPlace;
-
   private int myKills;
-
   private int myDeaths;
 
-
   private final Runnable onTakenTheLead;
-
   private final Runnable onLostTheLead;
+  private final Consumer<Integer> onFragsLeft;
 
   private static final PlayerComparator COMPARATOR = new PlayerComparator();
   private String cachedToString = "";
 
   private boolean needRefresh;
 
+  private final int fragsToWin;
+
   private final List<LeaderBoardPlayer> leaderBoardItems = new ArrayList<>();
 
-  public UILeaderBoard(final int myPlayerId,
+  public UILeaderBoard(
+      final int myPlayerId,
       final List<LeaderBoardPlayer> leaderBoardItems,
+      final int fragsToWin,
       final Runnable onTakenTheLead,
-      final Runnable onLostTheLead) {
+      final Runnable onLostTheLead,
+      final Consumer<Integer> onFragsLeft) {
     this.leaderBoardItems.addAll(leaderBoardItems);
     this.leaderBoardItems.sort(COMPARATOR);
     this.myPlayerId = myPlayerId;
     this.onTakenTheLead = onTakenTheLead;
     this.onLostTheLead = onLostTheLead;
+    this.onFragsLeft = onFragsLeft;
+    this.fragsToWin = fragsToWin;
     setMyStats();
     needRefresh = true;
   }
@@ -155,6 +160,12 @@ public class UILeaderBoard {
               .deaths(leaderBoardPlayer.deaths + 1)
               .name(leaderBoardPlayer.name).build());
         });
+    leaderBoardItems.stream()
+        .max(Comparator.comparingInt(LeaderBoardPlayer::getKills)).ifPresent(
+            topPlayer -> {
+              var fragsLeft = fragsToWin - topPlayer.kills;
+              onFragsLeft.accept(fragsLeft);
+            });
 
     needRefresh = true;
     if (myPlace == 1 && myKills > 0 && myOldPlace > myPlace) {
