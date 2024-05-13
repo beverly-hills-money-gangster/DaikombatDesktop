@@ -1,12 +1,5 @@
 package com.beverly.hills.money.gang.entities.enemies;
 
-import static com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry.ENEMY_PLAYER_SPRITES_BLUE;
-import static com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry.ENEMY_PLAYER_SPRITES_GREEN;
-import static com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry.ENEMY_PLAYER_SPRITES_ORANGE;
-import static com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry.ENEMY_PLAYER_SPRITES_PINK;
-import static com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry.ENEMY_PLAYER_SPRITES_PURPLE;
-import static com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry.ENEMY_PLAYER_SPRITES_YELLOW;
-
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
@@ -14,14 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EnemyTextures {
-
-  private static final TexturesRegistry[] ENEMY_SPRITES = {
-      ENEMY_PLAYER_SPRITES_GREEN,
-      ENEMY_PLAYER_SPRITES_BLUE,
-      ENEMY_PLAYER_SPRITES_ORANGE,
-      ENEMY_PLAYER_SPRITES_PURPLE,
-      ENEMY_PLAYER_SPRITES_YELLOW,
-      ENEMY_PLAYER_SPRITES_PINK};
 
   private final TexturesRegistry texturesRegistry;
 
@@ -44,9 +29,9 @@ public class EnemyTextures {
 
   private final DaiKombatAssetsManager assetsManager;
 
-  public EnemyTextures(DaiKombatAssetsManager assetsManager, int enemyId) {
+  public EnemyTextures(DaiKombatAssetsManager assetsManager, TexturesRegistry texturesRegistry) {
     this.assetsManager = assetsManager;
-    this.texturesRegistry = ENEMY_SPRITES[Math.abs(enemyId) % ENEMY_SPRITES.length];
+    this.texturesRegistry = texturesRegistry;
     textures.put(EnemyTextureRegistry.IDLETEXFRONTREG, getEnemyPlayerTextureRegion(0));
     textures.put(EnemyTextureRegistry.MOVING1TEXFRONTREG, getEnemyPlayerTextureRegion(11));
     textures.put(EnemyTextureRegistry.MOVING2TEXFRONTREG, getEnemyPlayerTextureRegion(14));

@@ -14,11 +14,13 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import lombok.Getter;
@@ -53,12 +55,15 @@ public class EnemyPlayer extends Enemy {
       final int enemyPlayerId,
       final Vector3 position,
       final Vector2 direction,
-      final GameScreen screen, final String name, EnemyListeners enemyListeners) {
+      final GameScreen screen,
+      final String name,
+      final TexturesRegistry enemyTextureRegistry,
+      final EnemyListeners enemyListeners) {
 
     super(position, screen, player, enemyListeners);
     this.enemyPlayerId = enemyPlayerId;
     lastDirection = direction;
-    enemyTextures = new EnemyTextures(screen.getGame().getAssMan(), name.hashCode());
+    enemyTextures = new EnemyTextures(screen.getGame().getAssMan(), enemyTextureRegistry);
     speed = Configs.PLAYER_MOVE_SPEED;
     this.name = name;
     super.setMdlInst(new ModelInstanceBB(screen.getGame().getCellBuilder().getMdlEnemy()));

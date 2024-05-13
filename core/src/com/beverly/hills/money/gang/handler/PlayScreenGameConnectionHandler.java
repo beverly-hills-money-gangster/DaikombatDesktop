@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
+import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.AttackingSound;
 import com.beverly.hills.money.gang.entities.enemies.Enemy;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
@@ -109,7 +110,8 @@ public class PlayScreenGameConnectionHandler {
             DEFAULT_ENEMY_Y, gameEvent.getPlayer().getPosition().getY()),
         new Vector2(gameEvent.getPlayer().getDirection().getX(),
             gameEvent.getPlayer().getDirection().getY()),
-        playScreen, gameEvent.getPlayer().getPlayerName(), createEnemyListeners());
+        playScreen, gameEvent.getPlayer().getPlayerName(),
+        getEnemyTexture(gameEvent.getPlayer().getSkinColor()), createEnemyListeners());
 
     gameEvent.getPlayer().getActivePowerUpsList().forEach(gamePowerUp -> {
       switch (gamePowerUp.getType()) {
@@ -134,6 +136,30 @@ public class PlayScreenGameConnectionHandler {
       playScreen.getGame().getAssMan()
           .getUserSettingSound(SoundRegistry.SPAWN_SOUND_SEQ.getNextSound())
           .play(enemyPlayer.getSFXVolume());
+    }
+  }
+
+  private TexturesRegistry getEnemyTexture(ServerResponse.PlayerSkinColor playerSkinColor) {
+    switch (playerSkinColor) {
+      case BLUE -> {
+        return TexturesRegistry.ENEMY_PLAYER_SPRITES_BLUE;
+      }
+      case PURPLE -> {
+        return TexturesRegistry.ENEMY_PLAYER_SPRITES_PURPLE;
+      }
+      case PINK -> {
+        return TexturesRegistry.ENEMY_PLAYER_SPRITES_PINK;
+      }
+      case GREEN -> {
+        return TexturesRegistry.ENEMY_PLAYER_SPRITES_GREEN;
+      }
+      case ORANGE -> {
+        return TexturesRegistry.ENEMY_PLAYER_SPRITES_ORANGE;
+      }
+      case YELLOW -> {
+        return TexturesRegistry.ENEMY_PLAYER_SPRITES_YELLOW;
+      }
+      default -> throw new IllegalStateException("Not supported skin color " + playerSkinColor);
     }
   }
 
