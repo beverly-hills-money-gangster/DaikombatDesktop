@@ -2,6 +2,7 @@ package com.beverly.hills.money.gang.rect;
 
 import com.badlogic.gdx.utils.Array;
 import com.beverly.hills.money.gang.DaiKombatGame;
+import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import lombok.Getter;
 
@@ -24,7 +25,14 @@ public class RectManager {
     for (final RectanglePlus otherRect : rects) {
       if (game.getOverlapFilterMan().doesFiltersOverlap(rect.getFilter(), otherRect.getFilter())
           && otherRect != rect
-          && !otherRect.getFilter().equals(RectanglePlusFilter.ENEMY) && rect.overlaps(otherRect)) {
+          && RectanglePlusFilter.ENEMY != otherRect.getFilter()
+          && rect.overlaps(otherRect)) {
+        if (RectanglePlusFilter.ITEM == otherRect.getFilter()) {
+          Entity item = game.getEntMan()
+              .getEntityFromId(otherRect.getConnectedEntityId());
+          item.onCollision();
+          continue;
+        }
         return true;
       }
     }

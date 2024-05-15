@@ -31,15 +31,13 @@ public class EnemyPlayer extends Enemy {
 
   private final EnemyTextures enemyTextures;
 
-  private long dieAnimationEndMls = Long.MAX_VALUE;
-
   private static final int MAX_ACTION_QUEUE_CLOGGING = 30;
 
   private final Queue<EnemyPlayerAction> actions = new ArrayDeque<>();
 
   @Getter
   private final String name;
-  private long redUntil;
+
   private long movingAnimationUntil;
 
   private long shootingAnimationUntil;
@@ -108,16 +106,6 @@ public class EnemyPlayer extends Enemy {
   }
 
 
-  private void flashRedIfHit() {
-    final ColorAttribute colorAttribute = (ColorAttribute) getMdlInst().materials.get(0)
-        .get(ColorAttribute.Diffuse);
-    if (System.currentTimeMillis() < redUntil) {
-      colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.RED, 1));
-    } else {
-      colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.RED, 0));
-    }
-  }
-
   public void shoot() {
     shootingAnimationUntil = System.currentTimeMillis() + 100;
     getEnemyListeners().getOnShooting().accept(this);
@@ -137,22 +125,11 @@ public class EnemyPlayer extends Enemy {
     super.render3D(mdlBatch, env, delta);
   }
 
-  @Override
-  public void getHit() {
-    super.getHit();
-    redUntil = getAnimationTimeoutMls();
-  }
-
-  @Override
-  public void die() {
-    super.die();
-    dieAnimationEndMls = getAnimationTimeoutMls();
-  }
 
   @Override
   public void tick(final float delta) {
     if (isDead()) {
-      if (System.currentTimeMillis() < dieAnimationEndMls) {
+      if (System.currentTimeMillis() < getDieAnimationEndMls()) {
         getMdlInst().materials.get(0).set(TextureAttribute
             .createDiffuse(
                 enemyTextures.getEnemyPlayerTextureRegion(EnemyTextureRegistry.DEATHTEXREG)));
@@ -190,7 +167,7 @@ public class EnemyPlayer extends Enemy {
     getPosition().set(getRect().x + getRect().getWidth() / 2, 0,
         getRect().y + getRect().getHeight() / 2);
     getRect().getOldPosition().set(getRect().x, getRect().y);
-    flashRedIfHit();
+    colorEffects();
     rotateEnemyAnimation();
   }
 
@@ -260,10 +237,6 @@ public class EnemyPlayer extends Enemy {
 
   private boolean keepMovingAnimation() {
     return System.currentTimeMillis() >= movingAnimationUntil;
-  }
-
-  private long getAnimationTimeoutMls() {
-    return System.currentTimeMillis() + 100;
   }
 
 

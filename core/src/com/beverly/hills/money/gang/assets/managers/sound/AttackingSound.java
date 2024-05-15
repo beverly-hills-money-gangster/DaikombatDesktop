@@ -5,6 +5,7 @@ import static com.beverly.hills.money.gang.Constants.SHOOTING_SOUND_FREQ_MLS;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class AttackingSound {
 
@@ -22,8 +23,14 @@ public class AttackingSound {
   }
 
   public void play(SoundVolumeType volumeType, float pan) {
+    play(volumeType, pan, null);
+  }
+
+  public void play(SoundVolumeType volumeType, float pan, UserSettingSound extraSound) {
     if (System.currentTimeMillis() - LAST_PLAYED.get(volumeType) > SHOOTING_SOUND_FREQ_MLS) {
       sound.play(volumeType, pan);
+      Optional.ofNullable(extraSound)
+          .ifPresent(userSettingSound -> userSettingSound.play(volumeType, pan));
       LAST_PLAYED.put(volumeType, System.currentTimeMillis());
     }
   }

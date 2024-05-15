@@ -49,6 +49,8 @@ public class PlayScreenGameConnectionHandler {
         handleGameOver(serverResponse.getGameOver());
       } else if (serverResponse.hasErrorEvent()) {
         handleErrorEvent(serverResponse.getErrorEvent());
+      } else if (serverResponse.hasPowerUpSpawn()) {
+        handlePowerUpSpawn(serverResponse.getPowerUpSpawn());
       }
     });
 
@@ -108,9 +110,21 @@ public class PlayScreenGameConnectionHandler {
         new Vector2(gameEvent.getPlayer().getDirection().getX(),
             gameEvent.getPlayer().getDirection().getY()),
         playScreen, gameEvent.getPlayer().getPlayerName(), createEnemyListeners());
-    playScreen.getGame().getEntMan().addEntity(enemyPlayer);
 
+    gameEvent.getPlayer().getActivePowerUpsList().forEach(gamePowerUp -> {
+      switch (gamePowerUp.getType()) {
+        case QUAD_DAMAGE -> {
+          enemyPlayer.quadDamage(gamePowerUp.getLastsForMls());
+          playScreen.removeQuadDamageOrb();
+        }
+        default -> throw new IllegalArgumentException(
+            "Not supported power-up type " + gamePowerUp.getType());
+      }
+    });
+
+    playScreen.getGame().getEntMan().addEntity(enemyPlayer);
     enemiesRegistry.addEnemy(gameEvent.getPlayer().getPlayerId(), enemyPlayer);
+
     playScreen.getUiLeaderBoard().addNewPlayer(UILeaderBoard.LeaderBoardPlayer.builder()
         .name(enemyPlayer.getName())
         .id(enemyPlayer.getEnemyPlayerId())
@@ -141,13 +155,43 @@ public class PlayScreenGameConnectionHandler {
   private void handleMove(ServerResponse.GameEvent gameEvent) {
     if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
         .getPlayerId()) {
+      gameEvent.getPlayer().getActivePowerUpsList().forEach(gamePowerUp -> {
+        switch (gamePowerUp.getType()) {
+          case QUAD_DAMAGE -> {
+            playScreen.getGame().getAssMan()
+                .getUserSettingSound(SoundRegistry.QUAD_DAMAGE_PICK)
+                .play(Constants.DEFAULT_SFX_VOLUME);
+            LOG.info("Picked up quad-damage. Lasts for {}", gamePowerUp.getLastsForMls());
+            playScreen.getPlayer().quadDamage(gamePowerUp.getLastsForMls());
+            playScreen.removeQuadDamageOrb();
+          }
+          default -> throw new IllegalArgumentException(
+              "Not supported power-up type " + gamePowerUp.getType());
+        }
+      });
       return;
     }
     enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
-        .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
-            .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
-            .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
-            .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build()));
+        .ifPresent(enemyPlayer -> {
+          gameEvent.getPlayer().getActivePowerUpsList().forEach(gamePowerUp -> {
+            switch (gamePowerUp.getType()) {
+              case QUAD_DAMAGE -> {
+                playScreen.getGame().getAssMan()
+                    .getUserSettingSound(SoundRegistry.ENEMY_QUAD_DAMAGE_PICK)
+                    .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
+                enemyPlayer.quadDamage(gamePowerUp.getLastsForMls());
+                playScreen.removeQuadDamageOrb();
+              }
+              default -> throw new IllegalArgumentException(
+                  "Not supported power-up type " + gamePowerUp.getType());
+            }
+          });
+
+          enemyPlayer.queueAction(EnemyPlayerAction.builder()
+              .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
+              .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
+              .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build());
+        });
   }
 
   private void handleAttackMiss(ServerResponse.GameEvent gameEvent) {
@@ -283,6 +327,16 @@ public class PlayScreenGameConnectionHandler {
     playScreen.setErrorMessage(errorEvent.getMessage());
   }
 
+  public void handlePowerUpSpawn(ServerResponse.PowerUpSpawnEvent powerUpSpawnEvent) {
+    switch (powerUpSpawnEvent.getType()) {
+      case QUAD_DAMAGE -> playScreen.spawnQuadDamage(
+          new Vector2(powerUpSpawnEvent.getPosition().getX(),
+              powerUpSpawnEvent.getPosition().getY()));
+      default -> throw new IllegalStateException(
+          "Not supported power-up type " + powerUpSpawnEvent.getType());
+    }
+  }
+
   public void handleException(Throwable error) {
     LOG.error("Got error", error);
     playScreen.setErrorMessage(ExceptionUtils.getMessage(error));
@@ -297,9 +351,13 @@ public class PlayScreenGameConnectionHandler {
         .onGetShot(enemy -> playScreen.getGame().getAssMan()
             .getUserSettingSound(SoundRegistry.ENEMY_GET_HIT_SOUND_SEQ.getNextSound())
             .play(enemy.getSFXVolume(), enemy.getSFXPan()))
-        .onShooting(enemy -> new AttackingSound(
-            playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.ENEMY_SHOTGUN))
-            .play(enemy.getSFXVolume(), enemy.getSFXPan())
+        .onShooting(enemy -> {
+              new AttackingSound(
+                  playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.ENEMY_SHOTGUN))
+                  .play(enemy.getSFXVolume(), enemy.getSFXPan(),
+                      enemy.isQuadDamageEffectActive() ? playScreen.getGame().getAssMan()
+                          .getUserSettingSound(SoundRegistry.ENEMY_QUAD_DAMAGE_ATTACK) : null);
+            }
         ).onPunching(enemy -> new AttackingSound(
             playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.ENEMY_PUNCH_HIT))
             .play(enemy.getSFXVolume(), enemy.getSFXPan()))

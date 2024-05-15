@@ -2,6 +2,7 @@ package com.beverly.hills.money.gang.entities.player;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
@@ -20,8 +21,12 @@ import java.util.function.Consumer;
 import lombok.Builder;
 import lombok.Getter;
 import org.apache.commons.lang3.stream.Streams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Player extends Entity {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Player.class);
 
   @Getter
   private long deathTimeMls;
@@ -53,6 +58,7 @@ public class Player extends Entity {
 
   private final ScreenWeapon screenWeapon;
 
+  private long quadDamageUntil;
 
   private float camY = Constants.DEFAULT_PLAYER_CAM_Y;
   private boolean headbob = false;
@@ -176,7 +182,7 @@ public class Player extends Entity {
   }
 
   private void attack(ScreenWeapon.Weapon weapon) {
-    if (screenWeapon.attack(weapon, Constants.DEFAULT_SFX_VOLUME)) {
+    if (screenWeapon.attack(this, weapon, Constants.DEFAULT_SFX_VOLUME)) {
       onAttackListener.accept(PlayerWeapon
           .builder().player(this).weapon(weapon).build());
     }
@@ -238,6 +244,14 @@ public class Player extends Entity {
 
   public ScreenWeapon.WeaponRenderData getActiveWeaponRenderingData() {
     return screenWeapon.getActiveWeaponForRendering();
+  }
+
+  public void quadDamage(int quadDamageTimeout) {
+    quadDamageUntil = System.currentTimeMillis() + quadDamageTimeout;
+  }
+
+  public boolean isQuadDamageEffectActive() {
+    return System.currentTimeMillis() < quadDamageUntil;
   }
 
   public float getWeaponDistance(ScreenWeapon.Weapon weapon) {
