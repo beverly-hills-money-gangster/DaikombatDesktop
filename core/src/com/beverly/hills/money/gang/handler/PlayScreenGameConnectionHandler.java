@@ -306,7 +306,7 @@ public class PlayScreenGameConnectionHandler {
       playScreen.getMyPlayerKillLog()
           .myPlayerKill(victimPlayerOpt.map(EnemyPlayer::getName).orElse("victim"), buff);
       int kills = playScreen.getUiLeaderBoard().getMyKills();
-      if (kills > 1 && kills % 3 == 0) {
+      if (kills > 1 && kills % 5 == 0) {
         playScreen.getGame().getAssMan()
             .getUserSettingSound(SoundRegistry.WINNING_SOUND_SEQ.getNextSound())
             .play(Constants.QUAKE_NARRATOR_FX_VOLUME);

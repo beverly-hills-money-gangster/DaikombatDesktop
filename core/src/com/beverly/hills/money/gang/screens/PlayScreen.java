@@ -37,6 +37,7 @@ import com.beverly.hills.money.gang.screens.ui.selection.DeadPlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
@@ -69,6 +70,9 @@ public class PlayScreen extends GameScreen {
   private final UserSettingSound boomSound2;
   private final UserSettingSound youLead;
   private final UserSettingSound lostLead;
+  private final UserSettingSound oneFragLeftSound;
+  private final UserSettingSound twoFragsLeftSound;
+  private final UserSettingSound threeFragsLeftSound;
 
   @Getter
   @Setter
@@ -137,6 +141,9 @@ public class PlayScreen extends GameScreen {
     youLead = getGame().getAssMan().getUserSettingSound(SoundRegistry.YOU_LEAD);
     lostLead = getGame().getAssMan().getUserSettingSound(SoundRegistry.LOST_LEAD);
     fightSound.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
+    oneFragLeftSound = getGame().getAssMan().getUserSettingSound(SoundRegistry.ONE_FRAG_LEFT);
+    twoFragsLeftSound = getGame().getAssMan().getUserSettingSound(SoundRegistry.TWO_FRAGS_LEFT);
+    threeFragsLeftSound= getGame().getAssMan().getUserSettingSound(SoundRegistry.THREE_FRAGS_LEFT);
 
     getGame().getMapBuilder().buildMap(getGame().getAssMan().getMap(MapRegistry.ONLINE_MAP));
 
@@ -215,6 +222,7 @@ public class PlayScreen extends GameScreen {
                 .kills(leaderBoardItem.getKills())
                 .build())
             .collect(Collectors.toList()),
+        playerConnectionContextData.getFragsToWin(),
         () -> {
           if (!gameOver) {
             youLead.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
@@ -224,7 +232,14 @@ public class PlayScreen extends GameScreen {
           if (!gameOver) {
             lostLead.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
           }
+        }, fragsLeft -> {
+          switch (fragsLeft) {
+            case 3 -> threeFragsLeftSound.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
+            case 2 -> twoFragsLeftSound.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
+            case 1 -> oneFragLeftSound.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
+          }
         }
+
     );
     playScreenGameConnectionHandler = new PlayScreenGameConnectionHandler(this);
     if (Configs.DEV_MODE && Configs.MIMIC_CONSTANT_NETWORK_ACTIVITY) {
