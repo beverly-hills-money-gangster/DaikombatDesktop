@@ -19,6 +19,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.MapRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
+import com.beverly.hills.money.gang.assets.managers.sound.SoundQueue;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.item.QuadDamagePowerUp;
 import com.beverly.hills.money.gang.entities.player.Player;
@@ -37,7 +38,6 @@ import com.beverly.hills.money.gang.screens.ui.selection.DeadPlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
@@ -53,6 +53,8 @@ public class PlayScreen extends GameScreen {
   private static final int DEAD_SCREEN_INPUT_DELAY_MLS = 1_000;
 
   private GameScreen screenToTransition;
+  private final SoundQueue narratorSoundQueue = new SoundQueue(1_000,
+      Constants.QUAKE_NARRATOR_FX_VOLUME);
   private static final int MAX_CHAT_MSG_LEN = 32;
   private static final float BLOOD_OVERLAY_ALPHA_SWITCH = 0.5f;
   private final TextureRegion texRegBloodOverlay, texRegBlackOverlay;
@@ -143,7 +145,7 @@ public class PlayScreen extends GameScreen {
     fightSound.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
     oneFragLeftSound = getGame().getAssMan().getUserSettingSound(SoundRegistry.ONE_FRAG_LEFT);
     twoFragsLeftSound = getGame().getAssMan().getUserSettingSound(SoundRegistry.TWO_FRAGS_LEFT);
-    threeFragsLeftSound= getGame().getAssMan().getUserSettingSound(SoundRegistry.THREE_FRAGS_LEFT);
+    threeFragsLeftSound = getGame().getAssMan().getUserSettingSound(SoundRegistry.THREE_FRAGS_LEFT);
 
     getGame().getMapBuilder().buildMap(getGame().getAssMan().getMap(MapRegistry.ONLINE_MAP));
 
@@ -223,22 +225,14 @@ public class PlayScreen extends GameScreen {
                 .build())
             .collect(Collectors.toList()),
         playerConnectionContextData.getFragsToWin(),
-        () -> {
-          if (!gameOver) {
-            youLead.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
-          }
-        },
-        () -> {
-          if (!gameOver) {
-            lostLead.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
-          }
-        }, fragsLeft -> {
-          switch (fragsLeft) {
-            case 3 -> threeFragsLeftSound.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
-            case 2 -> twoFragsLeftSound.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
-            case 1 -> oneFragLeftSound.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
-          }
-        }
+        () -> narratorSoundQueue.addSound(youLead),
+        () -> narratorSoundQueue.addSound(lostLead), fragsLeft -> {
+      switch (fragsLeft) {
+        case 3 -> narratorSoundQueue.addSound(threeFragsLeftSound);
+        case 2 -> narratorSoundQueue.addSound(twoFragsLeftSound);
+        case 1 -> narratorSoundQueue.addSound(oneFragLeftSound);
+      }
+    }
 
     );
     playScreenGameConnectionHandler = new PlayScreenGameConnectionHandler(this);
@@ -411,7 +405,9 @@ public class PlayScreen extends GameScreen {
   @Override
   public void render(final float delta) {
     super.render(delta);
-
+    if (!gameOver) {
+      narratorSoundQueue.play();
+    }
     getCurrentCam().update();
 
     getGame().getFbo().begin();
