@@ -2,10 +2,10 @@ package com.beverly.hills.money.gang.entities.ui;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -446,6 +446,59 @@ public class UILeaderBoardTest {
 
     leaderBoard.registerKill(myPlayerId, 999);
 
+    verify(onFragsLeft).accept(1);
+  }
+
+  @Test
+  public void testRegisterKillOneFragLeftDouble() {
+    int myPlayerId = 10;
+    UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
+        List.of(UILeaderBoard.LeaderBoardPlayer
+                .builder()
+                .kills(4).id(myPlayerId).name("my name")
+                .build(),
+            UILeaderBoard.LeaderBoardPlayer
+                .builder()
+                .kills(1).id(999).name("top dog")
+                .build(),
+            UILeaderBoard.LeaderBoardPlayer
+                .builder()
+                .kills(0).id(666).name("other player")
+                .build()), 6,
+        youLeadRunnable, lostLeadRunnable, onFragsLeft);
+
+    leaderBoard.registerKill(myPlayerId, 999);
+    leaderBoard.registerKill(999, myPlayerId); // the number of frags left doesn't change here
+
+    // called only once
+    verify(onFragsLeft).accept(1);
+  }
+
+  @Test
+  public void testRegisterKillOneFragLeftAfterRemove() {
+    int myPlayerId = 10;
+    UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
+        List.of(UILeaderBoard.LeaderBoardPlayer
+                .builder()
+                .kills(4).id(myPlayerId).name("my name")
+                .build(),
+            UILeaderBoard.LeaderBoardPlayer
+                .builder()
+                .kills(3).id(999).name("top dog")
+                .build(),
+            UILeaderBoard.LeaderBoardPlayer
+                .builder()
+                .kills(2).id(666).name("other player")
+                .build()), 6,
+        youLeadRunnable, lostLeadRunnable, onFragsLeft);
+
+    leaderBoard.removePlayer(myPlayerId);
+    // kill twice. after that, one frag is left
+    leaderBoard.registerKill(999, 666);
+    leaderBoard.registerKill(999, 666);
+
+    // called only once
+    verify(onFragsLeft).accept(anyInt());
     verify(onFragsLeft).accept(1);
   }
 

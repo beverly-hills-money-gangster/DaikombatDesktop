@@ -333,9 +333,9 @@ public class PlayScreenGameConnectionHandler {
           .myPlayerKill(victimPlayerOpt.map(EnemyPlayer::getName).orElse("victim"), buff);
       int kills = playScreen.getUiLeaderBoard().getMyKills();
       if (kills > 1 && kills % 5 == 0) {
-        playScreen.getGame().getAssMan()
-            .getUserSettingSound(SoundRegistry.WINNING_SOUND_SEQ.getNextSound())
-            .play(Constants.QUAKE_NARRATOR_FX_VOLUME);
+        playScreen.getNarratorSoundQueue().addSound(
+            playScreen.getGame().getAssMan()
+                .getUserSettingSound(SoundRegistry.WINNING_SOUND_SEQ.getNextSound()));
       }
     } else {
       enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
