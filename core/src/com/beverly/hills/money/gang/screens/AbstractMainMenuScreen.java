@@ -88,14 +88,16 @@ public abstract class AbstractMainMenuScreen extends GameScreen {
     guiFont32.draw(getGame().getBatch(), networkClientVersion,
         getViewport().getWorldWidth() / 2f - glyphLayoutNetworkClient.width / 2f,
         getViewport().getWorldHeight() - Constants.MENU_OPTION_INDENT);
+    getGame().getBatch().end();
     if (showLogo) {
+      getGame().getBatch().begin();
       getGame().getBatch().draw(guiTitle,
           getViewport().getWorldWidth() / 4,
           getViewport().getWorldHeight() / 4 + (int) (Math.sin(getGame().getTimeSinceLaunch())
               * 15),
           getViewport().getWorldWidth() / 2, getViewport().getWorldHeight() / 2);
+      getGame().getBatch().end();
     }
-    getGame().getBatch().end();
   }
 
 }

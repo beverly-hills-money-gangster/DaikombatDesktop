@@ -24,7 +24,6 @@ public class EnterYourNameScreen extends AbstractMainMenuScreen {
 
   private final JoinGameData.JoinGameDataBuilder joinGameDataBuilder;
 
-
   public EnterYourNameScreen(final DaiKombatGame game,
       final JoinGameData.JoinGameDataBuilder joinGameDataBuilder) {
     super(game);
@@ -45,7 +44,7 @@ public class EnterYourNameScreen extends AbstractMainMenuScreen {
       boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
       joinGameDataBuilder.playerName(nameTextInputProcessor.getText());
       getGame().setScreen(
-          new EnterServerPasswordScreen(getGame(), joinGameDataBuilder));
+          new ChooseSkinScreen(getGame(), joinGameDataBuilder));
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));

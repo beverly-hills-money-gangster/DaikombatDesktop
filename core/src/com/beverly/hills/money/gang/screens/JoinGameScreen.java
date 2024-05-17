@@ -6,8 +6,10 @@ import com.beverly.hills.money.gang.config.ClientConfig;
 import com.beverly.hills.money.gang.network.GameConnection;
 import com.beverly.hills.money.gang.proto.JoinGameCommand;
 import com.beverly.hills.money.gang.proto.ServerResponse;
+import com.beverly.hills.money.gang.proto.SkinColorSelection;
 import com.beverly.hills.money.gang.screens.data.JoinGameData;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
+import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.utils.Converter;
 import java.util.Optional;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -42,9 +44,35 @@ public class JoinGameScreen extends AbstractLoadingScreen {
       gameConnection.write(JoinGameCommand.newBuilder()
           .setVersion(ClientConfig.VERSION)
           .setGameId(Configs.GAME_ID)
+          .setSkin(creatSkinColorSelection(joinGameData.getSkinUISelection()))
           .setPlayerName(joinGameData.getPlayerName())
           .build());
     }
+  }
+
+  private SkinColorSelection creatSkinColorSelection(SkinUISelection skinUISelection) {
+    switch (skinUISelection) {
+      case BLUE -> {
+        return SkinColorSelection.BLUE;
+      }
+      case YELLOW -> {
+        return SkinColorSelection.YELLOW;
+      }
+      case ORANGE -> {
+        return SkinColorSelection.ORANGE;
+      }
+      case GREEN -> {
+        return SkinColorSelection.GREEN;
+      }
+      case PINK -> {
+        return SkinColorSelection.PINK;
+      }
+      case PURPLE -> {
+        return SkinColorSelection.PURPLE;
+      }
+      default -> throw new IllegalStateException("Not supported skin color " + skinUISelection);
+    }
+
   }
 
 
