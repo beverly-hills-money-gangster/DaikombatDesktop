@@ -19,8 +19,20 @@ to redemption, yet every defeat plunges him deeper into the abyss of his own dam
 
 ## Gameplay
 
+The player spawns on the map and joins a death-match against other players online. The player who
+gets 20(configurable) kills first is declared the winner. Notable features:
+- Online mode
+- In-game chat
+- Leaderboard
+- Power-ups
+- 3D sound
+- Various player skins(blue, yellow, pink, purple, orange, and green)
+
+### Video
+
 [![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white)](https://youtu.be/b0ZATG3TXaQ)
 
+### Screenshots
 
 ![Main menu](/screenshot-main-menu.png)
 
