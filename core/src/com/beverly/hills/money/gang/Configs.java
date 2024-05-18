@@ -19,6 +19,6 @@ public interface Configs {
   int PLAYER_MOVE_SPEED = NumberUtils.toInt(System.getenv("DESKTOP_PLAYER_MOVE_SPEED"), 5);
   float SHOOTING_DISTANCE = NumberUtils.toFloat(System.getenv("DESKTOP_SHOOTING_DISTANCE"), 7.5f);
 
-  float MELEE_DISTANCE = NumberUtils.toFloat(System.getenv("DESKTOP_MELEE_DISTANCE"), 0.35f);
+  float MELEE_DISTANCE = NumberUtils.toFloat(System.getenv("DESKTOP_MELEE_DISTANCE"), 0.55f);
 
 }
