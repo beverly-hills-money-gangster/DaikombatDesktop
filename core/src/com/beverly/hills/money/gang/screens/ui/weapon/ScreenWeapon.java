@@ -20,7 +20,7 @@ public class ScreenWeapon {
 
   private static final int GUNSHOT_ANIMATION_MLS = 200;
 
-  private static final int PUNCH_ANIMATION_MLS = 200;
+  private static final int PUNCH_ANIMATION_MLS = 175;
 
   private final UserSettingSound quadDamageAttack;
 
@@ -55,7 +55,8 @@ public class ScreenWeapon {
         .fireTexture(assetsManager.getTextureRegion(TexturesRegistry.PUNCH, 0, 0,
             273, 175))
         .weaponScreenPositioning(
-            animationTime -> new Vector2(-(animationTime / 200f) * 200 + 200, 0))
+            animationTime -> new Vector2(-(animationTime / (float) PUNCH_ANIMATION_MLS) * 200 + 200,
+                0))
         .build());
   }
 
