@@ -53,7 +53,7 @@ public class PlayScreen extends GameScreen {
   private static final int DEAD_SCREEN_INPUT_DELAY_MLS = 1_000;
 
   private GameScreen screenToTransition;
-  private final SoundQueue narratorSoundQueue = new SoundQueue(1_000,
+  private final SoundQueue narratorSoundQueue = new SoundQueue(1_250,
       Constants.QUAKE_NARRATOR_FX_VOLUME);
   private static final int MAX_CHAT_MSG_LEN = 32;
   private static final float BLOOD_OVERLAY_ALPHA_SWITCH = 0.5f;
