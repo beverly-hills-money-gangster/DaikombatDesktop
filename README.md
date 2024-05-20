@@ -76,4 +76,4 @@ To turn dev mode on, please run the game with `DESKTOP_DEV_MODE=true` environmen
 
 ## Distribution
 
-Right now, the game can be downloaded from the [official web-site](https://beverly-hills-money-gangster.github.io/DaikombatDesktop/).
+Right now, the game can be downloaded from the [official web-site](https://beverly-hills-money-gangster.github.io/DaikombatDesktop/) or [itch.io](https://beverlyhillsmoneygangster.itch.io/daikombat).
