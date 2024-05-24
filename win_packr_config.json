@@ -1,0 +1,15 @@
+{
+  "platform": "windows64",
+  "jdk": "windows/runtime/OpenJDK14U-jre_x64_windows_hotspot_14.0.2_12.zip",
+  "executable": "daikombat",
+  "classpath": ["desktop/build/lib/desktop-1.0.jar"],
+  "mainclass": "com.beverly.hills.money.gang.desktop.DesktopLauncher",
+  "vmargs": [
+    "Xmx1G"
+  ],
+  "resources": [
+    "core/assets"
+  ],
+  "minimizejre": "soft",
+  "output": "game"
+}

@@ -5,7 +5,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 public interface Configs {
 
-  String HOST = StringUtils.defaultIfBlank(System.getenv("DESKTOP_GAME_HOST"), "localhost");
+  String HOST = StringUtils.defaultIfBlank(System.getenv("DESKTOP_GAME_HOST"), "64.226.66.192");
 
   int PORT = NumberUtils.toInt(System.getenv("DESKTOP_GAME_PORT"), 7777);
 

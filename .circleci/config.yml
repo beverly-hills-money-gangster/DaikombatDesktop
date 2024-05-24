@@ -36,7 +36,7 @@ jobs:
           name: Create asset folder
           command: |
             mkdir -p core/assets
-            mkdir -p windows-executable/runtime
+            mkdir -p windows/runtime
       - add_ssh_keys:
           fingerprints:
             - "SHA256:F2SZAptMlXmPA7W1+cM0Y/XRkGrF34AtEbZLlOJIFuY"
@@ -44,25 +44,23 @@ jobs:
           name: Download assets
           command: |
             export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
-            git clone git@github.com:beverly-hills-money-gangster/DaikombatDesktopAssets.git private-assets
+            git clone --depth 1 git@github.com:beverly-hills-money-gangster/DaikombatDesktopAssets.git private-assets
             mv private-assets/assets/* core/assets
-            mv private-assets/runtime/windows/x86/* windows-executable/runtime
+            mv private-assets/runtime/windows/x64/* windows/runtime
+            mv private-assets/runtime/packr-all-4.0.0.jar packr-all-4.0.0.jar
       - run:
           name: Build jar
           command: ./gradlew desktop:dist
       - run:
-          name: Create executable
+          name: Create win executable
           command: |
-            mv desktop/build/lib/desktop-*.jar windows-executable/desktop.jar
-            touch windows-executable/run.cmd
-            echo "set DESKTOP_GAME_HOST=${GAME_HOST}" > windows-executable/run.cmd
-            echo ".\runtime\jdk-14.0.2+12-jre\bin\java.exe -jar .\desktop.jar > log.txt" >> windows-executable/run.cmd
-            zip -9 -r win86-game.zip windows-executable
+            java -jar packr-all-4.0.0.jar win_packr_config.json
+            zip -9 -r win64-exe-game.zip game
       - run:
-          name: Upload to dropbox
+          name: Upload win exe to dropbox
           command: |
-            chmod +x upload_to_dropbox.sh
-            ./upload_to_dropbox.sh
+            chmod +x upload_win_to_dropbox.sh
+            ./upload_win_to_dropbox.sh
 workflows:
   compile-verify-test:
     jobs:

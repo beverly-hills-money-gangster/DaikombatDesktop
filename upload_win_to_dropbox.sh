@@ -12,5 +12,5 @@ ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.access_token')
 curl --fail -X POST https://content.dropboxapi.com/2/files/upload \
   --header "Authorization: Bearer $ACCESS_TOKEN" \
   --header "Content-Type: application/octet-stream" \
-  --header "Dropbox-API-Arg: {\"path\": \"/win86-game.zip\",\"mode\": \"overwrite\",\"mute\": false}" \
-  --data-binary "@win86-game.zip"
+  --header "Dropbox-API-Arg: {\"path\": \"/win64-exe-game.zip\",\"mode\": \"overwrite\",\"mute\": false}" \
+  --data-binary "@win64-exe-game.zip"
