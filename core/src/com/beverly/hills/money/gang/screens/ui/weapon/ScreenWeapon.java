@@ -106,7 +106,7 @@ public class ScreenWeapon {
       state.animationStartMls = System.currentTimeMillis();
       weaponBeingUsed = weapon;
       state.fireSound.play(soundVolume);
-      if (player.isQuadDamageEffectActive()) {
+      if (player.getPlayerEffects().isQuadDamageEffectActive()) {
         quadDamageAttack.play(soundVolume);
       }
       return true;

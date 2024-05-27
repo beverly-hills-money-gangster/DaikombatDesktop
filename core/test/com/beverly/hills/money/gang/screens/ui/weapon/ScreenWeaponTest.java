@@ -18,6 +18,7 @@ import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
+import com.beverly.hills.money.gang.entities.effect.PlayerEffects;
 import com.beverly.hills.money.gang.entities.player.Player;
 import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
@@ -125,7 +126,9 @@ public class ScreenWeaponTest {
   public void testAttackShotgunQuadDamage() {
     float volume = 0.5f;
     var player = mock(Player.class);
-    doReturn(true).when(player).isQuadDamageEffectActive();
+    var effects = mock(PlayerEffects.class);
+    doReturn(effects).when(player).getPlayerEffects();
+    doReturn(true).when(effects).isQuadDamageEffectActive();
     assertTrue(screenWeapon.attack(player, ScreenWeapon.Weapon.SHOTGUN, volume));
     verify(playerShotgunFireSound).play(volume);
     verify(quadDamageAttackSound).play(volume);

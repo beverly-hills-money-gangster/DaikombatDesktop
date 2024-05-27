@@ -434,10 +434,17 @@ public class PlayScreen extends GameScreen {
 
     getGame().getBatch().end();
     getGame().getBatch().begin();
-    if (getPlayer().isQuadDamageEffectActive() && !getPlayer().isDead()) {
-      getGame().getBatch().setColor(Color.SKY.cpy()
-          .lerp(Color.WHITE, (float) Math.sin(getGame().getTimeSinceLaunch() * 20)));
+
+    if (!getPlayer().isDead()) {
+      if (getPlayer().getPlayerEffects().isQuadDamageEffectActive()) {
+        getGame().getBatch().setColor(
+            new Color(Color.SKY.r, Color.SKY.g, Color.SKY.b, getPlayer().getAlphaChannel())
+                .lerp(Color.WHITE, (float) Math.sin(getGame().getTimeSinceLaunch() * 15)));
+      } else if (getPlayer().getPlayerEffects().isInvisibilityEffectActive()) {
+        getGame().getBatch().setColor(new Color(1, 1, 1, getPlayer().getAlphaChannel()));
+      }
     }
+
     var activeWeapon = getPlayer().getActiveWeaponRenderingData();
     float gunWidth = getViewport().getWorldWidth() * activeWeapon.getScreenRatioX();
     float gunHeight = getViewport().getWorldHeight() * activeWeapon.getScreenRatioY();

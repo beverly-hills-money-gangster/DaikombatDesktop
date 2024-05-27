@@ -112,11 +112,12 @@ public class PlayScreenGameConnectionHandler {
             gameEvent.getPlayer().getDirection().getY()),
         playScreen, gameEvent.getPlayer().getPlayerName(),
         getEnemyTexture(gameEvent.getPlayer().getSkinColor()), createEnemyListeners());
-
+    enemyPlayer.getEnemyEffects().invisible(15_000);
+    enemyPlayer.getEnemyEffects().quadDamage(20_000);
     gameEvent.getPlayer().getActivePowerUpsList().forEach(gamePowerUp -> {
       switch (gamePowerUp.getType()) {
         case QUAD_DAMAGE -> {
-          enemyPlayer.quadDamage(gamePowerUp.getLastsForMls());
+          enemyPlayer.getEnemyEffects().quadDamage(gamePowerUp.getLastsForMls());
           playScreen.removeQuadDamageOrb();
         }
         default -> throw new IllegalArgumentException(
@@ -188,7 +189,7 @@ public class PlayScreenGameConnectionHandler {
                 .getUserSettingSound(SoundRegistry.QUAD_DAMAGE_PICK)
                 .play(Constants.DEFAULT_SFX_VOLUME);
             LOG.info("Picked up quad-damage. Lasts for {}", gamePowerUp.getLastsForMls());
-            playScreen.getPlayer().quadDamage(gamePowerUp.getLastsForMls());
+            playScreen.getPlayer().getPlayerEffects().quadDamage(gamePowerUp.getLastsForMls());
             playScreen.removeQuadDamageOrb();
           }
           default -> throw new IllegalArgumentException(
@@ -205,7 +206,7 @@ public class PlayScreenGameConnectionHandler {
                 playScreen.getGame().getAssMan()
                     .getUserSettingSound(SoundRegistry.ENEMY_QUAD_DAMAGE_PICK)
                     .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
-                enemyPlayer.quadDamage(gamePowerUp.getLastsForMls());
+                enemyPlayer.getEnemyEffects().quadDamage(gamePowerUp.getLastsForMls());
                 playScreen.removeQuadDamageOrb();
               }
               default -> throw new IllegalArgumentException(
@@ -381,7 +382,8 @@ public class PlayScreenGameConnectionHandler {
               new AttackingSound(
                   playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.ENEMY_SHOTGUN))
                   .play(enemy.getSFXVolume(), enemy.getSFXPan(),
-                      enemy.isQuadDamageEffectActive() ? playScreen.getGame().getAssMan()
+                      enemy.getEnemyEffects().isQuadDamageEffectActive() ? playScreen.getGame()
+                          .getAssMan()
                           .getUserSettingSound(SoundRegistry.ENEMY_QUAD_DAMAGE_ATTACK) : null);
             }
         ).onPunching(enemy -> new AttackingSound(

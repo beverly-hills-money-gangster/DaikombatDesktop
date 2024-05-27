@@ -93,6 +93,8 @@ public class EnemyPlayer extends Enemy {
     actions.add(enemyPlayerAction);
   }
 
+
+
   static float getSpeed(final Queue<EnemyPlayerAction> actions) {
     if (actions.size() > 15) {
       LOG.info("Action queue is super clogged. Size {}", actions.size());

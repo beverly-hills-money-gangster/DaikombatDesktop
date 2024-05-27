@@ -2,7 +2,6 @@ package com.beverly.hills.money.gang.entities.player;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
@@ -10,6 +9,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.entities.Entity;
+import com.beverly.hills.money.gang.entities.effect.PlayerEffects;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
@@ -58,7 +58,9 @@ public class Player extends Entity {
 
   private final ScreenWeapon screenWeapon;
 
-  private long quadDamageUntil;
+  @Getter
+  private final PlayerEffects playerEffects = new PlayerEffects();
+
 
   private float camY = Constants.DEFAULT_PLAYER_CAM_Y;
   private boolean headbob = false;
@@ -246,12 +248,12 @@ public class Player extends Entity {
     return screenWeapon.getActiveWeaponForRendering();
   }
 
-  public void quadDamage(int quadDamageTimeout) {
-    quadDamageUntil = System.currentTimeMillis() + quadDamageTimeout;
-  }
-
-  public boolean isQuadDamageEffectActive() {
-    return System.currentTimeMillis() < quadDamageUntil;
+  public float getAlphaChannel() {
+    if (getPlayerEffects().isInvisibilityEffectActive()) {
+      return 0.7f;
+    } else {
+      return 1f;
+    }
   }
 
   public float getWeaponDistance(ScreenWeapon.Weapon weapon) {
