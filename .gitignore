@@ -76,6 +76,8 @@ com_crashlytics_export_strings.xml
 !.keep
 # Custom end
 
+out-win/
+
 /html/build/
 /ios/build/
 
