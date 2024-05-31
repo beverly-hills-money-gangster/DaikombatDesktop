@@ -1,24 +1,24 @@
 package com.beverly.hills.money.gang.entities.effect;
 
+import com.beverly.hills.money.gang.entities.item.PowerUpType;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 public class PlayerEffects {
 
-  private long quadDamageUntil;
+  private final Map<PowerUpType, Long> powerUpsInEffect = new HashMap<>();
 
-  private long invisibleUntil;
-
-  public boolean isQuadDamageEffectActive() {
-    return System.currentTimeMillis() < quadDamageUntil;
+  {
+    Arrays.stream(PowerUpType.values()).forEach(
+        powerUpType -> powerUpsInEffect.put(powerUpType, 0L));
   }
 
-  public void quadDamage(int quadDamageTimeout) {
-    quadDamageUntil = System.currentTimeMillis() + quadDamageTimeout;
+  public boolean isPowerUpActive(PowerUpType powerUpType) {
+    return System.currentTimeMillis() < powerUpsInEffect.get(powerUpType);
   }
 
-  public void invisible(int invisibleTimeout) {
-    invisibleUntil = System.currentTimeMillis() + invisibleTimeout;
-  }
-
-  public boolean isInvisibilityEffectActive() {
-    return System.currentTimeMillis() < invisibleUntil;
+  public void activatePowerUp(PowerUpType powerUpType, int timeoutMls) {
+    powerUpsInEffect.put(powerUpType, System.currentTimeMillis() + timeoutMls);
   }
 }

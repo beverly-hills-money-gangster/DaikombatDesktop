@@ -22,9 +22,9 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QuadDamagePowerUp extends SoundMakingEntity {
+public class PowerUp extends SoundMakingEntity {
 
-  private static final Logger LOG = LoggerFactory.getLogger(QuadDamagePowerUp.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PowerUp.class);
   private final Vector3 position;
   private final ModelInstanceBB mdlInst;
 
@@ -36,8 +36,8 @@ public class QuadDamagePowerUp extends SoundMakingEntity {
 
   private final Runnable onCollision;
 
-  public QuadDamagePowerUp(final Vector3 position, final GameScreen screen, final Player player,
-      final Runnable onCollision) {
+  public PowerUp(final Vector3 position, final GameScreen screen, final Player player,
+      final TexturesRegistry texturesRegistry, final Runnable onCollision) {
     super(screen);
     this.position = position.cpy();
     this.player = player;
@@ -46,7 +46,7 @@ public class QuadDamagePowerUp extends SoundMakingEntity {
     mdlInst = new ModelInstanceBB(screen.getGame().getCellBuilder().getMdlEnemy());
     this.onCollision = onCollision;
     TextureRegion currentTexReg = screen.getGame().getAssMan()
-        .getTextureRegion(TexturesRegistry.QUAD_DAMAGE_ORB, 0, 0, 360, 360);
+        .getTextureRegion(texturesRegistry, 0, 0, 360, 360);
 
     mdlInst.materials.get(0).set(TextureAttribute.createDiffuse(currentTexReg));
     mdlInst.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, Color.WHITE));
@@ -64,13 +64,13 @@ public class QuadDamagePowerUp extends SoundMakingEntity {
 
     rect.getOldPosition().set(rect.x, rect.y);
     rect.getNewPosition().set(rect.x, rect.y);
-    LOG.info("Quad damage orb spawned");
   }
 
   @Override
   public void destroy() {
     getScreen().getGame().getRectMan().removeRect(rect);
     super.destroy(); // should be last.
+    LOG.info("Destroy power up");
   }
 
 

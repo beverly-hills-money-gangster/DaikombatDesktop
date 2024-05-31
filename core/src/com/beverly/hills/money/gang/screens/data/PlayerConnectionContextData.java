@@ -5,6 +5,7 @@ import com.beverly.hills.money.gang.proto.ServerResponse;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.ToString;
 
 @Getter
@@ -15,10 +16,15 @@ public class PlayerConnectionContextData {
   private final JoinGameData joinGameData;
   private final Vector2 spawn;
   private final Vector2 direction;
-  private final int playerId;
+  @NonNull
+  private final Integer playerId;
   private final List<ServerResponse.LeaderBoardItem> leaderBoardItemList;
   private final int playersOnline;
-  private final int fragsToWin;
-  private final int movesUpdateFreqMls;
+  @NonNull
+  private final Integer fragsToWin;
+  @NonNull
+  private final Integer movesUpdateFreqMls;
+  @NonNull
+  private final Integer speed;
 
 }

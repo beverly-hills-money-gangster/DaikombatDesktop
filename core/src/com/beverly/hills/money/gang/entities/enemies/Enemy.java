@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.entities.SoundMakingEntity;
 import com.beverly.hills.money.gang.entities.effect.EnemyEffects;
+import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
@@ -55,22 +56,27 @@ public abstract class Enemy extends SoundMakingEntity {
         .get(ColorAttribute.Diffuse);
     if (enemyEffects.isBeingAttacked()) {
       colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.RED, 1));
-    } else if (enemyEffects.isInvisibilityEffectActive()) {
+    } else if (enemyEffects.isPowerUpActive(PowerUpType.INVISIBILITY)) {
       colorAttribute.color.set(new Color(1, 1, 1, getAlphaChannel()));
-    } else if (enemyEffects.isQuadDamageEffectActive()) {
+    } else if (enemyEffects.isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {
       colorAttribute.color.set(new Color(Color.SKY.r, Color.SKY.g, Color.SKY.b, getAlphaChannel())
           .lerp(Color.WHITE, (float) Math.sin(getScreen().getGame().getTimeSinceLaunch() * 15)));
+    } else if (enemyEffects.isPowerUpActive(PowerUpType.DEFENCE)) {
+      colorAttribute.color.set(
+          new Color(Color.CHARTREUSE.r, Color.CHARTREUSE.g, Color.CHARTREUSE.b, getAlphaChannel())
+              .lerp(Color.WHITE, (float) Math.sin(getScreen().getGame().getTimeSinceLaunch() * 15)));
     } else {
       colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.WHITE, 0));
       colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.RED, 0));
       colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.SKY, 0));
+      colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.CHARTREUSE, 0));
     }
   }
 
 
   public float getAlphaChannel() {
-    if (enemyEffects.isInvisibilityEffectActive()) {
-      return 0.4f;
+    if (enemyEffects.isPowerUpActive(PowerUpType.INVISIBILITY)) {
+      return 0.2f;
     } else {
       return 1f;
     }

@@ -19,6 +19,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.effect.PlayerEffects;
+import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
 import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,11 +37,17 @@ public class ScreenWeaponTest {
 
   private UserSettingSound quadDamageAttackSound;
 
+  private UserSettingSound shotgunHitSound;
+
   private TextureRegion shotgunFireTexture;
 
   private TextureRegion shotgunIdleTexture;
 
   private TextureRegion punchTexture;
+
+  private Player player;
+
+  private PlayerEffects playerEffects;
 
 
   @BeforeEach
@@ -62,6 +69,8 @@ public class ScreenWeaponTest {
         .getUserSettingSound(SoundRegistry.PUNCH_THROWN);
     doReturn(punchHitSound).when(daiKombatAssetsManager)
         .getUserSettingSound(SoundRegistry.PUNCH_HIT);
+    doReturn(shotgunHitSound).when(daiKombatAssetsManager)
+        .getUserSettingSound(SoundRegistry.SHOOT_HIT_SOUND);
     doReturn(quadDamageAttackSound).when(daiKombatAssetsManager)
         .getUserSettingSound(SoundRegistry.QUAD_DAMAGE_ATTACK);
 
@@ -73,6 +82,10 @@ public class ScreenWeaponTest {
         eq(TexturesRegistry.PUNCH), anyInt(), anyInt(), anyInt(), anyInt());
 
     screenWeapon = new ScreenWeapon(daiKombatAssetsManager);
+    player = mock(Player.class);
+    playerEffects = mock(PlayerEffects.class);
+    doReturn(playerEffects).when(player).getPlayerEffects();
+
   }
 
   @Test
@@ -91,14 +104,14 @@ public class ScreenWeaponTest {
 
   @Test
   public void testCanAttackAfterRecentAttack() {
-    screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, 0);
+    screenWeapon.attack(player, ScreenWeapon.Weapon.SHOTGUN, 0);
     assertFalse(screenWeapon.canAttack(),
         "You can't attack right after. There must be some cool down");
   }
 
   @Test
   public void testCanAttackAfterWait() throws InterruptedException {
-    screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, 0);
+    screenWeapon.attack(player, ScreenWeapon.Weapon.SHOTGUN, 0);
     // wait a little
     Thread.sleep(
         screenWeapon.weaponStates.get(ScreenWeapon.Weapon.SHOTGUN).getAnimationDelayMls() + 50);
@@ -116,7 +129,7 @@ public class ScreenWeaponTest {
   @Test
   public void testAttackShotgun() {
     float volume = 0.5f;
-    assertTrue(screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, volume));
+    assertTrue(screenWeapon.attack(player, ScreenWeapon.Weapon.SHOTGUN, volume));
     verify(playerShotgunFireSound).play(volume);
     assertEquals(ScreenWeapon.Weapon.SHOTGUN, screenWeapon.weaponBeingUsed);
     verifyNoInteractions(quadDamageAttackSound);
@@ -125,10 +138,7 @@ public class ScreenWeaponTest {
   @Test
   public void testAttackShotgunQuadDamage() {
     float volume = 0.5f;
-    var player = mock(Player.class);
-    var effects = mock(PlayerEffects.class);
-    doReturn(effects).when(player).getPlayerEffects();
-    doReturn(true).when(effects).isQuadDamageEffectActive();
+    doReturn(true).when(playerEffects).isPowerUpActive(PowerUpType.QUAD_DAMAGE);
     assertTrue(screenWeapon.attack(player, ScreenWeapon.Weapon.SHOTGUN, volume));
     verify(playerShotgunFireSound).play(volume);
     verify(quadDamageAttackSound).play(volume);
@@ -138,7 +148,7 @@ public class ScreenWeaponTest {
   @Test
   public void testAttackPunch() {
     float volume = 0.7f;
-    assertTrue(screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.GAUNTLET, volume));
+    assertTrue(screenWeapon.attack(player, ScreenWeapon.Weapon.GAUNTLET, volume));
     verify(punchSound).play(volume);
     assertEquals(ScreenWeapon.Weapon.GAUNTLET, screenWeapon.weaponBeingUsed);
   }
@@ -146,8 +156,8 @@ public class ScreenWeaponTest {
   @Test
   public void testAttackTwiceNoDelay() {
     float volume = 0.5f;
-    assertTrue(screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, volume));
-    assertFalse(screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, volume),
+    assertTrue(screenWeapon.attack(player, ScreenWeapon.Weapon.SHOTGUN, volume));
+    assertFalse(screenWeapon.attack(player, ScreenWeapon.Weapon.SHOTGUN, volume),
         "If no delay, then we shouldn't be able to attack");
     verify(playerShotgunFireSound).play(volume);
   }
@@ -155,11 +165,11 @@ public class ScreenWeaponTest {
   @Test
   public void testAttackTwiceDelay() throws InterruptedException {
     float volume = 0.5f;
-    assertTrue(screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, volume));
+    assertTrue(screenWeapon.attack(player, ScreenWeapon.Weapon.SHOTGUN, volume));
     // wait a little
     Thread.sleep(
         screenWeapon.weaponStates.get(ScreenWeapon.Weapon.SHOTGUN).getAnimationDelayMls() + 50);
-    assertTrue(screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, volume),
+    assertTrue(screenWeapon.attack(player, ScreenWeapon.Weapon.SHOTGUN, volume),
         "If we have a  delay, then we SHOULD be able to attack");
     verify(playerShotgunFireSound, times(2)).play(volume);
   }
@@ -186,21 +196,21 @@ public class ScreenWeaponTest {
 
   @Test
   public void testGetActiveWeaponForRenderingShotgun() {
-    screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, 0.5f);
+    screenWeapon.attack(player, ScreenWeapon.Weapon.SHOTGUN, 0.5f);
     var renderingData = screenWeapon.getActiveWeaponForRendering();
     assertEquals(shotgunFireTexture, renderingData.getTextureRegion());
   }
 
   @Test
   public void testGetActiveWeaponForRenderingPunch() {
-    screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.GAUNTLET, 0.5f);
+    screenWeapon.attack(player, ScreenWeapon.Weapon.GAUNTLET, 0.5f);
     var renderingData = screenWeapon.getActiveWeaponForRendering();
     assertEquals(punchTexture, renderingData.getTextureRegion());
   }
 
   @Test
   public void testGetActiveWeaponForRenderingWaitAnimationFinish() throws InterruptedException {
-    screenWeapon.attack(mock(Player.class), ScreenWeapon.Weapon.SHOTGUN, 0.5f);
+    screenWeapon.attack(player, ScreenWeapon.Weapon.SHOTGUN, 0.5f);
     // wait a little
     Thread.sleep(
         screenWeapon.weaponStates.get(ScreenWeapon.Weapon.SHOTGUN).getAnimationDelayMls() + 50);

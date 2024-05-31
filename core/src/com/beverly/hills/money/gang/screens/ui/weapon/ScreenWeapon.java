@@ -7,6 +7,7 @@ import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
+import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
 import java.util.EnumMap;
 import java.util.Map;
@@ -18,7 +19,7 @@ import lombok.NonNull;
 
 public class ScreenWeapon {
 
-  private static final int GUNSHOT_ANIMATION_MLS = 200;
+  private static final int GUNSHOT_ANIMATION_MLS = 350;
 
   private static final int PUNCH_ANIMATION_MLS = 175;
 
@@ -36,7 +37,7 @@ public class ScreenWeapon {
     weaponStates.put(Weapon.SHOTGUN, WeaponState.builder()
         .distance(Configs.SHOOTING_DISTANCE)
         .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PLAYER_SHOTGUN))
-        .hitTargetSound(null)
+        .hitTargetSound(assetsManager.getUserSettingSound(SoundRegistry.SHOOT_HIT_SOUND))
         .screenRatioX(0.35f)
         .screenRatioY(0.40f)
         .animationDelayMls(GUNSHOT_ANIMATION_MLS)
@@ -106,7 +107,7 @@ public class ScreenWeapon {
       state.animationStartMls = System.currentTimeMillis();
       weaponBeingUsed = weapon;
       state.fireSound.play(soundVolume);
-      if (player.getPlayerEffects().isQuadDamageEffectActive()) {
+      if (player.getPlayerEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {
         quadDamageAttack.play(soundVolume);
       }
       return true;

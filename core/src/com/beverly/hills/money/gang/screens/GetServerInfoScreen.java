@@ -72,6 +72,7 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
             var serverInfo = response.getServerInfo();
             playerContextDataBuilder.movesUpdateFreqMls(serverInfo.getMovesUpdateFreqMls());
             playerContextDataBuilder.fragsToWin(serverInfo.getFragsToWin());
+            playerContextDataBuilder.speed(serverInfo.getPlayerSpeed());
             removeAllEntities();
             getGame().setScreen(new JoinGameScreen(getGame(),
                 playerContextDataBuilder, joinGameData, conn));
