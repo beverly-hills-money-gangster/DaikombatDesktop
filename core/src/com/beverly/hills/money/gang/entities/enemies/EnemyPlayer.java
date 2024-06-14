@@ -44,7 +44,8 @@ public class EnemyPlayer extends Enemy {
 
   private long shootingAnimationUntil;
   private int currentStep;
-  private float speed;
+  private float currentSpeed;
+  private final float defaultSpeed;
   private Vector2 lastDirection;
   private boolean isIdle = true;
 
@@ -58,13 +59,15 @@ public class EnemyPlayer extends Enemy {
       final GameScreen screen,
       final String name,
       final TexturesRegistry enemyTextureRegistry,
-      final EnemyListeners enemyListeners) {
+      final EnemyListeners enemyListeners,
+      final int speed) {
 
     super(position, screen, player, enemyListeners);
     this.enemyPlayerId = enemyPlayerId;
     lastDirection = direction;
     enemyTextures = new EnemyTextures(screen.getGame().getAssMan(), enemyTextureRegistry);
-    speed = Configs.PLAYER_MOVE_SPEED;
+    this.defaultSpeed = speed;
+    this.currentSpeed = this.defaultSpeed;
     this.name = name;
     super.setMdlInst(new ModelInstanceBB(screen.getGame().getCellBuilder().getMdlEnemy()));
     Attributes attributes = getMdlInst().materials.get(0);
@@ -88,25 +91,27 @@ public class EnemyPlayer extends Enemy {
     if (actions.size() >= MAX_ACTION_QUEUE_CLOGGING) {
       throw new IllegalStateException("Can't queue enemy action");
     } else {
-      this.speed = getSpeed(actions);
+      this.currentSpeed = getSpeed(actions, this.defaultSpeed);
     }
     actions.add(enemyPlayerAction);
   }
 
-  static float getSpeed(final Queue<EnemyPlayerAction> actions) {
+
+
+  static float getSpeed(final Queue<EnemyPlayerAction> actions, final float defaultSpeed) {
     if (actions.size() > 15) {
       LOG.info("Action queue is super clogged. Size {}", actions.size());
-      return Configs.PLAYER_MOVE_SPEED * 3f;
+      return  defaultSpeed * 3f;
     } else if (actions.size() > 10) {
       LOG.info("Action queue is very clogged. Size {}", actions.size());
-      return Configs.PLAYER_MOVE_SPEED * 2f;
+      return defaultSpeed * 2f;
     } else if (actions.size() >= 5) {
       LOG.info("Action queue is clogged. Size {}", actions.size());
-      return Configs.PLAYER_MOVE_SPEED * 1.25f;
+      return defaultSpeed * 1.25f;
     } else if (actions.size() > 2) {
-      return Configs.PLAYER_MOVE_SPEED * 1.15f;
+      return defaultSpeed * 1.15f;
     } else {
-      return Configs.PLAYER_MOVE_SPEED;
+      return defaultSpeed;
     }
   }
 
@@ -151,7 +156,7 @@ public class EnemyPlayer extends Enemy {
       Vector2 rectDirection = new Vector2();
       rectDirection.x = targetPosition.x - getRect().x;
       rectDirection.y = targetPosition.y - getRect().y;
-      rectDirection.nor().scl(speed * delta);
+      rectDirection.nor().scl(currentSpeed * delta);
       isIdle = false;
       getRect().getNewPosition().add(rectDirection.x, rectDirection.y);
       if (isTooClose(getRect().getOldPosition(), targetPosition)) {

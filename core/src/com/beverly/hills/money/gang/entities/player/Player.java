@@ -2,7 +2,6 @@ package com.beverly.hills.money.gang.entities.player;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
@@ -10,7 +9,9 @@ import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.entities.Entity;
+import com.beverly.hills.money.gang.entities.effect.PlayerEffects;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
+import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
@@ -58,11 +59,15 @@ public class Player extends Entity {
 
   private final ScreenWeapon screenWeapon;
 
-  private long quadDamageUntil;
+  @Getter
+  private final PlayerEffects playerEffects = new PlayerEffects();
+
 
   private float camY = Constants.DEFAULT_PLAYER_CAM_Y;
   private boolean headbob = false;
   private int currentHP = 100;
+
+  private final int speed;
 
 
   public Player(final GameScreen screen,
@@ -70,8 +75,10 @@ public class Player extends Entity {
       final Consumer<EnemyPlayer> onEnemyAim,
       final Consumer<Player> onMovementListener,
       final Vector2 spawnPosition,
-      final Vector2 lookAt) {
+      final Vector2 lookAt,
+      final int speed) {
     super(screen);
+    this.speed = speed;
     screenWeapon = new ScreenWeapon(screen.getGame().getAssMan());
     this.onMovementListener = onMovementListener;
     this.onAttackListener = onAttackListener;
@@ -167,7 +174,7 @@ public class Player extends Entity {
       onMovementListener.accept(this);
       camY = Constants.DEFAULT_PLAYER_CAM_Y;
       final float sinOffset = (float) (
-          Math.sin(getScreen().getGame().getTimeSinceLaunch() * Configs.PLAYER_MOVE_SPEED * 4f)
+          Math.sin(getScreen().getGame().getTimeSinceLaunch() * speed * 4f)
               * 0.01875f);
       camY += sinOffset;
       weaponY = -25f;
@@ -178,7 +185,7 @@ public class Player extends Entity {
     movementDirVec2.set(movementDir.x, movementDir.z);
     rect.getNewPosition().set(
         rect.getPosition(new Vector2()).cpy()
-            .add(movementDirVec2.nor().cpy().scl(Configs.PLAYER_MOVE_SPEED * delta)));
+            .add(movementDirVec2.nor().cpy().scl(speed * delta)));
   }
 
   private void attack(ScreenWeapon.Weapon weapon) {
@@ -227,7 +234,7 @@ public class Player extends Entity {
     gotHit = true;
   }
 
-  public void buffHp(final int newHp) {
+  public void setHP(final int newHp) {
     if (newHp <= 0) {
       throw new IllegalArgumentException("New HP can't be less or equal to zero");
     }
@@ -246,12 +253,12 @@ public class Player extends Entity {
     return screenWeapon.getActiveWeaponForRendering();
   }
 
-  public void quadDamage(int quadDamageTimeout) {
-    quadDamageUntil = System.currentTimeMillis() + quadDamageTimeout;
-  }
-
-  public boolean isQuadDamageEffectActive() {
-    return System.currentTimeMillis() < quadDamageUntil;
+  public float getAlphaChannel() {
+    if (getPlayerEffects().isPowerUpActive(PowerUpType.INVISIBILITY)) {
+      return 0.7f;
+    } else {
+      return 1f;
+    }
   }
 
   public float getWeaponDistance(ScreenWeapon.Weapon weapon) {

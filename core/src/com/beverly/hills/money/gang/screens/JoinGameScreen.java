@@ -51,28 +51,14 @@ public class JoinGameScreen extends AbstractLoadingScreen {
   }
 
   private SkinColorSelection creatSkinColorSelection(SkinUISelection skinUISelection) {
-    switch (skinUISelection) {
-      case BLUE -> {
-        return SkinColorSelection.BLUE;
-      }
-      case YELLOW -> {
-        return SkinColorSelection.YELLOW;
-      }
-      case ORANGE -> {
-        return SkinColorSelection.ORANGE;
-      }
-      case GREEN -> {
-        return SkinColorSelection.GREEN;
-      }
-      case PINK -> {
-        return SkinColorSelection.PINK;
-      }
-      case PURPLE -> {
-        return SkinColorSelection.PURPLE;
-      }
-      default -> throw new IllegalStateException("Not supported skin color " + skinUISelection);
-    }
-
+    return switch (skinUISelection) {
+      case BLUE -> SkinColorSelection.BLUE;
+      case YELLOW -> SkinColorSelection.YELLOW;
+      case ORANGE -> SkinColorSelection.ORANGE;
+      case GREEN -> SkinColorSelection.GREEN;
+      case PINK -> SkinColorSelection.PINK;
+      case PURPLE -> SkinColorSelection.PURPLE;
+    };
   }
 
 

@@ -4,6 +4,8 @@ import lombok.Getter;
 
 public enum TexturesRegistry {
   QUAD_DAMAGE_ORB("quad_damage_orb.png"),
+  DEFENCE_ORB("defence_orb.png"),
+  INVISIBILITY_ORB("invisibility_orb.png"),
   ENEMY_PLAYER_SPRITES_GREEN("enemy_player_sprites_green.png"),
   ENEMY_PLAYER_SPRITES_BLUE("enemy_player_sprites_blue.png"),
   ENEMY_PLAYER_SPRITES_ORANGE("enemy_player_sprites_orange.png"),

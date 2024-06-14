@@ -60,22 +60,15 @@ public class ChooseSkinScreen extends AbstractMainMenuScreen {
       skinSelection.down();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     }
-    switch (skinSelection.getSelectedOption()) {
-      case GREEN -> enemyTextures = new EnemyTextures(getGame().getAssMan(),
-          TexturesRegistry.ENEMY_PLAYER_SPRITES_GREEN);
-      case BLUE -> enemyTextures = new EnemyTextures(getGame().getAssMan(),
-          TexturesRegistry.ENEMY_PLAYER_SPRITES_BLUE);
-      case YELLOW -> enemyTextures = new EnemyTextures(getGame().getAssMan(),
-          TexturesRegistry.ENEMY_PLAYER_SPRITES_YELLOW);
-      case ORANGE -> enemyTextures = new EnemyTextures(getGame().getAssMan(),
-          TexturesRegistry.ENEMY_PLAYER_SPRITES_ORANGE);
-      case PURPLE -> enemyTextures = new EnemyTextures(getGame().getAssMan(),
-          TexturesRegistry.ENEMY_PLAYER_SPRITES_PURPLE);
-      case PINK -> enemyTextures = new EnemyTextures(getGame().getAssMan(),
-          TexturesRegistry.ENEMY_PLAYER_SPRITES_PINK);
-      default -> throw new IllegalArgumentException(
-          "Not supported skin " + skinSelection.getSelectedOption());
-    }
+    TexturesRegistry selectedTexture = switch (skinSelection.getSelectedOption()) {
+      case GREEN -> TexturesRegistry.ENEMY_PLAYER_SPRITES_GREEN;
+      case BLUE -> TexturesRegistry.ENEMY_PLAYER_SPRITES_BLUE;
+      case YELLOW -> TexturesRegistry.ENEMY_PLAYER_SPRITES_YELLOW;
+      case ORANGE -> TexturesRegistry.ENEMY_PLAYER_SPRITES_ORANGE;
+      case PURPLE -> TexturesRegistry.ENEMY_PLAYER_SPRITES_PURPLE;
+      case PINK -> TexturesRegistry.ENEMY_PLAYER_SPRITES_PINK;
+    };
+    enemyTextures = new EnemyTextures(getGame().getAssMan(), selectedTexture);
   }
 
   @Override

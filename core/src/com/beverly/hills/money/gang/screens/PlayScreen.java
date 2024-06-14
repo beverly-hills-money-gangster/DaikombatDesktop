@@ -2,6 +2,7 @@ package com.beverly.hills.money.gang.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -21,7 +22,8 @@ import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundQueue;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
-import com.beverly.hills.money.gang.entities.item.QuadDamagePowerUp;
+import com.beverly.hills.money.gang.entities.item.PowerUp;
+import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
 import com.beverly.hills.money.gang.handler.PlayScreenGameConnectionHandler;
@@ -31,12 +33,13 @@ import com.beverly.hills.money.gang.log.MyPlayerKillLog;
 import com.beverly.hills.money.gang.network.GameConnection;
 import com.beverly.hills.money.gang.proto.PushChatEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand;
-import com.beverly.hills.money.gang.proto.PushGameEventCommand.GameEventType;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.screens.ui.selection.ActivePlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.DeadPlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -107,7 +110,7 @@ public class PlayScreen extends GameScreen {
   private final GameConnection gameConnection;
   private final PlayerConnectionContextData playerConnectionContextData;
 
-  private QuadDamagePowerUp quadDamagePowerUp;
+  private final Map<PowerUpType, PowerUp> powerUps = new HashMap<>();
 
   public PlayScreen(final DaiKombatGame game,
       final GameConnection gameConnection,
@@ -154,17 +157,13 @@ public class PlayScreen extends GameScreen {
 
     setPlayer(new Player(this,
         playerWeapon -> {
-          PushGameEventCommand.GameEventType eventType;
-          switch (playerWeapon.getWeapon()) {
-            case GAUNTLET -> eventType = PushGameEventCommand.GameEventType.PUNCH;
-            case SHOTGUN -> eventType = PushGameEventCommand.GameEventType.SHOOT;
-            default -> throw new IllegalArgumentException(
-                "Not supported weapon " + playerWeapon.getWeapon());
-          }
+          PushGameEventCommand.GameEventType eventType = switch (playerWeapon.getWeapon()) {
+            case GAUNTLET -> PushGameEventCommand.GameEventType.PUNCH;
+            case SHOTGUN -> PushGameEventCommand.GameEventType.SHOOT;
+          };
           var direction = getPlayer().getCurrent2DDirection();
           var position = getPlayer().getCurrent2DPosition();
           boolean hitEnemy = getPlayer().getEnemyRectInRangeFromCam(enemy -> {
-
             enemy.getHit();
             playerWeapon.getPlayer().playWeaponHitSound(playerWeapon.getWeapon());
             gameConnection.write(PushGameEventCommand.newBuilder()
@@ -195,7 +194,11 @@ public class PlayScreen extends GameScreen {
                 .build());
           }
         },
-        enemy -> enemyAimName = enemy.getName(),
+        enemy -> {
+          if (!enemy.getEnemyEffects().isPowerUpActive(PowerUpType.INVISIBILITY)) {
+            enemyAimName = enemy.getName();
+          }
+        },
         player -> {
           if (System.currentTimeMillis() < nextTimeToFlushPlayerActions
               || gameConnection.isDisconnected()) {
@@ -207,7 +210,8 @@ public class PlayScreen extends GameScreen {
 
         },
         playerConnectionContextData.getSpawn(),
-        playerConnectionContextData.getDirection()));
+        playerConnectionContextData.getDirection(),
+        playerConnectionContextData.getSpeed()));
     getGame().getEntMan().addEntity(getPlayer());
 
     setCurrentCam(getPlayer().getPlayerCam());
@@ -225,8 +229,16 @@ public class PlayScreen extends GameScreen {
                 .build())
             .collect(Collectors.toList()),
         playerConnectionContextData.getFragsToWin(),
-        () -> narratorSoundQueue.addSound(youLead),
-        () -> narratorSoundQueue.addSound(lostLead), fragsLeft -> {
+        () -> {
+          if (!gameOver) {
+            narratorSoundQueue.addSound(youLead);
+          }
+        },
+        () -> {
+          if (!gameOver) {
+            narratorSoundQueue.addSound(lostLead);
+          }
+        }, fragsLeft -> {
       switch (fragsLeft) {
         case 3 -> narratorSoundQueue.addSound(threeFragsLeftSound);
         case 2 -> narratorSoundQueue.addSound(twoFragsLeftSound);
@@ -241,18 +253,21 @@ public class PlayScreen extends GameScreen {
     }
   }
 
-  public void spawnQuadDamage(Vector2 position) {
-    if (quadDamagePowerUp != null) {
+  public void spawnPowerUp(PowerUpType powerUpType, Vector2 position) {
+
+    if (powerUps.containsKey(powerUpType)) {
       return;
     }
-    quadDamagePowerUp = new QuadDamagePowerUp(new Vector3(position.x, 0.0f, position.y), this,
+    LOG.info("Spawn power-up {}", powerUpType);
+    var power = new PowerUp(new Vector3(position.x, 0.0f, position.y), this,
         getPlayer(),
+        powerUpType.getTexture(),
         () -> {
           var currentPosition = getPlayer().getCurrent2DPosition();
           var currentDirection = getPlayer().getCurrent2DDirection();
           gameConnection.write(PushGameEventCommand.newBuilder()
               .setPlayerId(playerConnectionContextData.getPlayerId())
-              .setEventType(GameEventType.QUAD_DAMAGE_POWER_UP)
+              .setEventType(powerUpType.getPickType())
               .setGameId(Configs.GAME_ID)
               .setPosition(PushGameEventCommand.Vector.newBuilder()
                   .setX(currentPosition.x).setY(currentPosition.y).build())
@@ -260,15 +275,13 @@ public class PlayScreen extends GameScreen {
                   .setX(currentDirection.x).setY(currentDirection.y).build())
               .build());
         });
-    getGame().getEntMan().addEntity(quadDamagePowerUp);
+    powerUps.put(powerUpType, power);
+    getGame().getEntMan().addEntity(power);
   }
 
-  public void removeQuadDamageOrb() {
-    if (quadDamagePowerUp == null) {
-      return;
-    }
-    quadDamagePowerUp.destroy();
-    quadDamagePowerUp = null;
+  public void removePowerUp(PowerUpType powerUpType) {
+    LOG.info("Remove power up {}", powerUpType);
+    Optional.ofNullable(powerUps.remove(powerUpType)).ifPresent(PowerUp::destroy);
   }
 
   private void mimicNetworkActivity() {
@@ -309,6 +322,9 @@ public class PlayScreen extends GameScreen {
         }
         if (Gdx.input.isKeyPressed(Input.Keys.TAB)) {
           showLeaderBoard = true;
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.P)) {
+          LOG.info("Player position is {}", getPlayer().getCurrent2DPosition());
         }
         getPlayer().handleInput(delta);
       }
@@ -357,12 +373,11 @@ public class PlayScreen extends GameScreen {
         || Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_RIGHT)
         || Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)
         || Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
-      switch (deadPlayUISelectionUISelection.getSelectedOption()) {
-        case RESPAWN ->
-            screenToTransition = new RespawnScreen(getGame(), playerConnectionContextData,
-                gameConnection);
-        case QUIT -> screenToTransition = new MainMenuScreen(getGame());
-      }
+      screenToTransition = switch (deadPlayUISelectionUISelection.getSelectedOption()) {
+        case RESPAWN -> new RespawnScreen(getGame(), playerConnectionContextData,
+            gameConnection);
+        case QUIT -> new MainMenuScreen(getGame());
+      };
     }
   }
 
@@ -434,10 +449,22 @@ public class PlayScreen extends GameScreen {
 
     getGame().getBatch().end();
     getGame().getBatch().begin();
-    if (getPlayer().isQuadDamageEffectActive() && !getPlayer().isDead()) {
-      getGame().getBatch().setColor(Color.SKY.cpy()
-          .lerp(Color.WHITE, (float) Math.sin(getGame().getTimeSinceLaunch() * 20)));
+
+    if (!getPlayer().isDead()) {
+      if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {
+        getGame().getBatch().setColor(
+            new Color(Color.SKY.r, Color.SKY.g, Color.SKY.b, getPlayer().getAlphaChannel())
+                .lerp(Color.WHITE, (float) Math.sin(getGame().getTimeSinceLaunch() * 15)));
+      } else if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.DEFENCE)) {
+        getGame().getBatch().setColor(
+            new Color(Color.CHARTREUSE.r, Color.CHARTREUSE.g, Color.CHARTREUSE.b,
+                getPlayer().getAlphaChannel())
+                .lerp(Color.WHITE, (float) Math.sin(getGame().getTimeSinceLaunch() * 15)));
+      } else if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.INVISIBILITY)) {
+        getGame().getBatch().setColor(new Color(1, 1, 1, getPlayer().getAlphaChannel()));
+      }
     }
+
     var activeWeapon = getPlayer().getActiveWeaponRenderingData();
     float gunWidth = getViewport().getWorldWidth() * activeWeapon.getScreenRatioX();
     float gunHeight = getViewport().getWorldHeight() * activeWeapon.getScreenRatioY();

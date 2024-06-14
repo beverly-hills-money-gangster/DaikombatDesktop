@@ -2,41 +2,42 @@ package com.beverly.hills.money.gang.entities.enemies;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.beverly.hills.money.gang.Configs;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import org.junit.jupiter.api.Test;
 
 public class EnemyPlayerTest {
 
+  private final int defaultSpeed = 5;
+
   @Test
   public void testGetSpeedEmptyQueue() {
-    assertEquals(Configs.PLAYER_MOVE_SPEED, EnemyPlayer.getSpeed(createActions(0)));
+    assertEquals(defaultSpeed, EnemyPlayer.getSpeed(createActions(0), defaultSpeed));
   }
 
   @Test
   public void testGetSpeedEmptyQueueOneAction() {
-    assertEquals(Configs.PLAYER_MOVE_SPEED, EnemyPlayer.getSpeed(createActions(1)));
+    assertEquals(defaultSpeed, EnemyPlayer.getSpeed(createActions(1), defaultSpeed));
   }
 
   @Test
   public void testGetSpeedEmptyQueueSlightlyClogged() {
-    assertEquals(Configs.PLAYER_MOVE_SPEED * 1.15, EnemyPlayer.getSpeed(createActions(3)));
+    assertEquals(defaultSpeed * 1.15, EnemyPlayer.getSpeed(createActions(3), defaultSpeed));
   }
 
   @Test
   public void testGetSpeedEmptyQueueClogged() {
-    assertEquals(Configs.PLAYER_MOVE_SPEED * 1.25, EnemyPlayer.getSpeed(createActions(5)));
+    assertEquals(defaultSpeed * 1.25, EnemyPlayer.getSpeed(createActions(5), defaultSpeed));
   }
 
   @Test
   public void testGetSpeedEmptyQueueVeryClogged() {
-    assertEquals(Configs.PLAYER_MOVE_SPEED * 2, EnemyPlayer.getSpeed(createActions(12)));
+    assertEquals(defaultSpeed * 2, EnemyPlayer.getSpeed(createActions(12), defaultSpeed));
   }
 
   @Test
   public void testGetSpeedEmptyQueueSuperClogged() {
-    assertEquals(Configs.PLAYER_MOVE_SPEED * 3, EnemyPlayer.getSpeed(createActions(25)));
+    assertEquals(defaultSpeed * 3, EnemyPlayer.getSpeed(createActions(25), defaultSpeed));
   }
 
   private Queue<EnemyPlayerAction> createActions(int numberOfActions) {

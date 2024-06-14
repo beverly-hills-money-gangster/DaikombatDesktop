@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.entities.SoundMakingEntity;
+import com.beverly.hills.money.gang.entities.effect.EnemyEffects;
+import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
@@ -37,8 +39,9 @@ public abstract class Enemy extends SoundMakingEntity {
   @Getter
   private boolean isDead;
 
-  private long redUntil;
-  private long quadDamageUntil;
+  @Getter
+  private final EnemyEffects enemyEffects = new EnemyEffects();
+
 
   public Enemy(final Vector3 position, final GameScreen screen, final Player player,
       final EnemyListeners enemyListeners) {
@@ -51,17 +54,33 @@ public abstract class Enemy extends SoundMakingEntity {
   protected void colorEffects() {
     final ColorAttribute colorAttribute = (ColorAttribute) getMdlInst().materials.get(0)
         .get(ColorAttribute.Diffuse);
-    if (isBeignAttacked()) {
+    if (enemyEffects.isBeingAttacked()) {
       colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.RED, 1));
-    } else if (isQuadDamageEffectActive()) {
-      colorAttribute.color.set(Color.SKY.cpy()
-          .lerp(Color.WHITE, (float) Math.sin(getScreen().getGame().getTimeSinceLaunch() * 20)));
+    } else if (enemyEffects.isPowerUpActive(PowerUpType.INVISIBILITY)) {
+      colorAttribute.color.set(new Color(1, 1, 1, getAlphaChannel()));
+    } else if (enemyEffects.isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {
+      colorAttribute.color.set(new Color(Color.SKY.r, Color.SKY.g, Color.SKY.b, getAlphaChannel())
+          .lerp(Color.WHITE, (float) Math.sin(getScreen().getGame().getTimeSinceLaunch() * 15)));
+    } else if (enemyEffects.isPowerUpActive(PowerUpType.DEFENCE)) {
+      colorAttribute.color.set(
+          new Color(Color.CHARTREUSE.r, Color.CHARTREUSE.g, Color.CHARTREUSE.b, getAlphaChannel())
+              .lerp(Color.WHITE, (float) Math.sin(getScreen().getGame().getTimeSinceLaunch() * 15)));
     } else {
+      colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.WHITE, 0));
       colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.RED, 0));
       colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.SKY, 0));
+      colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.CHARTREUSE, 0));
     }
   }
 
+
+  public float getAlphaChannel() {
+    if (enemyEffects.isPowerUpActive(PowerUpType.INVISIBILITY)) {
+      return 0.095f;
+    } else {
+      return 1f;
+    }
+  }
 
   @Override
   public void destroy() {
@@ -88,15 +107,11 @@ public abstract class Enemy extends SoundMakingEntity {
 
   public void getHit() {
     enemyListeners.onGetShot.accept(this);
-    redUntil = getAnimationTimeoutMls();
+    enemyEffects.beingAttacked(getAnimationTimeoutMls());
   }
 
   protected long getAnimationTimeoutMls() {
     return System.currentTimeMillis() + 100;
-  }
-
-  public void quadDamage(int effectTimeoutMls) {
-    quadDamageUntil = System.currentTimeMillis() + effectTimeoutMls;
   }
 
 
@@ -106,14 +121,6 @@ public abstract class Enemy extends SoundMakingEntity {
     dieAnimationEndMls = getAnimationTimeoutMls();
   }
 
-  public boolean isBeignAttacked() {
-    return System.currentTimeMillis() < redUntil;
-  }
-
-
-  public boolean isQuadDamageEffectActive() {
-    return System.currentTimeMillis() < quadDamageUntil;
-  }
 
   @Getter
   @Builder
