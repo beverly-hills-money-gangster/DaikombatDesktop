@@ -76,7 +76,7 @@ public abstract class Enemy extends SoundMakingEntity {
 
   public float getAlphaChannel() {
     if (enemyEffects.isPowerUpActive(PowerUpType.INVISIBILITY)) {
-      return 0.2f;
+      return 0.095f;
     } else {
       return 1f;
     }

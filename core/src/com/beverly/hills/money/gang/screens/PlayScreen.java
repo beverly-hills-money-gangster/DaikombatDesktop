@@ -229,8 +229,16 @@ public class PlayScreen extends GameScreen {
                 .build())
             .collect(Collectors.toList()),
         playerConnectionContextData.getFragsToWin(),
-        () -> narratorSoundQueue.addSound(youLead),
-        () -> narratorSoundQueue.addSound(lostLead), fragsLeft -> {
+        () -> {
+          if (!gameOver) {
+            narratorSoundQueue.addSound(youLead);
+          }
+        },
+        () -> {
+          if (!gameOver) {
+            narratorSoundQueue.addSound(lostLead);
+          }
+        }, fragsLeft -> {
       switch (fragsLeft) {
         case 3 -> narratorSoundQueue.addSound(threeFragsLeftSound);
         case 2 -> narratorSoundQueue.addSound(twoFragsLeftSound);
