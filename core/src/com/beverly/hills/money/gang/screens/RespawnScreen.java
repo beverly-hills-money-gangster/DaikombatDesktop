@@ -4,11 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.DaiKombatGame;
-import com.beverly.hills.money.gang.network.GameConnection;
+import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
 import com.beverly.hills.money.gang.proto.RespawnCommand;
 import com.beverly.hills.money.gang.proto.ServerResponse;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.utils.Converter;
+import java.util.function.Consumer;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +23,11 @@ public class RespawnScreen extends AbstractLoadingScreen {
 
   private final PlayerConnectionContextData oldPlayerConnectionContextData;
 
-  private final GameConnection gameConnection;
+  private final LoadBalancedGameConnection gameConnection;
 
   public RespawnScreen(final DaiKombatGame game,
       final PlayerConnectionContextData oldPlayerConnectionContextData,
-      final GameConnection gameConnection) {
+      final LoadBalancedGameConnection gameConnection) {
     super(game);
     this.oldPlayerConnectionContextData = oldPlayerConnectionContextData;
     this.gameConnection = gameConnection;
@@ -34,7 +35,7 @@ public class RespawnScreen extends AbstractLoadingScreen {
 
   @Override
   public void show() {
-    if (gameConnection.isDisconnected()) {
+    if (gameConnection.isAnyDisconnected()) {
       errorMessage = "Connection lost";
     } else {
       gameConnection.write(RespawnCommand.newBuilder()
@@ -60,7 +61,7 @@ public class RespawnScreen extends AbstractLoadingScreen {
       getGame().setScreen(new ErrorScreen(getGame(), errorMessage));
       return;
     }
-    gameConnection.getResponse().poll().ifPresentOrElse(response -> {
+    gameConnection.pollPrimaryConnectionResponse().ifPresent(response -> {
       if (response.hasErrorEvent()) {
         errorMessage = response.getErrorEvent().getMessage();
       } else if (response.hasGameEvents()) {
@@ -76,11 +77,13 @@ public class RespawnScreen extends AbstractLoadingScreen {
         getGame().setScreen(
             new PlayScreen(getGame(), gameConnection, createPlayerContextData(response)));
       }
-    }, () -> gameConnection.getErrors().poll().ifPresent(throwable -> {
+    });
+
+    gameConnection.pollErrors().stream().findFirst().ifPresent(throwable -> {
       LOG.error("Error while loading", throwable);
       gameConnection.disconnect();
       errorMessage = ExceptionUtils.getMessage(throwable);
-    }));
+    });
   }
 
   private PlayerConnectionContextData createPlayerContextData(ServerResponse response) {

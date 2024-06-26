@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.entities.player.Player;
@@ -20,7 +19,6 @@ import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
-import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import lombok.Getter;
@@ -32,6 +30,8 @@ public class EnemyPlayer extends Enemy {
   private static final Logger LOG = LoggerFactory.getLogger(EnemyPlayer.class);
 
   private final EnemyTextures enemyTextures;
+
+  private int lastEventSequenceId = -1;
 
   private static final int MAX_ACTION_QUEUE_CLOGGING = 30;
 
@@ -93,20 +93,43 @@ public class EnemyPlayer extends Enemy {
     } else {
       this.currentSpeed = getSpeed(actions, this.defaultSpeed);
     }
-    actions.add(enemyPlayerAction);
+
+    // if in order
+    if (enemyPlayerAction.getEventSequenceId() > lastEventSequenceId) {
+      lastEventSequenceId = enemyPlayerAction.getEventSequenceId();
+      actions.add(enemyPlayerAction);
+      return;
+    }
+
+    // fix out-of-order case
+    switch (enemyPlayerAction.getEnemyPlayerActionType()) {
+      case MOVE -> LOG.warn(
+          "MOVE event is out of order. Last event sequence id {} but given {}. Skip event.",
+          lastEventSequenceId, enemyPlayerAction.getEventSequenceId());
+      case SHOOT, PUNCH -> {
+        LOG.warn(
+            "SHOOT/PUNCH event is out of order. Last event sequence id {} but given {}",
+            lastEventSequenceId, enemyPlayerAction.getEventSequenceId());
+        actions.add(EnemyPlayerAction.builder()
+            .enemyPlayerActionType(enemyPlayerAction.getEnemyPlayerActionType())
+            .eventSequenceId(enemyPlayerAction.getEventSequenceId())
+            .onComplete(enemyPlayerAction.getOnComplete())
+            .direction(enemyPlayerAction.getDirection())
+            .route(getRect().getOldPosition())
+            .build());
+      }
+    }
   }
-
-
 
   static float getSpeed(final Queue<EnemyPlayerAction> actions, final float defaultSpeed) {
     if (actions.size() > 15) {
-      LOG.info("Action queue is super clogged. Size {}", actions.size());
-      return  defaultSpeed * 3f;
+      LOG.warn("Action queue is super clogged. Size {}", actions.size());
+      return defaultSpeed * 3f;
     } else if (actions.size() > 10) {
-      LOG.info("Action queue is very clogged. Size {}", actions.size());
+      LOG.warn("Action queue is very clogged. Size {}", actions.size());
       return defaultSpeed * 2f;
     } else if (actions.size() >= 5) {
-      LOG.info("Action queue is clogged. Size {}", actions.size());
+      LOG.warn("Action queue is clogged. Size {}", actions.size());
       return defaultSpeed * 1.25f;
     } else if (actions.size() > 2) {
       return defaultSpeed * 1.15f;
@@ -130,7 +153,7 @@ public class EnemyPlayer extends Enemy {
     getMdlInst().transform.setToLookAt(
         getScreen().getCurrentCam().direction.cpy().rotate(Vector3.Z, 180f), Vector3.Y);
     getMdlInst().transform.setTranslation(getPosition().cpy().add(0, Constants.HALF_UNIT, 0));
-    // otherwise, it the enemy is too "fat"
+    // otherwise, the enemy is too "fat"
     getMdlInst().transform.scale(0.8f, 1f, 1);
     super.render3D(mdlBatch, env, delta);
   }
@@ -169,7 +192,7 @@ public class EnemyPlayer extends Enemy {
         }
 
       }
-    } else {
+    } else if (System.currentTimeMillis() >= movingAnimationUntil) {
       isIdle = true;
     }
     getRect().setX(getRect().getNewPosition().x);
@@ -198,41 +221,41 @@ public class EnemyPlayer extends Enemy {
     float angle = playerDirection.angleDeg(lastDirection);
 
     if (Constants.FRONT_RANGE.contains(angle)) {
-      if (keepShootingAnimation()) {
+      if (isShootingAnimation()) {
         return enemyTextures.getEnemyPlayerTextureRegion(EnemyTextureRegistry.SHOOTINGTEXFRONTREG);
       } else if (isIdle) {
         return enemyTextures.getEnemyPlayerTextureRegion(EnemyTextureRegistry.IDLETEXFRONTREG);
-      } else if (keepMovingAnimation()) {
+      } else if (isNextStepAnimation()) {
         movingAnimationUntil = getAnimationTimeoutMls();
         currentStep++;
         return enemyTextures.getEnemyPlayerMoveFrontTextureRegion(currentStep);
       }
     } else if (Constants.LEFT_RANGE.contains(angle)) {
-      if (keepShootingAnimation()) {
+      if (isShootingAnimation()) {
         return enemyTextures.getEnemyPlayerTextureRegion(EnemyTextureRegistry.SHOOTINGTEXLEFTREG);
       } else if (isIdle) {
         return enemyTextures.getEnemyPlayerTextureRegion(EnemyTextureRegistry.IDLETEXLEFTREG);
-      } else if (keepMovingAnimation()) {
+      } else if (isNextStepAnimation()) {
         movingAnimationUntil = getAnimationTimeoutMls();
         currentStep++;
         return enemyTextures.getEnemyPlayerMoveLeftTextureRegion(currentStep);
       }
     } else if (Constants.RIGHT_RANGE.contains(angle)) {
-      if (keepShootingAnimation()) {
+      if (isShootingAnimation()) {
         return enemyTextures.getEnemyPlayerTextureRegion(EnemyTextureRegistry.SHOOTINGTEXRIGHTREG);
       } else if (isIdle) {
         return enemyTextures.getEnemyPlayerTextureRegion(EnemyTextureRegistry.IDLETEXRIGHTREG);
-      } else if (keepMovingAnimation()) {
+      } else if (isNextStepAnimation()) {
         movingAnimationUntil = getAnimationTimeoutMls();
         currentStep++;
         return enemyTextures.getEnemyPlayerMoveRightTextureRegion(currentStep);
       }
     } else {
-      if (keepShootingAnimation()) {
+      if (isShootingAnimation()) {
         return enemyTextures.getEnemyPlayerTextureRegion(EnemyTextureRegistry.SHOOTINGTEXBACKTREG);
       } else if (isIdle) {
         return enemyTextures.getEnemyPlayerTextureRegion(EnemyTextureRegistry.IDLETEXBACKREG);
-      } else if (keepMovingAnimation()) {
+      } else if (isNextStepAnimation()) {
         movingAnimationUntil = getAnimationTimeoutMls();
         currentStep += 1;
         return enemyTextures.getEnemyPlayerMoveBackTextureRegion(currentStep);
@@ -241,11 +264,11 @@ public class EnemyPlayer extends Enemy {
     return null;
   }
 
-  private boolean keepShootingAnimation() {
+  private boolean isShootingAnimation() {
     return System.currentTimeMillis() <= shootingAnimationUntil;
   }
 
-  private boolean keepMovingAnimation() {
+  private boolean isNextStepAnimation() {
     return System.currentTimeMillis() >= movingAnimationUntil;
   }
 

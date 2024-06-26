@@ -72,7 +72,10 @@ gradle desktop:dist
 To turn dev mode on, please run the game with `DESKTOP_DEV_MODE=true` environment variable. Dev mode features:
 - Smaller window size, so you can run multiple game windows at the same time and see IDE logs on-fly
 - Cursor gets "un-caught" when "Esc" is pressed during death-match, so you can use the mouse to go back to IDE or run one more game window
-- Basic network metrics are rendered on the screen during death-match
+
+#### Debug controls
+- N - see network metrics
+- P - log current player position
 
 ## Distribution
 

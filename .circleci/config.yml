@@ -55,7 +55,7 @@ jobs:
           name: Create win executable
           command: |
             java -jar packr-all-4.0.0.jar win_packr_config.json
-            zip -9 -r win64-exe-game.zip game
+            zip -9 -r win64-exe-game-tcp.zip game
       - run:
           name: Upload win exe to dropbox
           command: |
@@ -64,12 +64,4 @@ jobs:
 workflows:
   compile-verify-test:
     jobs:
-      - test-java
-  publish-zip:
-    jobs:
-      - build-and-publish:
-          filters:
-            tags:
-              only: /^(\d+)\.(\d+)\.(\d+)$/
-            branches:
-              ignore: /.*/
+      - build-and-publish
