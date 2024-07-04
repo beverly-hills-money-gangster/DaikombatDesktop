@@ -98,7 +98,7 @@ public class GameOverScreen extends AbstractMainMenuScreen {
       var glyphLayoutRecSentMessages = new GlyphLayout(guiFont64, leaderBoard);
       guiFont64.draw(getGame().getBatch(),
           leaderBoard, getViewport().getWorldWidth() / 2f - glyphLayoutRecSentMessages.width / 2f,
-          getViewport().getWorldHeight() - Constants.MENU_OPTION_INDENT * 2);
+          getViewport().getWorldHeight() - 128);
     } else {
       showLogo = true;
       String pressTabToSeeLeaderboard = "PRESS TAB TO SEE LEADERBOARD";

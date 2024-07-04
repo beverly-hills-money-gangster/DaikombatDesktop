@@ -17,6 +17,7 @@ import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
 import com.beverly.hills.money.gang.screens.ui.weapon.ScreenWeapon;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import lombok.Builder;
@@ -253,9 +254,11 @@ public class Player extends Entity {
     return screenWeapon.getActiveWeaponForRendering();
   }
 
+
+
   public float getAlphaChannel() {
     if (getPlayerEffects().isPowerUpActive(PowerUpType.INVISIBILITY)) {
-      return 0.7f;
+      return 0.6f;
     } else {
       return 1f;
     }

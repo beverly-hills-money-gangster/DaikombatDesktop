@@ -417,6 +417,13 @@ public class PlayScreen extends GameScreen {
         .build());
   }
 
+  private void powerUpEffect(Color color, PowerUpType powerUpType) {
+    getGame().getBatch().setColor(new Color(color.r, color.g, color.b,
+        getPlayer().getAlphaChannel()).lerp(Color.WHITE, (float) Math.sin(
+        getGame().getTimeSinceLaunch() * getPlayer().getPlayerEffects()
+            .getPowerUpEffectIntensity(powerUpType).getLevel())));
+  }
+
   @Override
   public void render(final float delta) {
     super.render(delta);
@@ -452,16 +459,11 @@ public class PlayScreen extends GameScreen {
 
     if (!getPlayer().isDead()) {
       if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {
-        getGame().getBatch().setColor(
-            new Color(Color.SKY.r, Color.SKY.g, Color.SKY.b, getPlayer().getAlphaChannel())
-                .lerp(Color.WHITE, (float) Math.sin(getGame().getTimeSinceLaunch() * 15)));
+        powerUpEffect(Color.SKY, PowerUpType.QUAD_DAMAGE);
       } else if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.DEFENCE)) {
-        getGame().getBatch().setColor(
-            new Color(Color.CHARTREUSE.r, Color.CHARTREUSE.g, Color.CHARTREUSE.b,
-                getPlayer().getAlphaChannel())
-                .lerp(Color.WHITE, (float) Math.sin(getGame().getTimeSinceLaunch() * 15)));
+        powerUpEffect(Color.LIME, PowerUpType.DEFENCE);
       } else if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.INVISIBILITY)) {
-        getGame().getBatch().setColor(new Color(1, 1, 1, getPlayer().getAlphaChannel()));
+        powerUpEffect(Color.WHITE, PowerUpType.INVISIBILITY);
       }
     }
 
@@ -526,7 +528,7 @@ public class PlayScreen extends GameScreen {
       var glyphLayoutRecSentMessages = new GlyphLayout(guiFont64, leaderBoard);
       guiFont64.draw(getGame().getBatch(),
           leaderBoard, getViewport().getWorldWidth() / 2f - glyphLayoutRecSentMessages.width / 2f,
-          getViewport().getWorldHeight() - Constants.MENU_OPTION_INDENT * 2);
+          getViewport().getWorldHeight() - 128);
     } else {
       // gui menu
       if (showGuiMenu) {
