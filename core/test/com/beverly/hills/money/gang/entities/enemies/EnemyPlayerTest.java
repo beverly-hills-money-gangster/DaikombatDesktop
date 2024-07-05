@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 
 public class EnemyPlayerTest {
 
+  private int sequence = 0;
+
   private final int defaultSpeed = 5;
 
   @Test
@@ -43,7 +45,7 @@ public class EnemyPlayerTest {
   private Queue<EnemyPlayerAction> createActions(int numberOfActions) {
     Queue<EnemyPlayerAction> enemyPlayerActions = new ArrayDeque<>();
     for (int i = 0; i < numberOfActions; i++) {
-      enemyPlayerActions.add(EnemyPlayerAction.builder().build());
+      enemyPlayerActions.add(EnemyPlayerAction.builder().eventSequenceId(sequence++).build());
     }
     return enemyPlayerActions;
   }

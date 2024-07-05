@@ -8,9 +8,12 @@ import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import java.util.Locale;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ErrorScreen extends AbstractMainMenuScreen {
 
+  private static final Logger LOG = LoggerFactory.getLogger(JoinGameScreen.class);
 
   private final String errorMessage;
   private final BitmapFont guiFont32;
@@ -20,6 +23,7 @@ public class ErrorScreen extends AbstractMainMenuScreen {
   public ErrorScreen(final DaiKombatGame game, final String errorMessage) {
     super(game);
     this.errorMessage = errorMessage.toUpperCase(Locale.ENGLISH);
+    LOG.error("Go to error screen with error '{}'", errorMessage);
     guiFont32 = game.getAssMan().getFont(FontRegistry.FONT_32);
     guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
   }
