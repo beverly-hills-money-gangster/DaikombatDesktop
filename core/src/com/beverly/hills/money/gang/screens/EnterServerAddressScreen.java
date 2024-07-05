@@ -78,7 +78,7 @@ public class EnterServerAddressScreen extends AbstractMainMenuScreen {
     guiFont32.draw(getGame().getBatch(), errorMessage,
         getViewport().getWorldWidth() / 2f - glyphLayoutTitle.width / 2f,
         getViewport().getWorldHeight() / 2f - glyphLayoutTitle.height / 2f
-            - Constants.LOGO_INDENT - Constants.MENU_OPTION_INDENT * 3);
+            - Constants.LOGO_INDENT - Constants.MENU_OPTION_INDENT * 5);
   }
 
 
@@ -99,7 +99,7 @@ public class EnterServerAddressScreen extends AbstractMainMenuScreen {
     guiFont32.draw(getGame().getBatch(), INSTRUCTION,
         getViewport().getWorldWidth() / 2f - glyphLayoutInstruction.width / 2f,
         getViewport().getWorldHeight() / 2f - glyphLayoutInstruction.height / 2f
-            - Constants.LOGO_INDENT - Constants.MENU_OPTION_INDENT);
+            - Constants.LOGO_INDENT - Constants.MENU_OPTION_INDENT * 2);
 
     String playerNameInput = ">" + nameTextInputProcessor.getText();
     GlyphLayout glyphLayoutPlayerInput = new GlyphLayout(guiFont64, playerNameInput);
@@ -107,7 +107,7 @@ public class EnterServerAddressScreen extends AbstractMainMenuScreen {
         getViewport().getWorldWidth() / 2f - glyphLayoutPlayerInput.width / 2f,
         getViewport().getWorldHeight() / 2f - glyphLayoutPlayerInput.height / 2f
             - Constants.LOGO_INDENT
-            - Constants.MENU_OPTION_INDENT * 2);
+            - Constants.MENU_OPTION_INDENT * 3);
     getGame().getBatch().end();
   }
 }

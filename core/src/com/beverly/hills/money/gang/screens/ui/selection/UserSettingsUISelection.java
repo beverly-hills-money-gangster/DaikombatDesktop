@@ -26,10 +26,10 @@ public enum UserSettingsUISelection {
 
   public static class SettingState {
 
-    protected static final int DEFAULT = 10;
-    protected static final int MAX_SETTING = 30;
+    public static final int DEFAULT = 5;
+    protected static final int MAX_SETTING = 10;
     protected static final int MIN_SETTING = 0;
-    protected static final int SETTING_DELTA = 3;
+    protected static final int SETTING_DELTA = 1;
 
     @Getter
     @Setter
@@ -48,7 +48,7 @@ public enum UserSettingsUISelection {
     }
 
     public float getNormalized() {
-      return setting / 10f;
+      return setting / (float) MAX_SETTING;
     }
 
     @Override

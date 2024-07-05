@@ -21,10 +21,10 @@ public interface Constants {
   float BLOOD_OVERLAY_ALPHA_MIN = 0f;
   float BLOOD_OVERLAY_ALPHA_SPEED = 5f;
 
-  int LOGO_INDENT = 256;
+  int LOGO_INDENT = 256 - 16;
   int DEFAULT_SELECTION_INDENT = 32;
 
-  int MENU_OPTION_INDENT = 64;
+  int MENU_OPTION_INDENT = 32;
 
   float DEFAULT_ENEMY_Y = 0.5057522f;
 

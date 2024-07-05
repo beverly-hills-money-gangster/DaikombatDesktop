@@ -59,24 +59,30 @@ public abstract class Enemy extends SoundMakingEntity {
     } else if (enemyEffects.isPowerUpActive(PowerUpType.INVISIBILITY)) {
       colorAttribute.color.set(new Color(1, 1, 1, getAlphaChannel()));
     } else if (enemyEffects.isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {
-      colorAttribute.color.set(new Color(Color.SKY.r, Color.SKY.g, Color.SKY.b, getAlphaChannel())
-          .lerp(Color.WHITE, (float) Math.sin(getScreen().getGame().getTimeSinceLaunch() * 15)));
+      powerUpEffect(colorAttribute, Color.SKY, PowerUpType.QUAD_DAMAGE);
     } else if (enemyEffects.isPowerUpActive(PowerUpType.DEFENCE)) {
-      colorAttribute.color.set(
-          new Color(Color.CHARTREUSE.r, Color.CHARTREUSE.g, Color.CHARTREUSE.b, getAlphaChannel())
-              .lerp(Color.WHITE, (float) Math.sin(getScreen().getGame().getTimeSinceLaunch() * 15)));
+      powerUpEffect(colorAttribute, Color.LIME, PowerUpType.DEFENCE);
     } else {
       colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.WHITE, 0));
       colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.RED, 0));
       colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.SKY, 0));
-      colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.CHARTREUSE, 0));
+      colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.LIME, 0));
     }
+  }
+
+  private void powerUpEffect(
+      ColorAttribute myCurrentColorAttribute, Color colorToSet, PowerUpType powerUpType) {
+    myCurrentColorAttribute.color.set(
+        new Color(colorToSet.r, colorToSet.g, colorToSet.b, getAlphaChannel()).lerp(
+            Color.WHITE, (float) Math.sin(
+                getScreen().getGame().getTimeSinceLaunch()
+                    * enemyEffects.getPowerUpEffectIntensity(powerUpType).getLevel())));
   }
 
 
   public float getAlphaChannel() {
     if (enemyEffects.isPowerUpActive(PowerUpType.INVISIBILITY)) {
-      return 0.095f;
+      return 0.085f;
     } else {
       return 1f;
     }
