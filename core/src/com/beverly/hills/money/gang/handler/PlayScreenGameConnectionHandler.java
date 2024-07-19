@@ -31,8 +31,6 @@ public class PlayScreenGameConnectionHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(PlayScreenGameConnectionHandler.class);
 
-  private static final int EVENTS_TO_POLL = 10;
-
   private final PlayScreen playScreen;
 
   private boolean initialRequestHandled;
@@ -44,7 +42,8 @@ public class PlayScreenGameConnectionHandler {
       LOG.info("Stop handling");
       return;
     }
-    playScreen.getGameConnection().getResponse().poll(EVENTS_TO_POLL).forEach(serverResponse -> {
+    // TODO sort game responses
+    playScreen.getGameConnection().pollResponses().forEach(serverResponse -> {
       if (serverResponse.hasChatEvents()) {
         handleChat(serverResponse.getChatEvents());
       } else if (serverResponse.hasGameEvents()) {
@@ -57,9 +56,7 @@ public class PlayScreenGameConnectionHandler {
         handlePowerUpSpawn(serverResponse.getPowerUpSpawn());
       }
     });
-
-    playScreen.getGameConnection().getErrors().poll()
-        .ifPresent(this::handleException);
+    playScreen.getGameConnection().pollErrors().forEach(this::handleException);
     if (!initialRequestHandled) {
       initialRequestHandled = true;
     }
@@ -107,6 +104,7 @@ public class PlayScreenGameConnectionHandler {
       LOG.info("Player already spawned {}", gameEvent);
       return;
     }
+    LOG.info("Spawn player {}", gameEvent.getPlayer().getPlayerName());
     EnemyPlayer enemyPlayer = new EnemyPlayer(playScreen.getPlayer(),
         gameEvent.getPlayer().getPlayerId(),
         new Vector3(gameEvent.getPlayer().getPosition().getX(),
@@ -179,6 +177,7 @@ public class PlayScreenGameConnectionHandler {
           gameEvent.getPlayer().getActivePowerUpsList().forEach(gamePowerUp
               -> activateEnemyPowerUp(enemyPlayer, gamePowerUp));
           enemyPlayer.queueAction(EnemyPlayerAction.builder()
+              .eventSequenceId(gameEvent.getSequence())
               .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
               .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
               .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build());
@@ -236,6 +235,7 @@ public class PlayScreenGameConnectionHandler {
     };
     enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
         .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
+            .eventSequenceId(gameEvent.getSequence())
             .enemyPlayerActionType(enemyPlayerActionType)
             .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
             .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build()));
@@ -258,6 +258,7 @@ public class PlayScreenGameConnectionHandler {
       enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
           .ifPresent(enemyPlayer -> {
             enemyPlayer.queueAction(EnemyPlayerAction.builder()
+                .eventSequenceId(gameEvent.getSequence())
                 .enemyPlayerActionType(enemyPlayerActionType)
                 .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
                 .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
@@ -274,6 +275,7 @@ public class PlayScreenGameConnectionHandler {
       // enemies hitting each other
       enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
           .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
+              .eventSequenceId(gameEvent.getSequence())
               .enemyPlayerActionType(enemyPlayerActionType)
               .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
               .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
@@ -304,6 +306,7 @@ public class PlayScreenGameConnectionHandler {
 
       enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
           .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
+              .eventSequenceId(gameEvent.getSequence())
               .enemyPlayerActionType(enemyPlayerActionType)
               .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
               .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
@@ -340,6 +343,7 @@ public class PlayScreenGameConnectionHandler {
     } else {
       enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
           .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
+              .eventSequenceId(gameEvent.getSequence())
               .enemyPlayerActionType(enemyPlayerActionType)
               .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
               .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))

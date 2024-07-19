@@ -26,11 +26,12 @@ import com.beverly.hills.money.gang.entities.item.PowerUp;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
+import com.beverly.hills.money.gang.entities.ui.UINetworkStats;
 import com.beverly.hills.money.gang.handler.PlayScreenGameConnectionHandler;
 import com.beverly.hills.money.gang.input.TextInputProcessor;
 import com.beverly.hills.money.gang.log.ChatLog;
 import com.beverly.hills.money.gang.log.MyPlayerKillLog;
-import com.beverly.hills.money.gang.network.GameConnection;
+import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
 import com.beverly.hills.money.gang.proto.PushChatEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
@@ -38,13 +39,12 @@ import com.beverly.hills.money.gang.screens.ui.selection.ActivePlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.DeadPlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +56,7 @@ public class PlayScreen extends GameScreen {
   private static final int DEAD_SCREEN_INPUT_DELAY_MLS = 1_000;
 
   private GameScreen screenToTransition;
+  private boolean showNetworkStats;
   private final SoundQueue narratorSoundQueue = new SoundQueue(1_250,
       Constants.QUAKE_NARRATOR_FX_VOLUME);
   private static final int MAX_CHAT_MSG_LEN = 32;
@@ -78,6 +79,7 @@ public class PlayScreen extends GameScreen {
   private final UserSettingSound oneFragLeftSound;
   private final UserSettingSound twoFragsLeftSound;
   private final UserSettingSound threeFragsLeftSound;
+  private int actionSequence;
 
   @Getter
   @Setter
@@ -107,16 +109,20 @@ public class PlayScreen extends GameScreen {
 
   private final ChatLog chatLog;
   private final MyPlayerKillLog myPlayerKillLog;
-  private final GameConnection gameConnection;
+  private final LoadBalancedGameConnection gameConnection;
   private final PlayerConnectionContextData playerConnectionContextData;
+
+  private final UINetworkStats uiNetworkStats;
 
   private final Map<PowerUpType, PowerUp> powerUps = new HashMap<>();
 
   public PlayScreen(final DaiKombatGame game,
-      final GameConnection gameConnection,
+      final LoadBalancedGameConnection gameConnection,
       final PlayerConnectionContextData playerConnectionContextData) {
     super(game, new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
     this.gameConnection = gameConnection;
+    this.uiNetworkStats = new UINetworkStats(gameConnection.getPrimaryNetworkStats(),
+        gameConnection.getSecondaryNetworkStats());
     dingSound1 = getGame().getAssMan().getUserSettingSound(SoundRegistry.DING_1);
     this.playerConnectionContextData = playerConnectionContextData;
     this.playersOnline = playerConnectionContextData.getPlayersOnline();
@@ -168,7 +174,11 @@ public class PlayScreen extends GameScreen {
             playerWeapon.getPlayer().playWeaponHitSound(playerWeapon.getWeapon());
             gameConnection.write(PushGameEventCommand.newBuilder()
                 .setGameId(Configs.GAME_ID)
+                .setPingMls(
+                    Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
+                        .orElse(0))
                 .setPlayerId(playerConnectionContextData.getPlayerId())
+                .setSequence(actionSequence++)
                 .setDirection(
                     PushGameEventCommand.Vector.newBuilder().setX(direction.x).setY(direction.y)
                         .build())
@@ -183,6 +193,10 @@ public class PlayScreen extends GameScreen {
             // if we haven't hit anybody
             gameConnection.write(PushGameEventCommand.newBuilder()
                 .setGameId(Configs.GAME_ID)
+                .setSequence(actionSequence++)
+                .setPingMls(
+                    Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
+                        .orElse(0))
                 .setPlayerId(playerConnectionContextData.getPlayerId())
                 .setDirection(
                     PushGameEventCommand.Vector.newBuilder().setX(direction.x).setY(direction.y)
@@ -201,7 +215,7 @@ public class PlayScreen extends GameScreen {
         },
         player -> {
           if (System.currentTimeMillis() < nextTimeToFlushPlayerActions
-              || gameConnection.isDisconnected()) {
+              || gameConnection.isAnyDisconnected()) {
             return;
           }
           sendCurrentPlayerPosition();
@@ -266,6 +280,9 @@ public class PlayScreen extends GameScreen {
           var currentPosition = getPlayer().getCurrent2DPosition();
           var currentDirection = getPlayer().getCurrent2DDirection();
           gameConnection.write(PushGameEventCommand.newBuilder()
+              .setSequence(actionSequence++)
+              .setPingMls(Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
+                  .orElse(0))
               .setPlayerId(playerConnectionContextData.getPlayerId())
               .setEventType(powerUpType.getPickType())
               .setGameId(Configs.GAME_ID)
@@ -325,6 +342,9 @@ public class PlayScreen extends GameScreen {
         }
         if (Gdx.input.isKeyJustPressed(Keys.P)) {
           LOG.info("Player position is {}", getPlayer().getCurrent2DPosition());
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.N)) {
+          showNetworkStats = !showNetworkStats;
         }
         getPlayer().handleInput(delta);
       }
@@ -407,6 +427,9 @@ public class PlayScreen extends GameScreen {
     var currentPosition = getPlayer().getCurrent2DPosition();
     var currentDirection = getPlayer().getCurrent2DDirection();
     gameConnection.write(PushGameEventCommand.newBuilder()
+        .setPingMls(
+            Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls()).orElse(0))
+        .setSequence(actionSequence++)
         .setPlayerId(playerConnectionContextData.getPlayerId())
         .setEventType(PushGameEventCommand.GameEventType.MOVE)
         .setGameId(Configs.GAME_ID)
@@ -545,11 +568,8 @@ public class PlayScreen extends GameScreen {
     if (gameOver) {
       screenToTransition = new GameOverScreen(getGame(), uiLeaderBoard,
           playerConnectionContextData.getJoinGameData());
-    } else if (gameConnection.isDisconnected()) {
-      while (gameConnection.getErrors().size() != 0) {
-        gameConnection.getErrors().poll()
-            .ifPresent(playScreenGameConnectionHandler::handleException);
-      }
+    } else if (gameConnection.isAnyDisconnected()) {
+      gameConnection.pollErrors().forEach(playScreenGameConnectionHandler::handleException);
       screenToTransition = new ErrorScreen(getGame(),
           StringUtils.defaultIfBlank(errorMessage, "Connection lost"));
     } else {
@@ -559,7 +579,7 @@ public class PlayScreen extends GameScreen {
         LOG.error("Can't handle screen actions", e);
         screenToTransition = new ErrorScreen(getGame(),
             StringUtils.defaultIfEmpty(e.getMessage(), "Can't handle connection")
-                + ". Check internet signal. Last ping " + gameConnection.getNetworkStats()
+                + ". Check internet signal. Last ping " + gameConnection.getPrimaryNetworkStats()
                 .getPingMls() + " mls.");
       }
     }
@@ -580,9 +600,7 @@ public class PlayScreen extends GameScreen {
     StringBuilder gameTechStats = new StringBuilder();
     gameTechStats.append(playersOnline).append(" ONLINE ");
     gameTechStats.append("| PING ")
-        .append(Optional.of(gameConnection.getNetworkStats().getPingMls())
-            .filter(ping -> ping >= 0)
-            .map(String::valueOf).orElse("-"))
+        .append(Objects.toString(gameConnection.getPrimaryNetworkStats().getPingMls(), "-"))
         .append(" MLS | ");
     gameTechStats.append(Gdx.graphics.getFramesPerSecond()).append(" FPS");
 
@@ -591,24 +609,18 @@ public class PlayScreen extends GameScreen {
         getViewport().getWorldWidth() - 32 - gameTechStatsGlyph.width,
         getViewport().getWorldHeight() - 32 - gameTechStatsGlyph.height);
 
-    if (Configs.DEV_MODE) {
+    if (showNetworkStats) {
       renderDevModeGameTechStats();
     }
   }
 
   private void renderDevModeGameTechStats() {
-    String networkStats = String.format(Locale.ENGLISH,
-            "NETWORK: RECV %s MSG | SENT %s MSG | INBOUND %s | OUTBOUND %s",
-            gameConnection.getNetworkStats().getReceivedMessages(),
-            gameConnection.getNetworkStats().getSentMessages(),
-            FileUtils.byteCountToDisplaySize(gameConnection.getNetworkStats().getInboundPayloadBytes()),
-            FileUtils.byteCountToDisplaySize(
-                gameConnection.getNetworkStats().getOutboundPayloadBytes()))
-        .toUpperCase();
-    var glyphNetStatsMessages = new GlyphLayout(guiFont32, networkStats);
+    String networkStats = uiNetworkStats.toString();
+    GlyphLayout glyphNetworkStats = new GlyphLayout(guiFont32, networkStats);
     guiFont32.draw(getGame().getBatch(),
-        networkStats, getViewport().getWorldWidth() / 2f - glyphNetStatsMessages.width / 2f,
-        getViewport().getWorldHeight() - 32);
+        networkStats, Constants.DEFAULT_SELECTION_INDENT,
+        getViewport().getWorldHeight() - getViewport().getWorldHeight() / 3
+            + glyphNetworkStats.height / 2);
   }
 
 

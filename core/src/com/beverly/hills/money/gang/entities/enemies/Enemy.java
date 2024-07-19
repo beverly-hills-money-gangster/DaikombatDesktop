@@ -117,7 +117,7 @@ public abstract class Enemy extends SoundMakingEntity {
   }
 
   protected long getAnimationTimeoutMls() {
-    return System.currentTimeMillis() + 100;
+    return System.currentTimeMillis() + 150;
   }
 
 

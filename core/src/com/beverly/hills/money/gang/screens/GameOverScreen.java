@@ -24,7 +24,6 @@ public class GameOverScreen extends AbstractMainMenuScreen {
   private final UserSettingSound boomSound1;
   private final UserSettingSound dingSound1;
   private final UserSettingSound youWinMusic;
-  private final UserSettingSound youWinVoice;
   private final GlyphLayout glyphLayoutWinner;
   private final UILeaderBoard uiLeaderBoard;
   private boolean showLeaderBoard;
@@ -37,13 +36,13 @@ public class GameOverScreen extends AbstractMainMenuScreen {
   public GameOverScreen(final DaiKombatGame game,
       final UILeaderBoard uiLeaderBoard,
       final JoinGameData joinGameData) {
+    // TODO show winner player skin instead of logo
     super(game);
     guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
     guiFont32 = game.getAssMan().getFont(FontRegistry.FONT_32);
     boomSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.BOOM_1);
     dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
     youWinMusic = game.getAssMan().getUserSettingSound(SoundRegistry.WIN_MUSIC);
-    youWinVoice = game.getAssMan().getUserSettingSound(SoundRegistry.YOU_WIN);
     this.joinGameData = joinGameData;
     this.uiLeaderBoard = uiLeaderBoard;
     leaderMessage = "WINNER IS " + uiLeaderBoard.getFirstPlaceStats();
@@ -51,7 +50,6 @@ public class GameOverScreen extends AbstractMainMenuScreen {
     if (uiLeaderBoard.getMyPlace() == 1) {
       stopBgMusic();
       youWinMusic.play(DEFAULT_MUSIC_VOLUME * 1.2f);
-      youWinVoice.play(Constants.QUAKE_NARRATOR_FX_VOLUME);
     }
   }
 
