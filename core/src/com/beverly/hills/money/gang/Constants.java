@@ -11,7 +11,7 @@ public interface Constants {
   Range<Float> LEFT_RANGE = Range.of(45f, 180f - 44.9f);
   Range<Float> RIGHT_RANGE = Range.of(180 + 45.01f, 320f);
 
-  float PLAYER_RECT_SIZE = 0.25f + 0.425f;
+  float PLAYER_RECT_SIZE = 0.25f + 0.125f;
 
   long SHOOTING_SOUND_FREQ_MLS = 550;
 
@@ -23,7 +23,7 @@ public interface Constants {
 
   int LOGO_INDENT = 256 - 16;
   int DEFAULT_SELECTION_INDENT = 32;
-
+  int SPAWN_ANIMATION_MLS = 250;
   int MENU_OPTION_INDENT = 32;
 
   float DEFAULT_ENEMY_Y = 0.5057522f;

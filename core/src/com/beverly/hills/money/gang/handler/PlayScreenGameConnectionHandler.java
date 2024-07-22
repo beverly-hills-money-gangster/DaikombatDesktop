@@ -54,6 +54,8 @@ public class PlayScreenGameConnectionHandler {
         handleErrorEvent(serverResponse.getErrorEvent());
       } else if (serverResponse.hasPowerUpSpawn()) {
         handlePowerUpSpawn(serverResponse.getPowerUpSpawn());
+      } else if (serverResponse.hasTeleportSpawn()) {
+        handleTeleportSpawn(serverResponse.getTeleportSpawn());
       }
     });
     playScreen.getGameConnection().pollErrors().forEach(this::handleException);
@@ -78,8 +80,42 @@ public class PlayScreenGameConnectionHandler {
         case MOVE -> handleMove(gameEvent);
         case SHOOT, PUNCH -> handleAttackMiss(gameEvent);
         case GET_SHOT, GET_PUNCHED -> handleGetHit(gameEvent);
+        case TELEPORT -> handleTeleport(gameEvent);
       }
     });
+  }
+
+  private void handleTeleport(ServerResponse.GameEvent gameEvent) {
+    // if I'm getting teleported
+    if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
+        .getPlayerId()) {
+      playScreen.getPlayer().teleport(
+          createVector(gameEvent.getPlayer().getPosition()),
+          createVector(gameEvent.getPlayer().getDirection()));
+      return;
+    }
+
+    enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
+        .ifPresent(enemyPlayer -> {
+          enemyPlayer.queueAction(EnemyPlayerAction
+              .builder()
+              .eventSequenceId(gameEvent.getSequence())
+              .direction(enemyPlayer.getLastDirection())
+              .route(enemyPlayer.getRect().getOldPosition())
+              .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
+              .onComplete(() -> {
+                playScreen.getGame().getAssMan()
+                    .getUserSettingSound(SoundRegistry.ENEMY_PLAYER_GOING_THROUGH_TELEPORT)
+                    .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
+                enemyPlayer.teleport(new Vector3(gameEvent.getPlayer().getPosition().getX(),
+                        DEFAULT_ENEMY_Y, gameEvent.getPlayer().getPosition().getY()),
+                    createVector(gameEvent.getPlayer().getDirection()));
+                playScreen.getGame().getAssMan()
+                    .getUserSettingSound(SoundRegistry.SPAWN_SOUND_SEQ.getNextSound())
+                    .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
+              })
+              .build());
+        });
   }
 
   private void handleGameOver(ServerResponse.GameOver gameOver) {
@@ -109,8 +145,7 @@ public class PlayScreenGameConnectionHandler {
         gameEvent.getPlayer().getPlayerId(),
         new Vector3(gameEvent.getPlayer().getPosition().getX(),
             DEFAULT_ENEMY_Y, gameEvent.getPlayer().getPosition().getY()),
-        new Vector2(gameEvent.getPlayer().getDirection().getX(),
-            gameEvent.getPlayer().getDirection().getY()),
+        createVector(gameEvent.getPlayer().getDirection()),
         playScreen, gameEvent.getPlayer().getPlayerName(),
         getEnemyTexture(gameEvent.getPlayer().getSkinColor()), createEnemyListeners(),
         playScreen.getPlayerConnectionContextData().getSpeed());
@@ -129,7 +164,7 @@ public class PlayScreenGameConnectionHandler {
     if (initialRequestHandled) {
       playScreen.getGame().getAssMan()
           .getUserSettingSound(SoundRegistry.SPAWN_SOUND_SEQ.getNextSound())
-          .play(enemyPlayer.getSFXVolume());
+          .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
     }
   }
 
@@ -358,12 +393,15 @@ public class PlayScreenGameConnectionHandler {
   }
 
   public void handlePowerUpSpawn(ServerResponse.PowerUpSpawnEvent powerUpSpawnEvent) {
-    powerUpSpawnEvent.getItemsList().forEach(powerUpSpawnEventItem -> {
-      playScreen.spawnPowerUp(getPowerUpType(powerUpSpawnEventItem.getType()),
-          new Vector2(
-              powerUpSpawnEventItem.getPosition().getX(),
-              powerUpSpawnEventItem.getPosition().getY()));
-    });
+    powerUpSpawnEvent.getItemsList().forEach(powerUpSpawnEventItem
+        -> playScreen.spawnPowerUp(getPowerUpType(powerUpSpawnEventItem.getType()),
+        createVector(powerUpSpawnEventItem.getPosition())));
+  }
+
+  public void handleTeleportSpawn(ServerResponse.TeleportSpawnEvent teleportSpawnEvent) {
+    teleportSpawnEvent.getItemsList().forEach(teleportSpawnEventItem
+        -> playScreen.spawnTeleport(teleportSpawnEventItem.getId(),
+        createVector(teleportSpawnEventItem.getPosition())));
   }
 
   public void handleException(Throwable error) {
@@ -393,5 +431,9 @@ public class PlayScreenGameConnectionHandler {
             playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.ENEMY_PUNCH_HIT))
             .play(enemy.getSFXVolume(), enemy.getSFXPan()))
         .build();
+  }
+
+  private static Vector2 createVector(ServerResponse.Vector serverVector) {
+    return new Vector2(serverVector.getX(), serverVector.getY());
   }
 }

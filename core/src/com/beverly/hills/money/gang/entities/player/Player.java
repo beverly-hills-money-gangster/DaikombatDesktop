@@ -12,16 +12,17 @@ import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.entities.effect.PlayerEffects;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
+import com.beverly.hills.money.gang.entities.teleport.Teleport;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
 import com.beverly.hills.money.gang.screens.ui.weapon.ScreenWeapon;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.stream.Streams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ public class Player extends Entity {
   @Getter
   private final PerspectiveCamera playerCam;
   @Getter
-  private final RectanglePlus rect;
+  private RectanglePlus rect;
 
   private final Consumer<Player> onMovementListener;
 
@@ -63,10 +64,12 @@ public class Player extends Entity {
   @Getter
   private final PlayerEffects playerEffects = new PlayerEffects();
 
-
   private float camY = Constants.DEFAULT_PLAYER_CAM_Y;
   private boolean headbob = false;
   private int currentHP = 100;
+
+  @Setter
+  private Teleport colliedTeleport;
 
   private final int speed;
 
@@ -91,18 +94,9 @@ public class Player extends Entity {
     playerCam.near = 0.01f;
     playerCam.far = 10f;
     playerCam.update();
-
-    rect = new RectanglePlus(
-        spawnPosition.x + Constants.HALF_UNIT - Constants.PLAYER_RECT_SIZE / 2f,
-        spawnPosition.y + Constants.HALF_UNIT - Constants.PLAYER_RECT_SIZE / 2f,
-        Constants.PLAYER_RECT_SIZE, Constants.PLAYER_RECT_SIZE, getEntityId(),
-        RectanglePlusFilter.PLAYER);
-    rect.getOldPosition().set(spawnPosition.x, spawnPosition.y);
-    rect.getNewPosition()
-        .set(spawnPosition.x, spawnPosition.y); // Needed for spawning at correct position.
-    screen.getGame().getRectMan().addRect(rect); // never forget!
-    playerCam.position.set(rect.x + rect.width / 2f, Constants.DEFAULT_PLAYER_CAM_Y,
-        rect.y + rect.height / 2f);
+    createRect(spawnPosition.cpy()
+        .set(spawnPosition.x - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f,
+            spawnPosition.y - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f));
   }
 
   public Vector2 getCurrent2DDirection() {
@@ -111,6 +105,38 @@ public class Player extends Entity {
 
   public Vector2 getCurrent2DPosition() {
     return new Vector2(this.rect.x, this.rect.y);
+  }
+
+  public void teleport(final Vector2 position, final Vector2 lookAt) {
+    getScreen().getGame().getRectMan().removeRect(rect); // never forget!
+    playerCam.position.set(new Vector3(0, Constants.DEFAULT_PLAYER_CAM_Y, 0));
+    playerCam.lookAt(new Vector3(lookAt.x, Constants.DEFAULT_PLAYER_CAM_Y, lookAt.y));
+    // TODO fix this
+    createRect(position.cpy()
+        .set(position.x - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f,
+            position.y - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f));
+    colliedTeleport.finish();
+    colliedTeleport = null;
+  }
+
+  public boolean isCollidedWithTeleport() {
+    return colliedTeleport != null;
+  }
+
+  private void createRect(final Vector2 position) {
+    rect = new RectanglePlus(
+        position.x + Constants.HALF_UNIT - Constants.PLAYER_RECT_SIZE / 2f,
+        position.y + Constants.HALF_UNIT - Constants.PLAYER_RECT_SIZE / 2f,
+        Constants.PLAYER_RECT_SIZE, Constants.PLAYER_RECT_SIZE, getEntityId(),
+        RectanglePlusFilter.PLAYER);
+    rect.getOldPosition().set(position.x, position.y);
+    rect.getNewPosition()
+        .set(position.x, position.y); // Needed for spawning at correct position.
+
+    getScreen().getGame().getRectMan().addRect(rect); // never forget!
+    playerCam.position.set(rect.x + rect.width / 2f, Constants.DEFAULT_PLAYER_CAM_Y,
+        rect.y + rect.height / 2f);
+
   }
 
   @Override
@@ -253,7 +279,6 @@ public class Player extends Entity {
   public ScreenWeapon.WeaponRenderData getActiveWeaponRenderingData() {
     return screenWeapon.getActiveWeaponForRendering();
   }
-
 
 
   public float getAlphaChannel() {

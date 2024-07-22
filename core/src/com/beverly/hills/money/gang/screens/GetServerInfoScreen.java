@@ -9,6 +9,8 @@ import com.beverly.hills.money.gang.network.SecondaryGameConnection;
 import com.beverly.hills.money.gang.proto.GetServerInfoCommand;
 import com.beverly.hills.money.gang.screens.data.JoinGameData;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -46,11 +48,9 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
             .password(joinGameData.getServerPassword())
             .build();
         var connection = new GameConnection(creds);
-        List<SecondaryGameConnection> secondaryGameConnections
-            = List.of(new SecondaryGameConnection(creds), new SecondaryGameConnection(creds));
         LoadBalancedGameConnection loadBalancedGameConnection
             = new LoadBalancedGameConnection(
-            connection, secondaryGameConnections);
+            connection, createSecondaryConnections(creds));
         if (!loadBalancedGameConnection.waitUntilAllConnected(5_000)) {
           errorMessage.set("Connection timeout");
           loadBalancedGameConnection.disconnect();
@@ -65,6 +65,14 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
     }).start();
   }
 
+  private List<SecondaryGameConnection> createSecondaryConnections(GameServerCreds creds)
+      throws IOException {
+    List<SecondaryGameConnection> secondaryGameConnections = new ArrayList<>();
+    for (int i = 0; i < com.beverly.hills.money.gang.Configs.SECONDARY_CONNECTIONS_TO_OPEN; i++) {
+      secondaryGameConnections.add(new SecondaryGameConnection(creds));
+    }
+    return secondaryGameConnections;
+  }
 
   @Override
   protected void onEscape() {
@@ -76,7 +84,8 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
     if (errorMessage.get() != null) {
       removeAllEntities();
       LOG.error("Got error '{}'", errorMessage.get());
-      Optional.ofNullable(gameConnectionRef.get()).ifPresent(LoadBalancedGameConnection::disconnect);
+      Optional.ofNullable(gameConnectionRef.get())
+          .ifPresent(LoadBalancedGameConnection::disconnect);
       getGame().setScreen(new ErrorScreen(getGame(), errorMessage.get()));
       return;
     }
@@ -92,6 +101,7 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
               playerContextDataBuilder.fragsToWin(serverInfo.getFragsToWin());
               playerContextDataBuilder.speed(serverInfo.getPlayerSpeed());
               removeAllEntities();
+              LOG.info("Got server info. Try join the game");
               getGame().setScreen(new JoinGameScreen(getGame(),
                   playerContextDataBuilder, joinGameData, connection));
             }
