@@ -20,4 +20,7 @@ public interface Configs {
 
   float MELEE_DISTANCE = NumberUtils.toFloat(System.getenv("DESKTOP_MELEE_DISTANCE"), 0.45f);
 
+  int SECONDARY_CONNECTIONS_TO_OPEN = NumberUtils.toInt(
+      System.getenv("DESKTOP_SECONDARY_CONNECTIONS_TO_OPEN"), 2);
+
 }

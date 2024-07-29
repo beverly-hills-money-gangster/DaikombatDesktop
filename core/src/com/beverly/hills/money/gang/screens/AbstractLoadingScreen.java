@@ -9,7 +9,6 @@ import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-// TODO show how many frags are left
 public abstract class AbstractLoadingScreen extends AbstractMainMenuScreen {
 
   private final long LOAD_UNTIL_MLS = System.currentTimeMillis() + 15_000;

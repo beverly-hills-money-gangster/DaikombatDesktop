@@ -1,5 +1,8 @@
 package com.beverly.hills.money.gang.entities.enemies;
 
+import static com.beverly.hills.money.gang.Constants.DEFAULT_ENEMY_Y;
+import static com.beverly.hills.money.gang.Constants.SPAWN_ANIMATION_MLS;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -19,9 +22,11 @@ import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.strategy.EnemyPlayerActionQueueStrategy;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,11 +36,9 @@ public class EnemyPlayer extends Enemy {
 
   private final EnemyTextures enemyTextures;
 
-  private int lastEventSequenceId = -1;
-
-  private static final int MAX_ACTION_QUEUE_CLOGGING = 30;
-
   private final Queue<EnemyPlayerAction> actions = new ArrayDeque<>();
+
+  private final EnemyPlayerActionQueueStrategy enemyPlayerActionQueueStrategy;
 
   @Getter
   private final String name;
@@ -44,8 +47,10 @@ public class EnemyPlayer extends Enemy {
 
   private long shootingAnimationUntil;
   private int currentStep;
+
+  @Setter
   private float currentSpeed;
-  private final float defaultSpeed;
+  @Getter
   private Vector2 lastDirection;
   private boolean isIdle = true;
 
@@ -66,8 +71,7 @@ public class EnemyPlayer extends Enemy {
     this.enemyPlayerId = enemyPlayerId;
     lastDirection = direction;
     enemyTextures = new EnemyTextures(screen.getGame().getAssMan(), enemyTextureRegistry);
-    this.defaultSpeed = speed;
-    this.currentSpeed = this.defaultSpeed;
+    this.currentSpeed = (float) speed;
     this.name = name;
     super.setMdlInst(new ModelInstanceBB(screen.getGame().getCellBuilder().getMdlEnemy()));
     Attributes attributes = getMdlInst().materials.get(0);
@@ -76,68 +80,42 @@ public class EnemyPlayer extends Enemy {
     attributes.set(new ColorAttribute(ColorAttribute.Diffuse, Color.WHITE));
     attributes.set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
     attributes.set(new FloatAttribute(FloatAttribute.AlphaTest));
+    setRect();
+    screen.getGame().getRectMan().addRect(getRect());
+    getEnemyEffects().beingSpawned(System.currentTimeMillis() + SPAWN_ANIMATION_MLS);
+    enemyPlayerActionQueueStrategy = new EnemyPlayerActionQueueStrategy(
+        actions,
+        enemyPlayerAction ->
+            teleport(new Vector3(enemyPlayerAction.getRoute().x, DEFAULT_ENEMY_Y,
+                    enemyPlayerAction.getRoute().y),
+                enemyPlayerAction.getDirection()),
+        this::setCurrentSpeed,
+        (float) speed);
+  }
 
+  public void teleport(Vector3 position, Vector2 direction) {
+    getEnemyEffects().beingSpawned(System.currentTimeMillis() + SPAWN_ANIMATION_MLS);
+    this.getPosition().set(position);
+    this.lastDirection = direction;
+    getScreen().getGame().getRectMan().removeRect(getRect());
+    setRect();
+    getScreen().getGame().getRectMan().addRect(getRect());
+    rotateEnemyAnimation();
+  }
+
+  private void setRect() {
     setRect(
         new RectanglePlus(this.getPosition().x, this.getPosition().z, Constants.PLAYER_RECT_SIZE,
             Constants.PLAYER_RECT_SIZE, getEntityId(),
             RectanglePlusFilter.ENEMY));
     getRect().setPosition(getRect().x, getRect().y);
-    screen.getGame().getRectMan().addRect(getRect());
     getRect().getOldPosition().set(getRect().x, getRect().y);
     getRect().getNewPosition().set(getRect().x, getRect().y);
   }
 
   public void queueAction(EnemyPlayerAction enemyPlayerAction) {
-    if (actions.size() >= MAX_ACTION_QUEUE_CLOGGING) {
-      throw new IllegalStateException("Can't queue enemy action");
-    } else {
-      this.currentSpeed = getSpeed(actions, this.defaultSpeed);
-    }
-
-    // if in order
-    if (enemyPlayerAction.getEventSequenceId() > lastEventSequenceId) {
-      lastEventSequenceId = enemyPlayerAction.getEventSequenceId();
-      actions.add(enemyPlayerAction);
-      return;
-    }
-
-    // fix out-of-order case
-    switch (enemyPlayerAction.getEnemyPlayerActionType()) {
-      case MOVE -> LOG.warn(
-          "MOVE event is out of order. Last event sequence id {} but given {}. Skip event.",
-          lastEventSequenceId, enemyPlayerAction.getEventSequenceId());
-      case SHOOT, PUNCH -> {
-        LOG.warn(
-            "SHOOT/PUNCH event is out of order. Last event sequence id {} but given {}",
-            lastEventSequenceId, enemyPlayerAction.getEventSequenceId());
-        actions.add(EnemyPlayerAction.builder()
-            .enemyPlayerActionType(enemyPlayerAction.getEnemyPlayerActionType())
-            .eventSequenceId(enemyPlayerAction.getEventSequenceId())
-            .onComplete(enemyPlayerAction.getOnComplete())
-            .direction(enemyPlayerAction.getDirection())
-            .route(getRect().getOldPosition())
-            .build());
-      }
-    }
+    enemyPlayerActionQueueStrategy.enqueue(enemyPlayerAction, getRect().getOldPosition());
   }
-
-  static float getSpeed(final Queue<EnemyPlayerAction> actions, final float defaultSpeed) {
-    if (actions.size() > 15) {
-      LOG.warn("Action queue is super clogged. Size {}", actions.size());
-      return defaultSpeed * 3f;
-    } else if (actions.size() > 10) {
-      LOG.warn("Action queue is very clogged. Size {}", actions.size());
-      return defaultSpeed * 2f;
-    } else if (actions.size() >= 5) {
-      LOG.warn("Action queue is clogged. Size {}", actions.size());
-      return defaultSpeed * 1.25f;
-    } else if (actions.size() > 2) {
-      return defaultSpeed * 1.15f;
-    } else {
-      return defaultSpeed;
-    }
-  }
-
 
   public void shoot() {
     shootingAnimationUntil = System.currentTimeMillis() + 100;

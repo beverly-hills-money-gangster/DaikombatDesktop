@@ -4,6 +4,9 @@ import com.beverly.hills.money.gang.assets.managers.sound.PseudoRandomSoundSeque
 import lombok.Getter;
 
 public enum SoundRegistry {
+
+  PLAYER_GOING_THROUGH_TELEPORT("sfx/player_going_through_teleport.mp3"),
+  ENEMY_PLAYER_GOING_THROUGH_TELEPORT("sfx/enemy_going_through_teleport.mp3"),
   ONE_FRAG_LEFT("sfx/one_frag_left.mp3"),
   TWO_FRAGS_LEFT("sfx/two_frags_left.mp3"),
   THREE_FRAGS_LEFT("sfx/three_frags_left.mp3"),

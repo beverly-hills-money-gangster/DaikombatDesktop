@@ -56,6 +56,9 @@ public abstract class Enemy extends SoundMakingEntity {
         .get(ColorAttribute.Diffuse);
     if (enemyEffects.isBeingAttacked()) {
       colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.RED, 1));
+    } else if (enemyEffects.isBeingSpawned()
+        && !enemyEffects.isPowerUpActive(PowerUpType.INVISIBILITY)) {
+      colorAttribute.color.set(new Color(1, 1, 1, 0.4f));
     } else if (enemyEffects.isPowerUpActive(PowerUpType.INVISIBILITY)) {
       colorAttribute.color.set(new Color(1, 1, 1, getAlphaChannel()));
     } else if (enemyEffects.isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {

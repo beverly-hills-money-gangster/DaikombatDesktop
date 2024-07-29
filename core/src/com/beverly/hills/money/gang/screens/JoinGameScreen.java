@@ -76,6 +76,12 @@ public class JoinGameScreen extends AbstractLoadingScreen {
       gameConnection.disconnect();
       getGame().setScreen(new ErrorScreen(getGame(), errorMessage));
       return;
+    } else if (gameConnection.isAnyDisconnected()) {
+      LOG.error("Disconnected while loading {}", errorMessage);
+      removeAllEntities();
+      gameConnection.disconnect();
+      getGame().setScreen(new ErrorScreen(getGame(), "Disconnected"));
+      return;
     }
     gameConnection.pollPrimaryConnectionResponse().ifPresent(response -> {
       if (response.hasErrorEvent()) {
@@ -84,6 +90,7 @@ public class JoinGameScreen extends AbstractLoadingScreen {
       } else if (response.hasGameEvents()) {
         removeAllEntities();
         stopBgMusic();
+        LOG.info("Joined the game. Go play");
         getGame().setScreen(
             new PlayScreen(getGame(), gameConnection, createPlayerContextData(response)));
       }

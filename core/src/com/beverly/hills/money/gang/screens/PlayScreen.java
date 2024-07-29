@@ -24,7 +24,8 @@ import com.beverly.hills.money.gang.assets.managers.sound.SoundQueue;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.item.PowerUp;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
-import com.beverly.hills.money.gang.entities.player.Player;
+import com.beverly.hills.money.gang.entities.player.PlayerFactory;
+import com.beverly.hills.money.gang.entities.teleport.Teleport;
 import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
 import com.beverly.hills.money.gang.entities.ui.UINetworkStats;
 import com.beverly.hills.money.gang.handler.PlayScreenGameConnectionHandler;
@@ -34,6 +35,7 @@ import com.beverly.hills.money.gang.log.MyPlayerKillLog;
 import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
 import com.beverly.hills.money.gang.proto.PushChatEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand;
+import com.beverly.hills.money.gang.proto.PushGameEventCommand.GameEventType;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.screens.ui.selection.ActivePlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.DeadPlayUISelection;
@@ -42,6 +44,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
@@ -76,10 +79,11 @@ public class PlayScreen extends GameScreen {
   private final UserSettingSound boomSound2;
   private final UserSettingSound youLead;
   private final UserSettingSound lostLead;
+  private final UserSettingSound playerGoingThroughTeleport;
   private final UserSettingSound oneFragLeftSound;
   private final UserSettingSound twoFragsLeftSound;
   private final UserSettingSound threeFragsLeftSound;
-  private int actionSequence;
+  private final AtomicInteger actionSequence = new AtomicInteger(0);
 
   @Getter
   @Setter
@@ -124,6 +128,8 @@ public class PlayScreen extends GameScreen {
     this.uiNetworkStats = new UINetworkStats(gameConnection.getPrimaryNetworkStats(),
         gameConnection.getSecondaryNetworkStats());
     dingSound1 = getGame().getAssMan().getUserSettingSound(SoundRegistry.DING_1);
+    playerGoingThroughTeleport = game.getAssMan()
+        .getUserSettingSound(SoundRegistry.PLAYER_GOING_THROUGH_TELEPORT);
     this.playerConnectionContextData = playerConnectionContextData;
     this.playersOnline = playerConnectionContextData.getPlayersOnline();
     myPlayerKillLog = new MyPlayerKillLog();
@@ -160,74 +166,8 @@ public class PlayScreen extends GameScreen {
 
     chatLog = new ChatLog(() -> getGame().getAssMan().getUserSettingSound(SoundRegistry.PING)
         .play(Constants.DEFAULT_SFX_VOLUME));
-
-    setPlayer(new Player(this,
-        playerWeapon -> {
-          PushGameEventCommand.GameEventType eventType = switch (playerWeapon.getWeapon()) {
-            case GAUNTLET -> PushGameEventCommand.GameEventType.PUNCH;
-            case SHOTGUN -> PushGameEventCommand.GameEventType.SHOOT;
-          };
-          var direction = getPlayer().getCurrent2DDirection();
-          var position = getPlayer().getCurrent2DPosition();
-          boolean hitEnemy = getPlayer().getEnemyRectInRangeFromCam(enemy -> {
-            enemy.getHit();
-            playerWeapon.getPlayer().playWeaponHitSound(playerWeapon.getWeapon());
-            gameConnection.write(PushGameEventCommand.newBuilder()
-                .setGameId(Configs.GAME_ID)
-                .setPingMls(
-                    Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
-                        .orElse(0))
-                .setPlayerId(playerConnectionContextData.getPlayerId())
-                .setSequence(actionSequence++)
-                .setDirection(
-                    PushGameEventCommand.Vector.newBuilder().setX(direction.x).setY(direction.y)
-                        .build())
-                .setPosition(
-                    PushGameEventCommand.Vector.newBuilder().setX(position.x).setY(position.y)
-                        .build())
-                .setAffectedPlayerId(enemy.getEnemyPlayerId())
-                .setEventType(eventType)
-                .build());
-          }, playerWeapon.getPlayer().getWeaponDistance(playerWeapon.getWeapon()));
-          if (!hitEnemy) {
-            // if we haven't hit anybody
-            gameConnection.write(PushGameEventCommand.newBuilder()
-                .setGameId(Configs.GAME_ID)
-                .setSequence(actionSequence++)
-                .setPingMls(
-                    Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
-                        .orElse(0))
-                .setPlayerId(playerConnectionContextData.getPlayerId())
-                .setDirection(
-                    PushGameEventCommand.Vector.newBuilder().setX(direction.x).setY(direction.y)
-                        .build())
-                .setPosition(
-                    PushGameEventCommand.Vector.newBuilder().setX(position.x).setY(position.y)
-                        .build())
-                .setEventType(eventType)
-                .build());
-          }
-        },
-        enemy -> {
-          if (!enemy.getEnemyEffects().isPowerUpActive(PowerUpType.INVISIBILITY)) {
-            enemyAimName = enemy.getName();
-          }
-        },
-        player -> {
-          if (System.currentTimeMillis() < nextTimeToFlushPlayerActions
-              || gameConnection.isAnyDisconnected()) {
-            return;
-          }
-          sendCurrentPlayerPosition();
-          nextTimeToFlushPlayerActions =
-              System.currentTimeMillis() + playerConnectionContextData.getMovesUpdateFreqMls();
-
-        },
-        playerConnectionContextData.getSpawn(),
-        playerConnectionContextData.getDirection(),
-        playerConnectionContextData.getSpeed()));
+    setPlayer(PlayerFactory.create(this, gameConnection, playerConnectionContextData));
     getGame().getEntMan().addEntity(getPlayer());
-
     setCurrentCam(getPlayer().getPlayerCam());
     getViewport().setCamera(getCurrentCam());
     Gdx.input.setCursorCatched(true);
@@ -267,6 +207,32 @@ public class PlayScreen extends GameScreen {
     }
   }
 
+  public void spawnTeleport(int teleportId, Vector2 position) {
+    Teleport teleport = new Teleport(new Vector3(position.x, 0.0f, position.y), this, getPlayer(),
+        teleportId, t -> {
+      playerGoingThroughTeleport.play(Constants.DEFAULT_SFX_VOLUME);
+      LOG.info("Collide with teleport");
+      var currentPosition = getPlayer().getCurrent2DPosition();
+      var currentDirection = getPlayer().getCurrent2DDirection();
+      gameConnection.write(PushGameEventCommand.newBuilder()
+          .setSequence(actionSequence.incrementAndGet())
+          .setPingMls(
+              Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
+                  .orElse(0))
+          .setPlayerId(playerConnectionContextData.getPlayerId())
+          .setEventType(GameEventType.TELEPORT)
+          .setPosition(PushGameEventCommand.Vector.newBuilder()
+              .setX(currentPosition.x).setY(currentPosition.y).build())
+          .setDirection(PushGameEventCommand.Vector.newBuilder()
+              .setX(currentDirection.x).setY(currentDirection.y).build())
+          .setGameId(Configs.GAME_ID)
+          .setTeleportId(teleportId)
+          .build());
+      getPlayer().setColliedTeleport(t);
+    });
+    getGame().getEntMan().addEntity(teleport);
+  }
+
   public void spawnPowerUp(PowerUpType powerUpType, Vector2 position) {
 
     if (powerUps.containsKey(powerUpType)) {
@@ -277,10 +243,11 @@ public class PlayScreen extends GameScreen {
         getPlayer(),
         powerUpType.getTexture(),
         () -> {
+          LOG.info("Collide with power-up");
           var currentPosition = getPlayer().getCurrent2DPosition();
           var currentDirection = getPlayer().getCurrent2DDirection();
           gameConnection.write(PushGameEventCommand.newBuilder()
-              .setSequence(actionSequence++)
+              .setSequence(actionSequence.incrementAndGet())
               .setPingMls(Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
                   .orElse(0))
               .setPlayerId(playerConnectionContextData.getPlayerId())
@@ -291,6 +258,7 @@ public class PlayScreen extends GameScreen {
               .setDirection(PushGameEventCommand.Vector.newBuilder()
                   .setX(currentDirection.x).setY(currentDirection.y).build())
               .build());
+          removePowerUp(powerUpType);
         });
     powerUps.put(powerUpType, power);
     getGame().getEntMan().addEntity(power);
@@ -341,7 +309,8 @@ public class PlayScreen extends GameScreen {
           showLeaderBoard = true;
         }
         if (Gdx.input.isKeyJustPressed(Keys.P)) {
-          LOG.info("Player position is {}", getPlayer().getCurrent2DPosition());
+          LOG.info("Player position {}, direction {}",
+              getPlayer().getCurrent2DPosition(), getPlayer().getCurrent2DDirection());
         }
         if (Gdx.input.isKeyJustPressed(Keys.N)) {
           showNetworkStats = !showNetworkStats;
@@ -423,13 +392,13 @@ public class PlayScreen extends GameScreen {
     }
   }
 
-  private void sendCurrentPlayerPosition() {
+  public void sendCurrentPlayerPosition() {
     var currentPosition = getPlayer().getCurrent2DPosition();
     var currentDirection = getPlayer().getCurrent2DDirection();
     gameConnection.write(PushGameEventCommand.newBuilder()
         .setPingMls(
             Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls()).orElse(0))
-        .setSequence(actionSequence++)
+        .setSequence(actionSequence.incrementAndGet())
         .setPlayerId(playerConnectionContextData.getPlayerId())
         .setEventType(PushGameEventCommand.GameEventType.MOVE)
         .setGameId(Configs.GAME_ID)
@@ -438,6 +407,7 @@ public class PlayScreen extends GameScreen {
         .setDirection(PushGameEventCommand.Vector.newBuilder()
             .setX(currentDirection.x).setY(currentDirection.y).build())
         .build());
+    setTimeToSendMoves();
   }
 
   private void powerUpEffect(Color color, PowerUpType powerUpType) {
@@ -614,6 +584,15 @@ public class PlayScreen extends GameScreen {
     }
   }
 
+  public boolean isTimeToSendMoves() {
+    return System.currentTimeMillis() >= nextTimeToFlushPlayerActions;
+  }
+
+  private void setTimeToSendMoves() {
+    nextTimeToFlushPlayerActions =
+        System.currentTimeMillis() + playerConnectionContextData.getMovesUpdateFreqMls();
+  }
+
   private void renderDevModeGameTechStats() {
     String networkStats = uiNetworkStats.toString();
     GlyphLayout glyphNetworkStats = new GlyphLayout(guiFont32, networkStats);
@@ -680,4 +659,7 @@ public class PlayScreen extends GameScreen {
     gameConnection.disconnect();
   }
 
+  public void setEnemyAimName(String name) {
+    this.enemyAimName = name;
+  }
 }
