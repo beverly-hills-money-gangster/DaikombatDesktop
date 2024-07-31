@@ -2,6 +2,7 @@ package com.beverly.hills.money.gang;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
@@ -60,6 +61,12 @@ public class DaiKombatGame extends Game {
     UserPreference userPreference = new UserPreference();
     UserSettingsUISelection.MOUSE_SENS.getState().setSetting(userPreference.getMouseSensitivity());
     UserSettingsUISelection.SOUND.getState().setSetting(userPreference.getSoundVolume());
+    if (!Configs.DEV_MODE) {
+      // support alt+tab for full screen
+      Gdx.graphics.setUndecorated(true);
+      Graphics.DisplayMode displayMode = Gdx.graphics.getDisplayMode();
+      Gdx.graphics.setWindowedMode(displayMode.width, displayMode.height);
+    }
 
     setScreen(new MainMenuScreen(this));
 
