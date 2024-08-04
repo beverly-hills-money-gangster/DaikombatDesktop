@@ -15,10 +15,12 @@ import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerActionType;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
 import com.beverly.hills.money.gang.proto.ServerResponse;
+import com.beverly.hills.money.gang.proto.ServerResponse.GameEvent.WeaponType;
 import com.beverly.hills.money.gang.proto.ServerResponse.GamePowerUp;
 import com.beverly.hills.money.gang.proto.ServerResponse.GamePowerUpType;
 import com.beverly.hills.money.gang.registry.EnemiesRegistry;
 import com.beverly.hills.money.gang.screens.PlayScreen;
+import com.beverly.hills.money.gang.screens.ui.weapon.WeaponMapper;
 import com.beverly.hills.money.gang.utils.Converter;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +44,7 @@ public class PlayScreenGameConnectionHandler {
       LOG.info("Stop handling");
       return;
     }
-    // TODO sort game responses
+
     playScreen.getGameConnection().pollResponses().forEach(serverResponse -> {
       if (serverResponse.hasChatEvents()) {
         handleChat(serverResponse.getChatEvents());
@@ -76,10 +78,10 @@ public class PlayScreenGameConnectionHandler {
       switch (gameEvent.getEventType()) {
         case SPAWN -> handleSpawn(gameEvent);
         case EXIT -> handleExit(gameEvent);
-        case KILL_PUNCHING, KILL_SHOOTING -> handleDeath(gameEvent);
+        case KILL -> handleDeath(gameEvent);
         case MOVE -> handleMove(gameEvent);
-        case SHOOT, PUNCH -> handleAttackMiss(gameEvent);
-        case GET_SHOT, GET_PUNCHED -> handleGetHit(gameEvent);
+        case ATTACK -> handleAttackMiss(gameEvent);
+        case GET_ATTACKED -> handleGetHit(gameEvent);
         case TELEPORT -> handleTeleport(gameEvent);
       }
     });
@@ -261,10 +263,10 @@ public class PlayScreenGameConnectionHandler {
         .getPlayerId()) {
       return;
     }
-    EnemyPlayerActionType enemyPlayerActionType = switch (gameEvent.getEventType()) {
+    EnemyPlayerActionType enemyPlayerActionType = switch (gameEvent.getWeaponType()) {
       // if we missed the punch then we just move to the position
       case PUNCH -> EnemyPlayerActionType.MOVE;
-      case SHOOT -> EnemyPlayerActionType.SHOOT;
+      case SHOTGUN, RAILGUN -> EnemyPlayerActionType.ATTACK;
       default -> throw new IllegalArgumentException(
           "Not supported event type " + gameEvent.getEventType());
     };
@@ -272,17 +274,21 @@ public class PlayScreenGameConnectionHandler {
         .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
             .eventSequenceId(gameEvent.getSequence())
             .enemyPlayerActionType(enemyPlayerActionType)
+            .weapon(WeaponMapper.getWeapon(gameEvent.getWeaponType()))
             .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
+            .onComplete(() -> {
+              if (gameEvent.getWeaponType() == WeaponType.PUNCH) {
+                new AttackingSound(
+                    playScreen.getGame().getAssMan()
+                        .getUserSettingSound(SoundRegistry.ENEMY_PUNCH_THROWN))
+                    .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
+              }
+            })
             .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build()));
   }
 
   private void handleGetHit(ServerResponse.GameEvent gameEvent) {
-    EnemyPlayerActionType enemyPlayerActionType = switch (gameEvent.getEventType()) {
-      case GET_SHOT -> EnemyPlayerActionType.SHOOT;
-      case GET_PUNCHED -> EnemyPlayerActionType.PUNCH;
-      default -> throw new IllegalArgumentException(
-          "Not supported event type " + gameEvent.getEventType());
-    };
+    EnemyPlayerActionType enemyPlayerActionType = EnemyPlayerActionType.ATTACK;
 
     // if I hit somebody, then do nothing. the animation is played one client immediately
 
@@ -295,6 +301,7 @@ public class PlayScreenGameConnectionHandler {
             enemyPlayer.queueAction(EnemyPlayerAction.builder()
                 .eventSequenceId(gameEvent.getSequence())
                 .enemyPlayerActionType(enemyPlayerActionType)
+                .weapon(WeaponMapper.getWeapon(gameEvent.getWeaponType()))
                 .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
                 .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
                 .onComplete(() -> {
@@ -312,6 +319,7 @@ public class PlayScreenGameConnectionHandler {
           .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
               .eventSequenceId(gameEvent.getSequence())
               .enemyPlayerActionType(enemyPlayerActionType)
+              .weapon(WeaponMapper.getWeapon(gameEvent.getWeaponType()))
               .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
               .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
               .onComplete(
@@ -324,13 +332,7 @@ public class PlayScreenGameConnectionHandler {
 
 
   private void handleDeath(ServerResponse.GameEvent gameEvent) {
-    EnemyPlayerActionType enemyPlayerActionType =
-        switch (gameEvent.getEventType()) {
-          case KILL_PUNCHING -> EnemyPlayerActionType.PUNCH;
-          case KILL_SHOOTING -> EnemyPlayerActionType.SHOOT;
-          default -> throw new IllegalArgumentException(
-              "Not supported event type " + gameEvent.getEventType());
-        };
+    EnemyPlayerActionType enemyPlayerActionType = EnemyPlayerActionType.ATTACK;
 
     playScreen.getUiLeaderBoard().registerKill(gameEvent.getPlayer().getPlayerId(),
         gameEvent.getAffectedPlayer().getPlayerId());
@@ -343,6 +345,7 @@ public class PlayScreenGameConnectionHandler {
           .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
               .eventSequenceId(gameEvent.getSequence())
               .enemyPlayerActionType(enemyPlayerActionType)
+              .weapon(WeaponMapper.getWeapon(gameEvent.getWeaponType()))
               .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
               .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
               .onComplete(() -> {
@@ -362,7 +365,7 @@ public class PlayScreenGameConnectionHandler {
         .getPlayerId()) {
       var victimPlayerOpt = enemiesRegistry.removeEnemy(
           gameEvent.getAffectedPlayer().getPlayerId());
-      victimPlayerOpt.ifPresent(EnemyPlayer::die);
+      victimPlayerOpt.ifPresent(Enemy::die);
       int oldHealth = playScreen.getPlayer().getCurrentHP();
       int newHealth = gameEvent.getPlayer().getHealth();
       playScreen.getPlayer().setHP(newHealth);
@@ -380,10 +383,12 @@ public class PlayScreenGameConnectionHandler {
           .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
               .eventSequenceId(gameEvent.getSequence())
               .enemyPlayerActionType(enemyPlayerActionType)
+              .weapon(WeaponMapper.getWeapon(gameEvent.getWeaponType()))
               .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
               .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
               .onComplete(() -> enemiesRegistry.removeEnemy(
-                  gameEvent.getAffectedPlayer().getPlayerId()).ifPresent(EnemyPlayer::die))
+                  gameEvent.getAffectedPlayer().getPlayerId()).ifPresent(
+                  Enemy::die))
               .build()));
     }
   }
@@ -418,19 +423,22 @@ public class PlayScreenGameConnectionHandler {
         .onGetShot(enemy -> playScreen.getGame().getAssMan()
             .getUserSettingSound(SoundRegistry.ENEMY_GET_HIT_SOUND_SEQ.getNextSound())
             .play(enemy.getSFXVolume(), enemy.getSFXPan()))
-        .onShooting(enemy -> {
+        .onAttack(enemyWeapon -> {
+              var enemy = enemyWeapon.getEnemy();
+              var sound = switch (enemyWeapon.getWeapon()) {
+                case SHOTGUN -> SoundRegistry.ENEMY_SHOTGUN;
+                case GAUNTLET -> SoundRegistry.ENEMY_PUNCH_HIT;
+                case RAILGUN -> SoundRegistry.ENEMY_RAILGUN;
+              };
               new AttackingSound(
-                  playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.ENEMY_SHOTGUN))
+                  playScreen.getGame().getAssMan().getUserSettingSound(sound))
                   .play(enemy.getSFXVolume(), enemy.getSFXPan(),
                       enemy.getEnemyEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)
                           ? playScreen.getGame()
                           .getAssMan()
                           .getUserSettingSound(SoundRegistry.ENEMY_QUAD_DAMAGE_ATTACK) : null);
             }
-        ).onPunching(enemy -> new AttackingSound(
-            playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.ENEMY_PUNCH_HIT))
-            .play(enemy.getSFXVolume(), enemy.getSFXPan()))
-        .build();
+        ).build();
   }
 
   private static Vector2 createVector(ServerResponse.Vector serverVector) {

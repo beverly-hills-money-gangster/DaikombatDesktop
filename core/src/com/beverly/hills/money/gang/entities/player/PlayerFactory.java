@@ -4,6 +4,8 @@ import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand;
+import com.beverly.hills.money.gang.proto.PushGameEventCommand.GameEventType;
+import com.beverly.hills.money.gang.proto.PushGameEventCommand.WeaponType;
 import com.beverly.hills.money.gang.screens.PlayScreen;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import java.util.Optional;
@@ -25,9 +27,10 @@ public class PlayerFactory {
             LOG.warn("Can't shoot while being teleported");
             return;
           }
-          PushGameEventCommand.GameEventType eventType = switch (playerWeapon.getWeapon()) {
-            case GAUNTLET -> PushGameEventCommand.GameEventType.PUNCH;
-            case SHOTGUN -> PushGameEventCommand.GameEventType.SHOOT;
+          PushGameEventCommand.WeaponType weaponType = switch (playerWeapon.getWeapon()) {
+            case GAUNTLET -> PushGameEventCommand.WeaponType.PUNCH;
+            case SHOTGUN -> WeaponType.SHOTGUN;
+            case RAILGUN -> WeaponType.RAILGUN;
           };
           var direction = playerWeapon.getPlayer().getCurrent2DDirection();
           var position = playerWeapon.getPlayer().getCurrent2DPosition();
@@ -48,7 +51,8 @@ public class PlayerFactory {
                     PushGameEventCommand.Vector.newBuilder().setX(position.x).setY(position.y)
                         .build())
                 .setAffectedPlayerId(enemy.getEnemyPlayerId())
-                .setEventType(eventType)
+                .setEventType(GameEventType.ATTACK)
+                .setWeaponType(weaponType)
                 .build());
           }, playerWeapon.getPlayer().getWeaponDistance(playerWeapon.getWeapon()));
           if (!hitEnemy) {
@@ -66,7 +70,8 @@ public class PlayerFactory {
                 .setPosition(
                     PushGameEventCommand.Vector.newBuilder().setX(position.x).setY(position.y)
                         .build())
-                .setEventType(eventType)
+                .setWeaponType(weaponType)
+                .setEventType(GameEventType.ATTACK)
                 .build());
           }
         },
@@ -85,7 +90,8 @@ public class PlayerFactory {
         },
         playerConnectionContextData.getSpawn(),
         playerConnectionContextData.getDirection(),
-        playerConnectionContextData.getSpeed());
+        playerConnectionContextData.getSpeed(),
+        playerConnectionContextData.getWeaponStats());
   }
 
 }

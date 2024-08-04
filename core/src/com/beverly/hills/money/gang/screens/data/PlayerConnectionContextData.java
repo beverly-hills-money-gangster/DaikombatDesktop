@@ -2,14 +2,17 @@ package com.beverly.hills.money.gang.screens.data;
 
 import com.badlogic.gdx.math.Vector2;
 import com.beverly.hills.money.gang.proto.ServerResponse;
+import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
+import com.beverly.hills.money.gang.screens.ui.weapon.WeaponStats;
 import java.util.List;
+import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.ToString;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @ToString
 public class PlayerConnectionContextData {
 
@@ -26,5 +29,7 @@ public class PlayerConnectionContextData {
   private final Integer movesUpdateFreqMls;
   @NonNull
   private final Integer speed;
+  @NonNull
+  private final Map<Weapon, WeaponStats> weaponStats;
 
 }

@@ -95,7 +95,7 @@ project(":core") {
         implementation 'commons-io:commons-io:2.8.0'
         api 'org.apache.commons:commons-lang3:3.13.0'
         api 'ch.qos.logback:logback-classic:1.4.12'
-        api "com.github.beverly-hills-money-gangster.Daikombat-server:net-client:2cd6182226"
+        api "com.github.beverly-hills-money-gangster.Daikombat-server:net-client:97f33b307098820ad0cdcffbe207d8c48f5913cd"
         api 'commons-validator:commons-validator:1.7'
         api 'org.apache.commons:commons-math3:3.6.1'
         compileOnly 'org.projectlombok:lombok:1.18.30'

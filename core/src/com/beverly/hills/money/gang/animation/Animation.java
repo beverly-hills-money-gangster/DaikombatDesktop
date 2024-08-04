@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import lombok.Builder;
-// TODO make animated power-up orbs
+
 public class Animation {
 
   private final int height;

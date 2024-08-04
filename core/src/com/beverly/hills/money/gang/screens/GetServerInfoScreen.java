@@ -1,5 +1,6 @@
 package com.beverly.hills.money.gang.screens;
 
+import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.entity.GameServerCreds;
 import com.beverly.hills.money.gang.entity.HostPort;
@@ -7,18 +8,24 @@ import com.beverly.hills.money.gang.network.GameConnection;
 import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
 import com.beverly.hills.money.gang.network.SecondaryGameConnection;
 import com.beverly.hills.money.gang.proto.GetServerInfoCommand;
+import com.beverly.hills.money.gang.proto.ServerResponse.GameEvent;
+import com.beverly.hills.money.gang.proto.ServerResponse.WeaponInfo;
 import com.beverly.hills.money.gang.screens.data.JoinGameData;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
+import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
+import com.beverly.hills.money.gang.screens.ui.weapon.WeaponMapper;
+import com.beverly.hills.money.gang.screens.ui.weapon.WeaponStats;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO test it
 public class GetServerInfoScreen extends AbstractLoadingScreen {
 
   private static final Logger LOG = LoggerFactory.getLogger(GetServerInfoScreen.class);
@@ -100,6 +107,7 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
               playerContextDataBuilder.movesUpdateFreqMls(serverInfo.getMovesUpdateFreqMls());
               playerContextDataBuilder.fragsToWin(serverInfo.getFragsToWin());
               playerContextDataBuilder.speed(serverInfo.getPlayerSpeed());
+              playerContextDataBuilder.weaponStats(getWeaponStats(serverInfo.getWeaponsInfoList()));
               removeAllEntities();
               LOG.info("Got server info. Try join the game");
               getGame().setScreen(new JoinGameScreen(getGame(),
@@ -112,6 +120,19 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
             errorMessage.set(ExceptionUtils.getMessage(throwable));
           });
         });
+  }
+
+  private Map<Weapon, WeaponStats> getWeaponStats(List<WeaponInfo> weaponInfo) {
+    Map<Weapon, WeaponStats> weaponStats = new HashMap<>();
+    weaponInfo.forEach(info -> weaponStats.put(WeaponMapper.getWeapon(info.getWeaponType()),
+        WeaponStats.builder()
+            .delayMls(info.getDelayMls())
+            .maxDistance((float) info.getMaxDistance() - Constants.HALF_UNIT)
+            .build()));
+    if (weaponStats.size() != Weapon.values().length) {
+      throw new IllegalStateException("Not all weapons have max distance");
+    }
+    return weaponStats;
   }
 
 

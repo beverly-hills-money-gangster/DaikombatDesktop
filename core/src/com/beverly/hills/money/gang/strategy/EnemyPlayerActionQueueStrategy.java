@@ -2,7 +2,6 @@ package com.beverly.hills.money.gang.strategy;
 
 import com.badlogic.gdx.math.Vector2;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerAction;
-import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerActionType;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.function.Consumer;
@@ -63,9 +62,9 @@ public class EnemyPlayerActionQueueStrategy {
       case MOVE -> LOG.warn(
           "MOVE event is out of order. Last event sequence id {} but given {}. Skip event.",
           lastEventSequenceId, enemyPlayerAction.getEventSequenceId());
-      case SHOOT, PUNCH -> {
+      case ATTACK -> {
         LOG.warn(
-            "SHOOT/PUNCH event is out of order. Last event sequence id {} but given {}",
+            "ATTACK event is out of order. Last event sequence id {} but given {}",
             lastEventSequenceId, enemyPlayerAction.getEventSequenceId());
         Optional.ofNullable(enemyPlayerAction.getOnComplete()).ifPresent(Runnable::run);
       }

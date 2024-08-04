@@ -22,14 +22,14 @@ public class UISelectionTest {
 
   @Test
   public void testUp() {
-    uiSelection.up();
+    uiSelection.next();
     assertEquals(TestUISelection.THIRD, uiSelection.getSelectedOption(),
         "We should get the last selection if we go up from the first selection");
   }
 
   @Test
   public void testDown() {
-    uiSelection.down();
+    uiSelection.prev();
     assertEquals(TestUISelection.SECOND, uiSelection.getSelectedOption(),
         "2nd selection should go after the 1st if player goes down the selection");
   }
@@ -37,7 +37,7 @@ public class UISelectionTest {
   @Test
   public void testUpFullCircle() {
     for (int i = 0; i < TestUISelection.values().length; i++) {
-      uiSelection.up();
+      uiSelection.next();
     }
     assertEquals(TestUISelection.FIRST, uiSelection.getSelectedOption(),
         "We must get back to the first selection if we made the full circle by pressing up");
@@ -46,7 +46,7 @@ public class UISelectionTest {
   @Test
   public void testDownFullCircle() {
     for (int i = 0; i < TestUISelection.values().length; i++) {
-      uiSelection.down();
+      uiSelection.prev();
     }
     assertEquals(TestUISelection.FIRST, uiSelection.getSelectedOption(),
         "We must get back to the first selection if we made the full circle by pressing down");

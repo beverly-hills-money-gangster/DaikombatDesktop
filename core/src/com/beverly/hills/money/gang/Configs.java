@@ -16,10 +16,6 @@ public interface Configs {
   boolean MIMIC_CONSTANT_NETWORK_ACTIVITY = Boolean.parseBoolean(
       System.getenv("DESKTOP_MIMIC_CONSTANT_NETWORK_ACTIVITY"));
 
-  float SHOOTING_DISTANCE = NumberUtils.toFloat(System.getenv("DESKTOP_SHOOTING_DISTANCE"), 7.5f);
-
-  float MELEE_DISTANCE = NumberUtils.toFloat(System.getenv("DESKTOP_MELEE_DISTANCE"), 0.45f);
-
   int SECONDARY_CONNECTIONS_TO_OPEN = NumberUtils.toInt(
       System.getenv("DESKTOP_SECONDARY_CONNECTIONS_TO_OPEN"), 2);
 

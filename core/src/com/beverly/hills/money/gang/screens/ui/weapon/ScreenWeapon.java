@@ -1,8 +1,7 @@
 package com.beverly.hills.money.gang.screens.ui.weapon;
 
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.beverly.hills.money.gang.Configs;
+import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
@@ -10,66 +9,115 @@ import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NonNull;
 
 public class ScreenWeapon {
 
-  private static final int GUNSHOT_ANIMATION_MLS = 350;
+  private final Map<Weapon, Long> animationStart = new HashMap<>();
+
+  private static final int GUNSHOT_ANIMATION_MLS = 150;
+
+  private static final int RAILGUN_ANIMATION_MLS = 200;
 
   private static final int PUNCH_ANIMATION_MLS = 175;
 
   private final UserSettingSound quadDamageAttack;
 
+  private final UserSettingSound weaponChangeSound;
+
   final Map<Weapon, WeaponState> weaponStates = new EnumMap<>(Weapon.class);
 
+  @Getter
   protected Weapon weaponBeingUsed;
 
-  private final TextureRegion idleWeapon;
 
-  public ScreenWeapon(DaiKombatAssetsManager assetsManager) {
+  public ScreenWeapon(
+      final DaiKombatAssetsManager assetsManager,
+      final Map<Weapon, WeaponStats> weaponStats) {
     quadDamageAttack = assetsManager.getUserSettingSound(SoundRegistry.QUAD_DAMAGE_ATTACK);
-    idleWeapon = assetsManager.getTextureRegion(TexturesRegistry.GUN_IDLE, 0, 0, 149, 117);
+    weaponChangeSound = assetsManager.getUserSettingSound(SoundRegistry.WEAPON_CHANGE);
     weaponStates.put(Weapon.SHOTGUN, WeaponState.builder()
-        .distance(Configs.SHOOTING_DISTANCE)
+        .distance(weaponStats.get(Weapon.SHOTGUN).getMaxDistance())
         .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PLAYER_SHOTGUN))
-        .hitTargetSound(assetsManager.getUserSettingSound(SoundRegistry.SHOOT_HIT_SOUND))
+        .hitTargetSound(assetsManager.getUserSettingSound(SoundRegistry.HIT_SOUND))
         .screenRatioX(0.35f)
         .screenRatioY(0.40f)
+        .backoffDelayMls(getBackoffDelay(weaponStats.get(Weapon.SHOTGUN), GUNSHOT_ANIMATION_MLS))
         .animationDelayMls(GUNSHOT_ANIMATION_MLS)
         .fireTexture(assetsManager.getTextureRegion(TexturesRegistry.GUN_SHOOT, 0, 0,
             149, 117 - 10))
-        .weaponScreenPositioning(animationTime -> Vector2.Zero)
+        .idleTexture(assetsManager.getTextureRegion(TexturesRegistry.GUN_IDLE, 0, 0,
+            149, 117 - 10))
+        .weaponScreenPositioning(animationTime -> new Vector2(0, -35))
         .build());
 
     weaponStates.put(Weapon.GAUNTLET, WeaponState.builder()
-        .distance(Configs.MELEE_DISTANCE)
+        .distance(weaponStats.get(Weapon.GAUNTLET).getMaxDistance())
         .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PUNCH_THROWN))
         .hitTargetSound(assetsManager.getUserSettingSound(SoundRegistry.PUNCH_HIT))
         .screenRatioX(0.5f)
         .screenRatioY(0.45f)
+        .backoffDelayMls(getBackoffDelay(weaponStats.get(Weapon.GAUNTLET), PUNCH_ANIMATION_MLS))
         .animationDelayMls(PUNCH_ANIMATION_MLS)
         .fireTexture(assetsManager.getTextureRegion(TexturesRegistry.PUNCH, 0, 0,
+            273, 175))
+        .idleTexture(assetsManager.getTextureRegion(TexturesRegistry.PUNCH_IDLE, 0, 0,
             273, 175))
         .weaponScreenPositioning(
             animationTime -> new Vector2(-(animationTime / (float) PUNCH_ANIMATION_MLS) * 200 + 200,
                 0))
         .build());
+
+    weaponStates.put(Weapon.RAILGUN, WeaponState.builder()
+        .distance(weaponStats.get(Weapon.RAILGUN).getMaxDistance())
+        .hitTargetSound(assetsManager.getUserSettingSound(SoundRegistry.HIT_SOUND))
+        .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PLAYER_RAILGUN))
+        .screenRatioX(0.35f)
+        .screenRatioY(0.40f)
+        .backoffDelayMls(getBackoffDelay(weaponStats.get(Weapon.RAILGUN), RAILGUN_ANIMATION_MLS))
+        .animationDelayMls(RAILGUN_ANIMATION_MLS)
+        .fireTexture(assetsManager.getTextureRegion(TexturesRegistry.RAILGUN_SHOOTING, 0, 0,
+            170, 118))
+        .idleTexture(assetsManager.getTextureRegion(TexturesRegistry.RAILGUN_IDLE, 0, 0,
+            170, 118))
+        .weaponScreenPositioning(animationTime -> new Vector2(0, -35))
+        .build());
+
+    setWeaponBeingUsed(Weapon.SHOTGUN);
   }
 
-  boolean canAttack() {
-    return isNoAnimation();
+  private static int getBackoffDelay(WeaponStats weaponStats, int animationMls) {
+    return Math.max(0, weaponStats.getDelayMls() - animationMls);
   }
 
-  private boolean isNoAnimation() {
-    return Optional.ofNullable(weaponStates.get(weaponBeingUsed))
-        .map(weaponState -> weaponState.animationStartMls + weaponState.animationDelayMls
-            < System.currentTimeMillis())
-        .orElse(true);
+  public void changeWeapon(Weapon weapon) {
+    if (weaponBeingUsed == weapon) {
+      return;
+    }
+    setWeaponBeingUsed(weapon);
+    weaponChangeSound.play(Constants.DEFAULT_SFX_VOLUME);
+  }
+
+  public void changeToNextWeapon() {
+    changeWeapon(weaponBeingUsed.nextWeapon());
+  }
+
+  public void changeToPrevWeapon() {
+    changeWeapon(weaponBeingUsed.prevWeapon());
+  }
+
+  private void setWeaponBeingUsed(Weapon weapon) {
+    weaponBeingUsed = weapon;
+  }
+
+  public void registerHit(Weapon weapon) {
+    Optional.ofNullable(weaponStates.get(weapon))
+        .map(WeaponState::getHitTargetSound)
+        .ifPresent(userSettingSound -> userSettingSound.play(Constants.DEFAULT_SFX_VOLUME * 1.5f));
+
   }
 
   public float getWeaponDistance(Weapon weapon) {
@@ -78,37 +126,28 @@ public class ScreenWeapon {
 
   public WeaponRenderData getActiveWeaponForRendering() {
     if (isNoAnimation()) {
-      weaponBeingUsed = null;
       return getIdleWeaponRendering();
     }
     return Optional.ofNullable(weaponStates.get(weaponBeingUsed))
         .map(currentActiveWeaponState
-            -> WeaponRenderData.builder().textureRegion(currentActiveWeaponState.fireTexture)
-            .distance(currentActiveWeaponState.distance)
-            .positioning(currentActiveWeaponState.weaponScreenPositioning
-                .apply(System.currentTimeMillis() - currentActiveWeaponState.animationStartMls))
+            -> WeaponRenderData.builder().textureRegion(currentActiveWeaponState.getFireTexture())
+            .distance(currentActiveWeaponState.getDistance())
+            .positioning(currentActiveWeaponState.getWeaponScreenPositioning()
+                .apply(
+                    System.currentTimeMillis() - animationStart.getOrDefault(weaponBeingUsed, 0L)))
             .screenRatioX(currentActiveWeaponState.getScreenRatioX())
-            .screenRatioY(currentActiveWeaponState.screenRatioY)
+            .screenRatioY(currentActiveWeaponState.getScreenRatioY())
             .build())
         .orElse(getIdleWeaponRendering());
   }
 
-  private WeaponRenderData getIdleWeaponRendering() {
-    return WeaponRenderData.builder().textureRegion(idleWeapon)
-        .distance(Configs.SHOOTING_DISTANCE)
-        .screenRatioX(0.35f)
-        .screenRatioY(0.40f)
-        .positioning(Vector2.Zero).build();
-  }
-
-  public boolean attack(Player player, Weapon weapon, float soundVolume) {
+  public boolean attack(Player player) {
     if (canAttack()) {
-      var state = weaponStates.get(weapon);
-      state.animationStartMls = System.currentTimeMillis();
-      weaponBeingUsed = weapon;
-      state.fireSound.play(soundVolume);
+      var state = weaponStates.get(weaponBeingUsed);
+      animationStart.put(weaponBeingUsed, System.currentTimeMillis());
+      state.getFireSound().play(Constants.DEFAULT_SFX_VOLUME);
       if (player.getPlayerEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {
-        quadDamageAttack.play(soundVolume);
+        quadDamageAttack.play(Constants.DEFAULT_SFX_VOLUME);
       }
       return true;
     } else {
@@ -116,45 +155,31 @@ public class ScreenWeapon {
     }
   }
 
-
-  public void registerHit( Weapon weapon, float volume) {
-    Optional.ofNullable(weaponStates.get(weapon))
-        .map(weaponState -> weaponState.hitTargetSound)
-        .ifPresent(userSettingSound -> userSettingSound.play(volume));
-
+  boolean canAttack() {
+    return Optional.ofNullable(weaponStates.get(weaponBeingUsed))
+        .map(weaponState -> animationStart.getOrDefault(weaponBeingUsed, 0L)
+            + weaponState.getAnimationDelayMls()
+            + weaponState.getBackoffDelayMls()
+            < System.currentTimeMillis())
+        .orElse(true);
   }
 
-  public enum Weapon {
-    SHOTGUN, GAUNTLET;
-
+  private boolean isNoAnimation() {
+    return Optional.ofNullable(weaponStates.get(weaponBeingUsed))
+        .map(weaponState ->
+            animationStart.getOrDefault(weaponBeingUsed, 0L)
+                + weaponState.getAnimationDelayMls()
+                < System.currentTimeMillis())
+        .orElse(true);
   }
 
-  @Getter
-  @Builder
-  static class WeaponState {
-
-    private final float distance;
-    @NonNull
-    private final UserSettingSound fireSound;
-    private final UserSettingSound hitTargetSound;
-    private final int animationDelayMls;
-    @NonNull
-    private final TextureRegion fireTexture;
-    private final float screenRatioX;
-    private final float screenRatioY;
-    @Builder.Default
-    private long animationStartMls = 0;
-    private final Function<Long, Vector2> weaponScreenPositioning;
+  private WeaponRenderData getIdleWeaponRendering() {
+    var weaponState = weaponStates.get(weaponBeingUsed);
+    return WeaponRenderData.builder().textureRegion(weaponState.getIdleTexture())
+        .distance(weaponState.getDistance())
+        .screenRatioX(weaponState.getScreenRatioX())
+        .screenRatioY(weaponState.getScreenRatioY())
+        .positioning(Vector2.Zero).build();
   }
 
-  @Builder
-  @Getter
-  public static class WeaponRenderData {
-
-    private final float distance;
-    private final Vector2 positioning;
-    private final TextureRegion textureRegion;
-    private final float screenRatioX;
-    private final float screenRatioY;
-  }
 }
