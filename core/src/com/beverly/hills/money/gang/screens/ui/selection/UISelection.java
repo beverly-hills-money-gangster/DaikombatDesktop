@@ -22,14 +22,14 @@ public class UISelection<T extends Enum> {
     return selections.get(selectedOption);
   }
 
-  public void up() {
+  public void next() {
     selectedOption--;
     if (selectedOption == -1) {
       selectedOption = selections.size() - 1;
     }
   }
 
-  public void down() {
+  public void prev() {
     selectedOption++;
     if (selectedOption == selections.size()) {
       selectedOption = 0;

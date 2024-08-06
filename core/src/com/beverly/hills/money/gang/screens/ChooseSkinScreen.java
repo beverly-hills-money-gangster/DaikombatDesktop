@@ -54,10 +54,10 @@ public class ChooseSkinScreen extends AbstractMainMenuScreen {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-      skinSelection.up();
+      skinSelection.next();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-      skinSelection.down();
+      skinSelection.prev();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     }
     TexturesRegistry selectedTexture = switch (skinSelection.getSelectedOption()) {

@@ -36,7 +36,7 @@ public class GameOverScreen extends AbstractMainMenuScreen {
   public GameOverScreen(final DaiKombatGame game,
       final UILeaderBoard uiLeaderBoard,
       final JoinGameData joinGameData) {
-    // TODO show winner player skin instead of logo
+
     super(game);
     guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
     guiFont32 = game.getAssMan().getFont(FontRegistry.FONT_32);
@@ -74,10 +74,10 @@ public class GameOverScreen extends AbstractMainMenuScreen {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-      menuSelection.up();
+      menuSelection.next();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-      menuSelection.down();
+      menuSelection.prev();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     } else if (Gdx.input.isKeyPressed(Keys.TAB)) {
       showLeaderBoard = true;

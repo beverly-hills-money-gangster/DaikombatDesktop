@@ -9,7 +9,6 @@ import com.beverly.hills.money.gang.proto.RespawnCommand;
 import com.beverly.hills.money.gang.proto.ServerResponse;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.utils.Converter;
-import java.util.function.Consumer;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,17 +88,12 @@ public class RespawnScreen extends AbstractLoadingScreen {
   private PlayerConnectionContextData createPlayerContextData(ServerResponse response) {
     var gameEvent = response.getGameEvents().getEvents(0);
     int playerId = gameEvent.getPlayer().getPlayerId();
-    return PlayerConnectionContextData.builder()
+    return oldPlayerConnectionContextData.toBuilder()
         .playerId(playerId)
         .playersOnline(response.getGameEvents().getPlayersOnline())
-        .joinGameData(
-            oldPlayerConnectionContextData.getJoinGameData())
         .spawn(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
         .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
         .leaderBoardItemList(gameEvent.getLeaderBoard().getItemsList())
-        .fragsToWin(oldPlayerConnectionContextData.getFragsToWin())
-        .speed(oldPlayerConnectionContextData.getSpeed())
-        .movesUpdateFreqMls(oldPlayerConnectionContextData.getMovesUpdateFreqMls())
         .build();
   }
 

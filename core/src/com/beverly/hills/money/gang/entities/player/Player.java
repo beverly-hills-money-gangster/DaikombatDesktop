@@ -2,11 +2,11 @@ package com.beverly.hills.money.gang.entities.player;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.entities.effect.PlayerEffects;
@@ -18,6 +18,10 @@ import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
 import com.beverly.hills.money.gang.screens.ui.weapon.ScreenWeapon;
+import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
+import com.beverly.hills.money.gang.screens.ui.weapon.WeaponRenderData;
+import com.beverly.hills.money.gang.screens.ui.weapon.WeaponStats;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import lombok.Builder;
@@ -80,10 +84,11 @@ public class Player extends Entity {
       final Consumer<Player> onMovementListener,
       final Vector2 spawnPosition,
       final Vector2 lookAt,
-      final int speed) {
+      final int speed,
+      final Map<Weapon, WeaponStats> weaponStats) {
     super(screen);
     this.speed = speed;
-    screenWeapon = new ScreenWeapon(screen.getGame().getAssMan());
+    screenWeapon = new ScreenWeapon(screen.getGame().getAssMan(), weaponStats);
     this.onMovementListener = onMovementListener;
     this.onAttackListener = onAttackListener;
     this.onEnemyAim = onEnemyAim;
@@ -185,11 +190,13 @@ public class Player extends Entity {
 
     if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)
         || Gdx.input.isKeyJustPressed(Input.Keys.ALT_RIGHT)) {
-      attack(ScreenWeapon.Weapon.SHOTGUN);
-    } else if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)
-        || Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_RIGHT)) {
-      attack(ScreenWeapon.Weapon.GAUNTLET);
+      attack();
+    } else if (Gdx.input.isKeyJustPressed(Keys.E)) {
+      screenWeapon.changeToNextWeapon();
+    } else if (Gdx.input.isKeyJustPressed(Keys.Q)) {
+      screenWeapon.changeToPrevWeapon();
     }
+
     // otherwise the screen goes 180 degrees on startup if you don't move the mouse on main menu screens
     if (Math.abs(Gdx.input.getDeltaX()) < 500) {
       playerCam.rotate(Vector3.Y, Gdx.input.getDeltaX() * -Constants.MOUSE_CAMERA_ROTATION_SPEED
@@ -215,15 +222,15 @@ public class Player extends Entity {
             .add(movementDirVec2.nor().cpy().scl(speed * delta)));
   }
 
-  private void attack(ScreenWeapon.Weapon weapon) {
-    if (screenWeapon.attack(this, weapon, Constants.DEFAULT_SFX_VOLUME)) {
+  private void attack() {
+    if (screenWeapon.attack(this)) {
       onAttackListener.accept(PlayerWeapon
-          .builder().player(this).weapon(weapon).build());
+          .builder().player(this).weapon(screenWeapon.getWeaponBeingUsed()).build());
     }
   }
 
-  public void playWeaponHitSound(ScreenWeapon.Weapon weapon) {
-    screenWeapon.registerHit(weapon, Constants.DEFAULT_SFX_VOLUME * 1.5f);
+  public void playWeaponHitSound(Weapon weapon) {
+    screenWeapon.registerHit(weapon);
   }
 
   private void handleWASD() {
@@ -276,7 +283,7 @@ public class Player extends Entity {
     this.deathTimeMls = System.currentTimeMillis();
   }
 
-  public ScreenWeapon.WeaponRenderData getActiveWeaponRenderingData() {
+  public WeaponRenderData getActiveWeaponRenderingData() {
     return screenWeapon.getActiveWeaponForRendering();
   }
 
@@ -289,7 +296,7 @@ public class Player extends Entity {
     }
   }
 
-  public float getWeaponDistance(ScreenWeapon.Weapon weapon) {
+  public float getWeaponDistance(Weapon weapon) {
     return screenWeapon.getWeaponDistance(weapon);
   }
 
@@ -302,7 +309,8 @@ public class Player extends Entity {
     if (isDead.get()) {
       return;
     }
-    getEnemyRectInRangeFromCam(onEnemyAim, Configs.SHOOTING_DISTANCE);
+    getEnemyRectInRangeFromCam(onEnemyAim,
+        screenWeapon.getWeaponDistance(screenWeapon.getWeaponBeingUsed()));
     if (gotHit) {
       renderBloodOverlay = true;
       bloodOverlayAlpha = Constants.BLOOD_OVERLAY_ALPHA_MAX;
@@ -328,7 +336,7 @@ public class Player extends Entity {
   public static class PlayerWeapon {
 
     private final Player player;
-    private final ScreenWeapon.Weapon weapon;
+    private final Weapon weapon;
   }
 
 }

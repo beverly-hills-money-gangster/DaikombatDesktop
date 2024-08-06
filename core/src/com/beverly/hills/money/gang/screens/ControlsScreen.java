@@ -15,9 +15,9 @@ public class ControlsScreen extends AbstractMainMenuScreen {
   private static final String[] CONTROLS_MAPPING = {
       "MOVE - WASD",
       "SHOOT - LMC/RIGHT ALT",
-      "PUNCH - RMC/RIGHT CTRL",
       "CHAT - TILDA",
-      "LEADERBOARD - TAB"};
+      "LEADERBOARD - TAB",
+      "Q,E - CHANGE WEAPON"};
   private final BitmapFont guiFont64;
 
   public ControlsScreen(final DaiKombatGame game) {

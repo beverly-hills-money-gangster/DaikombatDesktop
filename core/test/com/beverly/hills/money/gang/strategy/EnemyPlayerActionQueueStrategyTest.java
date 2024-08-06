@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import com.badlogic.gdx.math.Vector2;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerAction;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerActionType;
+import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.function.Consumer;
@@ -87,7 +88,8 @@ public class EnemyPlayerActionQueueStrategyTest {
         enemyPlayerActions, onTooMuchDistanceTravelled, onSpeedChange, defaultSpeed);
     var currentPosition = new Vector2(0, 0);
     var punch = EnemyPlayerAction.builder()
-        .enemyPlayerActionType(EnemyPlayerActionType.PUNCH)
+        .enemyPlayerActionType(EnemyPlayerActionType.ATTACK)
+        .weapon(Weapon.GAUNTLET)
         .direction(new Vector2(0, 1))
         .route(new Vector2(0, 2))
         .onComplete(onPunchComplete)
@@ -116,8 +118,9 @@ public class EnemyPlayerActionQueueStrategyTest {
         enemyPlayerActions, onTooMuchDistanceTravelled, onSpeedChange, defaultSpeed);
     var currentPosition = new Vector2(0, 0);
     var shoot = EnemyPlayerAction.builder()
-        .enemyPlayerActionType(EnemyPlayerActionType.SHOOT)
+        .enemyPlayerActionType(EnemyPlayerActionType.ATTACK)
         .direction(new Vector2(0, 1))
+        .weapon(Weapon.SHOTGUN)
         .route(new Vector2(0, 2))
         .onComplete(onShootComplete)
         .eventSequenceId(0).build();

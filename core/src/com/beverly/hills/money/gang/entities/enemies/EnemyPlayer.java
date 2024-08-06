@@ -22,6 +22,7 @@ import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import com.beverly.hills.money.gang.strategy.EnemyPlayerActionQueueStrategy;
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -117,13 +118,10 @@ public class EnemyPlayer extends Enemy {
     enemyPlayerActionQueueStrategy.enqueue(enemyPlayerAction, getRect().getOldPosition());
   }
 
-  public void shoot() {
+  public void attack(Weapon weapon) {
     shootingAnimationUntil = System.currentTimeMillis() + 100;
-    getEnemyListeners().getOnShooting().accept(this);
-  }
-
-  public void punch() {
-    getEnemyListeners().getOnPunching().accept(this);
+    getEnemyListeners().getOnAttack()
+        .accept(EnemyWeapon.builder().weapon(weapon).enemy(this).build());
   }
 
   @Override
@@ -164,9 +162,8 @@ public class EnemyPlayer extends Enemy {
         // if we are close to the target destination then we are here
         actions.remove();
         action.getOnComplete().run();
-        switch (action.getEnemyPlayerActionType()) {
-          case SHOOT -> shoot();
-          case PUNCH -> punch();
+        if (action.getEnemyPlayerActionType() == EnemyPlayerActionType.ATTACK) {
+          attack(action.getWeapon());
         }
 
       }

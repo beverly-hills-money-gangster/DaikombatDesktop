@@ -4,7 +4,9 @@ import com.beverly.hills.money.gang.assets.managers.sound.PseudoRandomSoundSeque
 import lombok.Getter;
 
 public enum SoundRegistry {
-
+  ENEMY_PUNCH_THROWN("sfx/enemy_punch_thrown.mp3"),
+  WEAPON_CHANGE("sfx/weapon_change.mp3"),
+  ENEMY_RAILGUN("sfx/enemy_railgun.mp3"),
   PLAYER_GOING_THROUGH_TELEPORT("sfx/player_going_through_teleport.mp3"),
   ENEMY_PLAYER_GOING_THROUGH_TELEPORT("sfx/enemy_going_through_teleport.mp3"),
   ONE_FRAG_LEFT("sfx/one_frag_left.mp3"),
@@ -23,6 +25,7 @@ public enum SoundRegistry {
   PUNCH_HIT("sfx/punch_hit.mp3"),
   ENEMY_PUNCH_HIT("sfx/enemy_punch_hit.mp3"),
   PUNCH_THROWN("sfx/punch_thrown.mp3"),
+  PLAYER_RAILGUN("sfx/player_railgun.mp3"),
   FIGHT("sfx/fight.mp3"),
   DING_1("sfx/ui/ding_1.mp3"),
   DING_2("sfx/ui/ding_2.mp3"),
@@ -56,7 +59,7 @@ public enum SoundRegistry {
   ENEMY_INVISIBILITY_PICK("sfx/enemy_invisibility_pick.mp3"),
   ENEMY_DEFENCE_PICK("sfx/enemy_defence_pick.mp3"),
   PLAYER_SHOTGUN("sfx/player_shotgun.mp3"),
-  SHOOT_HIT_SOUND("sfx/shoot_hit_sound.mp3"),
+  HIT_SOUND("sfx/shoot_hit_sound.mp3"),
   SPAWN1("sfx/spawn/spawn1.mp3"),
   SPAWN2("sfx/spawn/spawn2.mp3"),
   SPAWN3("sfx/spawn/spawn3.mp3");

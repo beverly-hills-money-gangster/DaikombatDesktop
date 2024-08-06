@@ -55,10 +55,10 @@ public class ChooseServerScreen extends AbstractMainMenuScreen {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-      serverSelection.up();
+      serverSelection.next();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-      serverSelection.down();
+      serverSelection.prev();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     }
   }

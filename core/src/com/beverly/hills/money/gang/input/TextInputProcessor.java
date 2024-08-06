@@ -7,7 +7,6 @@ import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
 
-// TODO cover all inputs with tests
 public class TextInputProcessor {
 
   private final int maxLength;

@@ -40,6 +40,7 @@ import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.screens.ui.selection.ActivePlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.DeadPlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
+import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -326,10 +327,10 @@ public class PlayScreen extends GameScreen {
     }
     if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-      activePlayUISelectionUISelection.up();
+      activePlayUISelectionUISelection.next();
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-      activePlayUISelectionUISelection.down();
+      activePlayUISelectionUISelection.prev();
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) || Gdx.input.isKeyJustPressed(
         Input.Keys.SPACE)) {
       switch (activePlayUISelectionUISelection.getSelectedOption()) {
@@ -352,10 +353,10 @@ public class PlayScreen extends GameScreen {
     if (Gdx.input.isKeyPressed(Input.Keys.TAB)) {
       showLeaderBoard = true;
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-      deadPlayUISelectionUISelection.up();
+      deadPlayUISelectionUISelection.next();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-      deadPlayUISelectionUISelection.down();
+      deadPlayUISelectionUISelection.prev();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)
         || Gdx.input.isKeyJustPressed(Input.Keys.ALT_RIGHT)

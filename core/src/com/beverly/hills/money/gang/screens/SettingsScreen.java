@@ -38,10 +38,10 @@ public class SettingsScreen extends AbstractMainMenuScreen {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-      settingsSelection.up();
+      settingsSelection.next();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-      settingsSelection.down();
+      settingsSelection.prev();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
       var setting = settingsSelection.getSelectedOption().getState();

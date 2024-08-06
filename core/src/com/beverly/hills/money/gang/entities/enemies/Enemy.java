@@ -12,6 +12,7 @@ import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import java.util.function.Consumer;
 import lombok.Builder;
 import lombok.Getter;
@@ -130,6 +131,13 @@ public abstract class Enemy extends SoundMakingEntity {
     dieAnimationEndMls = getAnimationTimeoutMls();
   }
 
+  @Builder
+  @Getter
+  public static class EnemyWeapon {
+
+    private final Enemy enemy;
+    private final Weapon weapon;
+  }
 
   @Getter
   @Builder
@@ -137,7 +145,6 @@ public abstract class Enemy extends SoundMakingEntity {
 
     private final Consumer<Enemy> onDeath;
     private final Consumer<Enemy> onGetShot;
-    private final Consumer<Enemy> onShooting;
-    private final Consumer<Enemy> onPunching;
+    private final Consumer<EnemyWeapon> onAttack;
   }
 }

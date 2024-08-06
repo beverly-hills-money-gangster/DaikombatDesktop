@@ -53,10 +53,10 @@ public class MainMenuScreen extends AbstractMainMenuScreen {
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       Gdx.app.exit();
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-      menuSelection.up();
+      menuSelection.next();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
-      menuSelection.down();
+      menuSelection.prev();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     }
   }
