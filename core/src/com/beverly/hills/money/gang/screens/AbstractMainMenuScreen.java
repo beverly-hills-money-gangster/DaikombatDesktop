@@ -31,6 +31,10 @@ public abstract class AbstractMainMenuScreen extends GameScreen {
   private final TextureRegion skyBg;
   private final TextureRegion guiTitle;
 
+  private final float logoHeight;
+
+  private final float logoWidht;
+
   protected AbstractMainMenuScreen(final DaiKombatGame game) {
     super(game, new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
     Environment env = new Environment();
@@ -45,6 +49,11 @@ public abstract class AbstractMainMenuScreen extends GameScreen {
     startBgMusic();
 
     Gdx.input.setCursorCatched(true);
+
+    float logoResizeCoefficient = (getViewport().getWorldHeight() / 2) / guiTitle.getRegionHeight();
+
+    logoWidht = guiTitle.getRegionWidth() * logoResizeCoefficient;
+    logoHeight = guiTitle.getRegionHeight() * logoResizeCoefficient;
   }
 
   private void startBgMusic() {
@@ -89,13 +98,13 @@ public abstract class AbstractMainMenuScreen extends GameScreen {
         getViewport().getWorldWidth() / 2f - glyphLayoutNetworkClient.width / 2f,
         getViewport().getWorldHeight() - Constants.MENU_OPTION_INDENT);
     getGame().getBatch().end();
+
     if (showLogo) {
       getGame().getBatch().begin();
       getGame().getBatch().draw(guiTitle,
-          getViewport().getWorldWidth() / 4,
-          getViewport().getWorldHeight() / 4 + (int) (Math.sin(getGame().getTimeSinceLaunch())
-              * 15),
-          getViewport().getWorldWidth() / 2, getViewport().getWorldHeight() / 2);
+          getViewport().getWorldWidth() / 2f - logoWidht / 2f,
+          getViewport().getWorldHeight() / 2f - logoHeight / 2f + (float) (
+              Math.sin(getGame().getTimeSinceLaunch()) * 15f), logoWidht, logoHeight);
       getGame().getBatch().end();
     }
   }
