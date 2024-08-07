@@ -4,6 +4,12 @@ Daikombat is a Doom-like online shooter game with a non-stop death-match mode. I
 
 **WARNING** The game is NOT for commercial use. This repository is for educational purposes only.
 
+## Distribution
+
+Right now, the game can be downloaded from the [official web-site](https://beverly-hills-money-gangster.github.io/DaikombatDesktop/) or [itch.io](https://beverlyhillsmoneygangster.itch.io/daikombat).
+
+![Main menu](/img/ps_one_cover_old_school.png)
+
 ## Plot
 
 In a world where the boundaries between heaven and hell blur, the once-heroic Doom Guy finds himself plunged into an eternal nightmare.
@@ -34,11 +40,11 @@ gets 20(configurable) kills first is declared the winner. Notable features:
 
 ### Screenshots
 
-![Main menu](/screenshot-main-menu.png)
+![Main menu](/img/screenshot-main-menu.png)
 
-![Gameplay](/screenshot-gameplay.png)
+![Gameplay](/img/screenshot-gameplay.png)
 
-![Death screen](/screenshot-death.png)
+![Death screen](/img/screenshot-death.png)
 
 
 ## Prerequisites
@@ -77,7 +83,3 @@ To turn dev mode on, please run the game with `DESKTOP_DEV_MODE=true` environmen
 #### Debug controls
 - N - see network metrics
 - P - log current player position
-
-## Distribution
-
-Right now, the game can be downloaded from the [official web-site](https://beverly-hills-money-gangster.github.io/DaikombatDesktop/) or [itch.io](https://beverlyhillsmoneygangster.itch.io/daikombat).
