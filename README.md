@@ -42,7 +42,9 @@ gets 20(configurable) kills first is declared the winner. Notable features:
 
 ![Main menu](/img/screenshot-main-menu.png)
 
-![Gameplay](/img/screenshot-gameplay.png)
+![Enemy](/img/screenshot-enemy.png)
+
+![Teleport](/img/screenshot-teleport.png)
 
 ![Death screen](/img/screenshot-death.png)
 
