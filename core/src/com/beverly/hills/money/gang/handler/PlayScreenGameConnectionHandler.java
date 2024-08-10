@@ -274,7 +274,6 @@ public class PlayScreenGameConnectionHandler {
         .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
             .eventSequenceId(gameEvent.getSequence())
             .enemyPlayerActionType(enemyPlayerActionType)
-            .weapon(WeaponMapper.getWeapon(gameEvent.getWeaponType()))
             .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
             .onComplete(() -> {
               if (gameEvent.getWeaponType() == WeaponType.PUNCH) {
@@ -282,6 +281,8 @@ public class PlayScreenGameConnectionHandler {
                     playScreen.getGame().getAssMan()
                         .getUserSettingSound(SoundRegistry.ENEMY_PUNCH_THROWN))
                     .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
+              } else {
+                enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()));
               }
             })
             .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build()));
@@ -301,10 +302,10 @@ public class PlayScreenGameConnectionHandler {
             enemyPlayer.queueAction(EnemyPlayerAction.builder()
                 .eventSequenceId(gameEvent.getSequence())
                 .enemyPlayerActionType(enemyPlayerActionType)
-                .weapon(WeaponMapper.getWeapon(gameEvent.getWeaponType()))
                 .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
                 .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
                 .onComplete(() -> {
+                  enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()));
                   playScreen.getPlayer().getHit(gameEvent.getAffectedPlayer().getHealth());
                   playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
                       .GET_HIT_SOUND_SEQ.getNextSound()).play(Constants.PLAYER_FX_VOLUME);
@@ -319,12 +320,14 @@ public class PlayScreenGameConnectionHandler {
           .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
               .eventSequenceId(gameEvent.getSequence())
               .enemyPlayerActionType(enemyPlayerActionType)
-              .weapon(WeaponMapper.getWeapon(gameEvent.getWeaponType()))
               .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
               .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
               .onComplete(
-                  () -> enemiesRegistry.getEnemy(gameEvent.getAffectedPlayer().getPlayerId())
-                      .ifPresent(EnemyPlayer::getHit))
+                  () -> {
+                    enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()));
+                    enemiesRegistry.getEnemy(gameEvent.getAffectedPlayer().getPlayerId())
+                        .ifPresent(EnemyPlayer::getHit);
+                  })
               .build()));
 
     }
@@ -345,10 +348,10 @@ public class PlayScreenGameConnectionHandler {
           .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
               .eventSequenceId(gameEvent.getSequence())
               .enemyPlayerActionType(enemyPlayerActionType)
-              .weapon(WeaponMapper.getWeapon(gameEvent.getWeaponType()))
               .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
               .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
               .onComplete(() -> {
+                enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()));
                 playScreen.getPlayer().die(killedBy);
                 playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
                     .GET_HIT_SOUND_SEQ.getNextSound()).play(Constants.PLAYER_FX_VOLUME);
@@ -383,12 +386,14 @@ public class PlayScreenGameConnectionHandler {
           .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
               .eventSequenceId(gameEvent.getSequence())
               .enemyPlayerActionType(enemyPlayerActionType)
-              .weapon(WeaponMapper.getWeapon(gameEvent.getWeaponType()))
               .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
               .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
-              .onComplete(() -> enemiesRegistry.removeEnemy(
-                  gameEvent.getAffectedPlayer().getPlayerId()).ifPresent(
-                  Enemy::die))
+              .onComplete(() -> {
+                enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()));
+                enemiesRegistry.removeEnemy(
+                    gameEvent.getAffectedPlayer().getPlayerId()).ifPresent(
+                    Enemy::die);
+              })
               .build()));
     }
   }

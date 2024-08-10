@@ -162,10 +162,6 @@ public class EnemyPlayer extends Enemy {
         // if we are close to the target destination then we are here
         actions.remove();
         action.getOnComplete().run();
-        if (action.getEnemyPlayerActionType() == EnemyPlayerActionType.ATTACK) {
-          attack(action.getWeapon());
-        }
-
       }
     } else if (System.currentTimeMillis() >= movingAnimationUntil) {
       isIdle = true;

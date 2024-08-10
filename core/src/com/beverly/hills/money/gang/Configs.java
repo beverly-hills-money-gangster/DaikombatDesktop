@@ -17,6 +17,6 @@ public interface Configs {
       System.getenv("DESKTOP_MIMIC_CONSTANT_NETWORK_ACTIVITY"));
 
   int SECONDARY_CONNECTIONS_TO_OPEN = NumberUtils.toInt(
-      System.getenv("DESKTOP_SECONDARY_CONNECTIONS_TO_OPEN"), 2);
+      System.getenv("DESKTOP_SECONDARY_CONNECTIONS_TO_OPEN"), 3);
 
 }

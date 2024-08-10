@@ -1,17 +1,17 @@
 package com.beverly.hills.money.gang.strategy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.badlogic.gdx.math.Vector2;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerAction;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerActionType;
-import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.function.Consumer;
@@ -26,44 +26,58 @@ public class EnemyPlayerActionQueueStrategyTest {
 
   private Consumer<Float> onSpeedChange;
 
-  private Consumer<EnemyPlayerAction> onTooMuchDistanceTravelled;
+  private Consumer<EnemyPlayerAction> onTeleport;
 
   @BeforeEach
   public void setUp() {
     onSpeedChange = mock(Consumer.class);
-    onTooMuchDistanceTravelled = mock(Consumer.class);
+    onTeleport = mock(Consumer.class);
   }
 
   @Test
   public void testEnqueueOverLimit() {
     Deque<EnemyPlayerAction> enemyPlayerActions = new ArrayDeque<>();
     EnemyPlayerActionQueueStrategy enemyPlayerActionQueueStrategy = new EnemyPlayerActionQueueStrategy(
-        enemyPlayerActions, onTooMuchDistanceTravelled, onSpeedChange, defaultSpeed);
+        enemyPlayerActions, onTeleport, onSpeedChange, defaultSpeed);
     var currentPosition = new Vector2(0, 0);
+    Runnable onComplete = spy(Runnable.class);
 
     for (int i = 0; i <= EnemyPlayerActionQueueStrategy.MAX_ACTION_QUEUE_CLOGGING; i++) {
       var someAction = EnemyPlayerAction.builder()
           .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
           .direction(new Vector2(0, 1))
-          .route(new Vector2(0, 1))
+          .route(new Vector2(0, i))
+          .onComplete(onComplete)
           .eventSequenceId(i).build();
       enemyPlayerActionQueueStrategy.enqueue(someAction, currentPosition);
     }
+    reset(onSpeedChange);
+
     var someOverTheLimitAction = EnemyPlayerAction.builder()
         .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
         .direction(new Vector2(0, 1))
-        .route(new Vector2(0, 1))
+        .route(new Vector2(0, EnemyPlayerActionQueueStrategy.MAX_ACTION_QUEUE_CLOGGING + 1))
+        .onComplete(onComplete)
         .eventSequenceId(EnemyPlayerActionQueueStrategy.MAX_ACTION_QUEUE_CLOGGING + 1).build();
     // over the limit
-    assertThrows(IllegalStateException.class,
-        () -> enemyPlayerActionQueueStrategy.enqueue(someOverTheLimitAction, currentPosition));
+    enemyPlayerActionQueueStrategy.enqueue(someOverTheLimitAction, currentPosition);
+    assertEquals(1, enemyPlayerActions.size(),
+        "Should be only one as the queue is clogged to the max. In this situation we should clear the queue.");
+    // we teleport and skip all events
+    verify(onTeleport).accept(someOverTheLimitAction);
+    // we should execute all "onComplete" Runnables,
+    // otherwise we can skip some events (like shooting, getting shot, deaths, teleport sounds)
+    verify(onComplete, times(
+        EnemyPlayerActionQueueStrategy.MAX_ACTION_QUEUE_CLOGGING + 1)).run();
+    // we keep normal speed as we skipped all events. no need to rush :-)
+    verify(onSpeedChange).accept((float) defaultSpeed);
   }
 
   @Test
   public void testEnqueueInOrder() {
     Deque<EnemyPlayerAction> enemyPlayerActions = new ArrayDeque<>();
     EnemyPlayerActionQueueStrategy enemyPlayerActionQueueStrategy = new EnemyPlayerActionQueueStrategy(
-        enemyPlayerActions, onTooMuchDistanceTravelled, onSpeedChange, defaultSpeed);
+        enemyPlayerActions, onTeleport, onSpeedChange, defaultSpeed);
     var currentPosition = new Vector2(0, 0);
     var firstAction = EnemyPlayerAction.builder()
         .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
@@ -85,11 +99,10 @@ public class EnemyPlayerActionQueueStrategyTest {
     Runnable onPunchComplete = spy(Runnable.class);
     Deque<EnemyPlayerAction> enemyPlayerActions = new ArrayDeque<>();
     EnemyPlayerActionQueueStrategy enemyPlayerActionQueueStrategy = new EnemyPlayerActionQueueStrategy(
-        enemyPlayerActions, onTooMuchDistanceTravelled, onSpeedChange, defaultSpeed);
+        enemyPlayerActions, onTeleport, onSpeedChange, defaultSpeed);
     var currentPosition = new Vector2(0, 0);
     var punch = EnemyPlayerAction.builder()
         .enemyPlayerActionType(EnemyPlayerActionType.ATTACK)
-        .weapon(Weapon.GAUNTLET)
         .direction(new Vector2(0, 1))
         .route(new Vector2(0, 2))
         .onComplete(onPunchComplete)
@@ -115,12 +128,11 @@ public class EnemyPlayerActionQueueStrategyTest {
     Runnable onShootComplete = spy(Runnable.class);
     Deque<EnemyPlayerAction> enemyPlayerActions = new ArrayDeque<>();
     EnemyPlayerActionQueueStrategy enemyPlayerActionQueueStrategy = new EnemyPlayerActionQueueStrategy(
-        enemyPlayerActions, onTooMuchDistanceTravelled, onSpeedChange, defaultSpeed);
+        enemyPlayerActions, onTeleport, onSpeedChange, defaultSpeed);
     var currentPosition = new Vector2(0, 0);
     var shoot = EnemyPlayerAction.builder()
         .enemyPlayerActionType(EnemyPlayerActionType.ATTACK)
         .direction(new Vector2(0, 1))
-        .weapon(Weapon.SHOTGUN)
         .route(new Vector2(0, 2))
         .onComplete(onShootComplete)
         .eventSequenceId(0).build();
@@ -144,7 +156,7 @@ public class EnemyPlayerActionQueueStrategyTest {
   public void testEnqueueOutOfOrderMoves() {
     Deque<EnemyPlayerAction> enemyPlayerActions = new ArrayDeque<>();
     EnemyPlayerActionQueueStrategy enemyPlayerActionQueueStrategy = new EnemyPlayerActionQueueStrategy(
-        enemyPlayerActions, onTooMuchDistanceTravelled, onSpeedChange, defaultSpeed);
+        enemyPlayerActions, onTeleport, onSpeedChange, defaultSpeed);
     var currentPosition = new Vector2(0, 0);
     var firstAction = EnemyPlayerAction.builder()
         .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
@@ -169,7 +181,7 @@ public class EnemyPlayerActionQueueStrategyTest {
   public void testEnqueueOutOfOrderTeleport2Move1Move3() {
     Deque<EnemyPlayerAction> enemyPlayerActions = new ArrayDeque<>();
     EnemyPlayerActionQueueStrategy enemyPlayerActionQueueStrategy = new EnemyPlayerActionQueueStrategy(
-        enemyPlayerActions, onTooMuchDistanceTravelled, onSpeedChange, defaultSpeed);
+        enemyPlayerActions, onTeleport, onSpeedChange, defaultSpeed);
 
     var move1 = EnemyPlayerAction.builder()
         .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
@@ -193,7 +205,7 @@ public class EnemyPlayerActionQueueStrategyTest {
     assertEquals(teleport2, enemyPlayerActions.getLast());
     enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 100));
     assertEquals(move3, enemyPlayerActions.getLast());
-    verifyNoInteractions(onTooMuchDistanceTravelled);
+    verifyNoInteractions(onTeleport);
 
     assertEquals(2, enemyPlayerActions.size(),
         "Move 1 should be ignored because it's out of order");
@@ -203,7 +215,7 @@ public class EnemyPlayerActionQueueStrategyTest {
   public void testEnqueueOutOfOrderTeleport2Move3Move1() {
     Deque<EnemyPlayerAction> enemyPlayerActions = new ArrayDeque<>();
     EnemyPlayerActionQueueStrategy enemyPlayerActionQueueStrategy = new EnemyPlayerActionQueueStrategy(
-        enemyPlayerActions, onTooMuchDistanceTravelled, onSpeedChange, defaultSpeed);
+        enemyPlayerActions, onTeleport, onSpeedChange, defaultSpeed);
 
     var move1 = EnemyPlayerAction.builder()
         .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
@@ -228,7 +240,7 @@ public class EnemyPlayerActionQueueStrategyTest {
     enemyPlayerActionQueueStrategy.enqueue(move1, new Vector2(0, 101));
     assertEquals(move3, enemyPlayerActions.getLast());
 
-    verifyNoInteractions(onTooMuchDistanceTravelled);
+    verifyNoInteractions(onTeleport);
 
     assertEquals(2, enemyPlayerActions.size(),
         "Move 1 should be ignored because it's out of order");
@@ -238,7 +250,7 @@ public class EnemyPlayerActionQueueStrategyTest {
   public void testEnqueueOutOfOrderMove1Move3Teleport2() {
     Deque<EnemyPlayerAction> enemyPlayerActions = new ArrayDeque<>();
     EnemyPlayerActionQueueStrategy enemyPlayerActionQueueStrategy = new EnemyPlayerActionQueueStrategy(
-        enemyPlayerActions, onTooMuchDistanceTravelled, onSpeedChange, defaultSpeed);
+        enemyPlayerActions, onTeleport, onSpeedChange, defaultSpeed);
 
     var move1 = EnemyPlayerAction.builder()
         .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
@@ -260,7 +272,7 @@ public class EnemyPlayerActionQueueStrategyTest {
     assertEquals(move1, enemyPlayerActions.getLast());
 
     enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 1));
-    verify(onTooMuchDistanceTravelled).accept(move3);
+    verify(onTeleport).accept(move3);
     assertTrue(enemyPlayerActions.isEmpty(), "Should be empty because it was a big leap");
 
     enemyPlayerActionQueueStrategy.enqueue(teleport2, new Vector2(0, 101));
@@ -271,7 +283,7 @@ public class EnemyPlayerActionQueueStrategyTest {
   public void testEnqueueOutOfOrderMove1Teleport2Move3() {
     Deque<EnemyPlayerAction> enemyPlayerActions = new ArrayDeque<>();
     EnemyPlayerActionQueueStrategy enemyPlayerActionQueueStrategy = new EnemyPlayerActionQueueStrategy(
-        enemyPlayerActions, onTooMuchDistanceTravelled, onSpeedChange, defaultSpeed);
+        enemyPlayerActions, onTeleport, onSpeedChange, defaultSpeed);
 
     var move1 = EnemyPlayerAction.builder()
         .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
@@ -292,7 +304,7 @@ public class EnemyPlayerActionQueueStrategyTest {
     enemyPlayerActionQueueStrategy.enqueue(move1, new Vector2(0, 0));
     enemyPlayerActionQueueStrategy.enqueue(teleport2, new Vector2(0, 1));
     enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 100));
-    verifyNoInteractions(onTooMuchDistanceTravelled);
+    verifyNoInteractions(onTeleport);
 
     assertEquals(3, enemyPlayerActions.size());
   }
@@ -301,7 +313,7 @@ public class EnemyPlayerActionQueueStrategyTest {
   public void testEnqueueOutOfOrderMove3Move1Teleport2() {
     Deque<EnemyPlayerAction> enemyPlayerActions = new ArrayDeque<>();
     EnemyPlayerActionQueueStrategy enemyPlayerActionQueueStrategy = new EnemyPlayerActionQueueStrategy(
-        enemyPlayerActions, onTooMuchDistanceTravelled, onSpeedChange, defaultSpeed);
+        enemyPlayerActions, onTeleport, onSpeedChange, defaultSpeed);
 
     var move1 = EnemyPlayerAction.builder()
         .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
@@ -321,7 +333,7 @@ public class EnemyPlayerActionQueueStrategyTest {
 
     enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 0));
     assertTrue(enemyPlayerActions.isEmpty(), "Should be empty because it's a very big leap");
-    verify(onTooMuchDistanceTravelled).accept(move3);
+    verify(onTeleport).accept(move3);
 
     enemyPlayerActionQueueStrategy.enqueue(move1, new Vector2(0, 101));
     assertTrue(enemyPlayerActions.isEmpty(), "Should be empty because it's out of order");
@@ -334,7 +346,7 @@ public class EnemyPlayerActionQueueStrategyTest {
   public void testEnqueueOutOfOrderMove3Teleport2Move1() {
     Deque<EnemyPlayerAction> enemyPlayerActions = new ArrayDeque<>();
     EnemyPlayerActionQueueStrategy enemyPlayerActionQueueStrategy = new EnemyPlayerActionQueueStrategy(
-        enemyPlayerActions, onTooMuchDistanceTravelled, onSpeedChange, defaultSpeed);
+        enemyPlayerActions, onTeleport, onSpeedChange, defaultSpeed);
 
     var move1 = EnemyPlayerAction.builder()
         .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
@@ -354,7 +366,7 @@ public class EnemyPlayerActionQueueStrategyTest {
 
     enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 0));
     assertTrue(enemyPlayerActions.isEmpty(), "Should be empty because it's a very big leap");
-    verify(onTooMuchDistanceTravelled).accept(move3);
+    verify(onTeleport).accept(move3);
 
     enemyPlayerActionQueueStrategy.enqueue(teleport2, new Vector2(0, 101));
     assertTrue(enemyPlayerActions.isEmpty(), "Should be empty because it's out of order");
@@ -396,7 +408,7 @@ public class EnemyPlayerActionQueueStrategyTest {
 
   @Test
   public void testGetSpeedEmptyQueueSuperClogged() {
-    assertEquals(defaultSpeed * 3,
+    assertEquals(defaultSpeed * 4,
         EnemyPlayerActionQueueStrategy.getSpeed(createActions(25), defaultSpeed));
   }
 

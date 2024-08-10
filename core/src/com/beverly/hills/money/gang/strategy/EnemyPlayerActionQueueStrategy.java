@@ -25,7 +25,7 @@ public class EnemyPlayerActionQueueStrategy {
   private final Queue<EnemyPlayerAction> actions;
 
   @NonNull
-  private final Consumer<EnemyPlayerAction> onTooMuchDistanceTravelled;
+  private final Consumer<EnemyPlayerAction> onTeleport;
 
   @NonNull
   private final Consumer<Float> onSpeedChange;
@@ -34,46 +34,52 @@ public class EnemyPlayerActionQueueStrategy {
 
   public void enqueue(
       final EnemyPlayerAction enemyPlayerAction, Vector2 currentPosition) {
+    // if clogged
     if (actions.size() > MAX_ACTION_QUEUE_CLOGGING) {
-      throw new IllegalStateException("Can't queue enemy action");
-    } else {
-      onSpeedChange.accept(getSpeed(actions, this.defaultSpeed));
+      LOG.warn("The queue is totally clogged. Clear all events.");
+      skipEventsAndTeleport(enemyPlayerAction);
     }
-
-    // if in order
-    if (enemyPlayerAction.getEventSequenceId() > lastEventSequenceId) {
-      int sequenceDiff = enemyPlayerAction.getEventSequenceId() - lastEventSequenceId;
-      if (sequenceDiff > 1 && enemyPlayerAction.getRoute().dst(currentPosition)
-          > TOO_MUCH_DISTANCE_TRAVELLED) {
-        LOG.warn("Too much distance travelled in one hop");
-        onTooMuchDistanceTravelled.accept(enemyPlayerAction);
-        actions.forEach(
-            action -> Optional.ofNullable(action.getOnComplete()).ifPresent(Runnable::run));
-        actions.clear();
-      } else {
-        actions.add(enemyPlayerAction);
+    onSpeedChange.accept(getSpeed(actions, this.defaultSpeed));
+    // if out-of-order
+    if (enemyPlayerAction.getEventSequenceId() < lastEventSequenceId) {
+      switch (enemyPlayerAction.getEnemyPlayerActionType()) {
+        case MOVE -> LOG.warn(
+            "MOVE event is out of order. Last event sequence id {} but given {}. Skip event.",
+            lastEventSequenceId, enemyPlayerAction.getEventSequenceId());
+        case ATTACK -> {
+          LOG.warn(
+              "ATTACK event is out of order. Last event sequence id {} but given {}",
+              lastEventSequenceId, enemyPlayerAction.getEventSequenceId());
+          Optional.ofNullable(enemyPlayerAction.getOnComplete()).ifPresent(Runnable::run);
+        }
       }
-      lastEventSequenceId = enemyPlayerAction.getEventSequenceId();
       return;
     }
-
-    // fix out-of-order case
-    switch (enemyPlayerAction.getEnemyPlayerActionType()) {
-      case MOVE -> LOG.warn(
-          "MOVE event is out of order. Last event sequence id {} but given {}. Skip event.",
-          lastEventSequenceId, enemyPlayerAction.getEventSequenceId());
-      case ATTACK -> {
-        LOG.warn(
-            "ATTACK event is out of order. Last event sequence id {} but given {}",
-            lastEventSequenceId, enemyPlayerAction.getEventSequenceId());
-        Optional.ofNullable(enemyPlayerAction.getOnComplete()).ifPresent(Runnable::run);
-      }
+    // if in order
+    int sequenceDiff = enemyPlayerAction.getEventSequenceId() - lastEventSequenceId;
+    if (sequenceDiff > 1 && enemyPlayerAction.getRoute().dst(currentPosition)
+        > TOO_MUCH_DISTANCE_TRAVELLED) {
+      LOG.warn("Too much distance travelled in one hop");
+      skipEventsAndTeleport(enemyPlayerAction);
+    } else {
+      actions.add(enemyPlayerAction);
     }
+    lastEventSequenceId = enemyPlayerAction.getEventSequenceId();
+  }
+
+  private void skipEventsAndTeleport(EnemyPlayerAction enemyPlayerAction) {
+    onTeleport.accept(enemyPlayerAction);
+    actions.forEach(
+        action -> Optional.ofNullable(action.getOnComplete()).ifPresent(Runnable::run));
+    actions.clear();
   }
 
   protected static float getSpeed(final Queue<EnemyPlayerAction> actions,
       final float defaultSpeed) {
-    if (actions.size() > 15) {
+    if (actions.size() > 20) {
+      LOG.warn("Action queue is super clogged. Size {}", actions.size());
+      return defaultSpeed * 4f;
+    } else if (actions.size() > 15) {
       LOG.warn("Action queue is super clogged. Size {}", actions.size());
       return defaultSpeed * 3f;
     } else if (actions.size() > 10) {
