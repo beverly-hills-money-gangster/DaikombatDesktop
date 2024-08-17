@@ -282,6 +282,18 @@ public class ScreenWeaponTest {
   }
 
   @Test
+  public void testChangeWeaponNoDelay() {
+    screenWeapon.changeWeapon(Weapon.RAILGUN);
+    assertEquals(Weapon.RAILGUN, screenWeapon.getWeaponBeingUsed());
+    screenWeapon.changeWeapon(Weapon.SHOTGUN);
+    assertEquals(Weapon.RAILGUN, screenWeapon.getWeaponBeingUsed(),
+        "Weapon should still be the same, because we can't change weapons so fast");
+    verify(weaponChangeSound).play(anyFloat());
+
+  }
+
+
+  @Test
   public void testChangeWeaponSame() {
     screenWeapon.changeWeapon(Weapon.RAILGUN);
     screenWeapon.changeWeapon(Weapon.RAILGUN); // second time
@@ -290,10 +302,11 @@ public class ScreenWeaponTest {
   }
 
   @Test
-  public void testChangeWeaponAndShoot() {
+  public void testChangeWeaponAndShoot() throws InterruptedException {
     screenWeapon.changeWeapon(Weapon.RAILGUN);
     assertTrue(screenWeapon.canAttack());
     screenWeapon.attack(player);
+    Thread.sleep(ScreenWeapon.CHANGE_WEAPON_DELAY_MLS);
     screenWeapon.changeWeapon(Weapon.SHOTGUN);
     assertTrue(screenWeapon.canAttack());
     screenWeapon.attack(player);
@@ -303,13 +316,15 @@ public class ScreenWeaponTest {
   }
 
   @Test
-  public void testChangeWeaponShotChangeShootChangeShoot() {
+  public void testChangeWeaponShotChangeShootChangeShoot() throws InterruptedException {
     screenWeapon.changeWeapon(Weapon.RAILGUN);
     assertTrue(screenWeapon.canAttack());
     screenWeapon.attack(player);
+    Thread.sleep(ScreenWeapon.CHANGE_WEAPON_DELAY_MLS);
     screenWeapon.changeWeapon(Weapon.SHOTGUN);
     assertTrue(screenWeapon.canAttack());
     screenWeapon.attack(player);
+    Thread.sleep(ScreenWeapon.CHANGE_WEAPON_DELAY_MLS);
     screenWeapon.changeWeapon(Weapon.RAILGUN);
     assertFalse(screenWeapon.canAttack(),
         "Can't attack because the animation hasn't finished yet");
@@ -323,6 +338,7 @@ public class ScreenWeaponTest {
     screenWeapon.changeWeapon(Weapon.RAILGUN);
     assertTrue(screenWeapon.canAttack());
     screenWeapon.attack(player);
+    Thread.sleep(ScreenWeapon.CHANGE_WEAPON_DELAY_MLS);
     screenWeapon.changeWeapon(Weapon.SHOTGUN);
     assertTrue(screenWeapon.canAttack());
     screenWeapon.attack(player);
@@ -340,16 +356,18 @@ public class ScreenWeaponTest {
   }
 
   @Test
-  public void testChangeWeaponAllWeapons() {
+  public void testChangeWeaponAllWeapons() throws InterruptedException {
     for (Weapon weapon : Weapon.values()) {
       screenWeapon.changeWeapon(weapon);
       assertEquals(weapon, screenWeapon.getWeaponBeingUsed());
+      Thread.sleep(ScreenWeapon.CHANGE_WEAPON_DELAY_MLS);
     }
   }
 
   @Test
-  public void testChangeToNextWeapon() {
+  public void testChangeToNextWeapon() throws InterruptedException {
     screenWeapon.changeWeapon(Weapon.GAUNTLET);
+    Thread.sleep(ScreenWeapon.CHANGE_WEAPON_DELAY_MLS);
     screenWeapon.changeToNextWeapon();
     assertEquals(Weapon.SHOTGUN, screenWeapon.getWeaponBeingUsed());
   }
@@ -365,8 +383,9 @@ public class ScreenWeaponTest {
   }
 
   @Test
-  public void testChangeToPrevWeapon() {
+  public void testChangeToPrevWeapon() throws InterruptedException {
     screenWeapon.changeWeapon(Weapon.GAUNTLET);
+    Thread.sleep(ScreenWeapon.CHANGE_WEAPON_DELAY_MLS);
     screenWeapon.changeToPrevWeapon();
     assertEquals(Weapon.RAILGUN, screenWeapon.getWeaponBeingUsed());
   }

@@ -18,6 +18,8 @@ public class ScreenWeapon {
 
   private final Map<Weapon, Long> animationStart = new HashMap<>();
 
+  protected static final int CHANGE_WEAPON_DELAY_MLS = 75;
+
   private static final int GUNSHOT_ANIMATION_MLS = 150;
 
   private static final int RAILGUN_ANIMATION_MLS = 200;
@@ -27,6 +29,8 @@ public class ScreenWeapon {
   private final UserSettingSound quadDamageAttack;
 
   private final UserSettingSound weaponChangeSound;
+
+  private long weaponChangedLastTimeMls;
 
   final Map<Weapon, WeaponState> weaponStates = new EnumMap<>(Weapon.class);
 
@@ -94,9 +98,11 @@ public class ScreenWeapon {
   }
 
   public void changeWeapon(Weapon weapon) {
-    if (weaponBeingUsed == weapon) {
+    if (weaponBeingUsed == weapon
+        || System.currentTimeMillis() < weaponChangedLastTimeMls + CHANGE_WEAPON_DELAY_MLS) {
       return;
     }
+    weaponChangedLastTimeMls = System.currentTimeMillis();
     setWeaponBeingUsed(weapon);
     weaponChangeSound.play(Constants.DEFAULT_SFX_VOLUME);
   }

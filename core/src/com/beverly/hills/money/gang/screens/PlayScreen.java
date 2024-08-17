@@ -142,8 +142,10 @@ public class PlayScreen extends GameScreen {
         () -> getGame().getAssMan()
             .getUserSettingSound(SoundRegistry.TYPING_SOUND_SEQ.getNextSound())
             .play(Constants.DEFAULT_SFX_TYPING_VOLUME));
-    texRegBloodOverlay = getGame().getAssMan().getTextureRegion(TexturesRegistry.ATLAS, 0, 0, 2, 2);
-    texRegBlackOverlay = getGame().getAssMan().getTextureRegion(TexturesRegistry.ATLAS, 3, 0, 2, 2);
+    texRegBloodOverlay = getGame().getAssMan().getTextureRegion(
+        TexturesRegistry.ATLAS, 0, 0, 2, 2);
+    texRegBlackOverlay = getGame().getAssMan().getTextureRegion(
+        TexturesRegistry.ATLAS, 3, 0, 2, 2);
 
     guiFont64 = getGame().getAssMan().getFont(FontRegistry.FONT_64);
     guiFont32 = getGame().getAssMan().getFont(FontRegistry.FONT_32);
