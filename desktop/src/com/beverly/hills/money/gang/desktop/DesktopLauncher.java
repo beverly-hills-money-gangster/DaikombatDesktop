@@ -1,8 +1,6 @@
 package com.beverly.hills.money.gang.desktop;
 
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.beverly.hills.money.gang.Configs;
@@ -15,12 +13,12 @@ public class DesktopLauncher {
   // TODO test on TV
   // TODO support alt+tab
   // TODO think about license and copyrights
-  public static void main
-  (final String[] arg) {
+  public static void main(final String[] arg) {
+
     final Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
     config.setTitle("DAIKOMBAT");
     config.setBackBufferConfig(8, 8, 8, 8, 24, 8, 0);
-    config.setForegroundFPS(60);
+    config.setForegroundFPS(120);
     config.setInitialBackgroundColor(Constants.FOG_COLOR);
     config.useVsync(true);
 
@@ -32,7 +30,6 @@ public class DesktopLauncher {
       config.setFullscreenMode(Lwjgl3ApplicationConfiguration
           .getDisplayMode(Lwjgl3ApplicationConfiguration.getPrimaryMonitor()));
     }
-
     new Lwjgl3Application(new DaiKombatGame(), config);
   }
 }
