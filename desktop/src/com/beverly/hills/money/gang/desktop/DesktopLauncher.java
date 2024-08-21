@@ -23,7 +23,6 @@ public class DesktopLauncher {
     config.setForegroundFPS(60);
     config.setInitialBackgroundColor(Constants.FOG_COLOR);
     config.useVsync(true);
-    config.useOpenGL3(true, 3, 3); // 3.3 Works on MacOSX
 
     if (Configs.DEV_MODE) {
       config.setWindowSizeLimits(1024, 768, 1024, 768);

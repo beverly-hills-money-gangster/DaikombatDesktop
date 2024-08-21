@@ -14,3 +14,10 @@ curl --fail -X POST https://content.dropboxapi.com/2/files/upload \
   --header "Content-Type: application/octet-stream" \
   --header "Dropbox-API-Arg: {\"path\": \"/win64-exe-game.zip\",\"mode\": \"overwrite\",\"mute\": false}" \
   --data-binary "@win64-exe-game.zip"
+
+
+curl --fail -X POST https://content.dropboxapi.com/2/files/upload \
+  --header "Authorization: Bearer $ACCESS_TOKEN" \
+  --header "Content-Type: application/octet-stream" \
+  --header "Dropbox-API-Arg: {\"path\": \"/daikombat.jar\",\"mode\": \"overwrite\",\"mute\": false}" \
+  --data-binary "@desktop/build/lib/desktop-1.0.jar"
