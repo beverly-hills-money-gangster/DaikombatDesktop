@@ -1,7 +1,25 @@
 package com.beverly.hills.money.gang.screens.ui.weapon;
 
+import com.badlogic.gdx.Input.Keys;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public enum Weapon {
-  GAUNTLET, SHOTGUN, RAILGUN;
+  GAUNTLET(Keys.NUM_1), SHOTGUN(Keys.NUM_2), RAILGUN(Keys.NUM_3);
+
+  static {
+    int keys = Arrays.stream(Weapon.values()).map(weapon -> weapon.selectKeyCode)
+        .collect(Collectors.toSet()).size();
+    if (keys != Weapon.values().length) {
+      throw new IllegalStateException("Not all weapons have unique select key mapping");
+    }
+  }
+
+  @Getter
+  private final int selectKeyCode;
 
   public Weapon nextWeapon() {
     return Weapon.values()[(getCurrentIdx() + 1) % Weapon.values().length];

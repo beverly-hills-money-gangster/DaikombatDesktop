@@ -3,6 +3,7 @@ package com.beverly.hills.money.gang.entities.player;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
@@ -21,6 +22,7 @@ import com.beverly.hills.money.gang.screens.ui.weapon.ScreenWeapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponRenderData;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponStats;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -102,6 +104,21 @@ public class Player extends Entity {
     createRect(spawnPosition.cpy()
         .set(spawnPosition.x - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f,
             spawnPosition.y - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f));
+
+    Gdx.input.setInputProcessor(new InputAdapter() {
+      @Override
+      public boolean scrolled(float amountX, float amountY) {
+        if (isDead.get()) {
+          return true;
+        }
+        if (amountY > 0) {
+          screenWeapon.changeToPrevWeapon();
+        } else if (amountY < 0) {
+          screenWeapon.changeToNextWeapon();
+        }
+        return true;
+      }
+    });
   }
 
   public Vector2 getCurrent2DDirection() {
@@ -196,6 +213,11 @@ public class Player extends Entity {
     } else if (Gdx.input.isKeyJustPressed(Keys.Q)) {
       screenWeapon.changeToPrevWeapon();
     }
+    Arrays.stream(Weapon.values()).forEach(weapon -> {
+      if (Gdx.input.isKeyJustPressed(weapon.getSelectKeyCode())) {
+        screenWeapon.changeWeapon(weapon);
+      }
+    });
 
     // otherwise the screen goes 180 degrees on startup if you don't move the mouse on main menu screens
     if (Math.abs(Gdx.input.getDeltaX()) < 500) {
