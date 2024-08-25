@@ -13,7 +13,7 @@ public interface Constants {
 
   float PLAYER_RECT_SIZE = 0.25f + 0.300f;
 
-  long SHOOTING_SOUND_FREQ_MLS = 550;
+  int SHOOTING_SOUND_FREQ_MLS = 125;
 
   float MOUSE_CAMERA_ROTATION_SPEED = 15f;
   float ARROWS_CAMERA_ROTATION = 2.5f;

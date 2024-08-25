@@ -22,16 +22,21 @@ public class AttackingSound {
   }
 
   public void play(SoundVolumeType volumeType, float pan) {
-    play(volumeType, pan, null);
+    play(volumeType, pan, null, SHOOTING_SOUND_FREQ_MLS);
   }
 
-  public void play(SoundVolumeType volumeType, float pan, UserSettingSound extraSound) {
+  public void play(SoundVolumeType volumeType, float pan, final int frequencyMls) {
+    play(volumeType, pan, null, frequencyMls);
+  }
+
+  public void play(SoundVolumeType volumeType, float pan, UserSettingSound extraSound,
+      final int frequencyMls) {
     var soundEntry
         = SoundVolumeTypeEntry.builder()
         .sound(sound.getSound())
         .soundVolumeType(volumeType).build();
     if (System.currentTimeMillis() - LAST_PLAYED.getOrDefault(soundEntry, 0L)
-        > SHOOTING_SOUND_FREQ_MLS) {
+        > frequencyMls) {
       sound.play(volumeType, pan);
       Optional.ofNullable(extraSound)
           .ifPresent(userSettingSound -> userSettingSound.play(volumeType, pan));
@@ -39,6 +44,9 @@ public class AttackingSound {
     }
   }
 
+  public void play(SoundVolumeType volumeType, float pan, UserSettingSound extraSound) {
+    play(volumeType, pan, extraSound, SHOOTING_SOUND_FREQ_MLS);
+  }
 
   @Builder
   @Getter

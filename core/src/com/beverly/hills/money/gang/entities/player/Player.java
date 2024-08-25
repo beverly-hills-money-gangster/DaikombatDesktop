@@ -2,6 +2,7 @@ package com.beverly.hills.money.gang.entities.player;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
@@ -205,10 +206,22 @@ public class Player extends Entity {
 
     movementDir.setZero();
 
-    if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)
+    if (screenWeapon.getWeaponBeingUsed().isAutomatic() &&
+        (Gdx.input.isButtonPressed(Input.Buttons.LEFT)
+            || Gdx.input.isKeyPressed(Input.Keys.ALT_RIGHT))) {
+      attack();
+    } else if (Gdx.input.isButtonPressed(Buttons.RIGHT)
+        || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT)) {
+      punch();
+    } else if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)
         || Gdx.input.isKeyJustPressed(Input.Keys.ALT_RIGHT)) {
       attack();
-    } else if (Gdx.input.isKeyJustPressed(Keys.E)) {
+    } else if (Gdx.input.isButtonJustPressed(Buttons.RIGHT)
+        || Gdx.input.isKeyJustPressed(Keys.CONTROL_RIGHT)) {
+      punch();
+    }
+
+    if (Gdx.input.isKeyJustPressed(Keys.E)) {
       screenWeapon.changeToNextWeapon();
     } else if (Gdx.input.isKeyJustPressed(Keys.Q)) {
       screenWeapon.changeToPrevWeapon();
@@ -246,6 +259,13 @@ public class Player extends Entity {
 
   private void attack() {
     if (screenWeapon.attack(this)) {
+      onAttackListener.accept(PlayerWeapon
+          .builder().player(this).weapon(screenWeapon.getWeaponBeingUsed()).build());
+    }
+  }
+
+  private void punch() {
+    if (screenWeapon.punch(this)) {
       onAttackListener.accept(PlayerWeapon
           .builder().player(this).weapon(screenWeapon.getWeaponBeingUsed()).build());
     }
@@ -331,6 +351,7 @@ public class Player extends Entity {
     if (isDead.get()) {
       return;
     }
+    screenWeapon.executeTask();
     getEnemyRectInRangeFromCam(onEnemyAim,
         screenWeapon.getWeaponDistance(screenWeapon.getWeaponBeingUsed()));
     if (gotHit) {

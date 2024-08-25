@@ -3,6 +3,8 @@ package com.beverly.hills.money.gang.assets.managers.registry;
 import lombok.Getter;
 
 public enum TexturesRegistry {
+  MINIGUN_IDLE("minigun_idle.png"),
+  MINIGUN_FIRE("minigun_fire.png"),
   QUAD_DAMAGE_ORB("quad_damage_orb.png"),
   DEFENCE_ORB("defence_orb.png"),
   INVISIBILITY_ORB("invisibility_orb.png"),

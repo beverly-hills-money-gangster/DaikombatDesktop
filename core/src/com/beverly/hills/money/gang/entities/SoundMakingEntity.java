@@ -23,7 +23,7 @@ public abstract class SoundMakingEntity extends Entity {
         getRect().y);
     if (distance < 3f) {
       return SoundVolumeType.VERY_LOUD;
-    } else if (distance < 10f) {
+    } else if (distance < 20) {
       return SoundVolumeType.LOUD;
     } else if (distance < 50) {
       return SoundVolumeType.NORMAL;

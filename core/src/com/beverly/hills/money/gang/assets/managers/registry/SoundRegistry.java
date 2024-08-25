@@ -51,6 +51,7 @@ public enum SoundRegistry {
   VOICE_ENEMY_DEATH_3("voice/enemy/death/death_3.mp3"),
   ENEMY_SHOTGUN("sfx/shotgun_mono.mp3"),
   QUAD_DAMAGE_ATTACK("sfx/quad_damage_attack.mp3"),
+  GAUNTLET_HUMILIATION("sfx/gauntlet_humiliation.mp3"),
   QUAD_DAMAGE_PICK("sfx/quad_damage_pick.mp3"),
   DEFENCE_PICK("sfx/defence_pick.mp3"),
   INVISIBILITY_PICK("sfx/invisibility_pick.mp3"),
@@ -59,6 +60,9 @@ public enum SoundRegistry {
   ENEMY_INVISIBILITY_PICK("sfx/enemy_invisibility_pick.mp3"),
   ENEMY_DEFENCE_PICK("sfx/enemy_defence_pick.mp3"),
   PLAYER_SHOTGUN("sfx/player_shotgun.mp3"),
+  // TODO make it mono
+  ENEMY_MINIGUN("sfx/enemy_minigun.mp3"),
+  PLAYER_MINIGUN("sfx/player_minigun.mp3"),
   HIT_SOUND("sfx/shoot_hit_sound.mp3"),
   SPAWN1("sfx/spawn/spawn1.mp3"),
   SPAWN2("sfx/spawn/spawn2.mp3"),
@@ -81,7 +85,7 @@ public enum SoundRegistry {
       = new PseudoRandomSoundSequence(SPAWN1, SPAWN2, SPAWN3);
   public static final PseudoRandomSoundSequence WINNING_SOUND_SEQ
       = new PseudoRandomSoundSequence(EXCELLENT, HUMILIATION, HOLY_SHIT, IMPRESSIVE, PERFECT);
-  public static final PseudoRandomSoundSequence GET_HIT_SOUND_SEQ
+  public static final PseudoRandomSoundSequence VOICE_GET_HIT_SOUND_SEQ
       = new PseudoRandomSoundSequence(VOICE_GET_HIT, VOICE_GET_HIT_2);
 
   public static final PseudoRandomSoundSequence ENEMY_GET_HIT_SOUND_SEQ

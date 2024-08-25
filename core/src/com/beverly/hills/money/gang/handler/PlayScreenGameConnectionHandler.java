@@ -281,7 +281,7 @@ public class PlayScreenGameConnectionHandler {
     EnemyPlayerActionType enemyPlayerActionType = switch (gameEvent.getWeaponType()) {
       // if we missed the punch then we just move to the position
       case PUNCH -> EnemyPlayerActionType.MOVE;
-      case SHOTGUN, RAILGUN -> EnemyPlayerActionType.ATTACK;
+      case SHOTGUN, RAILGUN, MINIGUN -> EnemyPlayerActionType.ATTACK;
       default -> throw new IllegalArgumentException(
           "Not supported event type " + gameEvent.getEventType());
     };
@@ -323,7 +323,7 @@ public class PlayScreenGameConnectionHandler {
                   enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()));
                   playScreen.getPlayer().getHit(gameEvent.getAffectedPlayer().getHealth());
                   playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
-                      .GET_HIT_SOUND_SEQ.getNextSound()).play(Constants.PLAYER_FX_VOLUME);
+                      .VOICE_GET_HIT_SOUND_SEQ.getNextSound()).play(Constants.PLAYER_FX_VOLUME);
                 })
                 .build());
           });
@@ -369,7 +369,7 @@ public class PlayScreenGameConnectionHandler {
                 enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()));
                 playScreen.getPlayer().die(killedBy);
                 playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
-                    .GET_HIT_SOUND_SEQ.getNextSound()).play(Constants.PLAYER_FX_VOLUME);
+                    .VOICE_GET_HIT_SOUND_SEQ.getNextSound()).play(Constants.PLAYER_FX_VOLUME);
                 playScreen.getGame().getAssMan()
                     .getUserSettingSound(SoundRegistry.LOOSING_SOUND_SEQ.getNextSound())
                     .play(Constants.MK_NARRATOR_FX_VOLUME);
@@ -391,7 +391,11 @@ public class PlayScreenGameConnectionHandler {
       playScreen.getMyPlayerKillLog()
           .myPlayerKill(victimPlayerOpt.map(EnemyPlayer::getName).orElse("victim"), buff);
       int kills = playScreen.getUiLeaderBoard().getMyKills();
-      if (kills > 1 && kills % 5 == 0) {
+      if (gameEvent.getWeaponType() == WeaponType.PUNCH) {
+        playScreen.getNarratorSoundQueue().addSound(
+            playScreen.getGame().getAssMan()
+                .getUserSettingSound(SoundRegistry.GAUNTLET_HUMILIATION));
+      } else if (kills > 1 && kills % 5 == 0) {
         playScreen.getNarratorSoundQueue().addSound(
             playScreen.getGame().getAssMan()
                 .getUserSettingSound(SoundRegistry.WINNING_SOUND_SEQ.getNextSound()));
@@ -449,6 +453,7 @@ public class PlayScreenGameConnectionHandler {
                 case SHOTGUN -> SoundRegistry.ENEMY_SHOTGUN;
                 case GAUNTLET -> SoundRegistry.ENEMY_PUNCH_HIT;
                 case RAILGUN -> SoundRegistry.ENEMY_RAILGUN;
+                case MINIGUN -> SoundRegistry.ENEMY_MINIGUN;
               };
               new AttackingSound(
                   playScreen.getGame().getAssMan().getUserSettingSound(sound))

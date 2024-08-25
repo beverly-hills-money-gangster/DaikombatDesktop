@@ -31,6 +31,7 @@ public class PlayerFactory {
             case GAUNTLET -> PushGameEventCommand.WeaponType.PUNCH;
             case SHOTGUN -> WeaponType.SHOTGUN;
             case RAILGUN -> WeaponType.RAILGUN;
+            case MINIGUN -> WeaponType.MINIGUN;
           };
           var direction = playerWeapon.getPlayer().getCurrent2DDirection();
           var position = playerWeapon.getPlayer().getCurrent2DPosition();

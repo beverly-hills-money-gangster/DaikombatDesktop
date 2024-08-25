@@ -9,6 +9,7 @@ public interface WeaponMapper {
       case PUNCH -> Weapon.GAUNTLET;
       case SHOTGUN -> Weapon.SHOTGUN;
       case RAILGUN -> Weapon.RAILGUN;
+      case MINIGUN -> Weapon.MINIGUN;
       default -> throw new IllegalStateException("Not supported weapon " + weaponType);
     };
   }

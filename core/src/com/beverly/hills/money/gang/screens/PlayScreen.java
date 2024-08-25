@@ -467,7 +467,8 @@ public class PlayScreen extends GameScreen {
     float gunWidth = getViewport().getWorldWidth() * activeWeapon.getScreenRatioX();
     float gunHeight = getViewport().getWorldHeight() * activeWeapon.getScreenRatioY();
     getGame().getBatch().draw(activeWeapon.getTextureRegion(),
-        getViewport().getWorldWidth() * 0.5f + activeWeapon.getPositioning().x,
+        getViewport().getWorldWidth() * 0.5f + activeWeapon.getPositioning().x - (
+            activeWeapon.isCenter() ? gunWidth / 2 : 0),
         (int) getPlayer().getWeaponY() + activeWeapon.getPositioning().y,
         gunWidth, gunHeight);
 
