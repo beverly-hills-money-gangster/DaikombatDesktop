@@ -8,9 +8,8 @@ import com.beverly.hills.money.gang.network.GameConnection;
 import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
 import com.beverly.hills.money.gang.network.SecondaryGameConnection;
 import com.beverly.hills.money.gang.proto.GetServerInfoCommand;
-import com.beverly.hills.money.gang.proto.ServerResponse.GameEvent;
 import com.beverly.hills.money.gang.proto.ServerResponse.WeaponInfo;
-import com.beverly.hills.money.gang.screens.data.JoinGameData;
+import com.beverly.hills.money.gang.screens.data.ConnectGameData;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponMapper;
@@ -26,22 +25,38 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GetServerInfoScreen extends AbstractLoadingScreen {
+public class ConnectServerScreen extends ReconnectableScreen {
 
-  private static final Logger LOG = LoggerFactory.getLogger(GetServerInfoScreen.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ConnectServerScreen.class);
   private final AtomicReference<String> errorMessage = new AtomicReference<>();
-  private final JoinGameData joinGameData;
+  private final ConnectGameData connectGameData;
+
+  private final int connectionTrial;
+
+  private final String loadingMessage;
 
   private final AtomicReference<LoadBalancedGameConnection> gameConnectionRef = new AtomicReference<>();
 
   private final PlayerConnectionContextData.PlayerConnectionContextDataBuilder playerContextDataBuilder;
 
 
-  public GetServerInfoScreen(final DaiKombatGame game,
-      final JoinGameData joinGameData) {
+  public ConnectServerScreen(final DaiKombatGame game,
+      final ConnectGameData connectGameData,
+      final int connectionTrial) {
     super(game);
-    this.joinGameData = joinGameData;
+    this.connectionTrial = connectionTrial;
+    this.connectGameData = connectGameData;
     this.playerContextDataBuilder = PlayerConnectionContextData.builder();
+    if (connectionTrial > 0) {
+      this.loadingMessage = Constants.CONNECTING + " ATTEMPT " + (connectionTrial + 1);
+    } else {
+      this.loadingMessage = Constants.CONNECTING;
+    }
+  }
+
+  public ConnectServerScreen(final DaiKombatGame game,
+      final ConnectGameData connectGameData) {
+    this(game, connectGameData, 0);
   }
 
   @Override
@@ -50,9 +65,9 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
       try {
         var creds = GameServerCreds.builder()
             .hostPort(HostPort.builder()
-                .host(joinGameData.getServerHost())
-                .port(joinGameData.getServerPort()).build())
-            .password(joinGameData.getServerPassword())
+                .host(connectGameData.getServerHost())
+                .port(connectGameData.getServerPort()).build())
+            .password(connectGameData.getServerPassword())
             .build();
         var connection = new GameConnection(creds);
         LoadBalancedGameConnection loadBalancedGameConnection
@@ -89,19 +104,18 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
   @Override
   protected void onLoadingRender(final float delta) {
     if (errorMessage.get() != null) {
-      removeAllEntities();
-      LOG.error("Got error '{}'", errorMessage.get());
-      Optional.ofNullable(gameConnectionRef.get())
-          .ifPresent(LoadBalancedGameConnection::disconnect);
-      getGame().setScreen(new ErrorScreen(getGame(), errorMessage.get()));
+      reconnectOnError(errorMessage.get(), connectionTrial, gameConnectionRef.get(),
+          connectGameData);
       return;
     }
     Optional.ofNullable(gameConnectionRef.get()).ifPresent(
         connection -> {
           connection.pollPrimaryConnectionResponse().ifPresent(response -> {
             if (response.hasErrorEvent()) {
-
               errorMessage.set(response.getErrorEvent().getMessage());
+            } else if (response.hasGameOver()) {
+              LOG.info("Game is over. Try to reconnect");
+              reconnectOnError("Game over", connectionTrial, connection, connectGameData);
             } else if (response.hasServerInfo()) {
               var serverInfo = response.getServerInfo();
               playerContextDataBuilder.movesUpdateFreqMls(serverInfo.getMovesUpdateFreqMls());
@@ -111,7 +125,7 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
               removeAllEntities();
               LOG.info("Got server info. Try join the game");
               getGame().setScreen(new JoinGameScreen(getGame(),
-                  playerContextDataBuilder, joinGameData, connection));
+                  playerContextDataBuilder, connectGameData, connection, connectionTrial));
             }
           });
           connection.pollErrors().stream().findFirst().ifPresent(throwable -> {
@@ -121,6 +135,7 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
           });
         });
   }
+
 
   private Map<Weapon, WeaponStats> getWeaponStats(List<WeaponInfo> weaponInfo) {
     Map<Weapon, WeaponStats> weaponStats = new HashMap<>();
@@ -139,6 +154,11 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
   @Override
   protected void onTimeout() {
     Optional.ofNullable(gameConnectionRef.get()).ifPresent(LoadBalancedGameConnection::disconnect);
+  }
+
+  @Override
+  protected String getBaseLoadingMessage() {
+    return loadingMessage;
   }
 
 }

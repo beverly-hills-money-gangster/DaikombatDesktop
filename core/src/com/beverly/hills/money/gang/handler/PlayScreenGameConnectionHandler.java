@@ -161,7 +161,11 @@ public class PlayScreenGameConnectionHandler {
     playScreen.getUiLeaderBoard().addNewPlayer(UILeaderBoard.LeaderBoardPlayer.builder()
         .name(enemyPlayer.getName())
         .id(enemyPlayer.getEnemyPlayerId())
-        .kills(0)
+        .deaths(
+            gameEvent.getPlayer().hasGameMatchStats() ? gameEvent.getPlayer().getGameMatchStats()
+                .getDeaths() : 0)
+        .kills(gameEvent.getPlayer().hasGameMatchStats() ? gameEvent.getPlayer().getGameMatchStats()
+            .getKills() : 0)
         .build());
     if (initialRequestHandled) {
       playScreen.getGame().getAssMan()

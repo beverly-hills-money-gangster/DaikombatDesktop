@@ -10,7 +10,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.input.TextInputProcessor;
-import com.beverly.hills.money.gang.screens.data.JoinGameData;
+import com.beverly.hills.money.gang.screens.data.ConnectGameData;
 import org.apache.commons.lang3.StringUtils;
 
 public class EnterServerPasswordScreen extends AbstractMainMenuScreen {
@@ -22,10 +22,10 @@ public class EnterServerPasswordScreen extends AbstractMainMenuScreen {
   private final UserSettingSound boomSound2;
   private final TextInputProcessor passwordTextInputProcessor;
 
-  private final JoinGameData.JoinGameDataBuilder joinGameDataBuilder;
+  private final ConnectGameData.ConnectGameDataBuilder joinGameDataBuilder;
 
   public EnterServerPasswordScreen(final DaiKombatGame game,
-      final JoinGameData.JoinGameDataBuilder joinGameDataBuilder) {
+      final ConnectGameData.ConnectGameDataBuilder joinGameDataBuilder) {
     super(game);
     this.joinGameDataBuilder = joinGameDataBuilder;
     guiFont64 = getGame().getAssMan().getFont(FontRegistry.FONT_64);
@@ -44,7 +44,7 @@ public class EnterServerPasswordScreen extends AbstractMainMenuScreen {
       boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
       joinGameDataBuilder.serverPassword(passwordTextInputProcessor.getText());
       getGame().setScreen(
-          new GetServerInfoScreen(getGame(), joinGameDataBuilder.build()));
+          new ConnectServerScreen(getGame(), joinGameDataBuilder.build()));
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));

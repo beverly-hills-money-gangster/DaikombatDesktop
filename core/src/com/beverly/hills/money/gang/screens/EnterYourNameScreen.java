@@ -10,7 +10,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.input.TextInputProcessor;
-import com.beverly.hills.money.gang.screens.data.JoinGameData;
+import com.beverly.hills.money.gang.screens.data.ConnectGameData;
 import org.apache.commons.lang3.StringUtils;
 
 public class EnterYourNameScreen extends AbstractMainMenuScreen {
@@ -22,10 +22,10 @@ public class EnterYourNameScreen extends AbstractMainMenuScreen {
   private final UserSettingSound boomSound2;
   private final TextInputProcessor nameTextInputProcessor;
 
-  private final JoinGameData.JoinGameDataBuilder joinGameDataBuilder;
+  private final ConnectGameData.ConnectGameDataBuilder joinGameDataBuilder;
 
   public EnterYourNameScreen(final DaiKombatGame game,
-      final JoinGameData.JoinGameDataBuilder joinGameDataBuilder) {
+      final ConnectGameData.ConnectGameDataBuilder joinGameDataBuilder) {
     super(game);
     this.joinGameDataBuilder = joinGameDataBuilder;
     guiFont64 = getGame().getAssMan().getFont(FontRegistry.FONT_64);

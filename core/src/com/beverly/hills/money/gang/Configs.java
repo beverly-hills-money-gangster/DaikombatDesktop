@@ -19,4 +19,7 @@ public interface Configs {
   int SECONDARY_CONNECTIONS_TO_OPEN = NumberUtils.toInt(
       System.getenv("DESKTOP_SECONDARY_CONNECTIONS_TO_OPEN"), 3);
 
+  int MAX_RECONNECTIONS = NumberUtils.toInt(
+      System.getenv("DESKTOP_MAX_RECONNECTIONS"), 5);
+
 }

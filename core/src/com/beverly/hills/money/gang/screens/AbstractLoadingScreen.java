@@ -73,7 +73,11 @@ public abstract class AbstractLoadingScreen extends AbstractMainMenuScreen {
         loadingDots += ".";
       }
     }
-    return Constants.CONNECTING + loadingDots;
+    return getBaseLoadingMessage() + loadingDots;
+  }
+
+  protected String getBaseLoadingMessage() {
+    return Constants.CONNECTING;
   }
 
 }
