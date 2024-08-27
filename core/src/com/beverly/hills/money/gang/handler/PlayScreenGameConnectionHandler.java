@@ -23,6 +23,7 @@ import com.beverly.hills.money.gang.registry.EnemiesRegistry;
 import com.beverly.hills.money.gang.screens.PlayScreen;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponMapper;
 import com.beverly.hills.money.gang.utils.Converter;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -43,6 +44,11 @@ public class PlayScreenGameConnectionHandler {
       LOG.info("Stop handling");
       return;
     }
+
+    playScreen.getUiLeaderBoard().setPing(
+        playScreen.getPlayerConnectionContextData().getPlayerId(),
+        Optional.ofNullable(playScreen.getGameConnection()
+            .getPrimaryNetworkStats().getPingMls()).orElse(0));
 
     playScreen.getGameConnection().pollResponses().forEach(serverResponse -> {
       if (serverResponse.hasChatEvents()) {
@@ -122,6 +128,7 @@ public class PlayScreenGameConnectionHandler {
         .map(leaderBoardItem -> UILeaderBoard.LeaderBoardPlayer.builder()
             .name(leaderBoardItem.getPlayerName())
             .id(leaderBoardItem.getPlayerId())
+            .ping(leaderBoardItem.getPingMls())
             .deaths(leaderBoardItem.getDeaths())
             .kills(leaderBoardItem.getKills())
             .build())
@@ -134,11 +141,10 @@ public class PlayScreenGameConnectionHandler {
       LOG.warn("This is my own spawn");
       return;
     } else if (enemiesRegistry.exists(gameEvent.getPlayer().getPlayerId())) {
-      // this might happen when players spawn at the same time
       LOG.info("Player already spawned {}", gameEvent);
       return;
     }
-    LOG.info("Spawn player {}", gameEvent.getPlayer().getPlayerName());
+    LOG.info("Spawn player {}", gameEvent.getPlayer());
     EnemyPlayer enemyPlayer = new EnemyPlayer(playScreen.getPlayer(),
         gameEvent.getPlayer().getPlayerId(),
         new Vector3(gameEvent.getPlayer().getPosition().getX(),
@@ -156,6 +162,7 @@ public class PlayScreenGameConnectionHandler {
 
     playScreen.getUiLeaderBoard().addNewPlayer(UILeaderBoard.LeaderBoardPlayer.builder()
         .name(enemyPlayer.getName())
+        .ping(gameEvent.getPlayer().getPingMls())
         .id(enemyPlayer.getEnemyPlayerId())
         .deaths(
             gameEvent.getPlayer().hasGameMatchStats() ? gameEvent.getPlayer().getGameMatchStats()
@@ -219,6 +226,8 @@ public class PlayScreenGameConnectionHandler {
         .ifPresent(enemyPlayer -> {
           gameEvent.getPlayer().getActivePowerUpsList().forEach(gamePowerUp
               -> activateEnemyPowerUp(enemyPlayer, gamePowerUp));
+          playScreen.getUiLeaderBoard()
+              .setPing(gameEvent.getPlayer().getPlayerId(), gameEvent.getPlayer().getPingMls());
           enemyPlayer.queueAction(EnemyPlayerAction.builder()
               .eventSequenceId(gameEvent.getSequence())
               .enemyPlayerActionType(EnemyPlayerActionType.MOVE)

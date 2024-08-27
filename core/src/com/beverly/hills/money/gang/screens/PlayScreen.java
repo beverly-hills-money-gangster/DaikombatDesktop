@@ -181,6 +181,7 @@ public class PlayScreen extends GameScreen {
                 .name(leaderBoardItem.getPlayerName())
                 .id(leaderBoardItem.getPlayerId())
                 .deaths(leaderBoardItem.getDeaths())
+                .ping(leaderBoardItem.getPingMls())
                 .kills(leaderBoardItem.getKills())
                 .build())
             .collect(Collectors.toList()),
@@ -575,7 +576,7 @@ public class PlayScreen extends GameScreen {
     gameTechStats.append(playersOnline).append(" ONLINE ");
     gameTechStats.append("| PING ")
         .append(Objects.toString(gameConnection.getPrimaryNetworkStats().getPingMls(), "-"))
-        .append(" MLS | ");
+        .append(" MS | ");
     gameTechStats.append(Gdx.graphics.getFramesPerSecond()).append(" FPS");
 
     var gameTechStatsGlyph = new GlyphLayout(guiFont64, gameTechStats);

@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 
@@ -28,9 +29,7 @@ public class UILeaderBoard {
   private int lastFragsLeft;
 
   private static final PlayerComparator COMPARATOR = new PlayerComparator();
-  private String cachedToString = "";
 
-  private boolean needRefresh;
 
   private final int fragsToWin;
 
@@ -51,7 +50,6 @@ public class UILeaderBoard {
     this.onFragsLeft = onFragsLeft;
     this.fragsToWin = fragsToWin;
     setMyStats();
-    needRefresh = true;
     getTopPlayer().ifPresent(topPlayer -> lastFragsLeft = fragsToWin - topPlayer.kills);
   }
 
@@ -60,7 +58,6 @@ public class UILeaderBoard {
     this.leaderBoardItems.addAll(leaderBoardItems);
     this.leaderBoardItems.sort(COMPARATOR);
     setMyStats();
-    needRefresh = true;
   }
 
   public String getFirstPlaceStats() {
@@ -118,6 +115,9 @@ public class UILeaderBoard {
     return deaths + " DEATHS";
   }
 
+  private String getPingMessage(int pingMls) {
+    return (pingMls > 0 ? String.valueOf(pingMls) : "-") + " MS PING";
+  }
 
   private void setMyStats() {
     for (int i = 0; i < leaderBoardItems.size(); i++) {
@@ -135,7 +135,16 @@ public class UILeaderBoard {
   public void removePlayer(int playerId) {
     leaderBoardItems.removeIf(leaderBoardPlayer -> leaderBoardPlayer.getId() == playerId);
     setMyStats();
-    needRefresh = true;
+  }
+
+  public void setPing(int playerId, int pingMls) {
+    if (pingMls <= 0) {
+      return;
+    }
+    leaderBoardItems.stream()
+        .filter(leaderBoardPlayer -> leaderBoardPlayer.getId() == playerId)
+        .findFirst()
+        .ifPresent(leaderBoardPlayer -> leaderBoardPlayer.setPing(pingMls));
   }
 
   public void registerKill(int killerPlayerId, int victimPlayerId) {
@@ -143,26 +152,12 @@ public class UILeaderBoard {
     leaderBoardItems.stream()
         .filter(leaderBoardPlayer -> leaderBoardPlayer.getId() == killerPlayerId)
         .findFirst()
-        .ifPresent(leaderBoardPlayer -> {
-          removePlayer(leaderBoardPlayer.id);
-          addNewPlayer(LeaderBoardPlayer.builder()
-              .id(leaderBoardPlayer.id)
-              .deaths(leaderBoardPlayer.deaths)
-              .kills(leaderBoardPlayer.kills + 1)
-              .name(leaderBoardPlayer.name).build());
-        });
+        .ifPresent(leaderBoardPlayer -> leaderBoardPlayer.setKills(leaderBoardPlayer.kills + 1));
 
     leaderBoardItems.stream()
         .filter(leaderBoardPlayer -> leaderBoardPlayer.getId() == victimPlayerId)
         .findFirst()
-        .ifPresent(leaderBoardPlayer -> {
-          removePlayer(leaderBoardPlayer.id);
-          addNewPlayer(LeaderBoardPlayer.builder()
-              .id(leaderBoardPlayer.id)
-              .kills(leaderBoardPlayer.kills)
-              .deaths(leaderBoardPlayer.deaths + 1)
-              .name(leaderBoardPlayer.name).build());
-        });
+        .ifPresent(leaderBoardPlayer -> leaderBoardPlayer.setDeaths(leaderBoardPlayer.deaths + 1));
     getTopPlayer().ifPresent(
         topPlayer -> {
           var fragsLeft = fragsToWin - topPlayer.kills;
@@ -172,7 +167,6 @@ public class UILeaderBoard {
           lastFragsLeft = fragsLeft;
         });
 
-    needRefresh = true;
     if (myPlace == 1 && myKills > 0 && myOldPlace > myPlace) {
       onTakenTheLead.run();
     } else if (myOldPlace == 1 && myKills > 0 && myPlace != 1) {
@@ -193,17 +187,11 @@ public class UILeaderBoard {
     leaderBoardItems.add(newLeaderBoardPlayer);
     leaderBoardItems.sort(COMPARATOR);
     setMyStats();
-    needRefresh = true;
   }
 
   @Override
   public String toString() {
-    if (!needRefresh) {
-      return cachedToString;
-    }
-    cachedToString = constructToString(leaderBoardItems);
-    needRefresh = false;
-    return cachedToString;
+    return constructToString(leaderBoardItems);
   }
 
   private String constructToString(List<LeaderBoardPlayer> leaderBoard) {
@@ -212,8 +200,9 @@ public class UILeaderBoard {
     for (LeaderBoardPlayer item : leaderBoard) {
       sb.append("# ")
           .append(StringUtils.rightPad(String.valueOf(place), 5, " "))
-          .append(StringUtils.rightPad(getKillsMessage(item.getKills()), 14, " "))
-          .append(StringUtils.rightPad(getDeathsMessage(item.getDeaths()), 14, " "))
+          .append(StringUtils.rightPad(getKillsMessage(item.getKills()), 10, " "))
+          .append(StringUtils.rightPad(getDeathsMessage(item.getDeaths()), 10, " "))
+          .append(StringUtils.rightPad(getPingMessage(item.ping), 13, " "))
           .append(item.getName());
       if (item.id == myPlayerId) {
         sb.append("  < YOU");
@@ -227,13 +216,15 @@ public class UILeaderBoard {
 
   @Builder
   @Getter
+  @Setter
   @ToString
   public static class LeaderBoardPlayer {
 
-    private final String name;
-    private final int id;
-    private final int kills;
-    private final int deaths;
+    private String name;
+    private int id;
+    private int kills;
+    private int deaths;
+    private int ping;
   }
 
   private static class PlayerComparator implements Comparator<LeaderBoardPlayer> {
