@@ -12,8 +12,9 @@ import com.beverly.hills.money.gang.screens.data.ConnectGameData;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.utils.Converter;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,29 +23,28 @@ import org.slf4j.LoggerFactory;
 public class JoinGameScreen extends ReconnectableScreen {
 
   private static final Logger LOG = LoggerFactory.getLogger(JoinGameScreen.class);
-  private String errorMessage;
   private final LoadBalancedGameConnection gameConnection;
   private final PlayerConnectionContextData.PlayerConnectionContextDataBuilder playerContextDataBuilder;
   private final ConnectGameData connectGameData;
 
-  private final int connectionTrial;
+  private final AtomicReference<String> errorMessage = new AtomicReference<>();
 
   public JoinGameScreen(final DaiKombatGame game,
       final PlayerConnectionContextData.PlayerConnectionContextDataBuilder playerContextDataBuilder,
       final ConnectGameData connectGameData,
       final LoadBalancedGameConnection gameConnection,
       final int connectionTrial) {
-    super(game);
+    super(game, connectionTrial);
     this.gameConnection = gameConnection;
     this.connectGameData = connectGameData;
     this.playerContextDataBuilder = playerContextDataBuilder;
-    this.connectionTrial = connectionTrial;
   }
+
 
   @Override
   public void show() {
     if (gameConnection.isAnyDisconnected()) {
-      errorMessage = "Connection lost";
+      errorMessage.set("Connection lost");
       return;
     }
     var joinGameRequestBuilder = JoinGameCommand.newBuilder()
@@ -78,22 +78,18 @@ public class JoinGameScreen extends ReconnectableScreen {
 
 
   @Override
-  protected void onLoadingRender(final float delta) {
-    if (!isTimeToConnect(connectionTrial)) {
-      return;
-    }
-    if (errorMessage != null || gameConnection.isAnyDisconnected()) {
-      reconnectOnError(Objects.toString(errorMessage, "can't connect"),
-          connectionTrial, gameConnection, connectGameData);
+  protected void onLoadingRenderInternal(final float delta) {
+    if (StringUtils.isNotBlank(errorMessage.get())) {
+      reconnect(errorMessage.get(), gameConnection, connectGameData);
       return;
     }
     gameConnection.pollPrimaryConnectionResponse().ifPresent(response -> {
       if (response.hasErrorEvent()) {
         LOG.error("Error {}", errorMessage);
-        errorMessage = response.getErrorEvent().getMessage();
+        errorMessage.set(response.getErrorEvent().getMessage());
       } else if (response.hasGameOver()) {
         LOG.info("Game is over. Try to reconnect");
-        reconnectOnError("Game over", connectionTrial, gameConnection, connectGameData);
+        errorMessage.set("Can't connect. Game is over.");
       } else if (response.hasGameEvents()) {
         removeAllEntities();
         stopBgMusic();
@@ -106,7 +102,7 @@ public class JoinGameScreen extends ReconnectableScreen {
     gameConnection.pollErrors().stream().findAny().ifPresent(throwable -> {
       LOG.error("Error while loading", throwable);
       gameConnection.disconnect();
-      errorMessage = ExceptionUtils.getMessage(throwable);
+      errorMessage.set(ExceptionUtils.getMessage(throwable));
     });
   }
 

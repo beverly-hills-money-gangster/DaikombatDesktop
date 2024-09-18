@@ -15,7 +15,6 @@ public class ConnectGameData {
 
   private String serverHost;
   private int serverPort;
-  private String serverPassword;
   private String playerName;
   @Nullable
   private Integer playerIdToRecover;
