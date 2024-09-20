@@ -15,6 +15,7 @@ import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerActionType;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
 import com.beverly.hills.money.gang.proto.ServerResponse;
+import com.beverly.hills.money.gang.proto.ServerResponse.GameEvent.GameEventType;
 import com.beverly.hills.money.gang.proto.ServerResponse.GameEvent.WeaponType;
 import com.beverly.hills.money.gang.proto.ServerResponse.GamePowerUp;
 import com.beverly.hills.money.gang.proto.ServerResponse.GamePowerUpType;
@@ -34,8 +35,6 @@ public class PlayScreenGameConnectionHandler {
   private static final Logger LOG = LoggerFactory.getLogger(PlayScreenGameConnectionHandler.class);
 
   private final PlayScreen playScreen;
-
-  private boolean initialRequestHandled;
 
   private final EnemiesRegistry enemiesRegistry = new EnemiesRegistry();
 
@@ -61,9 +60,6 @@ public class PlayScreenGameConnectionHandler {
       }
     });
     playScreen.getGameConnection().pollErrors().forEach(this::handleException);
-    if (!initialRequestHandled) {
-      initialRequestHandled = true;
-    }
   }
 
   private void handleChat(ServerResponse.ChatEvent chatEvent) {
@@ -76,7 +72,7 @@ public class PlayScreenGameConnectionHandler {
     }
     gameEvents.getEventsList().forEach(gameEvent -> {
       switch (gameEvent.getEventType()) {
-        case SPAWN -> handleSpawn(gameEvent);
+        case SPAWN, JOIN, RESPAWN -> handleSpawn(gameEvent);
         case EXIT -> handleExit(gameEvent);
         case KILL -> handleDeath(gameEvent);
         case MOVE -> handleMove(gameEvent);
@@ -167,7 +163,13 @@ public class PlayScreenGameConnectionHandler {
         .kills(gameEvent.getPlayer().hasGameMatchStats() ? gameEvent.getPlayer().getGameMatchStats()
             .getKills() : 0)
         .build());
-    if (initialRequestHandled) {
+
+    if (gameEvent.getEventType() == GameEventType.JOIN) {
+      playScreen.getChatLog()
+          .addMessage("game log", gameEvent.getPlayer().getPlayerName() + " has joined the game");
+    }
+    if (gameEvent.getEventType() == GameEventType.JOIN
+        || gameEvent.getEventType() == GameEventType.RESPAWN) {
       playScreen.getGame().getAssMan()
           .getUserSettingSound(SoundRegistry.SPAWN_SOUND_SEQ.getNextSound())
           .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());

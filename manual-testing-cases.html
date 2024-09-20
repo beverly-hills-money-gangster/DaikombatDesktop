@@ -17,6 +17,10 @@
   tr:hover {
     background-color: #f5f5f5;
   }
+
+
+
+
   </style>
 </head>
 <body>
@@ -86,6 +90,13 @@
   </tr>
   <tr>
     <td>Play screen</td>
+    <td>Player 1 joins the game. After some time, player 2 joins too. Player 1 sees player 2 in the
+      game. Player 1 also hears the "spawn" sound + game log "player 2 has joined the game".
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
     <td>1 player joins a game. If the server is restarted, then the player successfully
       reconnects to the game.
     </td>
@@ -95,9 +106,8 @@
     <td>Play screen</td>
     <td>3 players join the game: killer, victim and observer. killer kills victim twice. Then all
       players turn wifi connection off and on. after re-establishing the connection, all players
-      should
-      successfully reconnect and recover game stats: kills, deaths, and leaderboards. All stats
-      should be consistent across all players.
+      should successfully reconnect and recover game stats: kills, deaths, and leaderboards. All
+      stats should be consistent across all players.
     </td>
     <td><input type="checkbox"></td>
   </tr>
@@ -279,8 +289,8 @@
   <tr>
     <td>Play screen</td>
     <td>2 players join the game. Player 1 kills player 2 twenty times in a row. Player 2 respawns
-      successfully.
-      Player 2 stats(deaths and kills) are persisted.
+      successfully. Player 2 stats(deaths and kills) are persisted. No game log "player 2 has joined
+      the game" is published.
     </td>
     <td><input type="checkbox"></td>
   </tr>

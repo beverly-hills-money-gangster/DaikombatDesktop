@@ -11,7 +11,7 @@ public class ChatLog {
 
   private final Runnable onNewMessage;
   static final int MAX_MSG_TO_PRINT = 5;
-  static final int MAX_MSG_DURATION_MLS = 5_000;
+  static final int MAX_MSG_DURATION_MLS = 7_500;
   private final Queue<String> chatMessageQueue = new ArrayDeque<>();
   private long expireTime;
 
