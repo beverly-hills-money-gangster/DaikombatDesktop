@@ -40,7 +40,6 @@ import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.screens.ui.selection.ActivePlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.DeadPlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
-import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -384,7 +383,7 @@ public class PlayScreen extends GameScreen {
           .setGameId(Configs.GAME_ID)
           .build());
       chatLog.addMessage(
-          playerConnectionContextData.getJoinGameData().getPlayerName(),
+          playerConnectionContextData.getConnectGameData().getPlayerName(),
           chatTextInputProcessor.getText());
       chatTextInputProcessor.clear();
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
@@ -540,11 +539,13 @@ public class PlayScreen extends GameScreen {
     }
     if (gameOver) {
       screenToTransition = new GameOverScreen(getGame(), uiLeaderBoard,
-          playerConnectionContextData.getJoinGameData());
+          playerConnectionContextData.getConnectGameData());
     } else if (gameConnection.isAnyDisconnected()) {
       gameConnection.pollErrors().forEach(playScreenGameConnectionHandler::handleException);
-      screenToTransition = new ErrorScreen(getGame(),
-          StringUtils.defaultIfBlank(errorMessage, "Connection lost"));
+      playerConnectionContextData.getConnectGameData()
+          .setPlayerIdToRecover(playerConnectionContextData.getPlayerId());
+      screenToTransition = new ConnectServerScreen(getGame(),
+          playerConnectionContextData.getConnectGameData());
     } else {
       try {
         playScreenGameConnectionHandler.handle();

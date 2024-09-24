@@ -2,15 +2,13 @@ package com.beverly.hills.money.gang.screens;
 
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
-import com.beverly.hills.money.gang.entity.GameServerCreds;
 import com.beverly.hills.money.gang.entity.HostPort;
 import com.beverly.hills.money.gang.network.GameConnection;
 import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
 import com.beverly.hills.money.gang.network.SecondaryGameConnection;
 import com.beverly.hills.money.gang.proto.GetServerInfoCommand;
-import com.beverly.hills.money.gang.proto.ServerResponse.GameEvent;
 import com.beverly.hills.money.gang.proto.ServerResponse.WeaponInfo;
-import com.beverly.hills.money.gang.screens.data.JoinGameData;
+import com.beverly.hills.money.gang.screens.data.ConnectGameData;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponMapper;
@@ -22,42 +20,47 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GetServerInfoScreen extends AbstractLoadingScreen {
+public class ConnectServerScreen extends ReconnectableScreen {
 
-  private static final Logger LOG = LoggerFactory.getLogger(GetServerInfoScreen.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ConnectServerScreen.class);
+  private final ConnectGameData connectGameData;
+
   private final AtomicReference<String> errorMessage = new AtomicReference<>();
-  private final JoinGameData joinGameData;
 
   private final AtomicReference<LoadBalancedGameConnection> gameConnectionRef = new AtomicReference<>();
 
   private final PlayerConnectionContextData.PlayerConnectionContextDataBuilder playerContextDataBuilder;
 
-
-  public GetServerInfoScreen(final DaiKombatGame game,
-      final JoinGameData joinGameData) {
-    super(game);
-    this.joinGameData = joinGameData;
+  public ConnectServerScreen(final DaiKombatGame game,
+      final ConnectGameData connectGameData,
+      final int connectionTrial) {
+    super(game, connectionTrial);
+    this.connectGameData = connectGameData;
     this.playerContextDataBuilder = PlayerConnectionContextData.builder();
+
+  }
+
+  public ConnectServerScreen(final DaiKombatGame game,
+      final ConnectGameData connectGameData) {
+    this(game, connectGameData, 0);
   }
 
   @Override
   public void show() {
     new Thread(() -> {
       try {
-        var creds = GameServerCreds.builder()
-            .hostPort(HostPort.builder()
-                .host(joinGameData.getServerHost())
-                .port(joinGameData.getServerPort()).build())
-            .password(joinGameData.getServerPassword())
-            .build();
-        var connection = new GameConnection(creds);
+        var hostPort = HostPort.builder()
+            .host(connectGameData.getServerHost())
+            .port(connectGameData.getServerPort()).build();
+        var connection = new GameConnection(hostPort);
         LoadBalancedGameConnection loadBalancedGameConnection
             = new LoadBalancedGameConnection(
-            connection, createSecondaryConnections(creds));
+            connection, createSecondaryConnections(hostPort));
         if (!loadBalancedGameConnection.waitUntilAllConnected(5_000)) {
           errorMessage.set("Connection timeout");
           loadBalancedGameConnection.disconnect();
@@ -72,11 +75,11 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
     }).start();
   }
 
-  private List<SecondaryGameConnection> createSecondaryConnections(GameServerCreds creds)
+  private List<SecondaryGameConnection> createSecondaryConnections(HostPort hostPort)
       throws IOException {
     List<SecondaryGameConnection> secondaryGameConnections = new ArrayList<>();
     for (int i = 0; i < com.beverly.hills.money.gang.Configs.SECONDARY_CONNECTIONS_TO_OPEN; i++) {
-      secondaryGameConnections.add(new SecondaryGameConnection(creds));
+      secondaryGameConnections.add(new SecondaryGameConnection(hostPort));
     }
     return secondaryGameConnections;
   }
@@ -87,21 +90,19 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
   }
 
   @Override
-  protected void onLoadingRender(final float delta) {
-    if (errorMessage.get() != null) {
-      removeAllEntities();
-      LOG.error("Got error '{}'", errorMessage.get());
-      Optional.ofNullable(gameConnectionRef.get())
-          .ifPresent(LoadBalancedGameConnection::disconnect);
-      getGame().setScreen(new ErrorScreen(getGame(), errorMessage.get()));
+  protected void onLoadingRenderInternal(final float delta) {
+    if (StringUtils.isNotBlank(errorMessage.get())) {
+      reconnect(errorMessage.get(), gameConnectionRef.get(), connectGameData);
       return;
     }
     Optional.ofNullable(gameConnectionRef.get()).ifPresent(
         connection -> {
           connection.pollPrimaryConnectionResponse().ifPresent(response -> {
             if (response.hasErrorEvent()) {
-
               errorMessage.set(response.getErrorEvent().getMessage());
+            } else if (response.hasGameOver()) {
+              LOG.info("Game is over. Try to reconnect");
+              errorMessage.set("Can't connect. Game is over.");
             } else if (response.hasServerInfo()) {
               var serverInfo = response.getServerInfo();
               playerContextDataBuilder.movesUpdateFreqMls(serverInfo.getMovesUpdateFreqMls());
@@ -111,7 +112,7 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
               removeAllEntities();
               LOG.info("Got server info. Try join the game");
               getGame().setScreen(new JoinGameScreen(getGame(),
-                  playerContextDataBuilder, joinGameData, connection));
+                  playerContextDataBuilder, connectGameData, connection, connectionTrial));
             }
           });
           connection.pollErrors().stream().findFirst().ifPresent(throwable -> {
@@ -121,6 +122,7 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
           });
         });
   }
+
 
   private Map<Weapon, WeaponStats> getWeaponStats(List<WeaponInfo> weaponInfo) {
     Map<Weapon, WeaponStats> weaponStats = new HashMap<>();
@@ -140,5 +142,6 @@ public class GetServerInfoScreen extends AbstractLoadingScreen {
   protected void onTimeout() {
     Optional.ofNullable(gameConnectionRef.get()).ifPresent(LoadBalancedGameConnection::disconnect);
   }
+
 
 }

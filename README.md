@@ -66,6 +66,7 @@ Desktop can be configured using the following environment variables:
 - `DESKTOP_FLUSH_ACTIONS_FREQ_MLS` Frequency(in milliseconds) at which desktop sends "MOVE" events to server. Default - `50`.
 - `DESKTOP_DEV_MODE` Dev mode. Default - `false`
 - `DESKTOP_SECONDARY_CONNECTIONS_TO_OPEN` Number of secondary TCP connections to create. Default - `3`
+- `DESKTOP_MAX_RECONNECTIONS` Maximum connection retries. Default - `5`
 
 ## Development
 

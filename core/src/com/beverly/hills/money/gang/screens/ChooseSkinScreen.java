@@ -10,7 +10,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.enemies.EnemyTextures;
-import com.beverly.hills.money.gang.screens.data.JoinGameData;
+import com.beverly.hills.money.gang.screens.data.ConnectGameData;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 
@@ -28,10 +28,10 @@ public class ChooseSkinScreen extends AbstractMainMenuScreen {
   private final UISelection<SkinUISelection> skinSelection = new UISelection<>(
       SkinUISelection.values());
 
-  private final JoinGameData.JoinGameDataBuilder joinGameDataBuilder;
+  private final ConnectGameData.ConnectGameDataBuilder joinGameDataBuilder;
 
   public ChooseSkinScreen(final DaiKombatGame game,
-      final JoinGameData.JoinGameDataBuilder joinGameDataBuilder) {
+      final ConnectGameData.ConnectGameDataBuilder joinGameDataBuilder) {
     super(game);
     guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
     this.joinGameDataBuilder = joinGameDataBuilder;
@@ -49,7 +49,7 @@ public class ChooseSkinScreen extends AbstractMainMenuScreen {
       boomSound1.play(Constants.DEFAULT_SFX_VOLUME);
       joinGameDataBuilder.skinUISelection(skinSelection.getSelectedOption());
       removeAllEntities();
-      getGame().setScreen(new EnterServerPasswordScreen(getGame(), joinGameDataBuilder));
+      getGame().setScreen(new ConnectServerScreen(getGame(), joinGameDataBuilder.build()));
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));

@@ -13,7 +13,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
-import com.beverly.hills.money.gang.screens.data.JoinGameData;
+import com.beverly.hills.money.gang.screens.data.ConnectGameData;
 import com.beverly.hills.money.gang.screens.ui.selection.GameOverUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 
@@ -28,14 +28,14 @@ public class GameOverScreen extends AbstractMainMenuScreen {
   private final UILeaderBoard uiLeaderBoard;
   private boolean showLeaderBoard;
   private final String leaderMessage;
-  private final JoinGameData joinGameData;
+  private final ConnectGameData connectGameData;
   private final UISelection<GameOverUISelection> menuSelection = new UISelection<>(
       GameOverUISelection.values());
 
 
   public GameOverScreen(final DaiKombatGame game,
       final UILeaderBoard uiLeaderBoard,
-      final JoinGameData joinGameData) {
+      final ConnectGameData connectGameData) {
 
     super(game);
     guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
@@ -43,7 +43,7 @@ public class GameOverScreen extends AbstractMainMenuScreen {
     boomSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.BOOM_1);
     dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
     youWinMusic = game.getAssMan().getUserSettingSound(SoundRegistry.WIN_MUSIC);
-    this.joinGameData = joinGameData;
+    this.connectGameData = connectGameData;
     this.uiLeaderBoard = uiLeaderBoard;
     leaderMessage = "WINNER IS " + uiLeaderBoard.getFirstPlaceStats();
     glyphLayoutWinner = new GlyphLayout(guiFont64, leaderMessage);
@@ -61,7 +61,7 @@ public class GameOverScreen extends AbstractMainMenuScreen {
       switch (menuSelection.getSelectedOption()) {
         case PLAY -> {
           removeAllEntities();
-          getGame().setScreen(new GetServerInfoScreen(getGame(), joinGameData));
+          getGame().setScreen(new ConnectServerScreen(getGame(), connectGameData));
         }
         case QUIT -> {
           removeAllEntities();

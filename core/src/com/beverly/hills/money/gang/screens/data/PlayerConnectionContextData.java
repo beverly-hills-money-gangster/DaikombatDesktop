@@ -16,7 +16,7 @@ import lombok.ToString;
 @ToString
 public class PlayerConnectionContextData {
 
-  private final JoinGameData joinGameData;
+  private final ConnectGameData connectGameData;
   private final Vector2 spawn;
   private final Vector2 direction;
   @NonNull

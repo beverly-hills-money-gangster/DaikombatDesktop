@@ -18,6 +18,9 @@
     background-color: #f5f5f5;
   }
 
+
+
+
   </style>
 </head>
 <body>
@@ -42,22 +45,8 @@
     <td><input type="checkbox"></td>
   </tr>
   <tr>
-    <td>Enter password screen</td>
-    <td>If user enters an empty string then it doesn't transition to the next screen when "Enter" is
-      pressed.
-    </td>
-    <td><input type="checkbox"></td>
-  </tr>
-  <tr>
     <td>Loading screen</td>
     <td>If game server is down then it takes around 5 seconds before error pops up. The game doesn't
-      crash.
-    </td>
-    <td><input type="checkbox"></td>
-  </tr>
-  <tr>
-    <td>Loading screen</td>
-    <td>If game server is up but server pin is incorrect then an error pops up. The game doesn't
       crash.
     </td>
     <td><input type="checkbox"></td>
@@ -96,6 +85,36 @@
     <td>If player joins the game but the server goes offline mid-game, then an error pops up. Game
       doesn't crash.
       Can be tested by running 3-5 instances of the game at a time.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>Player 1 joins the game. After some time, player 2 joins too. Player 1 sees player 2 in the
+      game. Player 1 also hears the "spawn" sound + game log "player 2 has joined the game".
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>1 player joins a game. If the server is restarted, then the player successfully
+      reconnects to the game.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>3 players join the game: killer, victim and observer. killer kills victim twice. Then all
+      players turn wifi connection off and on. after re-establishing the connection, all players
+      should successfully reconnect and recover game stats: kills, deaths, and leaderboards. All
+      stats should be consistent across all players.
+    </td>
+    <td><input type="checkbox"></td>
+  </tr>
+  <tr>
+    <td>Play screen</td>
+    <td>A player joins the game and turns wifi connection off. After several reconnection attempts,
+      we should see an error screen saying that connection can't be established.
     </td>
     <td><input type="checkbox"></td>
   </tr>
@@ -270,8 +289,8 @@
   <tr>
     <td>Play screen</td>
     <td>2 players join the game. Player 1 kills player 2 twenty times in a row. Player 2 respawns
-      successfully.
-      Player 2 stats(deaths and kills) are persisted.
+      successfully. Player 2 stats(deaths and kills) are persisted. No game log "player 2 has joined
+      the game" is published.
     </td>
     <td><input type="checkbox"></td>
   </tr>

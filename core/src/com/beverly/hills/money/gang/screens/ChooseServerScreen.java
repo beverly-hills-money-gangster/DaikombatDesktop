@@ -9,7 +9,7 @@ import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
-import com.beverly.hills.money.gang.screens.data.JoinGameData;
+import com.beverly.hills.money.gang.screens.data.ConnectGameData;
 import com.beverly.hills.money.gang.screens.ui.selection.ServerUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 
@@ -39,7 +39,7 @@ public class ChooseServerScreen extends AbstractMainMenuScreen {
         case OFFICIAL -> {
           removeAllEntities();
           getGame().setScreen(new EnterYourNameScreen(getGame(),
-              JoinGameData.builder()
+              ConnectGameData.builder()
                   .serverHost(Configs.HOST)
                   .serverPort(Configs.PORT)));
         }
