@@ -33,7 +33,9 @@ public enum SoundRegistry {
   BOOM_1("sfx/ui/boom_1.mp3"),
   BOOM_2("sfx/ui/boom_2.mp3"),
   EXCELLENT("sfx/winning/excellent.wav"),
-  HOLY_SHIT("sfx/winning/holyshit.wav"),
+  HOLY_SHIT("sfx/winning/holy_shit.mp3"),
+  ACCURACY("sfx/winning/accuracy.mp3"),
+  TWO_FRAGS_TO_SEC("sfx/winning/two_frags_to_sec.mp3"),
   HUMILIATION("sfx/winning/humiliation.wav"),
   IMPRESSIVE("sfx/winning/impressive.wav"),
   YOU_WIN("sfx/winning/you_win.wav"),
@@ -52,6 +54,7 @@ public enum SoundRegistry {
   ENEMY_SHOTGUN("sfx/shotgun_mono.mp3"),
   QUAD_DAMAGE_ATTACK("sfx/quad_damage_attack.mp3"),
   GAUNTLET_HUMILIATION("sfx/gauntlet_humiliation.mp3"),
+  // TODO sounds like ass
   QUAD_DAMAGE_PICK("sfx/quad_damage_pick.mp3"),
   DEFENCE_PICK("sfx/defence_pick.mp3"),
   INVISIBILITY_PICK("sfx/invisibility_pick.mp3"),

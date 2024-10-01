@@ -8,6 +8,8 @@ import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.AttackingSound;
+import com.beverly.hills.money.gang.entities.achievement.AchievementFactory;
+import com.beverly.hills.money.gang.entities.achievement.KillStats;
 import com.beverly.hills.money.gang.entities.enemies.Enemy;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerAction;
@@ -38,6 +40,8 @@ public class PlayScreenGameConnectionHandler {
   private final PlayScreen playScreen;
 
   private final EnemiesRegistry enemiesRegistry = new EnemiesRegistry();
+
+  private final KillStats killStats = new KillStats();
 
   public void handle() {
     if (playScreen.isExiting()) {
@@ -390,16 +394,13 @@ public class PlayScreenGameConnectionHandler {
       int buff = newHealth - oldHealth;
       playScreen.getMyPlayerKillLog()
           .myPlayerKill(victimPlayerOpt.map(EnemyPlayer::getName).orElse("victim"), buff);
-      int kills = playScreen.getUiLeaderBoard().getMyKills();
-      if (gameEvent.getWeaponType() == WeaponType.PUNCH) {
-        playScreen.getNarratorSoundQueue().addSound(
-            playScreen.getGame().getAssMan()
-                .getUserSettingSound(SoundRegistry.GAUNTLET_HUMILIATION));
-      } else if (kills > 1 && kills % 5 == 0) {
-        playScreen.getNarratorSoundQueue().addSound(
-            playScreen.getGame().getAssMan()
-                .getUserSettingSound(SoundRegistry.WINNING_SOUND_SEQ.getNextSound()));
-      }
+      killStats.registerKill();
+      AchievementFactory.create(WeaponMapper.getWeapon(gameEvent.getWeaponType()), killStats)
+          .ifPresent(
+              achievement -> playScreen.getNarratorSoundQueue()
+                  .addSound(playScreen.getGame().getAssMan()
+                      .getUserSettingSound(achievement.getSound())));
+
     } else {
       enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
           .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
