@@ -223,6 +223,9 @@ public class PlayScreenGameConnectionHandler {
   private void handleMove(ServerResponse.GameEvent gameEvent) {
     if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
         .getPlayerId()) {
+      if (gameEvent.getPlayer().hasHealth()) {
+        playScreen.getPlayer().setHP(gameEvent.getPlayer().getHealth());
+      }
       gameEvent.getPlayer().getActivePowerUpsList().forEach(this::activatePlayerPowerUp);
       return;
     }
@@ -272,6 +275,7 @@ public class PlayScreenGameConnectionHandler {
       case INVISIBILITY -> PowerUpType.INVISIBILITY;
       case QUAD_DAMAGE -> PowerUpType.QUAD_DAMAGE;
       case DEFENCE -> PowerUpType.DEFENCE;
+      case HEALTH -> PowerUpType.HEALTH;
       default -> throw new IllegalArgumentException("Not supported power-up type " + powerUpType);
     };
   }
@@ -355,7 +359,7 @@ public class PlayScreenGameConnectionHandler {
 
   private void handleDeath(ServerResponse.GameEvent gameEvent) {
     EnemyPlayerActionType enemyPlayerActionType = EnemyPlayerActionType.ATTACK;
-
+    // TODO stats are not showing my kills in the bottom of the screen
     playScreen.getUiLeaderBoard().registerKill(gameEvent.getPlayer().getPlayerId(),
         gameEvent.getAffectedPlayer().getPlayerId());
     if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()

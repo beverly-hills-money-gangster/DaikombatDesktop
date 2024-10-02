@@ -153,11 +153,11 @@ public class UILeaderBoard {
         .filter(leaderBoardPlayer -> leaderBoardPlayer.getId() == killerPlayerId)
         .findFirst()
         .ifPresent(leaderBoardPlayer -> leaderBoardPlayer.setKills(leaderBoardPlayer.kills + 1));
-
     leaderBoardItems.stream()
         .filter(leaderBoardPlayer -> leaderBoardPlayer.getId() == victimPlayerId)
         .findFirst()
         .ifPresent(leaderBoardPlayer -> leaderBoardPlayer.setDeaths(leaderBoardPlayer.deaths + 1));
+    setMyStats();
     getTopPlayer().ifPresent(
         topPlayer -> {
           var fragsLeft = fragsToWin - topPlayer.kills;

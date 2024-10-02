@@ -22,8 +22,6 @@ import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
-// TODO reduce minigun volume
-// TODO increase quad damage volume
 public class ScreenWeapon {
 
   private final Map<Weapon, Long> animationStart = new HashMap<>();
@@ -79,7 +77,6 @@ public class ScreenWeapon {
         .weaponScreenPositioning(animationTime -> new Vector2(0, -35))
         .build());
 
-    // TODO "Gauntlet humiliation" sound when killed by gauntlet
     weaponStates.put(Weapon.GAUNTLET, WeaponState.builder()
         .distance(weaponStats.get(Weapon.GAUNTLET).getMaxDistance())
         .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PUNCH_THROWN))

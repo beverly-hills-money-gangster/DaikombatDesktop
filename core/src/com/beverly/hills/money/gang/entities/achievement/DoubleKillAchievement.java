@@ -3,7 +3,6 @@ package com.beverly.hills.money.gang.entities.achievement;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 
-// TODO use quake 3 only achievements
 public class DoubleKillAchievement extends Achievement {
 
   private static final int DOUBLE_KILL_WINDOW_MLS = 2_999;

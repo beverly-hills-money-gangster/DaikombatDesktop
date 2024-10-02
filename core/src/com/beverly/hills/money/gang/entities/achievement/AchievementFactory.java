@@ -4,8 +4,6 @@ import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import java.util.List;
 import java.util.Optional;
 
-// TODO add manual tests for all achievements
-// TODO normalize volume for all achievements
 public class AchievementFactory {
 
   private static final List<Achievement> achievementList = List.of(

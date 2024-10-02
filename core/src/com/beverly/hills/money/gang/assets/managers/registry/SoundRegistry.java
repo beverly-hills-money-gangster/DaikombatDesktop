@@ -57,13 +57,14 @@ public enum SoundRegistry {
   // TODO sounds like ass
   QUAD_DAMAGE_PICK("sfx/quad_damage_pick.mp3"),
   DEFENCE_PICK("sfx/defence_pick.mp3"),
+  REGENERATION_PICK("sfx/regeneration.mp3"),
+  ENEMY_REGENERATION_PICK("sfx/enemy_regeneration.mp3"),
   INVISIBILITY_PICK("sfx/invisibility_pick.mp3"),
   ENEMY_QUAD_DAMAGE_ATTACK("sfx/enemy_quad_damage_attack.mp3"),
   ENEMY_QUAD_DAMAGE_PICK("sfx/enemy_quad_damage_pick.mp3"),
   ENEMY_INVISIBILITY_PICK("sfx/enemy_invisibility_pick.mp3"),
   ENEMY_DEFENCE_PICK("sfx/enemy_defence_pick.mp3"),
   PLAYER_SHOTGUN("sfx/player_shotgun.mp3"),
-  // TODO make it mono
   ENEMY_MINIGUN("sfx/enemy_minigun.mp3"),
   PLAYER_MINIGUN("sfx/player_minigun.mp3"),
   HIT_SOUND("sfx/shoot_hit_sound.mp3"),

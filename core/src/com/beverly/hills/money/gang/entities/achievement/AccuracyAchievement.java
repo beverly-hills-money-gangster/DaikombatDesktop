@@ -6,7 +6,6 @@ import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 public class AccuracyAchievement extends Achievement {
 
   public AccuracyAchievement() {
-    // TODO use accuracy
     super(SoundRegistry.ACCURACY);
   }
 
