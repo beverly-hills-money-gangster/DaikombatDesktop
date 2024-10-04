@@ -34,6 +34,7 @@ gets 20(configurable) kills first is declared the winner. Notable features:
 - Teleports
 - Multiple weapons
 - 3D sound
+- Achievements
 - Various player skins(blue, yellow, pink, purple, orange, and green)
 
 ### Video

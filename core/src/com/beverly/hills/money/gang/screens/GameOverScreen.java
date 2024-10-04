@@ -45,12 +45,15 @@ public class GameOverScreen extends AbstractMainMenuScreen {
     youWinMusic = game.getAssMan().getUserSettingSound(SoundRegistry.WIN_MUSIC);
     this.connectGameData = connectGameData;
     this.uiLeaderBoard = uiLeaderBoard;
-    leaderMessage = "WINNER IS " + uiLeaderBoard.getFirstPlaceStats();
-    glyphLayoutWinner = new GlyphLayout(guiFont64, leaderMessage);
+
     if (uiLeaderBoard.getMyPlace() == 1) {
       stopBgMusic();
       youWinMusic.play(DEFAULT_MUSIC_VOLUME * 1.2f);
+      leaderMessage = "YOU WIN | " + uiLeaderBoard.getFirstPlaceStats();
+    } else {
+      leaderMessage = "WINNER IS " + uiLeaderBoard.getFirstPlace();
     }
+    glyphLayoutWinner = new GlyphLayout(guiFont64, leaderMessage);
   }
 
   @Override

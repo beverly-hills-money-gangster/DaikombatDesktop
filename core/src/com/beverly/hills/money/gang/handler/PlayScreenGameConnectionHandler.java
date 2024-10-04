@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
-import com.beverly.hills.money.gang.assets.managers.sound.AttackingSound;
+import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.entities.achievement.AchievementFactory;
 import com.beverly.hills.money.gang.entities.achievement.KillStats;
 import com.beverly.hills.money.gang.entities.enemies.Enemy;
@@ -300,7 +300,7 @@ public class PlayScreenGameConnectionHandler {
             .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
             .onComplete(() -> {
               if (gameEvent.getWeaponType() == WeaponType.PUNCH) {
-                new AttackingSound(
+                new TimeLimitedSound(
                     playScreen.getGame().getAssMan()
                         .getUserSettingSound(SoundRegistry.ENEMY_PUNCH_THROWN))
                     .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
@@ -359,7 +359,6 @@ public class PlayScreenGameConnectionHandler {
 
   private void handleDeath(ServerResponse.GameEvent gameEvent) {
     EnemyPlayerActionType enemyPlayerActionType = EnemyPlayerActionType.ATTACK;
-    // TODO stats are not showing my kills in the bottom of the screen
     playScreen.getUiLeaderBoard().registerKill(gameEvent.getPlayer().getPlayerId(),
         gameEvent.getAffectedPlayer().getPlayerId());
     if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
@@ -449,9 +448,9 @@ public class PlayScreenGameConnectionHandler {
         .onDeath(enemy -> playScreen.getGame().getAssMan()
             .getUserSettingSound(SoundRegistry.ENEMY_DEATH_SOUND_SEQ.getNextSound())
             .play(enemy.getSFXVolume(), enemy.getSFXPan()))
-        .onGetShot(enemy -> playScreen.getGame().getAssMan()
-            .getUserSettingSound(SoundRegistry.ENEMY_GET_HIT_SOUND_SEQ.getNextSound())
-            .play(enemy.getSFXVolume(), enemy.getSFXPan()))
+        .onGetShot(enemy -> new TimeLimitedSound(playScreen.getGame().getAssMan()
+            .getUserSettingSound(SoundRegistry.ENEMY_GET_HIT_SOUND_SEQ.getNextSound()))
+            .play(enemy.getSFXVolume(), enemy.getSFXPan(), 1000))
         .onAttack(enemyWeapon -> {
               var enemy = enemyWeapon.getEnemy();
               var sound = switch (enemyWeapon.getWeapon()) {
@@ -460,7 +459,7 @@ public class PlayScreenGameConnectionHandler {
                 case RAILGUN -> SoundRegistry.ENEMY_RAILGUN;
                 case MINIGUN -> SoundRegistry.ENEMY_MINIGUN;
               };
-              new AttackingSound(
+              new TimeLimitedSound(
                   playScreen.getGame().getAssMan().getUserSettingSound(sound))
                   .play(enemy.getSFXVolume(), enemy.getSFXPan(),
                       enemy.getEnemyEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)

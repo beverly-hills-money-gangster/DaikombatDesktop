@@ -60,12 +60,21 @@ public class UILeaderBoard {
     setMyStats();
   }
 
-  public String getFirstPlaceStats() {
+  public String getFirstPlace() {
     if (leaderBoardItems.isEmpty()) {
       return "";
     }
     var leader = leaderBoardItems.get(0);
-    return leader.name + " | " + getKillsMessage(leader.kills) + " | " + getDeathsMessage(
+    return leader.name + " | " + getFirstPlaceStats();
+  }
+
+  private LeaderBoardPlayer getLeader() {
+    return leaderBoardItems.get(0);
+  }
+
+  public String getFirstPlaceStats() {
+    var leader = getLeader();
+    return getKillsMessage(leader.kills) + " | " + getDeathsMessage(
         leader.getDeaths());
   }
 
@@ -157,7 +166,6 @@ public class UILeaderBoard {
         .filter(leaderBoardPlayer -> leaderBoardPlayer.getId() == victimPlayerId)
         .findFirst()
         .ifPresent(leaderBoardPlayer -> leaderBoardPlayer.setDeaths(leaderBoardPlayer.deaths + 1));
-    setMyStats();
     getTopPlayer().ifPresent(
         topPlayer -> {
           var fragsLeft = fragsToWin - topPlayer.kills;
@@ -166,7 +174,8 @@ public class UILeaderBoard {
           }
           lastFragsLeft = fragsLeft;
         });
-
+    this.leaderBoardItems.sort(COMPARATOR);
+    setMyStats();
     if (myPlace == 1 && myKills > 0 && myOldPlace > myPlace) {
       onTakenTheLead.run();
     } else if (myOldPlace == 1 && myKills > 0 && myPlace != 1) {

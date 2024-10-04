@@ -17,6 +17,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
+import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
+import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.effect.PlayerEffects;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
@@ -32,29 +34,12 @@ public class ScreenWeaponTest {
 
   private DaiKombatAssetsManager daiKombatAssetsManager;
 
-  private UserSettingSound playerShotgunFireSound;
+  private UserSettingSound punchSound, weaponChangeSound, punchHitSound, quadDamageAttackSound,
+      hitSound, playerRailgunFireSound, playerShotgunFireSound, playerMinigunFireSound;
 
-  private UserSettingSound playerRailgunFireSound;
-  private UserSettingSound punchSound;
+  private TextureRegion shotgunFireTexture, shotgunIdleTexture, punchIdleTexture,
+      railgunFireTexture, railgunIdleTexture, punchTexture, minigunFireTexture, minigunIdleTexture;
 
-  private UserSettingSound weaponChangeSound;
-  private UserSettingSound punchHitSound;
-
-  private UserSettingSound quadDamageAttackSound;
-
-  private UserSettingSound hitSound;
-
-  private TextureRegion shotgunFireTexture;
-
-  private TextureRegion punchIdleTexture;
-
-  private TextureRegion shotgunIdleTexture;
-
-  private TextureRegion railgunFireTexture;
-
-  private TextureRegion railgunIdleTexture;
-
-  private TextureRegion punchTexture;
 
   private Player player;
 
@@ -63,13 +48,17 @@ public class ScreenWeaponTest {
 
   @BeforeEach
   public void setUp() {
+    TimeLimitedSound.clear();
     shotgunIdleTexture = mock(TextureRegion.class);
     shotgunFireTexture = mock(TextureRegion.class);
     railgunIdleTexture = mock(TextureRegion.class);
     railgunFireTexture = mock(TextureRegion.class);
+    minigunIdleTexture = mock(TextureRegion.class);
+    minigunFireTexture = mock(TextureRegion.class);
     punchTexture = mock(TextureRegion.class);
     punchIdleTexture = mock(TextureRegion.class);
 
+    playerMinigunFireSound = mock(UserSettingSound.class);
     weaponChangeSound = mock(UserSettingSound.class);
     hitSound = mock(UserSettingSound.class);
     playerShotgunFireSound = mock(UserSettingSound.class);
@@ -82,6 +71,8 @@ public class ScreenWeaponTest {
 
     doReturn(playerShotgunFireSound).when(daiKombatAssetsManager)
         .getUserSettingSound(SoundRegistry.PLAYER_SHOTGUN);
+    doReturn(playerMinigunFireSound).when(daiKombatAssetsManager)
+        .getUserSettingSound(SoundRegistry.PLAYER_MINIGUN);
     doReturn(playerRailgunFireSound).when(daiKombatAssetsManager)
         .getUserSettingSound(SoundRegistry.PLAYER_RAILGUN);
     doReturn(punchSound).when(daiKombatAssetsManager)
@@ -99,6 +90,10 @@ public class ScreenWeaponTest {
         eq(TexturesRegistry.GUN_IDLE), anyInt(), anyInt(), anyInt(), anyInt());
     doReturn(shotgunFireTexture).when(daiKombatAssetsManager).getTextureRegion(
         eq(TexturesRegistry.GUN_SHOOT), anyInt(), anyInt(), anyInt(), anyInt());
+    doReturn(minigunIdleTexture).when(daiKombatAssetsManager).getTextureRegion(
+        eq(TexturesRegistry.MINIGUN_IDLE), anyInt(), anyInt(), anyInt(), anyInt());
+    doReturn(minigunFireTexture).when(daiKombatAssetsManager).getTextureRegion(
+        eq(TexturesRegistry.MINIGUN_FIRE), anyInt(), anyInt(), anyInt(), anyInt());
     doReturn(railgunIdleTexture).when(daiKombatAssetsManager).getTextureRegion(
         eq(TexturesRegistry.RAILGUN_IDLE), anyInt(), anyInt(), anyInt(), anyInt());
     doReturn(railgunFireTexture).when(daiKombatAssetsManager).getTextureRegion(
@@ -112,7 +107,9 @@ public class ScreenWeaponTest {
         Map.of(
             Weapon.SHOTGUN, WeaponStats.builder().maxDistance(7).delayMls(500).build(),
             Weapon.GAUNTLET, WeaponStats.builder().maxDistance(1).delayMls(500).build(),
+            Weapon.MINIGUN, WeaponStats.builder().maxDistance(7).delayMls(150).build(),
             Weapon.RAILGUN, WeaponStats.builder().maxDistance(10).delayMls(1_500).build())
+
     );
     player = mock(Player.class);
     playerEffects = mock(PlayerEffects.class);
@@ -181,7 +178,7 @@ public class ScreenWeaponTest {
     screenWeapon.changeWeapon(Weapon.SHOTGUN);
     assertTrue(screenWeapon.attack(player));
     verify(playerShotgunFireSound).play(volume);
-    verify(quadDamageAttackSound).play(volume);
+    verify(quadDamageAttackSound).play(SoundVolumeType.LOUD, 0.0f);
     assertEquals(Weapon.SHOTGUN, screenWeapon.weaponBeingUsed);
   }
 
@@ -222,7 +219,7 @@ public class ScreenWeaponTest {
     screenWeapon.registerHit(Weapon.SHOTGUN);
     // nothing happens. there is no hit sound for shotgun
     verifyNoInteractions(playerShotgunFireSound, punchSound, punchHitSound);
-    verify(hitSound).play(anyFloat());
+    verify(hitSound).play(SoundVolumeType.LOUD, 0.0f);
   }
 
   @Test
@@ -230,13 +227,13 @@ public class ScreenWeaponTest {
     screenWeapon.registerHit(Weapon.RAILGUN);
     // nothing happens. there is no hit sound for shotgun
     verifyNoInteractions(playerShotgunFireSound, punchSound, punchHitSound);
-    verify(hitSound).play(anyFloat());
+    verify(hitSound).play(SoundVolumeType.LOUD, 0.0f);
   }
 
   @Test
   public void testRegisterHitPunch() {
     screenWeapon.registerHit(Weapon.GAUNTLET);
-    verify(punchHitSound).play(anyFloat());
+    verify(punchHitSound).play(SoundVolumeType.LOUD, 0.0f);
   }
 
   @Test
@@ -387,7 +384,7 @@ public class ScreenWeaponTest {
     screenWeapon.changeWeapon(Weapon.GAUNTLET);
     Thread.sleep(ScreenWeapon.CHANGE_WEAPON_DELAY_MLS);
     screenWeapon.changeToPrevWeapon();
-    assertEquals(Weapon.RAILGUN, screenWeapon.getWeaponBeingUsed());
+    assertEquals(Weapon.MINIGUN, screenWeapon.getWeaponBeingUsed());
   }
 
   @Test

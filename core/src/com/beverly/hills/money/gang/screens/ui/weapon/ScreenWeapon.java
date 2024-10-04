@@ -5,8 +5,8 @@ import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
-import com.beverly.hills.money.gang.assets.managers.sound.AttackingSound;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
+import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
@@ -43,7 +43,7 @@ public class ScreenWeapon {
 
   private static final int PUNCH_ANIMATION_MLS = 155;
 
-  private final AttackingSound quadDamageAttack;
+  private final TimeLimitedSound quadDamageAttack;
 
   private final UserSettingSound weaponChangeSound;
 
@@ -58,7 +58,7 @@ public class ScreenWeapon {
   public ScreenWeapon(
       final DaiKombatAssetsManager assetsManager,
       final Map<Weapon, WeaponStats> weaponStats) {
-    quadDamageAttack = new AttackingSound(
+    quadDamageAttack = new TimeLimitedSound(
         assetsManager.getUserSettingSound(SoundRegistry.QUAD_DAMAGE_ATTACK));
     weaponChangeSound = assetsManager.getUserSettingSound(SoundRegistry.WEAPON_CHANGE);
     weaponStates.put(Weapon.SHOTGUN, WeaponState.builder()
@@ -182,7 +182,9 @@ public class ScreenWeapon {
   public void registerHit(Weapon weapon) {
     Optional.ofNullable(weaponStates.get(weapon))
         .map(WeaponState::getHitTargetSound)
-        .ifPresent(userSettingSound -> userSettingSound.play(Constants.DEFAULT_SFX_VOLUME * 1.5f));
+        .ifPresent(
+            userSettingSound -> new TimeLimitedSound(userSettingSound).play(SoundVolumeType.LOUD,
+                0.f, 250));
 
   }
 
