@@ -10,8 +10,6 @@ import com.beverly.hills.money.gang.DaiKombatGame;
 
 public class DesktopLauncher {
 
-  // TODO test on TV
-  // TODO support alt+tab
   // TODO think about license and copyrights
   public static void main(final String[] arg) {
 

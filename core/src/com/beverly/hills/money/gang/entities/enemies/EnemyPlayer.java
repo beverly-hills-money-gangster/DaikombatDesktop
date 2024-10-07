@@ -119,7 +119,9 @@ public class EnemyPlayer extends Enemy {
   }
 
   public void attack(Weapon weapon) {
-    shootingAnimationUntil = System.currentTimeMillis() + 100;
+    if (weapon != Weapon.GAUNTLET) {
+      shootingAnimationUntil = System.currentTimeMillis() + 100;
+    }
     getEnemyListeners().getOnAttack()
         .accept(EnemyWeapon.builder().weapon(weapon).enemy(this).build());
   }

@@ -5,18 +5,33 @@ import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
+import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
+import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
+import java.util.ArrayDeque;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import lombok.Getter;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 public class ScreenWeapon {
 
   private final Map<Weapon, Long> animationStart = new HashMap<>();
+
+  private final ScheduledExecutorService scheduledExecutor
+      = Executors.newScheduledThreadPool(1,
+      new BasicThreadFactory.Builder().namingPattern("weapon-change-scheduler-%d").daemon(true)
+          .build());
+
+  private final Queue<Runnable> tasks = new ArrayDeque<>();
 
   protected static final int CHANGE_WEAPON_DELAY_MLS = 75;
 
@@ -24,9 +39,11 @@ public class ScreenWeapon {
 
   private static final int RAILGUN_ANIMATION_MLS = 200;
 
-  private static final int PUNCH_ANIMATION_MLS = 175;
+  private static final int MINIGUN_ANIMATION_MLS = 100;
 
-  private final UserSettingSound quadDamageAttack;
+  private static final int PUNCH_ANIMATION_MLS = 155;
+
+  private final TimeLimitedSound quadDamageAttack;
 
   private final UserSettingSound weaponChangeSound;
 
@@ -41,7 +58,8 @@ public class ScreenWeapon {
   public ScreenWeapon(
       final DaiKombatAssetsManager assetsManager,
       final Map<Weapon, WeaponStats> weaponStats) {
-    quadDamageAttack = assetsManager.getUserSettingSound(SoundRegistry.QUAD_DAMAGE_ATTACK);
+    quadDamageAttack = new TimeLimitedSound(
+        assetsManager.getUserSettingSound(SoundRegistry.QUAD_DAMAGE_ATTACK));
     weaponChangeSound = assetsManager.getUserSettingSound(SoundRegistry.WEAPON_CHANGE);
     weaponStates.put(Weapon.SHOTGUN, WeaponState.builder()
         .distance(weaponStats.get(Weapon.SHOTGUN).getMaxDistance())
@@ -49,6 +67,7 @@ public class ScreenWeapon {
         .hitTargetSound(assetsManager.getUserSettingSound(SoundRegistry.HIT_SOUND))
         .screenRatioX(0.35f)
         .screenRatioY(0.40f)
+        .center(false)
         .backoffDelayMls(getBackoffDelay(weaponStats.get(Weapon.SHOTGUN), GUNSHOT_ANIMATION_MLS))
         .animationDelayMls(GUNSHOT_ANIMATION_MLS)
         .fireTexture(assetsManager.getTextureRegion(TexturesRegistry.GUN_SHOOT, 0, 0,
@@ -64,6 +83,7 @@ public class ScreenWeapon {
         .hitTargetSound(assetsManager.getUserSettingSound(SoundRegistry.PUNCH_HIT))
         .screenRatioX(0.5f)
         .screenRatioY(0.45f)
+        .center(false)
         .backoffDelayMls(getBackoffDelay(weaponStats.get(Weapon.GAUNTLET), PUNCH_ANIMATION_MLS))
         .animationDelayMls(PUNCH_ANIMATION_MLS)
         .fireTexture(assetsManager.getTextureRegion(TexturesRegistry.PUNCH, 0, 0,
@@ -81,6 +101,7 @@ public class ScreenWeapon {
         .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PLAYER_RAILGUN))
         .screenRatioX(0.35f)
         .screenRatioY(0.40f)
+        .center(false)
         .backoffDelayMls(getBackoffDelay(weaponStats.get(Weapon.RAILGUN), RAILGUN_ANIMATION_MLS))
         .animationDelayMls(RAILGUN_ANIMATION_MLS)
         .fireTexture(assetsManager.getTextureRegion(TexturesRegistry.RAILGUN_SHOOTING, 0, 0,
@@ -90,7 +111,46 @@ public class ScreenWeapon {
         .weaponScreenPositioning(animationTime -> new Vector2(0, -35))
         .build());
 
+    weaponStates.put(Weapon.MINIGUN, WeaponState.builder()
+        .distance(weaponStats.get(Weapon.MINIGUN).getMaxDistance())
+        .hitTargetSound(assetsManager.getUserSettingSound(SoundRegistry.HIT_SOUND))
+        .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PLAYER_MINIGUN))
+        .screenRatioX(0.45f)
+        .screenRatioY(0.40f)
+        .backoffDelayMls(getBackoffDelay(weaponStats.get(Weapon.MINIGUN), MINIGUN_ANIMATION_MLS))
+        .animationDelayMls(MINIGUN_ANIMATION_MLS)
+        .center(true)
+        .fireTexture(assetsManager.getTextureRegion(TexturesRegistry.MINIGUN_FIRE, 0, 0,
+            185, 96))
+        .idleTexture(assetsManager.getTextureRegion(TexturesRegistry.MINIGUN_IDLE, 0, 0,
+            185, 96))
+        .weaponScreenPositioning(
+            animationTime -> new Vector2((float) Math.sin(animationTime) * 15f, -35))
+        .build());
+
     setWeaponBeingUsed(Weapon.SHOTGUN);
+  }
+
+  public boolean punch(Player player) {
+    var prevWeapon = weaponBeingUsed;
+    setWeaponBeingUsed(Weapon.GAUNTLET);
+    var attacked = attack(player);
+    if (attacked && prevWeapon != Weapon.GAUNTLET) {
+      // get back to the previous weapon when animation is done
+      scheduledExecutor.schedule(() -> {
+        tasks.add(() -> setWeaponBeingUsed(prevWeapon));
+      }, PUNCH_ANIMATION_MLS, TimeUnit.MILLISECONDS);
+    } else {
+      setWeaponBeingUsed(prevWeapon);
+    }
+    return attacked;
+  }
+
+  public void executeTask() {
+    Runnable toExecute;
+    while ((toExecute = tasks.poll()) != null) {
+      toExecute.run();
+    }
   }
 
   private static int getBackoffDelay(WeaponStats weaponStats, int animationMls) {
@@ -122,7 +182,9 @@ public class ScreenWeapon {
   public void registerHit(Weapon weapon) {
     Optional.ofNullable(weaponStates.get(weapon))
         .map(WeaponState::getHitTargetSound)
-        .ifPresent(userSettingSound -> userSettingSound.play(Constants.DEFAULT_SFX_VOLUME * 1.5f));
+        .ifPresent(
+            userSettingSound -> new TimeLimitedSound(userSettingSound).play(SoundVolumeType.LOUD,
+                0.f, 250));
 
   }
 
@@ -138,6 +200,7 @@ public class ScreenWeapon {
         .map(currentActiveWeaponState
             -> WeaponRenderData.builder().textureRegion(currentActiveWeaponState.getFireTexture())
             .distance(currentActiveWeaponState.getDistance())
+            .center(currentActiveWeaponState.isCenter())
             .positioning(currentActiveWeaponState.getWeaponScreenPositioning()
                 .apply(
                     System.currentTimeMillis() - animationStart.getOrDefault(weaponBeingUsed, 0L)))
@@ -153,7 +216,7 @@ public class ScreenWeapon {
       animationStart.put(weaponBeingUsed, System.currentTimeMillis());
       state.getFireSound().play(Constants.DEFAULT_SFX_VOLUME);
       if (player.getPlayerEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {
-        quadDamageAttack.play(Constants.DEFAULT_SFX_VOLUME);
+        quadDamageAttack.play(SoundVolumeType.LOUD, 0, 350);
       }
       return true;
     } else {
@@ -183,6 +246,7 @@ public class ScreenWeapon {
     var weaponState = weaponStates.get(weaponBeingUsed);
     return WeaponRenderData.builder().textureRegion(weaponState.getIdleTexture())
         .distance(weaponState.getDistance())
+        .center(weaponState.isCenter())
         .screenRatioX(weaponState.getScreenRatioX())
         .screenRatioY(weaponState.getScreenRatioY())
         .positioning(Vector2.Zero).build();

@@ -33,7 +33,9 @@ public enum SoundRegistry {
   BOOM_1("sfx/ui/boom_1.mp3"),
   BOOM_2("sfx/ui/boom_2.mp3"),
   EXCELLENT("sfx/winning/excellent.wav"),
-  HOLY_SHIT("sfx/winning/holyshit.wav"),
+  HOLY_SHIT("sfx/winning/holy_shit.mp3"),
+  ACCURACY("sfx/winning/accuracy.mp3"),
+  TWO_FRAGS_TO_SEC("sfx/winning/two_frags_to_sec.mp3"),
   HUMILIATION("sfx/winning/humiliation.wav"),
   IMPRESSIVE("sfx/winning/impressive.wav"),
   YOU_WIN("sfx/winning/you_win.wav"),
@@ -51,14 +53,20 @@ public enum SoundRegistry {
   VOICE_ENEMY_DEATH_3("voice/enemy/death/death_3.mp3"),
   ENEMY_SHOTGUN("sfx/shotgun_mono.mp3"),
   QUAD_DAMAGE_ATTACK("sfx/quad_damage_attack.mp3"),
+  GAUNTLET_HUMILIATION("sfx/gauntlet_humiliation.mp3"),
+  // TODO sounds like ass
   QUAD_DAMAGE_PICK("sfx/quad_damage_pick.mp3"),
   DEFENCE_PICK("sfx/defence_pick.mp3"),
+  REGENERATION_PICK("sfx/regeneration.mp3"),
+  ENEMY_REGENERATION_PICK("sfx/enemy_regeneration.mp3"),
   INVISIBILITY_PICK("sfx/invisibility_pick.mp3"),
   ENEMY_QUAD_DAMAGE_ATTACK("sfx/enemy_quad_damage_attack.mp3"),
   ENEMY_QUAD_DAMAGE_PICK("sfx/enemy_quad_damage_pick.mp3"),
   ENEMY_INVISIBILITY_PICK("sfx/enemy_invisibility_pick.mp3"),
   ENEMY_DEFENCE_PICK("sfx/enemy_defence_pick.mp3"),
   PLAYER_SHOTGUN("sfx/player_shotgun.mp3"),
+  ENEMY_MINIGUN("sfx/enemy_minigun.mp3"),
+  PLAYER_MINIGUN("sfx/player_minigun.mp3"),
   HIT_SOUND("sfx/shoot_hit_sound.mp3"),
   SPAWN1("sfx/spawn/spawn1.mp3"),
   SPAWN2("sfx/spawn/spawn2.mp3"),
@@ -81,7 +89,7 @@ public enum SoundRegistry {
       = new PseudoRandomSoundSequence(SPAWN1, SPAWN2, SPAWN3);
   public static final PseudoRandomSoundSequence WINNING_SOUND_SEQ
       = new PseudoRandomSoundSequence(EXCELLENT, HUMILIATION, HOLY_SHIT, IMPRESSIVE, PERFECT);
-  public static final PseudoRandomSoundSequence GET_HIT_SOUND_SEQ
+  public static final PseudoRandomSoundSequence VOICE_GET_HIT_SOUND_SEQ
       = new PseudoRandomSoundSequence(VOICE_GET_HIT, VOICE_GET_HIT_2);
 
   public static final PseudoRandomSoundSequence ENEMY_GET_HIT_SOUND_SEQ

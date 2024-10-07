@@ -60,7 +60,7 @@ public class PlayScreen extends GameScreen {
 
   private GameScreen screenToTransition;
   private boolean showNetworkStats;
-  private final SoundQueue narratorSoundQueue = new SoundQueue(1_250,
+  private final SoundQueue narratorSoundQueue = new SoundQueue(1_500,
       Constants.QUAKE_NARRATOR_FX_VOLUME);
   private static final int MAX_CHAT_MSG_LEN = 32;
   private static final float BLOOD_OVERLAY_ALPHA_SWITCH = 0.5f;
@@ -181,6 +181,7 @@ public class PlayScreen extends GameScreen {
                 .name(leaderBoardItem.getPlayerName())
                 .id(leaderBoardItem.getPlayerId())
                 .deaths(leaderBoardItem.getDeaths())
+                .ping(leaderBoardItem.getPingMls())
                 .kills(leaderBoardItem.getKills())
                 .build())
             .collect(Collectors.toList()),
@@ -457,7 +458,7 @@ public class PlayScreen extends GameScreen {
         powerUpEffect(Color.SKY, PowerUpType.QUAD_DAMAGE);
       } else if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.DEFENCE)) {
         powerUpEffect(Color.LIME, PowerUpType.DEFENCE);
-      } else if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.INVISIBILITY)) {
+      }  else if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.INVISIBILITY)) {
         powerUpEffect(Color.WHITE, PowerUpType.INVISIBILITY);
       }
     }
@@ -466,7 +467,8 @@ public class PlayScreen extends GameScreen {
     float gunWidth = getViewport().getWorldWidth() * activeWeapon.getScreenRatioX();
     float gunHeight = getViewport().getWorldHeight() * activeWeapon.getScreenRatioY();
     getGame().getBatch().draw(activeWeapon.getTextureRegion(),
-        getViewport().getWorldWidth() * 0.5f + activeWeapon.getPositioning().x,
+        getViewport().getWorldWidth() * 0.5f + activeWeapon.getPositioning().x - (
+            activeWeapon.isCenter() ? gunWidth / 2 : 0),
         (int) getPlayer().getWeaponY() + activeWeapon.getPositioning().y,
         gunWidth, gunHeight);
 
@@ -575,7 +577,7 @@ public class PlayScreen extends GameScreen {
     gameTechStats.append(playersOnline).append(" ONLINE ");
     gameTechStats.append("| PING ")
         .append(Objects.toString(gameConnection.getPrimaryNetworkStats().getPingMls(), "-"))
-        .append(" MLS | ");
+        .append(" MS | ");
     gameTechStats.append(Gdx.graphics.getFramesPerSecond()).append(" FPS");
 
     var gameTechStatsGlyph = new GlyphLayout(guiFont64, gameTechStats);

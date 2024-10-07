@@ -14,4 +14,5 @@ public class WeaponRenderData {
   private final TextureRegion textureRegion;
   private final float screenRatioX;
   private final float screenRatioY;
+  private final boolean center;
 }

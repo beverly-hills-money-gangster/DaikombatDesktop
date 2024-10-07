@@ -34,6 +34,7 @@ gets 20(configurable) kills first is declared the winner. Notable features:
 - Teleports
 - Multiple weapons
 - 3D sound
+- Achievements
 - Various player skins(blue, yellow, pink, purple, orange, and green)
 
 ### Video
@@ -63,7 +64,6 @@ Desktop can be configured using the following environment variables:
 - `DESKTOP_GAME_HOST` Server host. Default - `64.226.66.192`
 - `DESKTOP_GAME_PORT` Server port. Default - `7777`
 - `DESKTOP_GAME_ID` Server game id. Default - `0`
-- `DESKTOP_FLUSH_ACTIONS_FREQ_MLS` Frequency(in milliseconds) at which desktop sends "MOVE" events to server. Default - `50`.
 - `DESKTOP_DEV_MODE` Dev mode. Default - `false`
 - `DESKTOP_SECONDARY_CONNECTIONS_TO_OPEN` Number of secondary TCP connections to create. Default - `3`
 - `DESKTOP_MAX_RECONNECTIONS` Maximum connection retries. Default - `5`

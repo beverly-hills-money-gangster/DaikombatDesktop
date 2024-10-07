@@ -47,7 +47,7 @@ public class PowerUp extends SoundMakingEntity {
     this.onCollision = onCollision;
     TextureRegion currentTexReg = screen.getGame().getAssMan()
         .getTextureRegion(texturesRegistry, 0, 0, 360, 360);
-
+    currentTexReg.flip(true,false);
     mdlInst.materials.get(0).set(TextureAttribute.createDiffuse(currentTexReg));
     mdlInst.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, Color.WHITE));
 

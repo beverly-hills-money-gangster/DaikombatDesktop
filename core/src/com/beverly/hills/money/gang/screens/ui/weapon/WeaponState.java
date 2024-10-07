@@ -24,5 +24,6 @@ public class WeaponState {
   private final float screenRatioX;
   private final float screenRatioY;
   private final int backoffDelayMls;
+  private final boolean center;
   private final Function<Long, Vector2> weaponScreenPositioning;
 }

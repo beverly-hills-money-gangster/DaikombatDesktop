@@ -1,6 +1,6 @@
 package com.beverly.hills.money.gang.assets.managers.sound;
 
-import static com.beverly.hills.money.gang.Constants.SHOOTING_SOUND_FREQ_MLS;
+import static com.beverly.hills.money.gang.Constants.TIME_LIMITED_SOUND_FREQ_MLS;
 
 import com.badlogic.gdx.audio.Sound;
 import java.util.HashMap;
@@ -10,28 +10,33 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-public class AttackingSound {
+public class TimeLimitedSound {
 
   private final UserSettingSound sound;
 
   private static final Map<SoundVolumeTypeEntry, Long> LAST_PLAYED = new HashMap<>();
 
 
-  public AttackingSound(UserSettingSound sound) {
+  public TimeLimitedSound(UserSettingSound sound) {
     this.sound = sound;
   }
 
   public void play(SoundVolumeType volumeType, float pan) {
-    play(volumeType, pan, null);
+    play(volumeType, pan, null, TIME_LIMITED_SOUND_FREQ_MLS);
   }
 
-  public void play(SoundVolumeType volumeType, float pan, UserSettingSound extraSound) {
+  public void play(SoundVolumeType volumeType, float pan, final int frequencyMls) {
+    play(volumeType, pan, null, frequencyMls);
+  }
+
+  public void play(SoundVolumeType volumeType, float pan, UserSettingSound extraSound,
+      final int frequencyMls) {
     var soundEntry
         = SoundVolumeTypeEntry.builder()
         .sound(sound.getSound())
         .soundVolumeType(volumeType).build();
     if (System.currentTimeMillis() - LAST_PLAYED.getOrDefault(soundEntry, 0L)
-        > SHOOTING_SOUND_FREQ_MLS) {
+        > frequencyMls) {
       sound.play(volumeType, pan);
       Optional.ofNullable(extraSound)
           .ifPresent(userSettingSound -> userSettingSound.play(volumeType, pan));
@@ -39,6 +44,9 @@ public class AttackingSound {
     }
   }
 
+  public void play(SoundVolumeType volumeType, float pan, UserSettingSound extraSound) {
+    play(volumeType, pan, extraSound, TIME_LIMITED_SOUND_FREQ_MLS);
+  }
 
   @Builder
   @Getter
@@ -47,6 +55,10 @@ public class AttackingSound {
 
     private final Sound sound;
     private final SoundVolumeType soundVolumeType;
+  }
+
+  public static void clear() {
+    LAST_PLAYED.clear();
   }
 
 }

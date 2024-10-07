@@ -19,8 +19,8 @@ public class ControlsScreen extends AbstractMainMenuScreen {
   private static final String[] CONTROLS_MAPPING = {
       "MOVE - WASD",
       "SHOOT - LEFT MOUSE CLICK/RIGHT ALT",
-      "PUNCH - RIGHT MOUSE CLICK",
-      "CHAT - TILDA",
+      "PUNCH - RIGHT MOUSE CLICK/RIGHT CTRL",
+      "CHAT - TILDE",
       "LEADERBOARD - TAB",
       "Q, E, MOUSE SCROLL - NEXT/PREV WEAPON",
       Arrays.stream(Weapon.values())
