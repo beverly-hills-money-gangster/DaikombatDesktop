@@ -29,6 +29,7 @@ The player spawns on the map and joins a death-match against other players onlin
 gets 20(configurable) kills first is declared the winner. Notable features:
 - Online mode
 - In-game chat
+- Classes (tank, warrior, berserk, etc)
 - Leaderboard
 - Power-ups
 - Teleports

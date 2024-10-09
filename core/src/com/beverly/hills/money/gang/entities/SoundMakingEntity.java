@@ -33,12 +33,12 @@ public abstract class SoundMakingEntity extends Entity {
       return SoundVolumeType.NORMAL;
     } else if (distance < 50) {
       return SoundVolumeType.LOW_NORMAL;
-    } else if (distance < 70) {
-      return SoundVolumeType.HIGH_QUITE;
-    } else if (distance < 90) {
-      return SoundVolumeType.QUITE;
-    } else if (distance < 110) {
-      return SoundVolumeType.LOW_QUITE;
+    } else if (distance < 80) {
+      return SoundVolumeType.HIGH_QUIET;
+    } else if (distance < 120) {
+      return SoundVolumeType.QUIET;
+    } else if (distance < 150) {
+      return SoundVolumeType.LOW_QUIET;
     } else {
       return SoundVolumeType.MUTE;
     }

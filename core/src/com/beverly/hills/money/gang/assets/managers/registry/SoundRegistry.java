@@ -5,7 +5,6 @@ import lombok.Getter;
 
 public enum SoundRegistry {
 
-  // TODO check 3D sound
   ENEMY_PUNCH_THROWN("sfx/enemy_punch_thrown.mp3"),
   WEAPON_CHANGE("sfx/weapon_change.mp3"),
   ENEMY_RAILGUN("sfx/enemy_railgun.mp3"),

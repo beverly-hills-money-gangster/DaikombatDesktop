@@ -333,7 +333,7 @@ public class PlayScreenGameConnectionHandler {
                   playScreen.getPlayer().getHit(gameEvent.getAffectedPlayer().getHealth());
                   new TimeLimitedSound(
                       playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
-                          .VOICE_GET_HIT_SOUND_SEQ.getNextSound())).play(SoundVolumeType.LOW_QUITE,
+                          .VOICE_GET_HIT_SOUND_SEQ.getNextSound())).play(SoundVolumeType.LOW_QUIET,
                       0.f, 1000);
                 })
                 .build());

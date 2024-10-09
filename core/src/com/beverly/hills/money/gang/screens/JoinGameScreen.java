@@ -6,10 +6,12 @@ import com.beverly.hills.money.gang.config.ClientConfig;
 import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
 import com.beverly.hills.money.gang.proto.JoinGameCommand;
 import com.beverly.hills.money.gang.proto.MergeConnectionCommand;
+import com.beverly.hills.money.gang.proto.PlayerClass;
 import com.beverly.hills.money.gang.proto.ServerResponse;
 import com.beverly.hills.money.gang.proto.SkinColorSelection;
 import com.beverly.hills.money.gang.screens.data.ConnectGameData;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
+import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.utils.Converter;
 import java.util.Optional;
@@ -51,6 +53,7 @@ public class JoinGameScreen extends ReconnectableScreen {
         .setVersion(ClientConfig.VERSION)
         .setGameId(Configs.GAME_ID)
         .setSkin(creatSkinColorSelection(connectGameData.getSkinUISelection()))
+        .setPlayerClass(createPlayerClass(connectGameData.getPlayerClassUISelection()))
         .setPlayerName(connectGameData.getPlayerName());
     Optional.ofNullable(connectGameData.getPlayerIdToRecover())
         .ifPresent(joinGameRequestBuilder::setRecoveryPlayerId);
@@ -67,6 +70,15 @@ public class JoinGameScreen extends ReconnectableScreen {
       case GREEN -> SkinColorSelection.GREEN;
       case PINK -> SkinColorSelection.PINK;
       case PURPLE -> SkinColorSelection.PURPLE;
+    };
+  }
+
+  private PlayerClass createPlayerClass(PlayerClassUISelection playerClassUISelection) {
+    return switch (playerClassUISelection) {
+      case COMMONER -> PlayerClass.COMMONER;
+      case DRACULA_BERSERK -> PlayerClass.DRACULA_BERSERK;
+      case DEMON_TANK -> PlayerClass.DEMON_TANK;
+      case BEAST_WARRIOR -> PlayerClass.BEAST_WARRIOR;
     };
   }
 
