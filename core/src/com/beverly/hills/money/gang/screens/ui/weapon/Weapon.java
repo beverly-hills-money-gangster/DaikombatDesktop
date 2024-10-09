@@ -8,10 +8,10 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum Weapon {
-  GAUNTLET(Keys.NUM_1, true),
-  SHOTGUN(Keys.NUM_2, false),
-  RAILGUN(Keys.NUM_3, false),
-  MINIGUN(Keys.NUM_4, true);
+  GAUNTLET(Keys.NUM_0, true),
+  SHOTGUN(Keys.NUM_1, false),
+  RAILGUN(Keys.NUM_2, false),
+  MINIGUN(Keys.NUM_3, true);
 
   static {
     int keys = Arrays.stream(Weapon.values()).map(weapon -> weapon.selectKeyCode)

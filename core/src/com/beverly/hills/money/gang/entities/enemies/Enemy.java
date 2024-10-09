@@ -137,6 +137,7 @@ public abstract class Enemy extends SoundMakingEntity {
 
     private final Enemy enemy;
     private final Weapon weapon;
+    private final boolean attackingPlayer;
   }
 
   @Getter
