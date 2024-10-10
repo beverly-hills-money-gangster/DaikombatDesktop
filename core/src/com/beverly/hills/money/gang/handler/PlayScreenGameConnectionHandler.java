@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
+import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.entities.achievement.AchievementFactory;
 import com.beverly.hills.money.gang.entities.achievement.KillStats;
@@ -305,7 +306,7 @@ public class PlayScreenGameConnectionHandler {
                         .getUserSettingSound(SoundRegistry.ENEMY_PUNCH_THROWN))
                     .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
               } else {
-                enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()));
+                enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), false);
               }
             })
             .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build()));
@@ -328,10 +329,12 @@ public class PlayScreenGameConnectionHandler {
                 .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
                 .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
                 .onComplete(() -> {
-                  enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()));
+                  enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), true);
                   playScreen.getPlayer().getHit(gameEvent.getAffectedPlayer().getHealth());
-                  playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
-                      .VOICE_GET_HIT_SOUND_SEQ.getNextSound()).play(Constants.PLAYER_FX_VOLUME);
+                  new TimeLimitedSound(
+                      playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
+                          .VOICE_GET_HIT_SOUND_SEQ.getNextSound())).play(SoundVolumeType.LOW_QUIET,
+                      0.f, 1000);
                 })
                 .build());
           });
@@ -347,7 +350,7 @@ public class PlayScreenGameConnectionHandler {
               .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
               .onComplete(
                   () -> {
-                    enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()));
+                    enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), false);
                     enemiesRegistry.getEnemy(gameEvent.getAffectedPlayer().getPlayerId())
                         .ifPresent(EnemyPlayer::getHit);
                   })
@@ -373,7 +376,7 @@ public class PlayScreenGameConnectionHandler {
               .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
               .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
               .onComplete(() -> {
-                enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()));
+                enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), true);
                 playScreen.getPlayer().die(killedBy);
                 playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
                     .VOICE_GET_HIT_SOUND_SEQ.getNextSound()).play(Constants.PLAYER_FX_VOLUME);
@@ -412,7 +415,7 @@ public class PlayScreenGameConnectionHandler {
               .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
               .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
               .onComplete(() -> {
-                enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()));
+                enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), false);
                 enemiesRegistry.removeEnemy(
                     gameEvent.getAffectedPlayer().getPlayerId()).ifPresent(
                     Enemy::die);
@@ -450,7 +453,7 @@ public class PlayScreenGameConnectionHandler {
             .play(enemy.getSFXVolume(), enemy.getSFXPan()))
         .onGetShot(enemy -> new TimeLimitedSound(playScreen.getGame().getAssMan()
             .getUserSettingSound(SoundRegistry.ENEMY_GET_HIT_SOUND_SEQ.getNextSound()))
-            .play(enemy.getSFXVolume(), enemy.getSFXPan(), 1000))
+            .play(enemy.getSFXVolume(), enemy.getSFXPan(), 1500))
         .onAttack(enemyWeapon -> {
               var enemy = enemyWeapon.getEnemy();
               var sound = switch (enemyWeapon.getWeapon()) {
@@ -461,7 +464,8 @@ public class PlayScreenGameConnectionHandler {
               };
               new TimeLimitedSound(
                   playScreen.getGame().getAssMan().getUserSettingSound(sound))
-                  .play(enemy.getSFXVolume(), enemy.getSFXPan(),
+                  .play(enemyWeapon.isAttackingPlayer() ? SoundVolumeType.HIGH_LOUD
+                          : enemy.getSFXVolume(), enemy.getSFXPan(),
                       enemy.getEnemyEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)
                           ? playScreen.getGame()
                           .getAssMan()

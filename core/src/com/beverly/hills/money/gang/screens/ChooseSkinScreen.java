@@ -49,7 +49,7 @@ public class ChooseSkinScreen extends AbstractMainMenuScreen {
       boomSound1.play(Constants.DEFAULT_SFX_VOLUME);
       joinGameDataBuilder.skinUISelection(skinSelection.getSelectedOption());
       removeAllEntities();
-      getGame().setScreen(new ConnectServerScreen(getGame(), joinGameDataBuilder.build()));
+      getGame().setScreen(new ChoosePlayerClassScreen(getGame(), joinGameDataBuilder));
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));

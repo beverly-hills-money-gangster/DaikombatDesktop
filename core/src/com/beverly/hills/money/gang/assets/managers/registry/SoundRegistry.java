@@ -4,6 +4,7 @@ import com.beverly.hills.money.gang.assets.managers.sound.PseudoRandomSoundSeque
 import lombok.Getter;
 
 public enum SoundRegistry {
+
   ENEMY_PUNCH_THROWN("sfx/enemy_punch_thrown.mp3"),
   WEAPON_CHANGE("sfx/weapon_change.mp3"),
   ENEMY_RAILGUN("sfx/enemy_railgun.mp3"),
@@ -51,7 +52,7 @@ public enum SoundRegistry {
   VOICE_ENEMY_DEATH("voice/enemy/death/death.mp3"),
   VOICE_ENEMY_DEATH_2("voice/enemy/death/death_2.mp3"),
   VOICE_ENEMY_DEATH_3("voice/enemy/death/death_3.mp3"),
-  ENEMY_SHOTGUN("sfx/shotgun_mono.mp3"),
+  ENEMY_SHOTGUN("sfx/enemy_shotgun.mp3"),
   QUAD_DAMAGE_ATTACK("sfx/quad_damage_attack.mp3"),
   GAUNTLET_HUMILIATION("sfx/gauntlet_humiliation.mp3"),
   // TODO sounds like ass

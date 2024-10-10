@@ -118,12 +118,13 @@ public class EnemyPlayer extends Enemy {
     enemyPlayerActionQueueStrategy.enqueue(enemyPlayerAction, getRect().getOldPosition());
   }
 
-  public void attack(Weapon weapon) {
+  public void attack(Weapon weapon, boolean attackingPlayer) {
     if (weapon != Weapon.GAUNTLET) {
       shootingAnimationUntil = System.currentTimeMillis() + 100;
     }
     getEnemyListeners().getOnAttack()
-        .accept(EnemyWeapon.builder().weapon(weapon).enemy(this).build());
+        .accept(EnemyWeapon.builder().weapon(weapon).attackingPlayer(attackingPlayer)
+            .enemy(this).build());
   }
 
   @Override

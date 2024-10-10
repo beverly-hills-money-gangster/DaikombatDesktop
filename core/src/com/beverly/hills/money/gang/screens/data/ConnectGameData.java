@@ -1,5 +1,6 @@
 package com.beverly.hills.money.gang.screens.data;
 
+import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import io.micrometer.common.lang.Nullable;
 import lombok.Builder;
@@ -19,4 +20,5 @@ public class ConnectGameData {
   @Nullable
   private Integer playerIdToRecover;
   private SkinUISelection skinUISelection;
+  private PlayerClassUISelection playerClassUISelection;
 }

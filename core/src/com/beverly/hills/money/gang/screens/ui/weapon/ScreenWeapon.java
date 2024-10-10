@@ -184,7 +184,7 @@ public class ScreenWeapon {
         .map(WeaponState::getHitTargetSound)
         .ifPresent(
             userSettingSound -> new TimeLimitedSound(userSettingSound).play(SoundVolumeType.LOUD,
-                0.f, 250));
+                0.f, 500));
 
   }
 
@@ -216,7 +216,7 @@ public class ScreenWeapon {
       animationStart.put(weaponBeingUsed, System.currentTimeMillis());
       state.getFireSound().play(Constants.DEFAULT_SFX_VOLUME);
       if (player.getPlayerEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {
-        quadDamageAttack.play(SoundVolumeType.LOUD, 0, 350);
+        quadDamageAttack.play(SoundVolumeType.LOUD, 0, 450);
       }
       return true;
     } else {
