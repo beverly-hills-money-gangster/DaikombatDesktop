@@ -7,8 +7,8 @@ import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
 import com.beverly.hills.money.gang.proto.JoinGameCommand;
 import com.beverly.hills.money.gang.proto.MergeConnectionCommand;
 import com.beverly.hills.money.gang.proto.PlayerClass;
+import com.beverly.hills.money.gang.proto.PlayerSkinColor;
 import com.beverly.hills.money.gang.proto.ServerResponse;
-import com.beverly.hills.money.gang.proto.SkinColorSelection;
 import com.beverly.hills.money.gang.screens.data.ConnectGameData;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
@@ -52,7 +52,7 @@ public class JoinGameScreen extends ReconnectableScreen {
     var joinGameRequestBuilder = JoinGameCommand.newBuilder()
         .setVersion(ClientConfig.VERSION)
         .setGameId(Configs.GAME_ID)
-        .setSkin(creatSkinColorSelection(connectGameData.getSkinUISelection()))
+        .setSkin(createSkinColorSelection(connectGameData.getSkinUISelection()))
         .setPlayerClass(createPlayerClass(connectGameData.getPlayerClassUISelection()))
         .setPlayerName(connectGameData.getPlayerName());
     Optional.ofNullable(connectGameData.getPlayerIdToRecover())
@@ -62,14 +62,14 @@ public class JoinGameScreen extends ReconnectableScreen {
 
   }
 
-  private SkinColorSelection creatSkinColorSelection(SkinUISelection skinUISelection) {
+  private PlayerSkinColor createSkinColorSelection(SkinUISelection skinUISelection) {
     return switch (skinUISelection) {
-      case BLUE -> SkinColorSelection.BLUE;
-      case YELLOW -> SkinColorSelection.YELLOW;
-      case ORANGE -> SkinColorSelection.ORANGE;
-      case GREEN -> SkinColorSelection.GREEN;
-      case PINK -> SkinColorSelection.PINK;
-      case PURPLE -> SkinColorSelection.PURPLE;
+      case BLUE -> PlayerSkinColor.BLUE;
+      case YELLOW -> PlayerSkinColor.YELLOW;
+      case ORANGE -> PlayerSkinColor.ORANGE;
+      case GREEN -> PlayerSkinColor.GREEN;
+      case PINK -> PlayerSkinColor.PINK;
+      case PURPLE -> PlayerSkinColor.PURPLE;
     };
   }
 

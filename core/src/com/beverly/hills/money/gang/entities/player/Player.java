@@ -1,5 +1,7 @@
 package com.beverly.hills.money.gang.entities.player;
 
+import static com.beverly.hills.money.gang.Configs.SPEED_BOOST;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Buttons;
@@ -90,7 +92,7 @@ public class Player extends Entity {
       final int speed,
       final Map<Weapon, WeaponStats> weaponStats) {
     super(screen);
-    this.speed = speed;
+    this.speed = speed * SPEED_BOOST;
     screenWeapon = new ScreenWeapon(screen.getGame().getAssMan(), weaponStats);
     this.onMovementListener = onMovementListener;
     this.onAttackListener = onAttackListener;
