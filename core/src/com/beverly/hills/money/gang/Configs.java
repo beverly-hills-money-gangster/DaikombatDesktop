@@ -22,4 +22,6 @@ public interface Configs {
   int MAX_RECONNECTIONS = NumberUtils.toInt(
       System.getenv("DESKTOP_MAX_RECONNECTIONS"), 5);
 
+  int SPEED_BOOST = NumberUtils.toInt(System.getenv("DESKTOP_SPEED_BOOST"), 1);
+
 }

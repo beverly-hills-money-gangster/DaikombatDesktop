@@ -1,10 +1,10 @@
 package com.beverly.hills.money.gang.screens.ui.weapon;
 
-import com.beverly.hills.money.gang.proto.ServerResponse.GameEvent;
+import com.beverly.hills.money.gang.proto.WeaponType;
 
 public interface WeaponMapper {
 
-  static Weapon getWeapon(GameEvent.WeaponType weaponType) {
+  static Weapon getWeapon(WeaponType weaponType) {
     return switch (weaponType) {
       case PUNCH -> Weapon.GAUNTLET;
       case SHOTGUN -> Weapon.SHOTGUN;

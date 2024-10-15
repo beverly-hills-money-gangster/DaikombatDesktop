@@ -1,6 +1,7 @@
 package com.beverly.hills.money.gang.handler;
 
 import static com.beverly.hills.money.gang.Constants.DEFAULT_ENEMY_Y;
+import static com.beverly.hills.money.gang.proto.WeaponType.PUNCH;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -17,13 +18,16 @@ import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerAction;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerActionType;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
+import com.beverly.hills.money.gang.proto.PlayerClass;
+import com.beverly.hills.money.gang.proto.PlayerSkinColor;
 import com.beverly.hills.money.gang.proto.ServerResponse;
 import com.beverly.hills.money.gang.proto.ServerResponse.GameEvent.GameEventType;
-import com.beverly.hills.money.gang.proto.ServerResponse.GameEvent.WeaponType;
 import com.beverly.hills.money.gang.proto.ServerResponse.GamePowerUp;
 import com.beverly.hills.money.gang.proto.ServerResponse.GamePowerUpType;
+import com.beverly.hills.money.gang.proto.Vector;
 import com.beverly.hills.money.gang.registry.EnemiesRegistry;
 import com.beverly.hills.money.gang.screens.PlayScreen;
+import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponMapper;
 import com.beverly.hills.money.gang.utils.Converter;
 import java.util.Optional;
@@ -157,7 +161,9 @@ public class PlayScreenGameConnectionHandler {
         createVector(gameEvent.getPlayer().getDirection()),
         playScreen, gameEvent.getPlayer().getPlayerName(),
         getEnemyTexture(gameEvent.getPlayer().getSkinColor()), createEnemyListeners(),
-        playScreen.getPlayerConnectionContextData().getSpeed());
+        playScreen.getPlayerConnectionContextData().getSpeed(),
+        gameEvent.getPlayer().getHealth(),
+        createPlayerClass(gameEvent.getPlayer().getPlayerClass()).toString());
     gameEvent.getPlayer().getActivePowerUpsList().forEach(
         gamePowerUp -> activateEnemyPowerUpOnSpawn(
             enemyPlayer, getPowerUpType(gamePowerUp.getType()), gamePowerUp.getLastsForMls()));
@@ -188,13 +194,23 @@ public class PlayScreenGameConnectionHandler {
     }
   }
 
+  private PlayerClassUISelection createPlayerClass(PlayerClass playerClass) {
+    return switch (playerClass) {
+      case COMMONER -> PlayerClassUISelection.COMMONER;
+      case DRACULA_BERSERK -> PlayerClassUISelection.DRACULA_BERSERK;
+      case DEMON_TANK -> PlayerClassUISelection.DEMON_TANK;
+      case BEAST_WARRIOR -> PlayerClassUISelection.BEAST_WARRIOR;
+      default -> throw new IllegalArgumentException("Not supported class " + playerClass.name());
+    };
+  }
+
   private void activateEnemyPowerUpOnSpawn(EnemyPlayer enemyPlayer, PowerUpType powerUpType,
       int lastsForMls) {
     enemyPlayer.getEnemyEffects().activatePowerUp(powerUpType, lastsForMls);
     playScreen.removePowerUp(powerUpType);
   }
 
-  private TexturesRegistry getEnemyTexture(ServerResponse.PlayerSkinColor playerSkinColor) {
+  private TexturesRegistry getEnemyTexture(PlayerSkinColor playerSkinColor) {
     return switch (playerSkinColor) {
       case BLUE -> TexturesRegistry.ENEMY_PLAYER_SPRITES_BLUE;
       case PURPLE -> TexturesRegistry.ENEMY_PLAYER_SPRITES_PURPLE;
@@ -300,7 +316,7 @@ public class PlayScreenGameConnectionHandler {
             .enemyPlayerActionType(enemyPlayerActionType)
             .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
             .onComplete(() -> {
-              if (gameEvent.getWeaponType() == WeaponType.PUNCH) {
+              if (gameEvent.getWeaponType() == PUNCH) {
                 new TimeLimitedSound(
                     playScreen.getGame().getAssMan()
                         .getUserSettingSound(SoundRegistry.ENEMY_PUNCH_THROWN))
@@ -315,14 +331,17 @@ public class PlayScreenGameConnectionHandler {
   private void handleGetHit(ServerResponse.GameEvent gameEvent) {
     EnemyPlayerActionType enemyPlayerActionType = EnemyPlayerActionType.ATTACK;
 
-    // if I hit somebody, then do nothing. the animation is played one client immediately
-
-    // if I get hit
-    if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
+    // if I hit somebody
+    if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
         .getPlayerId()) {
-
+      enemiesRegistry.getEnemy(gameEvent.getAffectedPlayer().getPlayerId())
+          .ifPresent(enemyPlayer -> enemyPlayer.setHp(gameEvent.getAffectedPlayer().getHealth()));
+    } else if (gameEvent.getAffectedPlayer().getPlayerId()
+        == playScreen.getPlayerConnectionContextData().getPlayerId()) {
+      // if I get hit
       enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
           .ifPresent(enemyPlayer -> {
+            enemyPlayer.setHp(gameEvent.getPlayer().getHealth());
             enemyPlayer.queueAction(EnemyPlayerAction.builder()
                 .eventSequenceId(gameEvent.getSequence())
                 .enemyPlayerActionType(enemyPlayerActionType)
@@ -338,23 +357,26 @@ public class PlayScreenGameConnectionHandler {
                 })
                 .build());
           });
-    } else if (gameEvent.getPlayer().getPlayerId() != playScreen.getPlayerConnectionContextData()
-        .getPlayerId()) {
-
+    } else {
       // enemies hitting each other
       enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
-          .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
-              .eventSequenceId(gameEvent.getSequence())
-              .enemyPlayerActionType(enemyPlayerActionType)
-              .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
-              .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
-              .onComplete(
-                  () -> {
-                    enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), false);
-                    enemiesRegistry.getEnemy(gameEvent.getAffectedPlayer().getPlayerId())
-                        .ifPresent(EnemyPlayer::getHit);
-                  })
-              .build()));
+          .ifPresent(enemyPlayer -> {
+            enemyPlayer.setHp(gameEvent.getPlayer().getHealth());
+            enemyPlayer.queueAction(EnemyPlayerAction.builder()
+                .eventSequenceId(gameEvent.getSequence())
+                .enemyPlayerActionType(enemyPlayerActionType)
+                .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
+                .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
+                .onComplete(
+                    () -> {
+                      enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), false);
+                      enemiesRegistry.getEnemy(gameEvent.getAffectedPlayer().getPlayerId())
+                          .ifPresent(EnemyPlayer::getHit);
+                    })
+                .build());
+          });
+      enemiesRegistry.getEnemy(gameEvent.getAffectedPlayer().getPlayerId())
+          .ifPresent(enemyPlayer -> enemyPlayer.setHp(gameEvent.getAffectedPlayer().getHealth()));
 
     }
   }
@@ -474,7 +496,7 @@ public class PlayScreenGameConnectionHandler {
         ).build();
   }
 
-  private static Vector2 createVector(ServerResponse.Vector serverVector) {
+  private static Vector2 createVector(Vector serverVector) {
     return new Vector2(serverVector.getX(), serverVector.getY());
   }
 }

@@ -44,6 +44,13 @@ public class EnemyPlayer extends Enemy {
   @Getter
   private final String name;
 
+  @Getter
+  private final String enemyClass;
+
+  @Getter
+  @Setter
+  private int hp;
+
   private long movingAnimationUntil;
 
   private long shootingAnimationUntil;
@@ -66,9 +73,13 @@ public class EnemyPlayer extends Enemy {
       final String name,
       final TexturesRegistry enemyTextureRegistry,
       final EnemyListeners enemyListeners,
-      final int speed) {
+      final int speed,
+      final int hp,
+      final String enemyClass) {
 
     super(position, screen, player, enemyListeners);
+    this.hp = hp;
+    this.enemyClass = enemyClass;
     this.enemyPlayerId = enemyPlayerId;
     lastDirection = direction;
     enemyTextures = new EnemyTextures(screen.getGame().getAssMan(), enemyTextureRegistry);

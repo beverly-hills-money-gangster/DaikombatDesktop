@@ -36,7 +36,9 @@ import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
 import com.beverly.hills.money.gang.proto.PushChatEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand.GameEventType;
+import com.beverly.hills.money.gang.proto.Vector;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
+import com.beverly.hills.money.gang.screens.ui.EnemyAim;
 import com.beverly.hills.money.gang.screens.ui.selection.ActivePlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.DeadPlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
@@ -52,6 +54,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// TODO make killer log message 64
 @Getter
 public class PlayScreen extends GameScreen {
 
@@ -66,7 +69,7 @@ public class PlayScreen extends GameScreen {
   private static final float BLOOD_OVERLAY_ALPHA_SWITCH = 0.5f;
   private final TextureRegion texRegBloodOverlay, texRegBlackOverlay;
   private final Environment env;
-  private String enemyAimName;
+  private EnemyAim enemyAim;
   private final TextInputProcessor chatTextInputProcessor;
   private final BitmapFont guiFont64;
   private final BitmapFont guiFont32;
@@ -224,9 +227,9 @@ public class PlayScreen extends GameScreen {
                   .orElse(0))
           .setPlayerId(playerConnectionContextData.getPlayerId())
           .setEventType(GameEventType.TELEPORT)
-          .setPosition(PushGameEventCommand.Vector.newBuilder()
+          .setPosition(Vector.newBuilder()
               .setX(currentPosition.x).setY(currentPosition.y).build())
-          .setDirection(PushGameEventCommand.Vector.newBuilder()
+          .setDirection(Vector.newBuilder()
               .setX(currentDirection.x).setY(currentDirection.y).build())
           .setGameId(Configs.GAME_ID)
           .setTeleportId(teleportId)
@@ -256,9 +259,9 @@ public class PlayScreen extends GameScreen {
               .setPlayerId(playerConnectionContextData.getPlayerId())
               .setEventType(powerUpType.getPickType())
               .setGameId(Configs.GAME_ID)
-              .setPosition(PushGameEventCommand.Vector.newBuilder()
+              .setPosition(Vector.newBuilder()
                   .setX(currentPosition.x).setY(currentPosition.y).build())
-              .setDirection(PushGameEventCommand.Vector.newBuilder()
+              .setDirection(Vector.newBuilder()
                   .setX(currentDirection.x).setY(currentDirection.y).build())
               .build());
           removePowerUp(powerUpType);
@@ -405,9 +408,9 @@ public class PlayScreen extends GameScreen {
         .setPlayerId(playerConnectionContextData.getPlayerId())
         .setEventType(PushGameEventCommand.GameEventType.MOVE)
         .setGameId(Configs.GAME_ID)
-        .setPosition(PushGameEventCommand.Vector.newBuilder()
+        .setPosition(Vector.newBuilder()
             .setX(currentPosition.x).setY(currentPosition.y).build())
-        .setDirection(PushGameEventCommand.Vector.newBuilder()
+        .setDirection(Vector.newBuilder()
             .setX(currentDirection.x).setY(currentDirection.y).build())
         .build());
     setTimeToSendMoves();
@@ -458,7 +461,7 @@ public class PlayScreen extends GameScreen {
         powerUpEffect(Color.SKY, PowerUpType.QUAD_DAMAGE);
       } else if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.DEFENCE)) {
         powerUpEffect(Color.LIME, PowerUpType.DEFENCE);
-      }  else if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.INVISIBILITY)) {
+      } else if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.INVISIBILITY)) {
         powerUpEffect(Color.WHITE, PowerUpType.INVISIBILITY);
       }
     }
@@ -479,8 +482,8 @@ public class PlayScreen extends GameScreen {
     if (!getPlayer().isDead()) {
       if (myPlayerKillLog.hasKillerMessage()) {
         String killerMessage = myPlayerKillLog.getKillerMessage();
-        GlyphLayout glyphLayoutKillerMessage = new GlyphLayout(guiFont32, killerMessage);
-        guiFont32.draw(getGame().getBatch(), killerMessage,
+        GlyphLayout glyphLayoutKillerMessage = new GlyphLayout(guiFont64, killerMessage);
+        guiFont64.draw(getGame().getBatch(), killerMessage,
             getViewport().getWorldWidth() / 2f - glyphLayoutKillerMessage.width / 2f,
             getViewport().getWorldHeight() / 2f - glyphLayoutKillerMessage.height / 2f + 128);
       }
@@ -502,19 +505,35 @@ public class PlayScreen extends GameScreen {
           128 - 32 + 64 + glyphLayoutChatLog.height);
     }
 
-    if (enemyAimName != null) {
-      GlyphLayout enemyNameGlyph = new GlyphLayout(guiFont32, enemyAimName);
+    if (enemyAim != null) {
+
       guiFont32.setColor(1, 1, 1, 0.8f);
-      guiFont32.draw(getGame().getBatch(), enemyAimName,
-          getViewport().getWorldWidth() / 2f - enemyNameGlyph.width / 2f,
-          getViewport().getWorldHeight() / 2f - (enemyNameGlyph.height / 2f) + 32);
-      enemyAimName = null;
+      guiFont64.setColor(1, 1, 1, 0.8f);
+
+      GlyphLayout glyphName = new GlyphLayout(guiFont64, enemyAim.getName());
+      guiFont64.draw(getGame().getBatch(), enemyAim.getName(),
+          getViewport().getWorldWidth() / 2f - glyphName.width / 2f,
+          getViewport().getWorldHeight() / 2f - (glyphName.height / 2f) + 64);
+      GlyphLayout glyphClass = new GlyphLayout(guiFont32, enemyAim.getPlayerClass());
+      guiFont32.draw(getGame().getBatch(), enemyAim.getPlayerClass(),
+          getViewport().getWorldWidth() / 2f - glyphClass.width / 2f,
+          getViewport().getWorldHeight() / 2f - (glyphClass.height / 2f) + 64 - 32);
+      GlyphLayout glyphHP = new GlyphLayout(guiFont32, enemyAim.getHp());
+      guiFont32.draw(getGame().getBatch(), enemyAim.getHp(),
+          getViewport().getWorldWidth() / 2f - glyphHP.width / 2f,
+          getViewport().getWorldHeight() / 2f - (glyphHP.height / 2f) + 64 - 32 - 16);
+
+      enemyAim = null;
       guiFont32.setColor(1, 1, 1, 1);
+      guiFont64.setColor(1, 1, 1, 1);
     }
 
     getGame().getBatch().setColor(1, 1, 1, 1); // Never cover HUD in blood.
     if (!getPlayer().isDead()) {
-      guiFont64.draw(getGame().getBatch(), getPlayer().getCurrentHP() + " HP", 32, 128 - 32);
+      guiFont64.draw(getGame().getBatch(),
+          getPlayer().getCurrentHP() + " HP | " + playerConnectionContextData.getConnectGameData()
+              .getPlayerName() + " | " + playerConnectionContextData.getConnectGameData()
+              .getPlayerClassUISelection().toString(), 32, 128 - 32);
       guiFont64.draw(getGame().getBatch(), "+",
           getViewport().getWorldWidth() / 2f - glyphLayoutAim.width / 2f,
           getViewport().getWorldHeight() / 2f - glyphLayoutAim.height / 2f);
@@ -665,7 +684,7 @@ public class PlayScreen extends GameScreen {
     gameConnection.disconnect();
   }
 
-  public void setEnemyAimName(String name) {
-    this.enemyAimName = name;
+  public void setEnemyAim(EnemyAim enemyAim) {
+    this.enemyAim = enemyAim;
   }
 }

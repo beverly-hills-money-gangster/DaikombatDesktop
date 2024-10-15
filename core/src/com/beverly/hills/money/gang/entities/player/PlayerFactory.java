@@ -5,9 +5,11 @@ import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand.GameEventType;
-import com.beverly.hills.money.gang.proto.PushGameEventCommand.WeaponType;
+import com.beverly.hills.money.gang.proto.Vector;
+import com.beverly.hills.money.gang.proto.WeaponType;
 import com.beverly.hills.money.gang.screens.PlayScreen;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
+import com.beverly.hills.money.gang.screens.ui.EnemyAim;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +29,8 @@ public class PlayerFactory {
             LOG.warn("Can't shoot while being teleported");
             return;
           }
-          PushGameEventCommand.WeaponType weaponType = switch (playerWeapon.getWeapon()) {
-            case GAUNTLET -> PushGameEventCommand.WeaponType.PUNCH;
+          WeaponType weaponType = switch (playerWeapon.getWeapon()) {
+            case GAUNTLET -> WeaponType.PUNCH;
             case SHOTGUN -> WeaponType.SHOTGUN;
             case RAILGUN -> WeaponType.RAILGUN;
             case MINIGUN -> WeaponType.MINIGUN;
@@ -46,10 +48,10 @@ public class PlayerFactory {
                 .setPlayerId(playerConnectionContextData.getPlayerId())
                 .setSequence(screen.getActionSequence().incrementAndGet())
                 .setDirection(
-                    PushGameEventCommand.Vector.newBuilder().setX(direction.x).setY(direction.y)
+                    Vector.newBuilder().setX(direction.x).setY(direction.y)
                         .build())
                 .setPosition(
-                    PushGameEventCommand.Vector.newBuilder().setX(position.x).setY(position.y)
+                    Vector.newBuilder().setX(position.x).setY(position.y)
                         .build())
                 .setAffectedPlayerId(enemy.getEnemyPlayerId())
                 .setEventType(GameEventType.ATTACK)
@@ -66,10 +68,10 @@ public class PlayerFactory {
                         .orElse(0))
                 .setPlayerId(playerConnectionContextData.getPlayerId())
                 .setDirection(
-                    PushGameEventCommand.Vector.newBuilder().setX(direction.x).setY(direction.y)
+                    Vector.newBuilder().setX(direction.x).setY(direction.y)
                         .build())
                 .setPosition(
-                    PushGameEventCommand.Vector.newBuilder().setX(position.x).setY(position.y)
+                    Vector.newBuilder().setX(position.x).setY(position.y)
                         .build())
                 .setWeaponType(weaponType)
                 .setEventType(GameEventType.ATTACK)
@@ -78,7 +80,10 @@ public class PlayerFactory {
         },
         enemy -> {
           if (!enemy.getEnemyEffects().isPowerUpActive(PowerUpType.INVISIBILITY)) {
-            screen.setEnemyAimName(enemy.getName());
+            screen.setEnemyAim(
+                EnemyAim.builder().name(enemy.getName()).hp(enemy.getHp())
+                    .playerClass(enemy.getEnemyClass())
+                    .build());
           }
         },
         player -> {
