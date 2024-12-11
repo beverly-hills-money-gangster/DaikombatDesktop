@@ -60,12 +60,16 @@ public class UILeaderBoard {
     setMyStats();
   }
 
-  public String getFirstPlace() {
+  public String getFirstPlaceString() {
     if (leaderBoardItems.isEmpty()) {
       return "";
     }
     var leader = leaderBoardItems.get(0);
     return leader.name + " | " + getFirstPlaceStats();
+  }
+
+  public int getFirstPlacePlayerId() {
+    return leaderBoardItems.get(0).id;
   }
 
   private LeaderBoardPlayer getLeader() {

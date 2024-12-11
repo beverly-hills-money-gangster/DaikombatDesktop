@@ -82,7 +82,7 @@ public class PlayerFactory {
           if (!enemy.getEnemyEffects().isPowerUpActive(PowerUpType.INVISIBILITY)) {
             screen.setEnemyAim(
                 EnemyAim.builder().name(enemy.getName()).hp(enemy.getHp())
-                    .playerClass(enemy.getEnemyClass())
+                    .playerClass(enemy.getEnemyClass().toString())
                     .build());
           }
         },

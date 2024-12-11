@@ -41,6 +41,8 @@ import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.screens.ui.EnemyAim;
 import com.beverly.hills.money.gang.screens.ui.selection.ActivePlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.DeadPlayUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import java.util.HashMap;
 import java.util.Map;
@@ -559,8 +561,20 @@ public class PlayScreen extends GameScreen {
       showGuiMenu = true;
     }
     if (gameOver) {
+      PlayerClassUISelection winnerClass;
+      SkinUISelection winnerColor;
+      if (uiLeaderBoard.getFirstPlacePlayerId() == playerConnectionContextData.getPlayerId()) {
+        winnerClass = playerConnectionContextData.getConnectGameData().getPlayerClassUISelection();
+        winnerColor = playerConnectionContextData.getConnectGameData().getSkinUISelection();
+      } else {
+        var enemyWinner = playScreenGameConnectionHandler.getEnemiesRegistry()
+            .getEnemy(uiLeaderBoard.getFirstPlacePlayerId()).orElseThrow(
+                () -> new IllegalStateException("Can't find enemy by id"));
+        winnerClass = enemyWinner.getEnemyClass();
+        winnerColor = enemyWinner.getSkinUISelection();
+      }
       screenToTransition = new GameOverScreen(getGame(), uiLeaderBoard,
-          playerConnectionContextData.getConnectGameData());
+          playerConnectionContextData.getConnectGameData(), winnerColor, winnerClass);
     } else if (gameConnection.isAnyDisconnected()) {
       gameConnection.pollErrors().forEach(playScreenGameConnectionHandler::handleException);
       playerConnectionContextData.getConnectGameData()

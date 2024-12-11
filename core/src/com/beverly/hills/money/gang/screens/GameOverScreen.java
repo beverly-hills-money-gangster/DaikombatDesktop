@@ -12,10 +12,14 @@ import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
+import com.beverly.hills.money.gang.entities.enemies.EnemyTextures;
 import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
 import com.beverly.hills.money.gang.screens.data.ConnectGameData;
 import com.beverly.hills.money.gang.screens.ui.selection.GameOverUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
+import com.beverly.hills.money.gang.screens.ui.skin.SkinSelectAnimation;
 
 public class GameOverScreen extends AbstractMainMenuScreen {
 
@@ -29,13 +33,18 @@ public class GameOverScreen extends AbstractMainMenuScreen {
   private boolean showLeaderBoard;
   private final String leaderMessage;
   private final ConnectGameData connectGameData;
+
+  private final SkinSelectAnimation winnerSkinSelectAnimation;
   private final UISelection<GameOverUISelection> menuSelection = new UISelection<>(
       GameOverUISelection.values());
 
 
+  // TODO add more manual tests for that
   public GameOverScreen(final DaiKombatGame game,
       final UILeaderBoard uiLeaderBoard,
-      final ConnectGameData connectGameData) {
+      final ConnectGameData connectGameData,
+      final SkinUISelection winnerSkinColor,
+      final PlayerClassUISelection winnerClass) {
 
     super(game);
     guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
@@ -45,15 +54,17 @@ public class GameOverScreen extends AbstractMainMenuScreen {
     youWinMusic = game.getAssMan().getUserSettingSound(SoundRegistry.WIN_MUSIC);
     this.connectGameData = connectGameData;
     this.uiLeaderBoard = uiLeaderBoard;
-
+    this.showLogo = false;
     if (uiLeaderBoard.getMyPlace() == 1) {
       stopBgMusic();
       youWinMusic.play(DEFAULT_MUSIC_VOLUME * 1.2f);
       leaderMessage = "YOU WIN | " + uiLeaderBoard.getFirstPlaceStats();
     } else {
-      leaderMessage = "WINNER IS " + uiLeaderBoard.getFirstPlace();
+      leaderMessage = "WINNER IS " + uiLeaderBoard.getFirstPlaceString();
     }
     glyphLayoutWinner = new GlyphLayout(guiFont64, leaderMessage);
+    winnerSkinSelectAnimation = new SkinSelectAnimation(new EnemyTextures(game.getAssMan(),
+        winnerClass, winnerSkinColor), this);
   }
 
   @Override
@@ -94,14 +105,13 @@ public class GameOverScreen extends AbstractMainMenuScreen {
     getGame().getBatch().begin();
 
     if (showLeaderBoard) {
-      showLogo = false;
       String leaderBoard = uiLeaderBoard.toString();
       var glyphLayoutRecSentMessages = new GlyphLayout(guiFont64, leaderBoard);
       guiFont64.draw(getGame().getBatch(),
           leaderBoard, getViewport().getWorldWidth() / 2f - glyphLayoutRecSentMessages.width / 2f,
           getViewport().getWorldHeight() - 128);
     } else {
-      showLogo = true;
+      winnerSkinSelectAnimation.render();
       String pressTabToSeeLeaderboard = "PRESS TAB TO SEE LEADERBOARD";
       GlyphLayout glyphLayoutLeaderBoardHint = new GlyphLayout(guiFont32, pressTabToSeeLeaderboard);
       guiFont32.draw(getGame().getBatch(), pressTabToSeeLeaderboard,

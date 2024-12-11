@@ -7,7 +7,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
-import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.entities.achievement.AchievementFactory;
@@ -28,10 +27,12 @@ import com.beverly.hills.money.gang.proto.Vector;
 import com.beverly.hills.money.gang.registry.EnemiesRegistry;
 import com.beverly.hills.money.gang.screens.PlayScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponMapper;
 import com.beverly.hills.money.gang.utils.Converter;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -44,6 +45,7 @@ public class PlayScreenGameConnectionHandler {
 
   private final PlayScreen playScreen;
 
+  @Getter
   private final EnemiesRegistry enemiesRegistry = new EnemiesRegistry();
 
   private final KillStats killStats = new KillStats();
@@ -160,10 +162,10 @@ public class PlayScreenGameConnectionHandler {
             DEFAULT_ENEMY_Y, gameEvent.getPlayer().getPosition().getY()),
         createVector(gameEvent.getPlayer().getDirection()),
         playScreen, gameEvent.getPlayer().getPlayerName(),
-        getEnemyTexture(gameEvent.getPlayer().getSkinColor()), createEnemyListeners(),
+        getSkinColor(gameEvent.getPlayer().getSkinColor()), createEnemyListeners(),
         playScreen.getPlayerConnectionContextData().getSpeed(),
         gameEvent.getPlayer().getHealth(),
-        createPlayerClass(gameEvent.getPlayer().getPlayerClass()).toString());
+        createPlayerClass(gameEvent.getPlayer().getPlayerClass()));
     gameEvent.getPlayer().getActivePowerUpsList().forEach(
         gamePowerUp -> activateEnemyPowerUpOnSpawn(
             enemyPlayer, getPowerUpType(gamePowerUp.getType()), gamePowerUp.getLastsForMls()));
@@ -196,10 +198,9 @@ public class PlayScreenGameConnectionHandler {
 
   private PlayerClassUISelection createPlayerClass(PlayerClass playerClass) {
     return switch (playerClass) {
-      case COMMONER -> PlayerClassUISelection.COMMONER;
-      case DRACULA_BERSERK -> PlayerClassUISelection.DRACULA_BERSERK;
+      case WARRIOR -> PlayerClassUISelection.WARRIOR;
       case DEMON_TANK -> PlayerClassUISelection.DEMON_TANK;
-      case BEAST_WARRIOR -> PlayerClassUISelection.BEAST_WARRIOR;
+      case ANGRY_SKELETON -> PlayerClassUISelection.ANGRY_SKELETON;
       default -> throw new IllegalArgumentException("Not supported class " + playerClass.name());
     };
   }
@@ -210,14 +211,15 @@ public class PlayScreenGameConnectionHandler {
     playScreen.removePowerUp(powerUpType);
   }
 
-  private TexturesRegistry getEnemyTexture(PlayerSkinColor playerSkinColor) {
+  private SkinUISelection getSkinColor(
+      PlayerSkinColor playerSkinColor) {
     return switch (playerSkinColor) {
-      case BLUE -> TexturesRegistry.ENEMY_PLAYER_SPRITES_BLUE;
-      case PURPLE -> TexturesRegistry.ENEMY_PLAYER_SPRITES_PURPLE;
-      case PINK -> TexturesRegistry.ENEMY_PLAYER_SPRITES_PINK;
-      case GREEN -> TexturesRegistry.ENEMY_PLAYER_SPRITES_GREEN;
-      case ORANGE -> TexturesRegistry.ENEMY_PLAYER_SPRITES_ORANGE;
-      case YELLOW -> TexturesRegistry.ENEMY_PLAYER_SPRITES_YELLOW;
+      case BLUE -> SkinUISelection.BLUE;
+      case PURPLE -> SkinUISelection.PURPLE;
+      case PINK -> SkinUISelection.PINK;
+      case GREEN -> SkinUISelection.GREEN;
+      case ORANGE -> SkinUISelection.ORANGE;
+      case YELLOW -> SkinUISelection.YELLOW;
       default -> throw new IllegalStateException("Not supported skin color " + playerSkinColor);
     };
   }

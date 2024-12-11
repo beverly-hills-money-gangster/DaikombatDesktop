@@ -12,9 +12,12 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.MapRegistry;
+import com.beverly.hills.money.gang.assets.managers.registry.SkinTextureTemplateRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
+import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import java.util.Arrays;
 
 public class DaiKombatAssetsManager {
@@ -24,6 +27,7 @@ public class DaiKombatAssetsManager {
 
   public DaiKombatAssetsManager() {
     loadTextures();
+    loadSkins();
     loadSounds();
     loadFonts();
     loadMaps();
@@ -40,6 +44,12 @@ public class DaiKombatAssetsManager {
   public TextureRegion getTextureRegion(final TexturesRegistry texturesRegistry, int x, int y,
       int width, int height) {
     return new TextureRegion((Texture) assetManager.get(texturesRegistry.getFileName()), x, y,
+        width, height);
+  }
+
+  public TextureRegion getTextureRegion(final String fileName, int x, int y,
+      int width, int height) {
+    return new TextureRegion((Texture) assetManager.get(fileName), x, y,
         width, height);
   }
 
@@ -88,5 +98,13 @@ public class DaiKombatAssetsManager {
   public void loadTextures() {
     Arrays.stream(TexturesRegistry.values()).forEach(texturesRegistry
         -> assetManager.load(texturesRegistry.getFileName(), Texture.class));
+  }
+
+  public void loadSkins() {
+    Arrays.stream(PlayerClassUISelection.values()).forEach(
+        playerClassUISelection -> Arrays.stream(SkinUISelection.values()).forEach(skinUISelection
+            -> assetManager.load(
+            SkinTextureTemplateRegistry
+                .getTextureForClass(playerClassUISelection, skinUISelection), Texture.class)));
   }
 }
