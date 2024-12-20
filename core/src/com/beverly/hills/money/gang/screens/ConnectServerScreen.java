@@ -7,6 +7,7 @@ import com.beverly.hills.money.gang.network.GameConnection;
 import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
 import com.beverly.hills.money.gang.network.SecondaryGameConnection;
 import com.beverly.hills.money.gang.proto.GetServerInfoCommand;
+import com.beverly.hills.money.gang.proto.ServerResponse.ProjectileInfo;
 import com.beverly.hills.money.gang.proto.ServerResponse.WeaponInfo;
 import com.beverly.hills.money.gang.screens.data.ConnectGameData;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
@@ -109,7 +110,9 @@ public class ConnectServerScreen extends ReconnectableScreen {
               playerContextDataBuilder.movesUpdateFreqMls(serverInfo.getMovesUpdateFreqMls());
               playerContextDataBuilder.fragsToWin(serverInfo.getFragsToWin());
               playerContextDataBuilder.speed(serverInfo.getPlayerSpeed());
-              playerContextDataBuilder.weaponStats(getWeaponStats(serverInfo.getWeaponsInfoList()));
+              playerContextDataBuilder.weaponStats(getWeaponStats(
+                  serverInfo.getWeaponsInfoList(),
+                  serverInfo.getProjectileInfoList()));
               removeAllEntities();
               LOG.info("Got server info. Try join the game");
               getGame().setScreen(new JoinGameScreen(getGame(),
@@ -125,13 +128,22 @@ public class ConnectServerScreen extends ReconnectableScreen {
   }
 
 
-  private Map<Weapon, WeaponStats> getWeaponStats(List<WeaponInfo> weaponInfo) {
+  private Map<Weapon, WeaponStats> getWeaponStats(
+      List<WeaponInfo> weaponInfo,
+      List<ProjectileInfo> projectileInfo) {
     Map<Weapon, WeaponStats> weaponStats = new HashMap<>();
-    weaponInfo.forEach(info -> weaponStats.put(WeaponMapper.getWeapon(info.getWeaponType()),
-        WeaponStats.builder()
-            .delayMls(info.getDelayMls())
-            .maxDistance((float) info.getMaxDistance() - Constants.HALF_UNIT)
-            .build()));
+    weaponInfo.forEach(info -> {
+      var weapon = WeaponMapper.getWeapon(info.getWeaponType());
+      weaponStats.put(weapon,
+          WeaponStats.builder()
+              .delayMls(info.getDelayMls())
+              .projectileRadius(projectileInfo.stream().filter(
+                      projectile -> WeaponMapper.getWeaponProjectile(projectile.getProjectileType())
+                          == weapon.getProjectileRef()).findFirst()
+                  .map(projectile -> (float) projectile.getRadius()).orElse(null))
+              .maxDistance((float) info.getMaxDistance() - Constants.HALF_UNIT)
+              .build());
+    });
     if (weaponStats.size() != Weapon.values().length) {
       throw new IllegalStateException("Not all weapons have max distance");
     }

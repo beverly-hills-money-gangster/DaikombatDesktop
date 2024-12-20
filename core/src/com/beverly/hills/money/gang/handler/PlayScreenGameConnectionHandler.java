@@ -25,19 +25,25 @@ import com.beverly.hills.money.gang.proto.ServerResponse.GamePowerUp;
 import com.beverly.hills.money.gang.proto.ServerResponse.GamePowerUpType;
 import com.beverly.hills.money.gang.proto.Vector;
 import com.beverly.hills.money.gang.registry.EnemiesRegistry;
+import com.beverly.hills.money.gang.registry.EnemyPlayerProjectileBoomFactoriesRegistry;
+import com.beverly.hills.money.gang.registry.EnemyPlayerProjectileShootingFactoriesRegistry;
 import com.beverly.hills.money.gang.screens.PlayScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
+import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponMapper;
 import com.beverly.hills.money.gang.utils.Converter;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+// TODO player can hit and kill themselves
+// TODO add manual tests for that
+// TODO this affects leaderboards
 @RequiredArgsConstructor
 public class PlayScreenGameConnectionHandler {
 
@@ -45,8 +51,12 @@ public class PlayScreenGameConnectionHandler {
 
   private final PlayScreen playScreen;
 
-  @Getter
-  private final EnemiesRegistry enemiesRegistry = new EnemiesRegistry();
+  private final EnemiesRegistry enemiesRegistry;
+
+  private final EnemyPlayerProjectileBoomFactoriesRegistry enemyPlayerProjectileBoomFactoriesRegistry
+      = new EnemyPlayerProjectileBoomFactoriesRegistry();
+  private final EnemyPlayerProjectileShootingFactoriesRegistry enemyPlayerProjectileShootingFactoriesRegistry
+      = new EnemyPlayerProjectileShootingFactoriesRegistry();
 
   private final KillStats killStats = new KillStats();
 
@@ -305,26 +315,49 @@ public class PlayScreenGameConnectionHandler {
         .getPlayerId()) {
       return;
     }
-    EnemyPlayerActionType enemyPlayerActionType = switch (gameEvent.getWeaponType()) {
-      // if we missed the punch then we just move to the position
-      case PUNCH -> EnemyPlayerActionType.MOVE;
-      case SHOTGUN, RAILGUN, MINIGUN -> EnemyPlayerActionType.ATTACK;
-      default -> throw new IllegalArgumentException(
-          "Not supported event type " + gameEvent.getEventType());
-    };
+    EnemyPlayerActionType enemyPlayerActionType =
+        gameEvent.hasWeaponType() ? switch (gameEvent.getWeaponType()) {
+          // if we missed the punch then we just move to the position
+          case PUNCH -> EnemyPlayerActionType.MOVE;
+          case SHOTGUN, RAILGUN, MINIGUN, ROCKET_LAUNCHER -> EnemyPlayerActionType.ATTACK;
+          default -> throw new IllegalArgumentException(
+              "Not supported weapon type " + gameEvent.getWeaponType());
+        } : EnemyPlayerActionType.MOVE;
+
+    if (gameEvent.hasWeaponType()) {
+      Optional.ofNullable(WeaponMapper.getWeapon(gameEvent.getWeaponType()).getProjectileRef())
+          .ifPresent(
+              projectile -> {
+                var position = Converter.convertToVector2(gameEvent.getPlayer().getPosition());
+                var direction = Converter.convertToVector2(gameEvent.getPlayer().getDirection());
+                playScreen.getGame().getEntMan()
+                    .addEntity(enemyPlayerProjectileShootingFactoriesRegistry.get(projectile)
+                        .create(position, direction, playScreen.getPlayer()));
+              });
+    }
+
     enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
         .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
             .eventSequenceId(gameEvent.getSequence())
             .enemyPlayerActionType(enemyPlayerActionType)
             .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
             .onComplete(() -> {
-              if (gameEvent.getWeaponType() == PUNCH) {
-                new TimeLimitedSound(
-                    playScreen.getGame().getAssMan()
-                        .getUserSettingSound(SoundRegistry.ENEMY_PUNCH_THROWN))
-                    .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
-              } else {
-                enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), false);
+              if (gameEvent.hasWeaponType()) {
+                if (gameEvent.getWeaponType() == PUNCH) {
+                  new TimeLimitedSound(
+                      playScreen.getGame().getAssMan()
+                          .getUserSettingSound(SoundRegistry.ENEMY_PUNCH_THROWN))
+                      .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
+                } else {
+                  enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), false);
+                }
+              } else if (gameEvent.hasProjectile()) {
+                var boomPosition = Converter.convertToVector2(
+                    gameEvent.getProjectile().getPosition());
+                playScreen.getGame().getEntMan().addEntity(
+                    enemyPlayerProjectileBoomFactoriesRegistry.get(WeaponMapper.getWeaponProjectile(
+                            gameEvent.getProjectile().getProjectileType()))
+                        .create(boomPosition, playScreen.getPlayer()));
               }
             })
             .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition())).build()));
@@ -336,8 +369,14 @@ public class PlayScreenGameConnectionHandler {
     // if I hit somebody
     if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
         .getPlayerId()) {
-      enemiesRegistry.getEnemy(gameEvent.getAffectedPlayer().getPlayerId())
-          .ifPresent(enemyPlayer -> enemyPlayer.setHp(gameEvent.getAffectedPlayer().getHealth()));
+      // if I hit myself
+      if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
+          .getPlayerId()) {
+        playScreen.getPlayer().setHP(gameEvent.getAffectedPlayer().getHealth());
+      } else {
+        enemiesRegistry.getEnemy(gameEvent.getAffectedPlayer().getPlayerId())
+            .ifPresent(enemyPlayer -> enemyPlayer.setHp(gameEvent.getAffectedPlayer().getHealth()));
+      }
     } else if (gameEvent.getAffectedPlayer().getPlayerId()
         == playScreen.getPlayerConnectionContextData().getPlayerId()) {
       // if I get hit
@@ -350,7 +389,16 @@ public class PlayScreenGameConnectionHandler {
                 .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
                 .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
                 .onComplete(() -> {
-                  enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), true);
+                  if (gameEvent.hasWeaponType()) {
+                    enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), true);
+                  } else if (gameEvent.hasProjectile()) {
+                    playScreen.getGame().getEntMan().addEntity(
+                        enemyPlayerProjectileBoomFactoriesRegistry.get(
+                                WeaponMapper.getWeaponProjectile(
+                                    gameEvent.getProjectile().getProjectileType()))
+                            .create(playScreen.getPlayer().getCurrent2DPosition(),
+                                playScreen.getPlayer()));
+                  }
                   playScreen.getPlayer().getHit(gameEvent.getAffectedPlayer().getHealth());
                   new TimeLimitedSound(
                       playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
@@ -371,7 +419,19 @@ public class PlayScreenGameConnectionHandler {
                 .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
                 .onComplete(
                     () -> {
-                      enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), false);
+                      if (gameEvent.hasWeaponType()) {
+                        enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()),
+                            false);
+                      } else {
+                        playScreen.getGame().getEntMan().addEntity(
+                            enemyPlayerProjectileBoomFactoriesRegistry.get(
+                                    WeaponMapper.getWeaponProjectile(
+                                        gameEvent.getProjectile().getProjectileType()))
+                                .create(
+                                    Converter.convertToVector2(
+                                        gameEvent.getProjectile().getPosition()),
+                                    playScreen.getPlayer()));
+                      }
                       enemiesRegistry.getEnemy(gameEvent.getAffectedPlayer().getPlayerId())
                           .ifPresent(EnemyPlayer::getHit);
                     })
@@ -388,30 +448,38 @@ public class PlayScreenGameConnectionHandler {
     EnemyPlayerActionType enemyPlayerActionType = EnemyPlayerActionType.ATTACK;
     playScreen.getUiLeaderBoard().registerKill(gameEvent.getPlayer().getPlayerId(),
         gameEvent.getAffectedPlayer().getPlayerId());
+
     if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
         .getPlayerId()) {
-      String killedBy = enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
-          .map(EnemyPlayer::getName).orElse("killer");
-
-      enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
-          .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
-              .eventSequenceId(gameEvent.getSequence())
-              .enemyPlayerActionType(enemyPlayerActionType)
-              .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
-              .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
-              .onComplete(() -> {
-                enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), true);
-                playScreen.getPlayer().die(killedBy);
-                playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
-                    .VOICE_GET_HIT_SOUND_SEQ.getNextSound()).play(Constants.PLAYER_FX_VOLUME);
-                playScreen.getGame().getAssMan()
-                    .getUserSettingSound(SoundRegistry.LOOSING_SOUND_SEQ.getNextSound())
-                    .play(Constants.MK_NARRATOR_FX_VOLUME);
-                playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.BELL)
-                    .play(Constants.DEFAULT_SFX_VOLUME);
-              })
-              .build()));
-
+      // if I get killed
+      if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
+          .getPlayerId()) {
+        // if I get killed by myself
+        diePlayer("yourself");
+      } else {
+        String killedBy = enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
+            .map(EnemyPlayer::getName).orElse("killer");
+        enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
+            .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
+                .eventSequenceId(gameEvent.getSequence())
+                .enemyPlayerActionType(enemyPlayerActionType)
+                .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
+                .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
+                .onComplete(() -> {
+                  if (gameEvent.hasWeaponType()) {
+                    enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), true);
+                  } else if (gameEvent.hasProjectile()) {
+                    playScreen.getGame().getEntMan().addEntity(
+                        enemyPlayerProjectileBoomFactoriesRegistry.get(
+                                WeaponMapper.getWeaponProjectile(
+                                    gameEvent.getProjectile().getProjectileType()))
+                            .create(playScreen.getPlayer().getCurrent2DPosition(),
+                                playScreen.getPlayer()));
+                  }
+                  diePlayer(killedBy);
+                })
+                .build()));
+      }
       LOG.info("I'm dead");
     } else if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
         .getPlayerId()) {
@@ -425,12 +493,16 @@ public class PlayScreenGameConnectionHandler {
       playScreen.getMyPlayerKillLog()
           .myPlayerKill(victimPlayerOpt.map(EnemyPlayer::getName).orElse("victim"), buff);
       killStats.registerKill();
-      AchievementFactory.create(WeaponMapper.getWeapon(gameEvent.getWeaponType()), killStats)
-          .ifPresent(
-              achievement -> playScreen.getNarratorSoundQueue()
-                  .addSound(playScreen.getGame().getAssMan()
-                      .getUserSettingSound(achievement.getSound())));
-
+      var weapon = gameEvent.hasWeaponType() ? WeaponMapper.getWeapon(gameEvent.getWeaponType())
+          : Weapon.getWeaponForProjectile(
+              WeaponMapper.getWeaponProjectile(gameEvent.getProjectile().getProjectileType()));
+      if (gameEvent.hasWeaponType()) {
+        AchievementFactory.create(weapon, killStats)
+            .ifPresent(
+                achievement -> playScreen.getNarratorSoundQueue()
+                    .addSound(playScreen.getGame().getAssMan()
+                        .getUserSettingSound(achievement.getSound())));
+      }
     } else {
       enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
           .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
@@ -439,7 +511,17 @@ public class PlayScreenGameConnectionHandler {
               .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
               .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
               .onComplete(() -> {
-                enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), false);
+                if (gameEvent.hasWeaponType()) {
+                  enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), false);
+                } else if (gameEvent.hasProjectile()) {
+                  playScreen.getGame().getEntMan().addEntity(
+                      enemyPlayerProjectileBoomFactoriesRegistry.get(
+                              WeaponMapper.getWeaponProjectile(
+                                  gameEvent.getProjectile().getProjectileType()))
+                          .create(
+                              Converter.convertToVector2(gameEvent.getProjectile().getPosition()),
+                              playScreen.getPlayer()));
+                }
                 enemiesRegistry.removeEnemy(
                     gameEvent.getAffectedPlayer().getPlayerId()).ifPresent(
                     Enemy::die);
@@ -485,6 +567,7 @@ public class PlayScreenGameConnectionHandler {
                 case GAUNTLET -> SoundRegistry.ENEMY_PUNCH_HIT;
                 case RAILGUN -> SoundRegistry.ENEMY_RAILGUN;
                 case MINIGUN -> SoundRegistry.ENEMY_MINIGUN;
+                case ROCKET_LAUNCHER -> SoundRegistry.ENEMY_ROCKET_LAUNCHER;
               };
               new TimeLimitedSound(
                   playScreen.getGame().getAssMan().getUserSettingSound(sound))
@@ -496,6 +579,17 @@ public class PlayScreenGameConnectionHandler {
                           .getUserSettingSound(SoundRegistry.ENEMY_QUAD_DAMAGE_ATTACK) : null);
             }
         ).build();
+  }
+
+  private void diePlayer(final String killedBy) {
+    playScreen.getPlayer().die(killedBy);
+    playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
+        .VOICE_GET_HIT_SOUND_SEQ.getNextSound()).play(Constants.PLAYER_FX_VOLUME);
+    playScreen.getGame().getAssMan()
+        .getUserSettingSound(SoundRegistry.LOOSING_SOUND_SEQ.getNextSound())
+        .play(Constants.MK_NARRATOR_FX_VOLUME);
+    playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.BELL)
+        .play(Constants.DEFAULT_SFX_VOLUME);
   }
 
   private static Vector2 createVector(Vector serverVector) {

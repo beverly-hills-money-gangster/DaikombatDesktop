@@ -15,7 +15,7 @@ public class EnemyPlayerActionQueueStrategy {
 
   private static final Logger LOG = LoggerFactory.getLogger(EnemyPlayerActionQueueStrategy.class);
 
-  protected static final int MAX_ACTION_QUEUE_CLOGGING = 30;
+  protected static final int MAX_ACTION_QUEUE_CLOGGING = 15;
 
   private static final double TOO_MUCH_DISTANCE_TRAVELLED = 5;
 
@@ -43,9 +43,13 @@ public class EnemyPlayerActionQueueStrategy {
     // if out-of-order
     if (enemyPlayerAction.getEventSequenceId() < lastEventSequenceId) {
       switch (enemyPlayerAction.getEnemyPlayerActionType()) {
-        case MOVE -> LOG.warn(
-            "MOVE event is out of order. Last event sequence id {} but given {}. Skip event.",
-            lastEventSequenceId, enemyPlayerAction.getEventSequenceId());
+        case MOVE -> {
+          // TODO test this
+          LOG.warn(
+              "MOVE event is out of order. Last event sequence id {} but given {}. Skip event.",
+              lastEventSequenceId, enemyPlayerAction.getEventSequenceId());
+          Optional.ofNullable(enemyPlayerAction.getOnComplete()).ifPresent(Runnable::run);
+        }
         case ATTACK -> {
           LOG.warn(
               "ATTACK event is out of order. Last event sequence id {} but given {}",

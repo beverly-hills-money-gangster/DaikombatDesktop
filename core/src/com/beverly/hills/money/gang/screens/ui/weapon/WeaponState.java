@@ -13,6 +13,7 @@ import lombok.NonNull;
 public class WeaponState {
 
   private final float distance;
+  private final Float projectileRadius;
   @NonNull
   private final UserSettingSound fireSound;
   private final UserSettingSound hitTargetSound;

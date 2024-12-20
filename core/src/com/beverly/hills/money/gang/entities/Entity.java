@@ -30,7 +30,7 @@ public class Entity {
 
   }
 
-  public void onCollision() {
+  public void onCollisionWithPlayer() {
 
   }
 

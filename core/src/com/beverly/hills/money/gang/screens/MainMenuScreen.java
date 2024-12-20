@@ -47,6 +47,10 @@ public class MainMenuScreen extends AbstractMainMenuScreen {
           removeAllEntities();
           getGame().setScreen(new SettingsScreen(getGame()));
         }
+        case CREDITS -> {
+          removeAllEntities();
+          getGame().setScreen(new CreditsScreen(getGame()));
+        }
         default -> Gdx.app.exit();
 
       }

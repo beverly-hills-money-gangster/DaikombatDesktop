@@ -11,4 +11,6 @@ public class WeaponStats {
 
   private final float maxDistance;
 
+  private final Float projectileRadius;
+
 }

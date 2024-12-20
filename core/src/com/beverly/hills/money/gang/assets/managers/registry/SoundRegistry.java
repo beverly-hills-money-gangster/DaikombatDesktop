@@ -9,6 +9,7 @@ public enum SoundRegistry {
   WEAPON_CHANGE("sfx/weapon_change.mp3"),
   ENEMY_RAILGUN("sfx/enemy_railgun.mp3"),
   PLAYER_GOING_THROUGH_TELEPORT("sfx/player_going_through_teleport.mp3"),
+  PLAYER_ROCKET_LAUNCHER("sfx/player_rocket_launcher.mp3"),
   ENEMY_PLAYER_GOING_THROUGH_TELEPORT("sfx/enemy_going_through_teleport.mp3"),
   ONE_FRAG_LEFT("sfx/one_frag_left.mp3"),
   TWO_FRAGS_LEFT("sfx/two_frags_left.mp3"),
@@ -53,6 +54,7 @@ public enum SoundRegistry {
   VOICE_ENEMY_DEATH_2("voice/enemy/death/death_2.mp3"),
   VOICE_ENEMY_DEATH_3("voice/enemy/death/death_3.mp3"),
   ENEMY_SHOTGUN("sfx/enemy_shotgun.mp3"),
+  ENEMY_ROCKET_LAUNCHER("sfx/enemy_player_rocket_launcher.mp3"),
   QUAD_DAMAGE_ATTACK("sfx/quad_damage_attack.mp3"),
   GAUNTLET_HUMILIATION("sfx/gauntlet_humiliation.mp3"),
   // TODO sounds like ass
@@ -66,6 +68,7 @@ public enum SoundRegistry {
   ENEMY_INVISIBILITY_PICK("sfx/enemy_invisibility_pick.mp3"),
   ENEMY_DEFENCE_PICK("sfx/enemy_defence_pick.mp3"),
   PLAYER_SHOTGUN("sfx/player_shotgun.mp3"),
+  ROCKET_BOOM("sfx/rocket_boom.mp3"),
   ENEMY_MINIGUN("sfx/enemy_minigun.mp3"),
   PLAYER_MINIGUN("sfx/player_minigun.mp3"),
   HIT_SOUND("sfx/shoot_hit_sound.mp3"),

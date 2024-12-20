@@ -23,6 +23,7 @@ import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.effect.PlayerEffects;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
+import com.beverly.hills.money.gang.registry.ScreenWeaponStateFactoriesRegistry;
 import java.util.Arrays;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -108,8 +109,8 @@ public class ScreenWeaponTest {
             Weapon.SHOTGUN, WeaponStats.builder().maxDistance(7).delayMls(500).build(),
             Weapon.GAUNTLET, WeaponStats.builder().maxDistance(1).delayMls(500).build(),
             Weapon.MINIGUN, WeaponStats.builder().maxDistance(7).delayMls(150).build(),
-            Weapon.RAILGUN, WeaponStats.builder().maxDistance(10).delayMls(1_500).build())
-
+            Weapon.RAILGUN, WeaponStats.builder().maxDistance(10).delayMls(1_500).build()),
+        new ScreenWeaponStateFactoriesRegistry() // TODO mock it
     );
     player = mock(Player.class);
     playerEffects = mock(PlayerEffects.class);

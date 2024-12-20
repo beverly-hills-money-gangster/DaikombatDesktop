@@ -162,10 +162,13 @@ public class UILeaderBoard {
 
   public void registerKill(int killerPlayerId, int victimPlayerId) {
     int myOldPlace = myPlace;
-    leaderBoardItems.stream()
-        .filter(leaderBoardPlayer -> leaderBoardPlayer.getId() == killerPlayerId)
-        .findFirst()
-        .ifPresent(leaderBoardPlayer -> leaderBoardPlayer.setKills(leaderBoardPlayer.kills + 1));
+    // TODO test it
+    if (killerPlayerId != victimPlayerId) {
+      leaderBoardItems.stream()
+          .filter(leaderBoardPlayer -> leaderBoardPlayer.getId() == killerPlayerId)
+          .findFirst()
+          .ifPresent(leaderBoardPlayer -> leaderBoardPlayer.setKills(leaderBoardPlayer.kills + 1));
+    }
     leaderBoardItems.stream()
         .filter(leaderBoardPlayer -> leaderBoardPlayer.getId() == victimPlayerId)
         .findFirst()

@@ -26,17 +26,26 @@ public class RectManager {
       if (game.getOverlapFilterMan().doesFiltersOverlap(rect.getFilter(), otherRect.getFilter())
           && otherRect != rect
           && RectanglePlusFilter.ENEMY != otherRect.getFilter()
+          && RectanglePlusFilter.ITEM != otherRect.getFilter()
           && rect.overlaps(otherRect)) {
-        if (RectanglePlusFilter.ITEM == otherRect.getFilter()) {
-          Entity item = game.getEntMan()
-              .getEntityFromId(otherRect.getConnectedEntityId());
-          item.onCollision();
-          continue;
-        }
         return true;
       }
     }
     return false;
+  }
+
+  public void onCollisionWithPlayer(final RectanglePlus playerRect) {
+    for (final RectanglePlus otherRect : rects) {
+      if (game.getOverlapFilterMan()
+          .doesFiltersOverlap(playerRect.getFilter(), otherRect.getFilter())
+          && otherRect != playerRect
+          && RectanglePlusFilter.ITEM == otherRect.getFilter()
+          && playerRect.overlaps(otherRect)) {
+        Entity item = game.getEntMan()
+            .getEntityFromId(otherRect.getConnectedEntityId());
+        item.onCollisionWithPlayer();
+      }
+    }
   }
 
   public void removeRect(final RectanglePlus rect) {

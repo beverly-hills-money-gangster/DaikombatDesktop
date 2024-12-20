@@ -1,9 +1,8 @@
-package com.beverly.hills.money.gang.entities.teleport;
-
-import static com.badlogic.gdx.graphics.Color.WHITE;
+package com.beverly.hills.money.gang.entities.projectile;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
@@ -13,59 +12,50 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.animation.Animation;
+import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
+import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.entities.SoundMakingEntity;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
-import com.beverly.hills.money.gang.screens.GameScreen;
-import java.util.function.Consumer;
 import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.Setter;
 
-public class Teleport extends SoundMakingEntity {
+public class EnemyRocketBoom extends SoundMakingEntity {
 
-  private final int teleportId;
 
-  private static final Logger LOG = LoggerFactory.getLogger(Teleport.class);
-
+  @Getter
   private final Vector3 position;
-  private final ModelInstanceBB mdlInst;
-
+  @Setter
   @Getter
-  private final RectanglePlus rect;
+  private ModelInstanceBB mdlInst;
 
+  @Setter
   @Getter
+  private RectanglePlus rect;
+
   private final Player player;
 
-  private final Consumer<Teleport> onCollision;
+  private final Animation boomAnimation;
 
-  private final Animation animation;
+  private final long destroyAtMls = System.currentTimeMillis() + 200;
 
-  private boolean beingTeleported;
 
-  public Teleport(
-      final Vector3 position,
-      final GameScreen screen,
-      final Player player,
-      final int teleportId,
-      final Consumer<Teleport> onCollision) {
-    super(screen);
-    this.teleportId = teleportId;
+  public EnemyRocketBoom(final Player player,
+      final Vector3 position) {
+    super(player.getScreen());
     this.position = position.cpy();
     this.player = player;
     this.position.add(Constants.HALF_UNIT, 0, Constants.HALF_UNIT);
-    this.animation = Animation.builder()
-        .animationSteps(6).animationStepMls(120)
-        .width(82).height(112).texturesRegistry(TexturesRegistry.TELEPORT_SPRITES).build();
 
-    mdlInst = new ModelInstanceBB(screen.getGame().getCellBuilder().getMdlEnemy());
-    this.onCollision = onCollision;
-
-    mdlInst.materials.get(0).set(
-        new ColorAttribute(ColorAttribute.Diffuse, new Color(WHITE.r, WHITE.g, WHITE.b, 0.8f)));
+    mdlInst = new ModelInstanceBB(player.getScreen().getGame().getCellBuilder().getMdlEnemy());
+    TextureRegion currentTexReg = player.getScreen().getGame().getAssMan()
+        .getTextureRegion(TexturesRegistry.FIREBALL, 0, 0, 11, 11);
+    currentTexReg.flip(true, false);
+    mdlInst.materials.get(0).set(TextureAttribute.createDiffuse(currentTexReg));
+    mdlInst.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, Color.WHITE));
 
     mdlInst.materials.get(0)
         .set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
@@ -76,19 +66,32 @@ public class Teleport extends SoundMakingEntity {
     rect = new RectanglePlus(this.position.x, this.position.z, rectWidth, rectHeight, getEntityId(),
         RectanglePlusFilter.ITEM);
     rect.setPosition(this.position.x - rect.getWidth() / 2, this.position.z - rect.getHeight() / 2);
-    screen.getGame().getRectMan().addRect(rect);
+    player.getScreen().getGame().getRectMan().addRect(rect);
 
     rect.getOldPosition().set(rect.x, rect.y);
     rect.getNewPosition().set(rect.x, rect.y);
+    boomAnimation = Animation.builder()
+        .animationSteps(5).animationStepMls(50)
+        .width(100).height(99).texturesRegistry(TexturesRegistry.BOOM_SPRITES).build();
+    new TimeLimitedSound(
+        getScreen().getGame().getAssMan().getUserSettingSound(SoundRegistry.ROCKET_BOOM)).play(
+        getSFXVolume(), getSFXPan(), 500);
+
   }
+
 
   @Override
   public void destroy() {
-    getScreen().getGame().getRectMan().removeRect(rect);
+    if (rect != null) {
+      getScreen().getGame().getRectMan().removeRect(rect);
+    }
     super.destroy(); // should be last.
-    LOG.info("Destroy teleport");
   }
 
+  @Override
+  protected Player getPlayer() {
+    return player;
+  }
 
   @Override
   public void render3D(final ModelBatch mdlBatch, final Environment env, final float delta) {
@@ -96,31 +99,22 @@ public class Teleport extends SoundMakingEntity {
         getScreen().getCurrentCam().direction.cpy().rotate(Vector3.Z, 180f),
         Vector3.Y);
     mdlInst.transform.setTranslation(position.cpy().add(0, Constants.HALF_UNIT, 0));
-    mdlInst.transform.scale(1f, 1.15f, 1);
     mdlInst.setInFrustum(getScreen().frustumCull(getScreen().getCurrentCam(), mdlInst));
     if (mdlInst.isInFrustum()) {
       mdlBatch.render(mdlInst, env);
     }
   }
 
+
   @Override
   public void tick(final float delta) {
-    position.set(rect.x + rect.getWidth() / 2, 0, rect.y + rect.getHeight() / 2);
-    mdlInst.materials.get(0).set(TextureAttribute.createDiffuse(
-        animation.getCurrentTextureRegion(getScreen().getGame().getAssMan())));
-    rect.getOldPosition().set(rect.x, rect.y);
-  }
-
-  public void finish() {
-    beingTeleported = false;
-  }
-
-  @Override
-  public void onCollisionWithPlayer() {
-    if (!beingTeleported) {
-      onCollision.accept(this);
-      beingTeleported = true;
+    if (System.currentTimeMillis() > destroyAtMls) {
+      destroy();
+      return;
     }
+    mdlInst.materials.get(0).set(TextureAttribute.createDiffuse(
+        boomAnimation.getCurrentTextureRegion(getScreen().getGame().getAssMan())));
   }
+
 
 }
