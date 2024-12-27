@@ -1,5 +1,7 @@
 package com.beverly.hills.money.gang.screens.ui.weapon;
 
+import static com.beverly.hills.money.gang.Constants.PUNCH_ANIMATION_MLS;
+
 import com.badlogic.gdx.math.Vector2;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
@@ -36,9 +38,6 @@ public class ScreenWeapon {
   private final Queue<Runnable> tasks = new ArrayDeque<>();
 
   protected static final int CHANGE_WEAPON_DELAY_MLS = 75;
-
-  // TODO put it to constants
-  private static final int PUNCH_ANIMATION_MLS = 155;
 
   private final TimeLimitedSound quadDamageAttack;
 

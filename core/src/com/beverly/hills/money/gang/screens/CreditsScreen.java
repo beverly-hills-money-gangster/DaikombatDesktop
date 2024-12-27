@@ -14,7 +14,7 @@ public class CreditsScreen extends AbstractMainMenuScreen {
   private static final String[] CREDITS = {
       "GAME IS FORK OF 'ULTRA NIGHTMARE' BY GITHUB.COM/PILZHERE",
       "CODING - GITHUB.COM/BEVERLY-HILLS-MONEY-GANGSTER",
-      "TEXTURES - DOOM 2, DUKE NUKEM, HEXEN",
+      "TEXTURES - MINECRAFT, DOOM 2, DUKE NUKEM, HEXEN",
       "MUSIC AND SFX - MORTAL KOMBAT 3, QUAKE 3"};
   private final BitmapFont guiFont64;
 

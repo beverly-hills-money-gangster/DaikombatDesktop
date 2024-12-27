@@ -106,7 +106,7 @@ public class EnemyTextures {
 
   private TextureRegion getEnemyPlayerTextureRegion(int spriteNumber, boolean mirrorX) {
     TextureRegion region = assetsManager.getTextureRegion(
-        SkinTextureTemplateRegistry.getTextureForClass(playerClassUISelection, skinUISelection),
+        SkinTextureTemplateRegistry.getTextureFileNameForClass(playerClassUISelection, skinUISelection),
         spriteNumber * ENEMY_PLAYER_SPRITE_WIDTH, 0, ENEMY_PLAYER_SPRITE_WIDTH,
         ENEMY_PLAYER_SPRITE_HEIGHT);
     if (!mirrorX) {

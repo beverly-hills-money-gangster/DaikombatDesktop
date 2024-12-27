@@ -17,11 +17,11 @@ public class WeaponState {
   @NonNull
   private final UserSettingSound fireSound;
   private final UserSettingSound hitTargetSound;
-  private final int animationDelayMls;
   @NonNull
   private final TextureRegion fireTexture;
   @NonNull
   private final TextureRegion idleTexture;
+  private final int animationDelayMls;
   private final float screenRatioX;
   private final float screenRatioY;
   private final int backoffDelayMls;

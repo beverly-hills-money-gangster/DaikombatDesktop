@@ -29,6 +29,7 @@ import com.beverly.hills.money.gang.screens.ui.weapon.ScreenWeapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponRenderData;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponStats;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -246,7 +247,7 @@ public class Player extends Entity {
     } else if (Gdx.input.isKeyJustPressed(Keys.Q)) {
       screenWeapon.changeToPrevWeapon();
     }
-    Weapon.getAllHoldableWeapons().forEach(weapon -> {
+    Arrays.stream(Weapon.values()).forEach(weapon -> {
       if (Gdx.input.isKeyJustPressed(weapon.getSelectKeyCode())) {
         screenWeapon.changeWeapon(weapon);
       }
@@ -290,21 +291,6 @@ public class Player extends Entity {
             currentWeapon.getProjectileRef());
         getScreen().getGame().getEntMan()
             .addEntity(projectileFactory.create(this, screenWeapon.getWeaponState(currentWeapon)));
-        // Enemy player projectile
-        /*
-        getScreen().getGame().getEntMan().addEntity(new EnemyRocketProjectile(
-            new Vector3(playerCam.position.x - 0.5f + playerCam.direction.x * 0.001f, 0,
-                playerCam.position.z - 0.5f + playerCam.direction.z * 0.001f),
-            new Vector2(playerCam.position.x - 0.5f + playerCam.direction.x * weaponDistance,
-                playerCam.position.z + playerCam.direction.z * weaponDistance),
-            getScreen()));
-*/
-        // Enemy player rocket boom
-/*
-        getScreen().getGame().getEntMan().addEntity(new EnemyRocketBoom(this,
-            new Vector3(playerCam.position.x - 0.5f + playerCam.direction.x * 5f, 0,
-                playerCam.position.z - 0.5f + playerCam.direction.z * 5f), getScreen()));
-*/
       }
     }
   }

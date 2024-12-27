@@ -57,7 +57,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO make killer log message 64
 @Getter
 public class PlayScreen extends GameScreen {
 

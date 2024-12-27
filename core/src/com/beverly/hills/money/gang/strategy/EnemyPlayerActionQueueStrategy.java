@@ -44,7 +44,6 @@ public class EnemyPlayerActionQueueStrategy {
     if (enemyPlayerAction.getEventSequenceId() < lastEventSequenceId) {
       switch (enemyPlayerAction.getEnemyPlayerActionType()) {
         case MOVE -> {
-          // TODO test this
           LOG.warn(
               "MOVE event is out of order. Last event sequence id {} but given {}. Skip event.",
               lastEventSequenceId, enemyPlayerAction.getEventSequenceId());

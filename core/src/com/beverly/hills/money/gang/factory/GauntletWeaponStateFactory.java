@@ -1,5 +1,7 @@
 package com.beverly.hills.money.gang.factory;
 
+import static com.beverly.hills.money.gang.Constants.PUNCH_ANIMATION_MLS;
+
 import com.badlogic.gdx.math.Vector2;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
@@ -8,8 +10,6 @@ import com.beverly.hills.money.gang.screens.ui.weapon.WeaponState;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponStats;
 
 public class GauntletWeaponStateFactory extends ScreenWeaponStateFactory {
-
-  private static final int PUNCH_ANIMATION_MLS = 155;
 
   @Override
   public WeaponState create(DaiKombatAssetsManager assetsManager, WeaponStats weaponStats) {

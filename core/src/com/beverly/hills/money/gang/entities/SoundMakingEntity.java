@@ -17,9 +17,6 @@ public abstract class SoundMakingEntity extends Entity {
 
   protected abstract RectanglePlus getRect();
 
-
-  // TODO bring it back
-  // TODO this sounds like ass for a rocket
   public SoundVolumeType getSFXVolume() {
     float distance = Vector2.dst2(getPlayer().getRect().x, getPlayer().getRect().y, getRect().x,
         getRect().y);

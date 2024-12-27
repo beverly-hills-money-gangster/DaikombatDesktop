@@ -105,6 +105,6 @@ public class DaiKombatAssetsManager {
         playerClassUISelection -> Arrays.stream(SkinUISelection.values()).forEach(skinUISelection
             -> assetManager.load(
             SkinTextureTemplateRegistry
-                .getTextureForClass(playerClassUISelection, skinUISelection), Texture.class)));
+                .getTextureFileNameForClass(playerClassUISelection, skinUISelection), Texture.class)));
   }
 }

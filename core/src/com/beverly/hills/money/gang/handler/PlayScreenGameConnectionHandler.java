@@ -40,10 +40,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-// TODO player can hit and kill themselves
 // TODO add manual tests for that
-// TODO this affects leaderboards
 @RequiredArgsConstructor
 public class PlayScreenGameConnectionHandler {
 

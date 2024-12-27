@@ -21,7 +21,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO test it
 public class JoinGameScreen extends ReconnectableScreen {
 
   private static final Logger LOG = LoggerFactory.getLogger(JoinGameScreen.class);

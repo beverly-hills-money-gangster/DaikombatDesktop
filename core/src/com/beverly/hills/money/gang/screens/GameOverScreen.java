@@ -38,8 +38,6 @@ public class GameOverScreen extends AbstractMainMenuScreen {
   private final UISelection<GameOverUISelection> menuSelection = new UISelection<>(
       GameOverUISelection.values());
 
-
-  // TODO add more manual tests for that
   public GameOverScreen(final DaiKombatGame game,
       final UILeaderBoard uiLeaderBoard,
       final ConnectGameData connectGameData,
@@ -114,7 +112,6 @@ public class GameOverScreen extends AbstractMainMenuScreen {
       winnerSkinSelectAnimation.render();
       String pressTabToSeeLeaderboard = "PRESS TAB TO SEE LEADERBOARD";
       GlyphLayout glyphLayoutLeaderBoardHint = new GlyphLayout(guiFont32, pressTabToSeeLeaderboard);
-      // TODO use 64
       guiFont32.draw(getGame().getBatch(), pressTabToSeeLeaderboard,
           getViewport().getWorldWidth() / 2f - glyphLayoutLeaderBoardHint.width / 2f,
           getViewport().getWorldHeight() / 2f - glyphLayoutLeaderBoardHint.height / 2f
