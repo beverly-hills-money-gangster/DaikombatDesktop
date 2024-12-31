@@ -257,6 +257,9 @@ public class PlayScreenGameConnectionHandler {
     }
     enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
         .ifPresent(enemyPlayer -> {
+          if (gameEvent.getPlayer().hasHealth()) {
+            enemyPlayer.setHp(gameEvent.getPlayer().getHealth());
+          }
           gameEvent.getPlayer().getActivePowerUpsList().forEach(gamePowerUp
               -> activateEnemyPowerUp(enemyPlayer, gamePowerUp));
           playScreen.getUiLeaderBoard()
@@ -393,8 +396,7 @@ public class PlayScreenGameConnectionHandler {
                         enemyPlayerProjectileBoomFactoriesRegistry.get(
                                 WeaponMapper.getWeaponProjectile(
                                     gameEvent.getProjectile().getProjectileType()))
-                            .create(playScreen.getPlayer().getCurrent2DPosition(),
-                                playScreen.getPlayer()));
+                            .create(getPlayerBoomPosition(), playScreen.getPlayer()));
                   }
                   playScreen.getPlayer().getHit(gameEvent.getAffectedPlayer().getHealth());
                   new TimeLimitedSound(
@@ -470,8 +472,7 @@ public class PlayScreenGameConnectionHandler {
                         enemyPlayerProjectileBoomFactoriesRegistry.get(
                                 WeaponMapper.getWeaponProjectile(
                                     gameEvent.getProjectile().getProjectileType()))
-                            .create(playScreen.getPlayer().getCurrent2DPosition(),
-                                playScreen.getPlayer()));
+                            .create(getPlayerBoomPosition(), playScreen.getPlayer()));
                   }
                   diePlayer(killedBy);
                 })
@@ -493,13 +494,10 @@ public class PlayScreenGameConnectionHandler {
       var weapon = gameEvent.hasWeaponType() ? WeaponMapper.getWeapon(gameEvent.getWeaponType())
           : Weapon.getWeaponForProjectile(
               WeaponMapper.getWeaponProjectile(gameEvent.getProjectile().getProjectileType()));
-      if (gameEvent.hasWeaponType()) {
-        AchievementFactory.create(weapon, killStats)
-            .ifPresent(
-                achievement -> playScreen.getNarratorSoundQueue()
-                    .addSound(playScreen.getGame().getAssMan()
-                        .getUserSettingSound(achievement.getSound())));
-      }
+      AchievementFactory.create(weapon, killStats)
+          .ifPresent(achievement -> playScreen.getNarratorSoundQueue()
+              .addSound(playScreen.getGame().getAssMan()
+                  .getUserSettingSound(achievement.getSound())));
     } else {
       enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
           .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
@@ -587,6 +585,14 @@ public class PlayScreenGameConnectionHandler {
         .play(Constants.MK_NARRATOR_FX_VOLUME);
     playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.BELL)
         .play(Constants.DEFAULT_SFX_VOLUME);
+  }
+
+  private Vector2 getPlayerBoomPosition() {
+    var currentPosition = playScreen.getPlayer().getCurrent2DPosition();
+    var currentDirection = playScreen.getPlayer().getCurrent2DDirection();
+    return new Vector2(
+        currentPosition.x + Constants.PLAYER_RECT_SIZE / 2 + currentDirection.x * 0.25f,
+        currentPosition.y + Constants.PLAYER_RECT_SIZE / 2 + currentDirection.y * 0.25f);
   }
 
   private static Vector2 createVector(Vector serverVector) {

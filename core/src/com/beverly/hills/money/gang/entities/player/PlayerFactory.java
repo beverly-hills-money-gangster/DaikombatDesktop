@@ -6,7 +6,6 @@ import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
-import com.beverly.hills.money.gang.entities.player.Player.ProjectilePlayer;
 import com.beverly.hills.money.gang.entities.projectile.Projectile;
 import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
 import com.beverly.hills.money.gang.proto.ProjectileStats;
@@ -19,7 +18,6 @@ import com.beverly.hills.money.gang.screens.PlayScreen;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.screens.ui.EnemyAim;
 import java.util.Optional;
-import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +68,7 @@ public class PlayerFactory {
 
           enemyHit.ifPresent(enemyPlayer -> {
             enemyPlayer.getHit();
+            playerWeapon.getPlayer().playWeaponHitSound(playerWeapon.getWeapon());
             commandBuilder.setAffectedPlayerId(enemyPlayer.getEnemyPlayerId());
           });
           gameConnection.write(commandBuilder.build());
@@ -90,6 +89,10 @@ public class PlayerFactory {
           }
           screen.sendCurrentPlayerPosition();
         }, projectileEnemy -> {
+      if (projectileEnemy.getPlayer().isCollidedWithTeleport()) {
+        LOG.warn("Can't shoot projectiles while being teleported");
+        return;
+      }
       var enemy = projectileEnemy.getEnemyPlayer();
       var projectile = projectileEnemy.getProjectile();
       var player = projectileEnemy.getPlayer();
@@ -125,6 +128,10 @@ public class PlayerFactory {
       });
       gameConnection.write(commandBuilder.build());
     }, projectilePlayer -> {
+      if (projectilePlayer.getPlayer().isCollidedWithTeleport()) {
+        LOG.warn("Can't shoot projectiles while being teleported");
+        return;
+      }
       projectilePlayer.getPlayer().getHit();
       var projectile = projectilePlayer.getProjectile();
       var player = projectilePlayer.getPlayer();

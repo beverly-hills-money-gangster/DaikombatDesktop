@@ -9,7 +9,6 @@ import com.beverly.hills.money.gang.screens.ui.weapon.WeaponStats;
 
 public class RocketLauncherWeaponStateFactory extends ScreenWeaponStateFactory {
 
-  private static final int ROCKET_LAUNCHER_ANIMATION_MLS = 200;
 
   @Override
   public WeaponState create(DaiKombatAssetsManager assetsManager, WeaponStats weaponStats) {
@@ -21,15 +20,15 @@ public class RocketLauncherWeaponStateFactory extends ScreenWeaponStateFactory {
         .screenRatioX(0.50f)
         .screenRatioY(0.40f)
         .center(false)
-        .backoffDelayMls(
-            getBackoffDelay(weaponStats, ROCKET_LAUNCHER_ANIMATION_MLS))
-        .animationDelayMls(ROCKET_LAUNCHER_ANIMATION_MLS)
-        .fireTexture(assetsManager.getTextureRegion(TexturesRegistry.ROCKET_LAUNCHER_SHOOTING, 0, 0,
+        .backoffDelayMls(0)
+        .animationDelayMls(weaponStats.getDelayMls())
+        .fireTexture(assetsManager.getTextureRegion(TexturesRegistry.ROCKET_LAUNCHER_IDLE, 0, 0,
             217, 105))
         .idleTexture(assetsManager.getTextureRegion(TexturesRegistry.ROCKET_LAUNCHER_IDLE, 0, 0,
             217, 105))
         .weaponScreenPositioning(
-            animationTime -> new Vector2(0, -ROCKET_LAUNCHER_ANIMATION_MLS + animationTime))
+            animationTime -> new Vector2(0,
+                Math.max(-350, -weaponStats.getDelayMls() + animationTime)))
         .build();
   }
 }
