@@ -16,12 +16,13 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.Constants;
-import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import com.beverly.hills.money.gang.strategy.EnemyPlayerActionQueueStrategy;
 import java.util.ArrayDeque;
@@ -45,7 +46,10 @@ public class EnemyPlayer extends Enemy {
   private final String name;
 
   @Getter
-  private final String enemyClass;
+  private final PlayerClassUISelection enemyClass;
+
+  @Getter
+  private final SkinUISelection skinUISelection;
 
   @Getter
   @Setter
@@ -65,24 +69,26 @@ public class EnemyPlayer extends Enemy {
   @Getter
   private final int enemyPlayerId;
 
-  public EnemyPlayer(final Player player,
+  public EnemyPlayer(
+      final Player player,
       final int enemyPlayerId,
       final Vector3 position,
       final Vector2 direction,
       final GameScreen screen,
       final String name,
-      final TexturesRegistry enemyTextureRegistry,
+      final SkinUISelection skinUISelection,
       final EnemyListeners enemyListeners,
       final int speed,
       final int hp,
-      final String enemyClass) {
+      final PlayerClassUISelection enemyClass) {
 
     super(position, screen, player, enemyListeners);
     this.hp = hp;
     this.enemyClass = enemyClass;
+    this.skinUISelection = skinUISelection;
     this.enemyPlayerId = enemyPlayerId;
     lastDirection = direction;
-    enemyTextures = new EnemyTextures(screen.getGame().getAssMan(), enemyTextureRegistry);
+    enemyTextures = new EnemyTextures(screen.getGame().getAssMan(), enemyClass, skinUISelection);
     this.currentSpeed = (float) speed;
     this.name = name;
     super.setMdlInst(new ModelInstanceBB(screen.getGame().getCellBuilder().getMdlEnemy()));

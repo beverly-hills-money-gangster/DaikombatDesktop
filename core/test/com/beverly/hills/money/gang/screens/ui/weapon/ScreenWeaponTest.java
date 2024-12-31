@@ -4,27 +4,31 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
-import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.effect.PlayerEffects;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
+import com.beverly.hills.money.gang.factory.ScreenWeaponStateFactory;
+import com.beverly.hills.money.gang.registry.ScreenWeaponStateFactoriesRegistry;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,12 +38,9 @@ public class ScreenWeaponTest {
 
   private DaiKombatAssetsManager daiKombatAssetsManager;
 
-  private UserSettingSound punchSound, weaponChangeSound, punchHitSound, quadDamageAttackSound,
-      hitSound, playerRailgunFireSound, playerShotgunFireSound, playerMinigunFireSound;
+  private Map<Weapon, WeaponState> weaponStateMap;
 
-  private TextureRegion shotgunFireTexture, shotgunIdleTexture, punchIdleTexture,
-      railgunFireTexture, railgunIdleTexture, punchTexture, minigunFireTexture, minigunIdleTexture;
-
+  private UserSettingSound quadDamageAttackSound, weaponChangeSound;
 
   private Player player;
 
@@ -48,73 +49,44 @@ public class ScreenWeaponTest {
 
   @BeforeEach
   public void setUp() {
+    weaponStateMap = new HashMap<>();
     TimeLimitedSound.clear();
-    shotgunIdleTexture = mock(TextureRegion.class);
-    shotgunFireTexture = mock(TextureRegion.class);
-    railgunIdleTexture = mock(TextureRegion.class);
-    railgunFireTexture = mock(TextureRegion.class);
-    minigunIdleTexture = mock(TextureRegion.class);
-    minigunFireTexture = mock(TextureRegion.class);
-    punchTexture = mock(TextureRegion.class);
-    punchIdleTexture = mock(TextureRegion.class);
-
-    playerMinigunFireSound = mock(UserSettingSound.class);
-    weaponChangeSound = mock(UserSettingSound.class);
-    hitSound = mock(UserSettingSound.class);
-    playerShotgunFireSound = mock(UserSettingSound.class);
-    playerRailgunFireSound = mock(UserSettingSound.class);
-    punchSound = mock(UserSettingSound.class);
-    punchHitSound = mock(UserSettingSound.class);
-    quadDamageAttackSound = mock(UserSettingSound.class);
-
     daiKombatAssetsManager = mock(DaiKombatAssetsManager.class);
-
-    doReturn(playerShotgunFireSound).when(daiKombatAssetsManager)
-        .getUserSettingSound(SoundRegistry.PLAYER_SHOTGUN);
-    doReturn(playerMinigunFireSound).when(daiKombatAssetsManager)
-        .getUserSettingSound(SoundRegistry.PLAYER_MINIGUN);
-    doReturn(playerRailgunFireSound).when(daiKombatAssetsManager)
-        .getUserSettingSound(SoundRegistry.PLAYER_RAILGUN);
-    doReturn(punchSound).when(daiKombatAssetsManager)
-        .getUserSettingSound(SoundRegistry.PUNCH_THROWN);
-    doReturn(punchHitSound).when(daiKombatAssetsManager)
-        .getUserSettingSound(SoundRegistry.PUNCH_HIT);
-    doReturn(hitSound).when(daiKombatAssetsManager)
-        .getUserSettingSound(SoundRegistry.HIT_SOUND);
-    doReturn(weaponChangeSound).when(daiKombatAssetsManager)
-        .getUserSettingSound(SoundRegistry.WEAPON_CHANGE);
+    quadDamageAttackSound = mock(UserSettingSound.class);
+    weaponChangeSound = mock(UserSettingSound.class);
     doReturn(quadDamageAttackSound).when(daiKombatAssetsManager)
         .getUserSettingSound(SoundRegistry.QUAD_DAMAGE_ATTACK);
-
-    doReturn(shotgunIdleTexture).when(daiKombatAssetsManager).getTextureRegion(
-        eq(TexturesRegistry.GUN_IDLE), anyInt(), anyInt(), anyInt(), anyInt());
-    doReturn(shotgunFireTexture).when(daiKombatAssetsManager).getTextureRegion(
-        eq(TexturesRegistry.GUN_SHOOT), anyInt(), anyInt(), anyInt(), anyInt());
-    doReturn(minigunIdleTexture).when(daiKombatAssetsManager).getTextureRegion(
-        eq(TexturesRegistry.MINIGUN_IDLE), anyInt(), anyInt(), anyInt(), anyInt());
-    doReturn(minigunFireTexture).when(daiKombatAssetsManager).getTextureRegion(
-        eq(TexturesRegistry.MINIGUN_FIRE), anyInt(), anyInt(), anyInt(), anyInt());
-    doReturn(railgunIdleTexture).when(daiKombatAssetsManager).getTextureRegion(
-        eq(TexturesRegistry.RAILGUN_IDLE), anyInt(), anyInt(), anyInt(), anyInt());
-    doReturn(railgunFireTexture).when(daiKombatAssetsManager).getTextureRegion(
-        eq(TexturesRegistry.RAILGUN_SHOOTING), anyInt(), anyInt(), anyInt(), anyInt());
-    doReturn(punchIdleTexture).when(daiKombatAssetsManager).getTextureRegion(
-        eq(TexturesRegistry.PUNCH_IDLE), anyInt(), anyInt(), anyInt(), anyInt());
-    doReturn(punchTexture).when(daiKombatAssetsManager).getTextureRegion(
-        eq(TexturesRegistry.PUNCH), anyInt(), anyInt(), anyInt(), anyInt());
+    doReturn(weaponChangeSound).when(daiKombatAssetsManager)
+        .getUserSettingSound(SoundRegistry.WEAPON_CHANGE);
+    var screenWeaponStateFactoriesRegistry = mock(ScreenWeaponStateFactoriesRegistry.class);
+    for (Weapon value : Weapon.values()) {
+      var screenWeaponStateFactory = mock(ScreenWeaponStateFactory.class);
+      var mockWeaponState = mock(WeaponState.class);
+      doReturn(mock(UserSettingSound.class)).when(mockWeaponState).getFireSound();
+      doReturn(mock(UserSettingSound.class)).when(mockWeaponState).getHitTargetSound();
+      doReturn(mock(TextureRegion.class)).when(mockWeaponState).getFireTexture();
+      doReturn(mock(TextureRegion.class)).when(mockWeaponState).getIdleTexture();
+      doReturn(100).when(mockWeaponState).getBackoffDelayMls();
+      doReturn(150).when(mockWeaponState).getAnimationDelayMls();
+      doReturn((Function<Long, Vector2>) aLong
+          -> new Vector2(0, 0)).when(mockWeaponState).getWeaponScreenPositioning();
+      weaponStateMap.put(value, mockWeaponState);
+      doReturn(mockWeaponState).when(screenWeaponStateFactory).create(any(), any());
+      doReturn(screenWeaponStateFactory).when(screenWeaponStateFactoriesRegistry).get(eq(value));
+    }
 
     screenWeapon = new ScreenWeapon(daiKombatAssetsManager,
         Map.of(
             Weapon.SHOTGUN, WeaponStats.builder().maxDistance(7).delayMls(500).build(),
             Weapon.GAUNTLET, WeaponStats.builder().maxDistance(1).delayMls(500).build(),
             Weapon.MINIGUN, WeaponStats.builder().maxDistance(7).delayMls(150).build(),
-            Weapon.RAILGUN, WeaponStats.builder().maxDistance(10).delayMls(1_500).build())
-
+            Weapon.RAILGUN, WeaponStats.builder().maxDistance(10).delayMls(1_500).build(),
+            Weapon.ROCKET_LAUNCHER, WeaponStats.builder().maxDistance(999).delayMls(1_700).build()),
+        screenWeaponStateFactoriesRegistry
     );
     player = mock(Player.class);
     playerEffects = mock(PlayerEffects.class);
     doReturn(playerEffects).when(player).getPlayerEffects();
-
   }
 
 
@@ -152,21 +124,11 @@ public class ScreenWeaponTest {
   }
 
   @Test
-  public void testGetWeaponDistance() {
-    assertEquals(7,
-        screenWeapon.getWeaponDistance(Weapon.SHOTGUN), 0.00001);
-    assertEquals(1,
-        screenWeapon.getWeaponDistance(Weapon.GAUNTLET), 0.00001);
-    assertEquals(10,
-        screenWeapon.getWeaponDistance(Weapon.RAILGUN), 0.00001);
-  }
-
-  @Test
   public void testAttackShotgun() {
     float volume = 0.5f;
     screenWeapon.changeWeapon(Weapon.SHOTGUN);
     assertTrue(screenWeapon.attack(player));
-    verify(playerShotgunFireSound).play(volume);
+    verify(weaponStateMap.get(Weapon.SHOTGUN).getFireSound()).play(volume);
     assertEquals(Weapon.SHOTGUN, screenWeapon.weaponBeingUsed);
     verifyNoInteractions(quadDamageAttackSound);
   }
@@ -177,7 +139,7 @@ public class ScreenWeaponTest {
     doReturn(true).when(playerEffects).isPowerUpActive(PowerUpType.QUAD_DAMAGE);
     screenWeapon.changeWeapon(Weapon.SHOTGUN);
     assertTrue(screenWeapon.attack(player));
-    verify(playerShotgunFireSound).play(volume);
+    verify(weaponStateMap.get(Weapon.SHOTGUN).getFireSound()).play(volume);
     verify(quadDamageAttackSound).play(SoundVolumeType.LOUD, 0.0f);
     assertEquals(Weapon.SHOTGUN, screenWeapon.weaponBeingUsed);
   }
@@ -186,7 +148,7 @@ public class ScreenWeaponTest {
   public void testAttackPunch() {
     screenWeapon.changeWeapon(Weapon.GAUNTLET);
     assertTrue(screenWeapon.attack(player));
-    verify(punchSound).play(anyFloat());
+    verify(weaponStateMap.get(Weapon.GAUNTLET).getFireSound()).play(anyFloat());
     assertEquals(Weapon.GAUNTLET, screenWeapon.weaponBeingUsed);
   }
 
@@ -197,7 +159,7 @@ public class ScreenWeaponTest {
     assertTrue(screenWeapon.attack(player));
     assertFalse(screenWeapon.attack(player),
         "If no delay, then we shouldn't be able to attack");
-    verify(playerShotgunFireSound).play(volume);
+    verify(weaponStateMap.get(Weapon.SHOTGUN).getFireSound()).play(volume);
   }
 
   @Test
@@ -211,35 +173,35 @@ public class ScreenWeaponTest {
             + screenWeapon.weaponStates.get(Weapon.SHOTGUN).getBackoffDelayMls() + 50);
     assertTrue(screenWeapon.attack(player),
         "If we have a  delay, then we SHOULD be able to attack");
-    verify(playerShotgunFireSound, times(2)).play(volume);
+    verify(weaponStateMap.get(Weapon.SHOTGUN).getFireSound(), times(2)).play(volume);
   }
 
   @Test
   public void testRegisterHitShotgun() {
     screenWeapon.registerHit(Weapon.SHOTGUN);
-    // nothing happens. there is no hit sound for shotgun
-    verifyNoInteractions(playerShotgunFireSound, punchSound, punchHitSound);
-    verify(hitSound).play(SoundVolumeType.LOUD, 0.0f);
+    verify(weaponStateMap.get(Weapon.SHOTGUN).getHitTargetSound())
+        .play(SoundVolumeType.LOUD, 0.0f);
   }
 
   @Test
   public void testRegisterHitRailgun() {
     screenWeapon.registerHit(Weapon.RAILGUN);
-    // nothing happens. there is no hit sound for shotgun
-    verifyNoInteractions(playerShotgunFireSound, punchSound, punchHitSound);
-    verify(hitSound).play(SoundVolumeType.LOUD, 0.0f);
+    verify(weaponStateMap.get(Weapon.RAILGUN).getHitTargetSound())
+        .play(SoundVolumeType.LOUD, 0.0f);
   }
 
   @Test
   public void testRegisterHitPunch() {
     screenWeapon.registerHit(Weapon.GAUNTLET);
-    verify(punchHitSound).play(SoundVolumeType.LOUD, 0.0f);
+    verify(weaponStateMap.get(Weapon.GAUNTLET).getHitTargetSound()).play(SoundVolumeType.LOUD,
+        0.0f);
   }
 
   @Test
   public void testGetActiveWeaponForRenderingIdle() {
     var renderingData = screenWeapon.getActiveWeaponForRendering();
-    assertEquals(shotgunIdleTexture, renderingData.getTextureRegion(),
+    assertEquals(weaponStateMap.get(Weapon.SHOTGUN).getIdleTexture(),
+        renderingData.getTextureRegion(),
         "Be default, idle texture should be returned");
   }
 
@@ -248,7 +210,8 @@ public class ScreenWeaponTest {
     screenWeapon.changeWeapon(Weapon.SHOTGUN);
     screenWeapon.attack(player);
     var renderingData = screenWeapon.getActiveWeaponForRendering();
-    assertEquals(shotgunFireTexture, renderingData.getTextureRegion());
+    assertEquals(weaponStateMap.get(Weapon.SHOTGUN).getFireTexture(),
+        renderingData.getTextureRegion());
   }
 
   @Test
@@ -256,7 +219,8 @@ public class ScreenWeaponTest {
     screenWeapon.changeWeapon(Weapon.GAUNTLET);
     screenWeapon.attack(player);
     var renderingData = screenWeapon.getActiveWeaponForRendering();
-    assertEquals(punchTexture, renderingData.getTextureRegion());
+    assertEquals(weaponStateMap.get(Weapon.GAUNTLET).getFireTexture(),
+        renderingData.getTextureRegion());
   }
 
   @Test
@@ -267,7 +231,8 @@ public class ScreenWeaponTest {
     Thread.sleep(
         screenWeapon.weaponStates.get(Weapon.SHOTGUN).getAnimationDelayMls() + 50);
     var renderingData = screenWeapon.getActiveWeaponForRendering();
-    assertEquals(shotgunIdleTexture, renderingData.getTextureRegion(),
+    assertEquals(weaponStateMap.get(Weapon.SHOTGUN).getIdleTexture(),
+        renderingData.getTextureRegion(),
         "After animation finish, idle texture should be returned");
   }
 
@@ -384,7 +349,7 @@ public class ScreenWeaponTest {
     screenWeapon.changeWeapon(Weapon.GAUNTLET);
     Thread.sleep(ScreenWeapon.CHANGE_WEAPON_DELAY_MLS);
     screenWeapon.changeToPrevWeapon();
-    assertEquals(Weapon.MINIGUN, screenWeapon.getWeaponBeingUsed());
+    assertEquals(Weapon.ROCKET_LAUNCHER, screenWeapon.getWeaponBeingUsed());
   }
 
   @Test

@@ -1,8 +1,17 @@
 package com.beverly.hills.money.gang.screens.ui.selection;
 
-public enum PlayerClassUISelection {
-  COMMONER, DRACULA_BERSERK, DEMON_TANK, BEAST_WARRIOR;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
+public enum PlayerClassUISelection {
+  WARRIOR("Default stats"),
+  ANGRY_SKELETON("Low defense, increased damage and gun speed"),
+  DEMON_TANK("Increased defense, low vampirism");
+
+
+  @Getter
+  private final String description;
 
   @Override
   public String toString() {

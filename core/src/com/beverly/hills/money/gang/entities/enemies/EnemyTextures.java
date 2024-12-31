@@ -2,13 +2,18 @@ package com.beverly.hills.money.gang.entities.enemies;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
-import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
+import com.beverly.hills.money.gang.assets.managers.registry.SkinTextureTemplateRegistry;
+import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class EnemyTextures {
 
-  private final TexturesRegistry texturesRegistry;
+
+  private final PlayerClassUISelection playerClassUISelection;
+
+  private final SkinUISelection skinUISelection;
 
   private static final int ENEMY_PLAYER_SPRITE_HEIGHT = 66;
   private static final int ENEMY_PLAYER_SPRITE_WIDTH = 55;
@@ -29,9 +34,12 @@ public class EnemyTextures {
 
   private final DaiKombatAssetsManager assetsManager;
 
-  public EnemyTextures(DaiKombatAssetsManager assetsManager, TexturesRegistry texturesRegistry) {
+  public EnemyTextures(DaiKombatAssetsManager assetsManager,
+      PlayerClassUISelection playerClassUISelection,
+      SkinUISelection skinUISelection) {
     this.assetsManager = assetsManager;
-    this.texturesRegistry = texturesRegistry;
+    this.playerClassUISelection = playerClassUISelection;
+    this.skinUISelection = skinUISelection;
     textures.put(EnemyTextureRegistry.IDLETEXFRONTREG, getEnemyPlayerTextureRegion(0));
     textures.put(EnemyTextureRegistry.MOVING1TEXFRONTREG, getEnemyPlayerTextureRegion(11));
     textures.put(EnemyTextureRegistry.MOVING2TEXFRONTREG, getEnemyPlayerTextureRegion(14));
@@ -97,7 +105,8 @@ public class EnemyTextures {
   }
 
   private TextureRegion getEnemyPlayerTextureRegion(int spriteNumber, boolean mirrorX) {
-    TextureRegion region = assetsManager.getTextureRegion(texturesRegistry,
+    TextureRegion region = assetsManager.getTextureRegion(
+        SkinTextureTemplateRegistry.getTextureFileNameForClass(playerClassUISelection, skinUISelection),
         spriteNumber * ENEMY_PLAYER_SPRITE_WIDTH, 0, ENEMY_PLAYER_SPRITE_WIDTH,
         ENEMY_PLAYER_SPRITE_HEIGHT);
     if (!mirrorX) {

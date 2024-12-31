@@ -105,7 +105,6 @@ public class Teleport extends SoundMakingEntity {
 
   @Override
   public void tick(final float delta) {
-    getScreen().checkOverlaps(rect);
     position.set(rect.x + rect.getWidth() / 2, 0, rect.y + rect.getHeight() / 2);
     mdlInst.materials.get(0).set(TextureAttribute.createDiffuse(
         animation.getCurrentTextureRegion(getScreen().getGame().getAssMan())));
@@ -117,7 +116,7 @@ public class Teleport extends SoundMakingEntity {
   }
 
   @Override
-  public void onCollision() {
+  public void onCollisionWithPlayer() {
     if (!beingTeleported) {
       onCollision.accept(this);
       beingTeleported = true;

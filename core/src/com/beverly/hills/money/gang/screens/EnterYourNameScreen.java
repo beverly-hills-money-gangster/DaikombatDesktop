@@ -44,7 +44,7 @@ public class EnterYourNameScreen extends AbstractMainMenuScreen {
       boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
       joinGameDataBuilder.playerName(nameTextInputProcessor.getText());
       getGame().setScreen(
-          new ChooseSkinScreen(getGame(), joinGameDataBuilder));
+          new ChoosePlayerClassScreen(getGame(), joinGameDataBuilder));
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));

@@ -9,22 +9,21 @@ public enum TexturesRegistry {
   MED_KIT("medkit.png"),
   DEFENCE_ORB("defence_orb.png"),
   INVISIBILITY_ORB("invisibility_orb.png"),
-  ENEMY_PLAYER_SPRITES_GREEN("enemy_player_sprites_green.png"),
-  ENEMY_PLAYER_SPRITES_BLUE("enemy_player_sprites_blue.png"),
-  ENEMY_PLAYER_SPRITES_ORANGE("enemy_player_sprites_orange.png"),
-  ENEMY_PLAYER_SPRITES_PURPLE("enemy_player_sprites_purple.png"),
-  ENEMY_PLAYER_SPRITES_YELLOW("enemy_player_sprites_yellow.png"),
-  ENEMY_PLAYER_SPRITES_PINK("enemy_player_sprites_pink.png"),
   TELEPORT_SPRITES("teleport_sprites.png"),
+  BOOM_SPRITES("boom_sprites.png"),
   GUN_IDLE("gun_idle.png"),
   GUN_SHOOT("gun_shot.png"),
   PUNCH("punch.png"),
   PUNCH_IDLE("punch_idle.png"),
   RAILGUN_IDLE("railgun_idle.png"),
   RAILGUN_SHOOTING("railgun_shooting.png"),
+  ROCKET_LAUNCHER_IDLE("rocket_launcher_idle.png"),
+  ROCKET_LAUNCHER_SHOOTING("rocket_launcher_fire.png"),
   LOGO("logo.png"),
   MAIN_MENU_BG("main_menu_bg.png"),
   ATLAS("atlas.png"),
+
+  FIREBALL("fireball.png"),
   SKY("sky.png");
 
   @Getter

@@ -43,7 +43,8 @@ public class Cell3D extends Entity {
       }
 
       mdlInstWallNorth.transform.setToTranslation(
-          this.position.cpy().add(new Vector3(0, 0, -0.5f)));
+          this.position.cpy().add(new Vector3(0, -0.25f, -0.5f)));
+      mdlInstWallNorth.transform.scale(1, 1.5f, 1);
     }
 
     if (hasWallSouth) {
@@ -56,7 +57,8 @@ public class Cell3D extends Entity {
         ta.set(texRegSouth);
       }
 
-      mdlInstWallSouth.transform.setToTranslation(this.position.cpy().add(new Vector3(0, 0, 0.5f)));
+      mdlInstWallSouth.transform.setToTranslation(this.position.cpy().add(new Vector3(0, -0.25f, 0.5f)));
+      mdlInstWallSouth.transform.scale(1, 1.5f, 1);
     }
 
     if (hasWallWest) {
@@ -69,7 +71,8 @@ public class Cell3D extends Entity {
         ta.set(texRegWest);
       }
 
-      mdlInstWallWest.transform.setToTranslation(this.position.cpy().add(new Vector3(0.5f, 0, 0)));
+      mdlInstWallWest.transform.setToTranslation(this.position.cpy().add(new Vector3(0.5f, -0.25f, 0)));
+      mdlInstWallWest.transform.scale(1, 1.5f, 1);
     }
 
     if (hasWallEast) {
@@ -82,7 +85,8 @@ public class Cell3D extends Entity {
         ta.set(texRegEast);
       }
 
-      mdlInstWallEast.transform.setToTranslation(this.position.cpy().add(new Vector3(-0.5f, 0, 0)));
+      mdlInstWallEast.transform.setToTranslation(this.position.cpy().add(new Vector3(-0.5f, -0.25f, 0)));
+      mdlInstWallEast.transform.scale(1, 1.5f, 1);
     }
 
     if (hasFloor) {
@@ -106,7 +110,7 @@ public class Cell3D extends Entity {
         ta.set(texRegCeiling);
       }
 
-      mdlInstCeiling.transform.setToTranslation(this.position.cpy().add(new Vector3(0, -0.5f, 0)));
+      mdlInstCeiling.transform.setToTranslation(this.position.cpy().add(new Vector3(0, -1f, 0)));
     }
   }
 

@@ -2,24 +2,18 @@ package com.beverly.hills.money.gang.screens.ui.weapon;
 
 import com.badlogic.gdx.Input.Keys;
 import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum Weapon {
-  GAUNTLET(Keys.NUM_0, true),
-  SHOTGUN(Keys.NUM_1, false),
-  RAILGUN(Keys.NUM_2, false),
-  MINIGUN(Keys.NUM_3, true);
+  GAUNTLET(Keys.NUM_0, true, null),
+  SHOTGUN(Keys.NUM_1, false, null),
+  RAILGUN(Keys.NUM_2, false, null),
+  MINIGUN(Keys.NUM_3, true, null),
+  ROCKET_LAUNCHER(Keys.NUM_4, false, WeaponProjectile.ROCKET);
 
-  static {
-    int keys = Arrays.stream(Weapon.values()).map(weapon -> weapon.selectKeyCode)
-        .collect(Collectors.toSet()).size();
-    if (keys != Weapon.values().length) {
-      throw new IllegalStateException("Not all weapons have unique select key mapping");
-    }
-  }
 
   @Getter
   private final int selectKeyCode;
@@ -27,8 +21,21 @@ public enum Weapon {
   @Getter
   private final boolean automatic;
 
+
+  @Getter
+  private final WeaponProjectile projectileRef;
+
+  public static Weapon getWeaponForProjectile(WeaponProjectile weaponProjectile) {
+    return Arrays.stream(Weapon.values()).filter(
+        weapon -> weapon.getProjectileRef() == weaponProjectile).findFirst().get();
+  }
+
   public Weapon nextWeapon() {
     return Weapon.values()[(getCurrentIdx() + 1) % Weapon.values().length];
+  }
+
+  public boolean hasProjectile() {
+    return projectileRef != null;
   }
 
   public Weapon prevWeapon() {

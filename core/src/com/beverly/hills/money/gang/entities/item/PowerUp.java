@@ -89,7 +89,6 @@ public class PowerUp extends SoundMakingEntity {
 
   @Override
   public void tick(final float delta) {
-    getScreen().checkOverlaps(rect);
     position.set(rect.x + rect.getWidth() / 2,
         (float) Math.sin(getScreen().getGame().getTimeSinceLaunch() * 5f) * 0.15f,
         rect.y + rect.getHeight() / 2);
@@ -101,7 +100,7 @@ public class PowerUp extends SoundMakingEntity {
   }
 
   @Override
-  public void onCollision() {
+  public void onCollisionWithPlayer() {
     onCollision.run();
   }
 

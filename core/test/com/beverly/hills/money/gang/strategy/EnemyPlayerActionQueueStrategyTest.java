@@ -154,6 +154,8 @@ public class EnemyPlayerActionQueueStrategyTest {
 
   @Test
   public void testEnqueueOutOfOrderMoves() {
+    Runnable onMoveComplete1 = mock(Runnable.class);
+    Runnable onMoveComplete2 = mock(Runnable.class);
     Deque<EnemyPlayerAction> enemyPlayerActions = new ArrayDeque<>();
     EnemyPlayerActionQueueStrategy enemyPlayerActionQueueStrategy = new EnemyPlayerActionQueueStrategy(
         enemyPlayerActions, onTeleport, onSpeedChange, defaultSpeed);
@@ -161,11 +163,13 @@ public class EnemyPlayerActionQueueStrategyTest {
     var firstAction = EnemyPlayerAction.builder()
         .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
         .direction(new Vector2(0, 1))
+        .onComplete(onMoveComplete1)
         .route(new Vector2(0, 1))
         .eventSequenceId(0).build();
     var secondAction = EnemyPlayerAction.builder()
         .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
         .direction(new Vector2(0, 1))
+        .onComplete(onMoveComplete2)
         .route(new Vector2(0, 2))
         .eventSequenceId(2).build();
     // out of order
@@ -175,6 +179,7 @@ public class EnemyPlayerActionQueueStrategyTest {
     assertEquals(1, enemyPlayerActions.size(),
         "Only one action is expected to be enqueued because they are out of order");
     assertEquals(secondAction, enemyPlayerActions.getLast());
+    verify(onMoveComplete1).run();
   }
 
   @Test

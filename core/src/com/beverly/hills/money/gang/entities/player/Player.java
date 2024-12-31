@@ -16,10 +16,14 @@ import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.entities.effect.PlayerEffects;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
+import com.beverly.hills.money.gang.entities.projectile.Projectile;
 import com.beverly.hills.money.gang.entities.teleport.Teleport;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
-import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.registry.EnemiesRegistry;
+import com.beverly.hills.money.gang.registry.PlayerProjectileFactoriesRegistry;
+import com.beverly.hills.money.gang.registry.ScreenWeaponStateFactoriesRegistry;
+import com.beverly.hills.money.gang.screens.PlayScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
 import com.beverly.hills.money.gang.screens.ui.weapon.ScreenWeapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
@@ -27,6 +31,7 @@ import com.beverly.hills.money.gang.screens.ui.weapon.WeaponRenderData;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponStats;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import lombok.Builder;
@@ -40,6 +45,9 @@ public class Player extends Entity {
 
   private static final Logger LOG = LoggerFactory.getLogger(Player.class);
 
+  private final PlayerProjectileFactoriesRegistry playerProjectileFactoriesRegistry
+      = new PlayerProjectileFactoriesRegistry();
+
   @Getter
   private long deathTimeMls;
 
@@ -51,6 +59,12 @@ public class Player extends Entity {
   private final Consumer<Player> onMovementListener;
 
   private final Consumer<PlayerWeapon> onAttackListener;
+
+  @Getter
+  private final Consumer<ProjectileEnemy> onProjectileAttackHit;
+
+  @Getter
+  private final Consumer<ProjectilePlayer> onProjectileSelfHit;
 
   private final Consumer<EnemyPlayer> onEnemyAim;
   private final Vector3 movementDir = new Vector3();
@@ -71,6 +85,9 @@ public class Player extends Entity {
   private final ScreenWeapon screenWeapon;
 
   @Getter
+  private final EnemiesRegistry enemiesRegistry;
+
+  @Getter
   private final PlayerEffects playerEffects = new PlayerEffects();
 
   private float camY = Constants.DEFAULT_PLAYER_CAM_Y;
@@ -83,18 +100,24 @@ public class Player extends Entity {
   private final int speed;
 
 
-  public Player(final GameScreen screen,
+  public Player(final PlayScreen screen,
       final Consumer<PlayerWeapon> onAttackListener,
       final Consumer<EnemyPlayer> onEnemyAim,
       final Consumer<Player> onMovementListener,
+      final Consumer<ProjectileEnemy> onProjectileAttackHit,
+      final Consumer<ProjectilePlayer> onProjectileSelfHit,
       final Vector2 spawnPosition,
       final Vector2 lookAt,
       final int speed,
       final Map<Weapon, WeaponStats> weaponStats) {
     super(screen);
+    this.onProjectileSelfHit = onProjectileSelfHit;
+    this.enemiesRegistry = screen.getEnemiesRegistry();
     this.speed = speed * SPEED_BOOST;
-    screenWeapon = new ScreenWeapon(screen.getGame().getAssMan(), weaponStats);
+    screenWeapon = new ScreenWeapon(screen.getGame().getAssMan(), weaponStats,
+        new ScreenWeaponStateFactoriesRegistry());
     this.onMovementListener = onMovementListener;
+    this.onProjectileAttackHit = onProjectileAttackHit;
     this.onAttackListener = onAttackListener;
     this.onEnemyAim = onEnemyAim;
 
@@ -175,10 +198,9 @@ public class Player extends Entity {
   }
 
 
-  public final boolean getEnemyRectInRangeFromCam(final Consumer<EnemyPlayer> onEnemyIntersect,
+  public final Optional<EnemyPlayer> getEnemyRectInRangeFromCam(
       final float weaponDistance) {
-    AtomicBoolean intersected = new AtomicBoolean(false);
-    Streams.of(getScreen().getGame().getRectMan().getRects())
+    return Streams.of(getScreen().getGame().getRectMan().getRects())
         .filter(rect -> (rect.getFilter() == RectanglePlusFilter.ENEMY
             || rect.getFilter() == RectanglePlusFilter.WALL))
         .filter(rect -> Intersector.intersectSegmentRectangle(playerCam.position.x,
@@ -186,18 +208,15 @@ public class Player extends Entity {
             playerCam.position.x + playerCam.direction.x * weaponDistance,
             playerCam.position.z + playerCam.direction.z * weaponDistance, rect))
         .min((o1, o2) -> Float.compare(distToPlayer(o1), distToPlayer(o2)))
-        .ifPresent(closestRect -> {
+        .map(closestRect -> {
           if (closestRect.getFilter() == RectanglePlusFilter.ENEMY) {
-            EnemyPlayer enemy = (EnemyPlayer) getScreen().getGame().getEntMan()
+            return (EnemyPlayer) getScreen().getGame().getEntMan()
                 .getEntityFromId(closestRect.getConnectedEntityId());
-            if (enemy != null) {
-              intersected.set(true);
-              onEnemyIntersect.accept(enemy);
-            }
           }
+          return null;
         });
-    return intersected.get();
   }
+
 
   private float distToPlayer(final RectanglePlus rect) {
     return Vector2.dst2(playerCam.position.x, playerCam.position.z,
@@ -261,8 +280,18 @@ public class Player extends Entity {
 
   private void attack() {
     if (screenWeapon.attack(this)) {
+
+      var currentWeapon = screenWeapon.getWeaponBeingUsed();
+
       onAttackListener.accept(PlayerWeapon
-          .builder().player(this).weapon(screenWeapon.getWeaponBeingUsed()).build());
+          .builder().player(this).weapon(currentWeapon).build());
+
+      if (currentWeapon.hasProjectile()) {
+        var projectileFactory = playerProjectileFactoriesRegistry.get(
+            currentWeapon.getProjectileRef());
+        getScreen().getGame().getEntMan()
+            .addEntity(projectileFactory.create(this, screenWeapon.getWeaponState(currentWeapon)));
+      }
     }
   }
 
@@ -309,6 +338,10 @@ public class Player extends Entity {
       throw new IllegalArgumentException("New HP can't be less or equal to zero");
     }
     this.currentHP = newHp;
+    getHit();
+  }
+
+  public void getHit() {
     gotHit = true;
   }
 
@@ -354,8 +387,9 @@ public class Player extends Entity {
       return;
     }
     screenWeapon.executeTask();
-    getEnemyRectInRangeFromCam(onEnemyAim,
+    var enemyOnAim = getEnemyRectInRangeFromCam(
         screenWeapon.getWeaponDistance(screenWeapon.getWeaponBeingUsed()));
+    enemyOnAim.ifPresent(onEnemyAim);
     if (gotHit) {
       renderBloodOverlay = true;
       bloodOverlayAlpha = Constants.BLOOD_OVERLAY_ALPHA_MAX;
@@ -371,6 +405,7 @@ public class Player extends Entity {
     }
 
     getScreen().checkOverlaps(rect);
+    getScreen().getGame().getRectMan().onCollisionWithPlayer(rect);
     playerCam.position.set(rect.x + rect.width / 2f, camY, rect.y + rect.height / 2f);
     rect.getOldPosition().set(rect.x, rect.y);
   }
@@ -382,6 +417,23 @@ public class Player extends Entity {
 
     private final Player player;
     private final Weapon weapon;
+  }
+
+  @Builder
+  @Getter
+  public static class ProjectileEnemy {
+
+    private final Projectile projectile;
+    private final Player player;
+    private final EnemyPlayer enemyPlayer;
+  }
+
+  @Builder
+  @Getter
+  public static class ProjectilePlayer {
+
+    private final Projectile projectile;
+    private final Player player;
   }
 
 }

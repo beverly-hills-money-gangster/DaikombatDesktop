@@ -17,7 +17,6 @@ public abstract class SoundMakingEntity extends Entity {
 
   protected abstract RectanglePlus getRect();
 
-
   public SoundVolumeType getSFXVolume() {
     float distance = Vector2.dst2(getPlayer().getRect().x, getPlayer().getRect().y, getRect().x,
         getRect().y);
@@ -25,19 +24,19 @@ public abstract class SoundMakingEntity extends Entity {
       return SoundVolumeType.HIGH_LOUD;
     } else if (distance < 10) {
       return SoundVolumeType.LOUD;
-    } else if (distance < 15) {
+    } else if (distance < 20) {
       return SoundVolumeType.LOW_LOUD;
-    } else if (distance < 20f) {
+    } else if (distance < 35f) {
       return SoundVolumeType.HIGH_NORMAL;
-    } else if (distance < 35) {
+    } else if (distance < 55) {
       return SoundVolumeType.NORMAL;
-    } else if (distance < 50) {
+    } else if (distance < 75) {
       return SoundVolumeType.LOW_NORMAL;
-    } else if (distance < 80) {
+    } else if (distance < 115) {
       return SoundVolumeType.HIGH_QUIET;
-    } else if (distance < 120) {
+    } else if (distance < 135) {
       return SoundVolumeType.QUIET;
-    } else if (distance < 150) {
+    } else if (distance < 170) {
       return SoundVolumeType.LOW_QUIET;
     } else {
       return SoundVolumeType.MUTE;

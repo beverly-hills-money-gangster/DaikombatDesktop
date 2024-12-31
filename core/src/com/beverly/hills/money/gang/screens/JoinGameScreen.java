@@ -21,7 +21,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO test it
 public class JoinGameScreen extends ReconnectableScreen {
 
   private static final Logger LOG = LoggerFactory.getLogger(JoinGameScreen.class);
@@ -73,12 +72,11 @@ public class JoinGameScreen extends ReconnectableScreen {
     };
   }
 
-  private PlayerClass createPlayerClass(PlayerClassUISelection playerClassUISelection) {
+  public static PlayerClass createPlayerClass(PlayerClassUISelection playerClassUISelection) {
     return switch (playerClassUISelection) {
-      case COMMONER -> PlayerClass.COMMONER;
-      case DRACULA_BERSERK -> PlayerClass.DRACULA_BERSERK;
+      case WARRIOR -> PlayerClass.WARRIOR;
+      case ANGRY_SKELETON -> PlayerClass.ANGRY_SKELETON;
       case DEMON_TANK -> PlayerClass.DEMON_TANK;
-      case BEAST_WARRIOR -> PlayerClass.BEAST_WARRIOR;
     };
   }
 

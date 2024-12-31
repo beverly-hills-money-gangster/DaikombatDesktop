@@ -37,10 +37,13 @@ import com.beverly.hills.money.gang.proto.PushChatEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand.GameEventType;
 import com.beverly.hills.money.gang.proto.Vector;
+import com.beverly.hills.money.gang.registry.EnemiesRegistry;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.screens.ui.EnemyAim;
 import com.beverly.hills.money.gang.screens.ui.selection.ActivePlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.DeadPlayUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +57,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO make killer log message 64
 @Getter
 public class PlayScreen extends GameScreen {
 
@@ -65,6 +67,7 @@ public class PlayScreen extends GameScreen {
   private boolean showNetworkStats;
   private final SoundQueue narratorSoundQueue = new SoundQueue(1_500,
       Constants.QUAKE_NARRATOR_FX_VOLUME);
+  private final EnemiesRegistry enemiesRegistry = new EnemiesRegistry();
   private static final int MAX_CHAT_MSG_LEN = 32;
   private static final float BLOOD_OVERLAY_ALPHA_SWITCH = 0.5f;
   private final TextureRegion texRegBloodOverlay, texRegBlackOverlay;
@@ -152,8 +155,8 @@ public class PlayScreen extends GameScreen {
     guiFont64 = getGame().getAssMan().getFont(FontRegistry.FONT_64);
     guiFont32 = getGame().getAssMan().getFont(FontRegistry.FONT_32);
 
-    glyphLayoutHeadsupDead = new GlyphLayout(guiFont64, Constants.YOU_DIED);
-    glyphLayoutAim = new GlyphLayout(guiFont64, "+");
+    glyphLayoutHeadsupDead = new GlyphLayout(getUiFont(), Constants.YOU_DIED);
+    glyphLayoutAim = new GlyphLayout(getUiFont(), "+");
 
     musicBackground = getGame().getAssMan()
         .getUserSettingSound(SoundRegistry.BATTLE_BG_SEQ.getNextSound());
@@ -207,9 +210,17 @@ public class PlayScreen extends GameScreen {
     }
 
     );
-    playScreenGameConnectionHandler = new PlayScreenGameConnectionHandler(this);
+    playScreenGameConnectionHandler = new PlayScreenGameConnectionHandler(this, enemiesRegistry);
     if (Configs.DEV_MODE && Configs.MIMIC_CONSTANT_NETWORK_ACTIVITY) {
       mimicNetworkActivity();
+    }
+  }
+
+  public BitmapFont getUiFont() {
+    if (Configs.DEV_MODE) {
+      return guiFont32;
+    } else {
+      return guiFont64;
     }
   }
 
@@ -482,36 +493,36 @@ public class PlayScreen extends GameScreen {
     if (!getPlayer().isDead()) {
       if (myPlayerKillLog.hasKillerMessage()) {
         String killerMessage = myPlayerKillLog.getKillerMessage();
-        GlyphLayout glyphLayoutKillerMessage = new GlyphLayout(guiFont64, killerMessage);
-        guiFont64.draw(getGame().getBatch(), killerMessage,
+        GlyphLayout glyphLayoutKillerMessage = new GlyphLayout(getUiFont(), killerMessage);
+        getUiFont().draw(getGame().getBatch(), killerMessage,
             getViewport().getWorldWidth() / 2f - glyphLayoutKillerMessage.width / 2f,
             getViewport().getWorldHeight() / 2f - glyphLayoutKillerMessage.height / 2f + 128);
       }
       String killStats = uiLeaderBoard.getMyStatsMessage(
           playerConnectionContextData.getFragsToWin());
-      guiFont64.draw(getGame().getBatch(), killStats,
-          getViewport().getWorldWidth() - 32 - new GlyphLayout(guiFont64, killStats).width,
+      getUiFont().draw(getGame().getBatch(), killStats,
+          getViewport().getWorldWidth() - 32 - new GlyphLayout(getUiFont(), killStats).width,
           128 - 32);
 
     }
     if (chatMode) {
-      guiFont64.draw(getGame().getBatch(), ">" + chatTextInputProcessor.getText(), 32,
+      getUiFont().draw(getGame().getBatch(), ">" + chatTextInputProcessor.getText(), 32,
           128 - 32 + 64);
     }
     if (chatLog.hasChatMessage()) {
       String chatMessages = chatLog.getChatMessages();
-      GlyphLayout glyphLayoutChatLog = new GlyphLayout(guiFont64, chatMessages);
-      guiFont64.draw(getGame().getBatch(), chatMessages, 32,
+      GlyphLayout glyphLayoutChatLog = new GlyphLayout(getUiFont(), chatMessages);
+      getUiFont().draw(getGame().getBatch(), chatMessages, 32,
           128 - 32 + 64 + glyphLayoutChatLog.height);
     }
 
     if (enemyAim != null) {
 
       guiFont32.setColor(1, 1, 1, 0.8f);
-      guiFont64.setColor(1, 1, 1, 0.8f);
+      getUiFont().setColor(1, 1, 1, 0.8f);
 
-      GlyphLayout glyphName = new GlyphLayout(guiFont64, enemyAim.getName());
-      guiFont64.draw(getGame().getBatch(), enemyAim.getName(),
+      GlyphLayout glyphName = new GlyphLayout(getUiFont(), enemyAim.getName());
+      getUiFont().draw(getGame().getBatch(), enemyAim.getName(),
           getViewport().getWorldWidth() / 2f - glyphName.width / 2f,
           getViewport().getWorldHeight() / 2f - (glyphName.height / 2f) + 64);
       GlyphLayout glyphClass = new GlyphLayout(guiFont32, enemyAim.getPlayerClass());
@@ -525,24 +536,24 @@ public class PlayScreen extends GameScreen {
 
       enemyAim = null;
       guiFont32.setColor(1, 1, 1, 1);
-      guiFont64.setColor(1, 1, 1, 1);
+      getUiFont().setColor(1, 1, 1, 1);
     }
 
     getGame().getBatch().setColor(1, 1, 1, 1); // Never cover HUD in blood.
     if (!getPlayer().isDead()) {
-      guiFont64.draw(getGame().getBatch(),
+      getUiFont().draw(getGame().getBatch(),
           getPlayer().getCurrentHP() + " HP | " + playerConnectionContextData.getConnectGameData()
               .getPlayerName() + " | " + playerConnectionContextData.getConnectGameData()
               .getPlayerClassUISelection().toString(), 32, 128 - 32);
-      guiFont64.draw(getGame().getBatch(), "+",
+      getUiFont().draw(getGame().getBatch(), "+",
           getViewport().getWorldWidth() / 2f - glyphLayoutAim.width / 2f,
           getViewport().getWorldHeight() / 2f - glyphLayoutAim.height / 2f);
     }
 
     if (showLeaderBoard) {
       String leaderBoard = getUiLeaderBoard().toString();
-      var glyphLayoutRecSentMessages = new GlyphLayout(guiFont64, leaderBoard);
-      guiFont64.draw(getGame().getBatch(),
+      var glyphLayoutRecSentMessages = new GlyphLayout(getUiFont(), leaderBoard);
+      getUiFont().draw(getGame().getBatch(),
           leaderBoard, getViewport().getWorldWidth() / 2f - glyphLayoutRecSentMessages.width / 2f,
           getViewport().getWorldHeight() - 128);
     } else {
@@ -559,8 +570,20 @@ public class PlayScreen extends GameScreen {
       showGuiMenu = true;
     }
     if (gameOver) {
+      PlayerClassUISelection winnerClass;
+      SkinUISelection winnerColor;
+      if (uiLeaderBoard.getFirstPlacePlayerId() == playerConnectionContextData.getPlayerId()) {
+        winnerClass = playerConnectionContextData.getConnectGameData().getPlayerClassUISelection();
+        winnerColor = playerConnectionContextData.getConnectGameData().getSkinUISelection();
+      } else {
+        var enemyWinner = enemiesRegistry
+            .getEnemy(uiLeaderBoard.getFirstPlacePlayerId()).orElseThrow(
+                () -> new IllegalStateException("Can't find enemy by id"));
+        winnerClass = enemyWinner.getEnemyClass();
+        winnerColor = enemyWinner.getSkinUISelection();
+      }
       screenToTransition = new GameOverScreen(getGame(), uiLeaderBoard,
-          playerConnectionContextData.getConnectGameData());
+          playerConnectionContextData.getConnectGameData(), winnerColor, winnerClass);
     } else if (gameConnection.isAnyDisconnected()) {
       gameConnection.pollErrors().forEach(playScreenGameConnectionHandler::handleException);
       playerConnectionContextData.getConnectGameData()
@@ -599,8 +622,8 @@ public class PlayScreen extends GameScreen {
         .append(" MS | ");
     gameTechStats.append(Gdx.graphics.getFramesPerSecond()).append(" FPS");
 
-    var gameTechStatsGlyph = new GlyphLayout(guiFont64, gameTechStats);
-    guiFont64.draw(getGame().getBatch(), gameTechStats,
+    var gameTechStatsGlyph = new GlyphLayout(getUiFont(), gameTechStats);
+    getUiFont().draw(getGame().getBatch(), gameTechStats,
         getViewport().getWorldWidth() - 32 - gameTechStatsGlyph.width,
         getViewport().getWorldHeight() - 32 - gameTechStatsGlyph.height);
 
@@ -631,15 +654,15 @@ public class PlayScreen extends GameScreen {
   private void renderDeadGui() {
     float halfViewportWidth = getViewport().getWorldWidth() / 2f;
     float halfViewportHeight = getViewport().getWorldHeight() / 2f;
-    guiFont64.draw(getGame().getBatch(), Constants.YOU_DIED,
+    getUiFont().draw(getGame().getBatch(), Constants.YOU_DIED,
         halfViewportWidth - glyphLayoutHeadsupDead.width / 2f,
         halfViewportHeight - glyphLayoutHeadsupDead.height / 2f);
     String killedBy = "KILLED BY " + getPlayer().getKilledBy().toUpperCase();
-    GlyphLayout glyphLayoutKilledBy = new GlyphLayout(guiFont64, killedBy);
+    GlyphLayout glyphLayoutKilledBy = new GlyphLayout(getUiFont(), killedBy);
     final float killedByX = halfViewportWidth - glyphLayoutKilledBy.width / 2f;
     final float killedByY = halfViewportHeight - glyphLayoutKilledBy.height / 2f - 64;
-    guiFont64.draw(getGame().getBatch(), killedBy, killedByX, killedByY);
-    deadPlayUISelectionUISelection.render(guiFont64, this, 128);
+    getUiFont().draw(getGame().getBatch(), killedBy, killedByX, killedByY);
+    deadPlayUISelectionUISelection.render(getUiFont(), this, 128);
     String pressTabToSeeLeaderboard = "PRESS TAB TO SEE LEADERBOARD";
     GlyphLayout glyphLayoutLeaderBoardHint = new GlyphLayout(guiFont32, pressTabToSeeLeaderboard);
     guiFont32.draw(getGame().getBatch(), pressTabToSeeLeaderboard,
@@ -648,7 +671,7 @@ public class PlayScreen extends GameScreen {
   }
 
   private void renderAliveGui() {
-    activePlayUISelectionUISelection.render(guiFont64, this, 64);
+    activePlayUISelectionUISelection.render(getUiFont(), this, 64);
   }
 
   private void renderBloodOverlay01() {

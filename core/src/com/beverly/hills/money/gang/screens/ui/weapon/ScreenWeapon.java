@@ -1,15 +1,17 @@
 package com.beverly.hills.money.gang.screens.ui.weapon;
 
+import static com.beverly.hills.money.gang.Constants.PUNCH_ANIMATION_MLS;
+
 import com.badlogic.gdx.math.Vector2;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
-import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
+import com.beverly.hills.money.gang.registry.ScreenWeaponStateFactoriesRegistry;
 import java.util.ArrayDeque;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -26,6 +28,8 @@ public class ScreenWeapon {
 
   private final Map<Weapon, Long> animationStart = new HashMap<>();
 
+  private final ScreenWeaponStateFactoriesRegistry screenWeaponStateFactoriesRegistry;
+
   private final ScheduledExecutorService scheduledExecutor
       = Executors.newScheduledThreadPool(1,
       new BasicThreadFactory.Builder().namingPattern("weapon-change-scheduler-%d").daemon(true)
@@ -34,14 +38,6 @@ public class ScreenWeapon {
   private final Queue<Runnable> tasks = new ArrayDeque<>();
 
   protected static final int CHANGE_WEAPON_DELAY_MLS = 75;
-
-  private static final int GUNSHOT_ANIMATION_MLS = 150;
-
-  private static final int RAILGUN_ANIMATION_MLS = 200;
-
-  private static final int MINIGUN_ANIMATION_MLS = 100;
-
-  private static final int PUNCH_ANIMATION_MLS = 155;
 
   private final TimeLimitedSound quadDamageAttack;
 
@@ -57,78 +53,22 @@ public class ScreenWeapon {
 
   public ScreenWeapon(
       final DaiKombatAssetsManager assetsManager,
-      final Map<Weapon, WeaponStats> weaponStats) {
+      final Map<Weapon, WeaponStats> weaponStats,
+      final ScreenWeaponStateFactoriesRegistry screenWeaponStateFactoriesRegistry) {
+    this.screenWeaponStateFactoriesRegistry = screenWeaponStateFactoriesRegistry;
     quadDamageAttack = new TimeLimitedSound(
         assetsManager.getUserSettingSound(SoundRegistry.QUAD_DAMAGE_ATTACK));
     weaponChangeSound = assetsManager.getUserSettingSound(SoundRegistry.WEAPON_CHANGE);
-    weaponStates.put(Weapon.SHOTGUN, WeaponState.builder()
-        .distance(weaponStats.get(Weapon.SHOTGUN).getMaxDistance())
-        .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PLAYER_SHOTGUN))
-        .hitTargetSound(assetsManager.getUserSettingSound(SoundRegistry.HIT_SOUND))
-        .screenRatioX(0.35f)
-        .screenRatioY(0.40f)
-        .center(false)
-        .backoffDelayMls(getBackoffDelay(weaponStats.get(Weapon.SHOTGUN), GUNSHOT_ANIMATION_MLS))
-        .animationDelayMls(GUNSHOT_ANIMATION_MLS)
-        .fireTexture(assetsManager.getTextureRegion(TexturesRegistry.GUN_SHOOT, 0, 0,
-            149, 117 - 10))
-        .idleTexture(assetsManager.getTextureRegion(TexturesRegistry.GUN_IDLE, 0, 0,
-            149, 117 - 10))
-        .weaponScreenPositioning(animationTime -> new Vector2(0, -35))
-        .build());
-
-    weaponStates.put(Weapon.GAUNTLET, WeaponState.builder()
-        .distance(weaponStats.get(Weapon.GAUNTLET).getMaxDistance())
-        .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PUNCH_THROWN))
-        .hitTargetSound(assetsManager.getUserSettingSound(SoundRegistry.PUNCH_HIT))
-        .screenRatioX(0.5f)
-        .screenRatioY(0.45f)
-        .center(false)
-        .backoffDelayMls(getBackoffDelay(weaponStats.get(Weapon.GAUNTLET), PUNCH_ANIMATION_MLS))
-        .animationDelayMls(PUNCH_ANIMATION_MLS)
-        .fireTexture(assetsManager.getTextureRegion(TexturesRegistry.PUNCH, 0, 0,
-            273, 175))
-        .idleTexture(assetsManager.getTextureRegion(TexturesRegistry.PUNCH_IDLE, 0, 0,
-            273, 175))
-        .weaponScreenPositioning(
-            animationTime -> new Vector2(-(animationTime / (float) PUNCH_ANIMATION_MLS) * 200 + 200,
-                0))
-        .build());
-
-    weaponStates.put(Weapon.RAILGUN, WeaponState.builder()
-        .distance(weaponStats.get(Weapon.RAILGUN).getMaxDistance())
-        .hitTargetSound(assetsManager.getUserSettingSound(SoundRegistry.HIT_SOUND))
-        .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PLAYER_RAILGUN))
-        .screenRatioX(0.35f)
-        .screenRatioY(0.40f)
-        .center(false)
-        .backoffDelayMls(getBackoffDelay(weaponStats.get(Weapon.RAILGUN), RAILGUN_ANIMATION_MLS))
-        .animationDelayMls(RAILGUN_ANIMATION_MLS)
-        .fireTexture(assetsManager.getTextureRegion(TexturesRegistry.RAILGUN_SHOOTING, 0, 0,
-            170, 118))
-        .idleTexture(assetsManager.getTextureRegion(TexturesRegistry.RAILGUN_IDLE, 0, 0,
-            170, 118))
-        .weaponScreenPositioning(animationTime -> new Vector2(0, -35))
-        .build());
-
-    weaponStates.put(Weapon.MINIGUN, WeaponState.builder()
-        .distance(weaponStats.get(Weapon.MINIGUN).getMaxDistance())
-        .hitTargetSound(assetsManager.getUserSettingSound(SoundRegistry.HIT_SOUND))
-        .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PLAYER_MINIGUN))
-        .screenRatioX(0.45f)
-        .screenRatioY(0.40f)
-        .backoffDelayMls(getBackoffDelay(weaponStats.get(Weapon.MINIGUN), MINIGUN_ANIMATION_MLS))
-        .animationDelayMls(MINIGUN_ANIMATION_MLS)
-        .center(true)
-        .fireTexture(assetsManager.getTextureRegion(TexturesRegistry.MINIGUN_FIRE, 0, 0,
-            185, 96))
-        .idleTexture(assetsManager.getTextureRegion(TexturesRegistry.MINIGUN_IDLE, 0, 0,
-            185, 96))
-        .weaponScreenPositioning(
-            animationTime -> new Vector2((float) Math.sin(animationTime) * 15f, -35))
-        .build());
-
+    for (Weapon value : Weapon.values()) {
+      putWeapon(value, assetsManager, weaponStats);
+    }
     setWeaponBeingUsed(Weapon.SHOTGUN);
+  }
+
+  private void putWeapon(final Weapon weapon, final DaiKombatAssetsManager assetsManager,
+      final Map<Weapon, WeaponStats> weaponStats) {
+    weaponStates.put(weapon, screenWeaponStateFactoriesRegistry.get(weapon)
+        .create(assetsManager, weaponStats.get(weapon)));
   }
 
   public boolean punch(Player player) {
@@ -151,10 +91,6 @@ public class ScreenWeapon {
     while ((toExecute = tasks.poll()) != null) {
       toExecute.run();
     }
-  }
-
-  private static int getBackoffDelay(WeaponStats weaponStats, int animationMls) {
-    return Math.max(0, weaponStats.getDelayMls() - animationMls);
   }
 
   public void changeWeapon(Weapon weapon) {
@@ -190,6 +126,10 @@ public class ScreenWeapon {
 
   public float getWeaponDistance(Weapon weapon) {
     return weaponStates.get(weapon).getDistance();
+  }
+
+  public WeaponState getWeaponState(Weapon weapon) {
+    return weaponStates.get(weapon);
   }
 
   public WeaponRenderData getActiveWeaponForRendering() {

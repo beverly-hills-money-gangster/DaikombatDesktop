@@ -6,6 +6,10 @@ import org.apache.commons.lang3.Range;
 
 public interface Constants {
 
+  int ROCKET_SPEED = 27;
+
+  int PUNCH_ANIMATION_MLS = 155;
+
   float FLOAT_COMPARE_EPS = 0.000001f;
   Range<Float> FRONT_RANGE = Range.of(180f - 45, 180f + 45);
   Range<Float> LEFT_RANGE = Range.of(45f, 180f - 44.9f);

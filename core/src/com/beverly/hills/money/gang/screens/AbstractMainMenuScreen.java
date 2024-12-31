@@ -86,7 +86,8 @@ public abstract class AbstractMainMenuScreen extends GameScreen {
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
     getGame().getBatch().begin();
     getGame().getBatch()
-        .draw(skyBg, 0, 0, getViewport().getWorldWidth(), getViewport().getWorldHeight());
+        .draw(skyBg, 0, 0, getViewport().getWorldWidth(),
+            getViewport().getWorldHeight());
     getGame().getBatch().end();
     getGame().getFbo().end();
 
