@@ -42,7 +42,7 @@ public class EnterServerAddressScreen extends AbstractMainMenuScreen {
     boomSound2 = getGame().getAssMan().getUserSettingSound(SoundRegistry.BOOM_2);
     nameTextInputProcessor = new TextInputProcessor(MAX_SERVER_NAME_LEN,
         () -> getGame().getAssMan().
-            getUserSettingSound(SoundRegistry.TYPING_SOUND_SEQ.getNextSound())
+            getUserSettingSound(SoundRegistry.TYPING_SOUND_SEQ.getNext())
             .play(Constants.DEFAULT_SFX_TYPING_VOLUME));
   }
 

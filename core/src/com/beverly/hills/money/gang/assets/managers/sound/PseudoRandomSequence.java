@@ -1,24 +1,23 @@
 package com.beverly.hills.money.gang.assets.managers.sound;
 
-import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import java.util.Arrays;
 import java.util.Random;
 import org.apache.commons.lang3.ArrayUtils;
 
-public class PseudoRandomSoundSequence {
+public class PseudoRandomSequence<T> {
 
   private static final Random RANDOM = new Random();
 
-  private final SoundRegistry[] sounds;
+  private final T[] sounds;
   private int currentSoundIdx;
 
-  public PseudoRandomSoundSequence(SoundRegistry... sounds) {
+  public PseudoRandomSequence(T... sounds) {
     this.sounds = Arrays.copyOf(sounds, sounds.length);
     ArrayUtils.shuffle(this.sounds);
     currentSoundIdx = RANDOM.nextInt(sounds.length);
   }
 
-  public SoundRegistry getNextSound() {
+  public T getNext() {
     currentSoundIdx++;
     return sounds[currentSoundIdx % sounds.length];
   }

@@ -21,6 +21,7 @@ public class ControlsScreen extends AbstractMainMenuScreen {
       "SHOOT - LEFT MOUSE CLICK/RIGHT ALT",
       "PUNCH - RIGHT MOUSE CLICK/RIGHT CTRL",
       "CHAT - TILDE",
+      "X - TAUNT",
       "LEADERBOARD - TAB",
       "Q, E, MOUSE SCROLL - NEXT/PREV WEAPON",
       Arrays.stream(Weapon.values())
