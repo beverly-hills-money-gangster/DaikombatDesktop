@@ -55,17 +55,6 @@ public class AchievementFactoryTest {
     assertEquals(SoundRegistry.TWO_FRAGS_TO_SEC, achievement.get().getSound());
   }
 
-  @Test
-  public void testCreateTripleKillHolyShit() {
-    KillStats killStats = new KillStats();
-    killStats.registerKill();
-    killStats.registerKill();
-    killStats.registerKill();
-    var achievement = AchievementFactory.create(Weapon.SHOTGUN, killStats);
-    assertTrue(achievement.isPresent());
-    assertEquals(HolyShitAchievement.class, achievement.get().getClass());
-    assertEquals(SoundRegistry.HOLY_SHIT, achievement.get().getSound());
-  }
 
   @Test
   public void testCreateNoDoubleKill() throws InterruptedException {

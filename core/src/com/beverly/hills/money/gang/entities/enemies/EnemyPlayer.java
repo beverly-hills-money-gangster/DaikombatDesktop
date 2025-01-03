@@ -32,6 +32,7 @@ import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// TODO show 3 dots on top of the player if it's chatting
 public class EnemyPlayer extends Enemy {
 
   private static final Logger LOG = LoggerFactory.getLogger(EnemyPlayer.class);

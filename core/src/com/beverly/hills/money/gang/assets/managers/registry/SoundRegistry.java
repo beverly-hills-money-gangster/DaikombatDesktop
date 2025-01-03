@@ -1,6 +1,6 @@
 package com.beverly.hills.money.gang.assets.managers.registry;
 
-import com.beverly.hills.money.gang.assets.managers.sound.PseudoRandomSoundSequence;
+import com.beverly.hills.money.gang.assets.managers.sound.PseudoRandomSequence;
 import lombok.Getter;
 
 public enum SoundRegistry {
@@ -44,15 +44,37 @@ public enum SoundRegistry {
   PERFECT("sfx/winning/perfect.wav"),
   VOICE_GET_HIT("voice/pain/voice_get_shot.mp3"),
   VOICE_GET_HIT_2("voice/pain/voice_get_shot_2.mp3"),
-
   VOICE_ENEMY_GET_HIT("voice/enemy/pain/oof.mp3"),
   VOICE_ENEMY_GET_HIT_2("voice/enemy/pain/oof_2.mp3"),
   VOICE_ENEMY_GET_HIT_3("voice/enemy/pain/oof_3.mp3"),
   VOICE_ENEMY_GET_HIT_4("voice/enemy/pain/oof_4.mp3"),
-
   VOICE_ENEMY_DEATH("voice/enemy/death/death.mp3"),
   VOICE_ENEMY_DEATH_2("voice/enemy/death/death_2.mp3"),
   VOICE_ENEMY_DEATH_3("voice/enemy/death/death_3.mp3"),
+  TAUNT_DO_NOT_MAKE_ME_LAUGH("voice/taunt/player/do_not_make_me_laugh.mp3"),
+  TAUNT_I_WIN("voice/taunt/player/i_win.mp3"),
+  TAUNT_OFFICIAL_SUCK("voice/taunt/player/official_suck.mp3"),
+  TAUNT_PATHETIC("voice/taunt/player/pathetic.mp3"),
+  TAUNT_STILL_TRYING("voice/taunt/player/still_trying.mp3"),
+  TAUNT_YOU_NEVER_WIN("voice/taunt/player/you_never_win.mp3"),
+  TAUNT_YOU_SUCK("voice/taunt/player/you_suck.mp3"),
+  TAUNT_IS_THAT_YOUR_BEST("voice/taunt/player/is_that_your_best.mp3"),
+  TAUNT_PREPARE_TO_DIE("voice/taunt/player/prepare_to_die.mp3"),
+  TAUNT_YOU_ARE_NOTHING("voice/taunt/player/you_are_nothing.mp3"),
+  TAUNT_YOU_WEAK_PATHETIC_FOOL("voice/taunt/player/you_are_weak_pathetic_fool.mp3"),
+  
+  ENEMY_TAUNT_DO_NOT_MAKE_ME_LAUGH("voice/taunt/enemy/do_not_make_me_laugh.mp3"),
+  ENEMY_TAUNT_I_WIN("voice/taunt/enemy/i_win.mp3"),
+  ENEMY_TAUNT_OFFICIAL_SUCK("voice/taunt/enemy/official_suck.mp3"),
+  ENEMY_TAUNT_PATHETIC("voice/taunt/enemy/pathetic.mp3"),
+  ENEMY_TAUNT_STILL_TRYING("voice/taunt/enemy/still_trying.mp3"),
+  ENEMY_TAUNT_YOU_NEVER_WIN("voice/taunt/enemy/you_never_win.mp3"),
+  ENEMY_TAUNT_YOU_SUCK("voice/taunt/enemy/you_suck.mp3"),
+  ENEMY_TAUNT_IS_THAT_YOUR_BEST("voice/taunt/enemy/is_that_your_best.mp3"),
+  ENEMY_TAUNT_PREPARE_TO_DIE("voice/taunt/enemy/prepare_to_die.mp3"),
+  ENEMY_TAUNT_YOU_ARE_NOTHING("voice/taunt/enemy/you_are_nothing.mp3"),
+  ENEMY_TAUNT_YOU_WEAK_PATHETIC_FOOL("voice/taunt/enemy/you_are_weak_pathetic_fool.mp3"),
+  
   ENEMY_SHOTGUN("sfx/enemy_shotgun.mp3"),
   ENEMY_ROCKET_LAUNCHER("sfx/enemy_player_rocket_launcher.mp3"),
   QUAD_DAMAGE_ATTACK("sfx/quad_damage_attack.mp3"),
@@ -84,26 +106,25 @@ public enum SoundRegistry {
   }
 
 
-  public static final PseudoRandomSoundSequence TYPING_SOUND_SEQ
-      = new PseudoRandomSoundSequence(DING_1, DING_2);
-  public static final PseudoRandomSoundSequence LOOSING_SOUND_SEQ
-      = new PseudoRandomSoundSequence(LAUGH, LAUGH_2, LAUGH_3);
+  public static final PseudoRandomSequence<SoundRegistry> TYPING_SOUND_SEQ
+      = new PseudoRandomSequence<>(DING_1, DING_2);
+  public static final PseudoRandomSequence<SoundRegistry> LOOSING_SOUND_SEQ
+      = new PseudoRandomSequence<>(LAUGH, LAUGH_2, LAUGH_3);
 
-  public static final PseudoRandomSoundSequence SPAWN_SOUND_SEQ
-      = new PseudoRandomSoundSequence(SPAWN1, SPAWN2, SPAWN3);
-  public static final PseudoRandomSoundSequence WINNING_SOUND_SEQ
-      = new PseudoRandomSoundSequence(EXCELLENT, HUMILIATION, HOLY_SHIT, IMPRESSIVE, PERFECT);
-  public static final PseudoRandomSoundSequence VOICE_GET_HIT_SOUND_SEQ
-      = new PseudoRandomSoundSequence(VOICE_GET_HIT, VOICE_GET_HIT_2);
+  public static final PseudoRandomSequence<SoundRegistry> SPAWN_SOUND_SEQ
+      = new PseudoRandomSequence<>(SPAWN1, SPAWN2, SPAWN3);
 
-  public static final PseudoRandomSoundSequence ENEMY_GET_HIT_SOUND_SEQ
-      = new PseudoRandomSoundSequence(VOICE_ENEMY_GET_HIT, VOICE_ENEMY_GET_HIT_2,
+  public static final PseudoRandomSequence<SoundRegistry> VOICE_GET_HIT_SOUND_SEQ
+      = new PseudoRandomSequence<>(VOICE_GET_HIT, VOICE_GET_HIT_2);
+
+  public static final PseudoRandomSequence<SoundRegistry> ENEMY_GET_HIT_SOUND_SEQ
+      = new PseudoRandomSequence<>(VOICE_ENEMY_GET_HIT, VOICE_ENEMY_GET_HIT_2,
       VOICE_ENEMY_GET_HIT_3, VOICE_ENEMY_GET_HIT_4);
 
-  public static final PseudoRandomSoundSequence BATTLE_BG_SEQ
-      = new PseudoRandomSoundSequence(BATTLE, BATTLE2);
+  public static final PseudoRandomSequence<SoundRegistry> BATTLE_BG_SEQ
+      = new PseudoRandomSequence<>(BATTLE, BATTLE2);
 
-  public static final PseudoRandomSoundSequence ENEMY_DEATH_SOUND_SEQ
-      = new PseudoRandomSoundSequence(VOICE_ENEMY_DEATH, VOICE_ENEMY_DEATH_2, VOICE_ENEMY_DEATH_3);
+  public static final PseudoRandomSequence<SoundRegistry> ENEMY_DEATH_SOUND_SEQ
+      = new PseudoRandomSequence<>(VOICE_ENEMY_DEATH, VOICE_ENEMY_DEATH_2, VOICE_ENEMY_DEATH_3);
 
 }

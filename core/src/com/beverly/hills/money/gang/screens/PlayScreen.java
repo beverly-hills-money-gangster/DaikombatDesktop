@@ -1,5 +1,7 @@
 package com.beverly.hills.money.gang.screens;
 
+import static com.beverly.hills.money.gang.screens.ui.taunt.GameTaunt.TAUNTS_SEQ;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
@@ -21,6 +23,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.MapRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundQueue;
+import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.item.PowerUp;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
@@ -62,7 +65,7 @@ public class PlayScreen extends GameScreen {
 
   private static final Logger LOG = LoggerFactory.getLogger(PlayScreen.class);
   private static final int DEAD_SCREEN_INPUT_DELAY_MLS = 1_000;
-
+  private static final int TAUNT_DELAY_MLS = 1_250;
   private GameScreen screenToTransition;
   private boolean showNetworkStats;
   private final SoundQueue narratorSoundQueue = new SoundQueue(1_500,
@@ -75,6 +78,7 @@ public class PlayScreen extends GameScreen {
   private EnemyAim enemyAim;
   private final TextInputProcessor chatTextInputProcessor;
   private final BitmapFont guiFont64;
+  private long lastTauntTime = 0;
   private final BitmapFont guiFont32;
   private final GlyphLayout glyphLayoutHeadsupDead;
   private final GlyphLayout glyphLayoutAim;
@@ -145,7 +149,7 @@ public class PlayScreen extends GameScreen {
 
     chatTextInputProcessor = new TextInputProcessor(MAX_CHAT_MSG_LEN,
         () -> getGame().getAssMan()
-            .getUserSettingSound(SoundRegistry.TYPING_SOUND_SEQ.getNextSound())
+            .getUserSettingSound(SoundRegistry.TYPING_SOUND_SEQ.getNext())
             .play(Constants.DEFAULT_SFX_TYPING_VOLUME));
     texRegBloodOverlay = getGame().getAssMan().getTextureRegion(
         TexturesRegistry.ATLAS, 0, 0, 2, 2);
@@ -159,7 +163,7 @@ public class PlayScreen extends GameScreen {
     glyphLayoutAim = new GlyphLayout(getUiFont(), "+");
 
     musicBackground = getGame().getAssMan()
-        .getUserSettingSound(SoundRegistry.BATTLE_BG_SEQ.getNextSound());
+        .getUserSettingSound(SoundRegistry.BATTLE_BG_SEQ.getNext());
     fightSound = getGame().getAssMan().getUserSettingSound(SoundRegistry.FIGHT);
     boomSound1 = getGame().getAssMan().getUserSettingSound(SoundRegistry.BOOM_1);
     boomSound2 = getGame().getAssMan().getUserSettingSound(SoundRegistry.BOOM_2);
@@ -332,9 +336,31 @@ public class PlayScreen extends GameScreen {
         if (Gdx.input.isKeyJustPressed(Keys.N)) {
           showNetworkStats = !showNetworkStats;
         }
+        // TODO add to controls screen
+        if (Gdx.input.isKeyJustPressed(Keys.X)
+            && System.currentTimeMillis() > lastTauntTime + TAUNT_DELAY_MLS) {
+          handleTaunt();
+        }
         getPlayer().handleInput(delta);
       }
     }
+  }
+
+  private void handleTaunt() {
+    var taunt = TAUNTS_SEQ.getNext();
+    getGame().getAssMan().getUserSettingSound(taunt.getPlayerSound())
+        .play(SoundVolumeType.LOW_LOUD, 0);
+    String message = taunt.getChatMessage();
+    chatLog.addMessage(
+        playerConnectionContextData.getConnectGameData().getPlayerName(),
+        message);
+    lastTauntTime = System.currentTimeMillis();
+    gameConnection.write(PushChatEventCommand.newBuilder()
+        .setMessage(message)
+        .setTaunt(taunt.getTauntType())
+        .setPlayerId(playerConnectionContextData.getPlayerId())
+        .setGameId(Configs.GAME_ID)
+        .build());
   }
 
   private void handleAliveGuiInput() {

@@ -121,7 +121,7 @@ public class Player extends Entity {
     this.onAttackListener = onAttackListener;
     this.onEnemyAim = onEnemyAim;
 
-    playerCam = new PerspectiveCamera(70, 640, 480);
+    playerCam = new PerspectiveCamera(75, 640, 480);
     playerCam.position.set(new Vector3(0, Constants.DEFAULT_PLAYER_CAM_Y, 0));
     playerCam.lookAt(new Vector3(lookAt.x, Constants.DEFAULT_PLAYER_CAM_Y, lookAt.y));
     playerCam.near = 0.01f;

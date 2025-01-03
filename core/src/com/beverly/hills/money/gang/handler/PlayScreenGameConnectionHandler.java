@@ -30,6 +30,7 @@ import com.beverly.hills.money.gang.registry.EnemyPlayerProjectileShootingFactor
 import com.beverly.hills.money.gang.screens.PlayScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
+import com.beverly.hills.money.gang.screens.ui.taunt.GameTaunt;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponMapper;
 import com.beverly.hills.money.gang.utils.Converter;
@@ -88,6 +89,12 @@ public class PlayScreenGameConnectionHandler {
 
   private void handleChat(ServerResponse.ChatEvent chatEvent) {
     playScreen.getChatLog().addMessage(chatEvent.getName(), chatEvent.getMessage());
+    if (chatEvent.hasTaunt()) {
+      enemiesRegistry.getEnemy(chatEvent.getPlayerId()).ifPresent(
+          enemyPlayer -> playScreen.getGame().getAssMan()
+              .getUserSettingSound(GameTaunt.map(chatEvent.getTaunt()).getEnemySound())
+              .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan()));
+    }
   }
 
   private void handleGameEvent(ServerResponse.GameEvents gameEvents) {
@@ -133,7 +140,7 @@ public class PlayScreenGameConnectionHandler {
                         DEFAULT_ENEMY_Y, gameEvent.getPlayer().getPosition().getY()),
                     createVector(gameEvent.getPlayer().getDirection()));
                 playScreen.getGame().getAssMan()
-                    .getUserSettingSound(SoundRegistry.SPAWN_SOUND_SEQ.getNextSound())
+                    .getUserSettingSound(SoundRegistry.SPAWN_SOUND_SEQ.getNext())
                     .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
               })
               .build());
@@ -198,7 +205,7 @@ public class PlayScreenGameConnectionHandler {
     if (gameEvent.getEventType() == GameEventType.JOIN
         || gameEvent.getEventType() == GameEventType.RESPAWN) {
       playScreen.getGame().getAssMan()
-          .getUserSettingSound(SoundRegistry.SPAWN_SOUND_SEQ.getNextSound())
+          .getUserSettingSound(SoundRegistry.SPAWN_SOUND_SEQ.getNext())
           .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
     }
   }
@@ -401,7 +408,7 @@ public class PlayScreenGameConnectionHandler {
                   playScreen.getPlayer().getHit(gameEvent.getAffectedPlayer().getHealth());
                   new TimeLimitedSound(
                       playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
-                          .VOICE_GET_HIT_SOUND_SEQ.getNextSound())).play(SoundVolumeType.LOW_QUIET,
+                          .VOICE_GET_HIT_SOUND_SEQ.getNext())).play(SoundVolumeType.LOW_QUIET,
                       0.f, 1000);
                 })
                 .build());
@@ -550,10 +557,10 @@ public class PlayScreenGameConnectionHandler {
     return Enemy.EnemyListeners
         .builder()
         .onDeath(enemy -> playScreen.getGame().getAssMan()
-            .getUserSettingSound(SoundRegistry.ENEMY_DEATH_SOUND_SEQ.getNextSound())
+            .getUserSettingSound(SoundRegistry.ENEMY_DEATH_SOUND_SEQ.getNext())
             .play(enemy.getSFXVolume(), enemy.getSFXPan()))
         .onGetShot(enemy -> new TimeLimitedSound(playScreen.getGame().getAssMan()
-            .getUserSettingSound(SoundRegistry.ENEMY_GET_HIT_SOUND_SEQ.getNextSound()))
+            .getUserSettingSound(SoundRegistry.ENEMY_GET_HIT_SOUND_SEQ.getNext()))
             .play(enemy.getSFXVolume(), enemy.getSFXPan(), 1500))
         .onAttack(enemyWeapon -> {
               var enemy = enemyWeapon.getEnemy();
@@ -579,9 +586,9 @@ public class PlayScreenGameConnectionHandler {
   private void diePlayer(final String killedBy) {
     playScreen.getPlayer().die(killedBy);
     playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
-        .VOICE_GET_HIT_SOUND_SEQ.getNextSound()).play(Constants.PLAYER_FX_VOLUME);
+        .VOICE_GET_HIT_SOUND_SEQ.getNext()).play(Constants.PLAYER_FX_VOLUME);
     playScreen.getGame().getAssMan()
-        .getUserSettingSound(SoundRegistry.LOOSING_SOUND_SEQ.getNextSound())
+        .getUserSettingSound(SoundRegistry.LOOSING_SOUND_SEQ.getNext())
         .play(Constants.MK_NARRATOR_FX_VOLUME);
     playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.BELL)
         .play(Constants.DEFAULT_SFX_VOLUME);
