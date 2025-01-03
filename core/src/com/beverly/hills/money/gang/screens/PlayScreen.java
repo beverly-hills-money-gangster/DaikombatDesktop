@@ -336,7 +336,6 @@ public class PlayScreen extends GameScreen {
         if (Gdx.input.isKeyJustPressed(Keys.N)) {
           showNetworkStats = !showNetworkStats;
         }
-        // TODO add to controls screen
         if (Gdx.input.isKeyJustPressed(Keys.X)
             && System.currentTimeMillis() > lastTauntTime + TAUNT_DELAY_MLS) {
           handleTaunt();

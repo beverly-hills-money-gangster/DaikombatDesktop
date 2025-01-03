@@ -6,7 +6,6 @@ import com.beverly.hills.money.gang.proto.Taunt;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-// TODO all of this sounds like ass
 @RequiredArgsConstructor
 public enum GameTaunt {
 
