@@ -62,7 +62,7 @@ public enum SoundRegistry {
   TAUNT_PREPARE_TO_DIE("voice/taunt/player/prepare_to_die.mp3"),
   TAUNT_YOU_ARE_NOTHING("voice/taunt/player/you_are_nothing.mp3"),
   TAUNT_YOU_WEAK_PATHETIC_FOOL("voice/taunt/player/you_are_weak_pathetic_fool.mp3"),
-  
+
   ENEMY_TAUNT_DO_NOT_MAKE_ME_LAUGH("voice/taunt/enemy/do_not_make_me_laugh.mp3"),
   ENEMY_TAUNT_I_WIN("voice/taunt/enemy/i_win.mp3"),
   ENEMY_TAUNT_OFFICIAL_SUCK("voice/taunt/enemy/official_suck.mp3"),
@@ -74,7 +74,7 @@ public enum SoundRegistry {
   ENEMY_TAUNT_PREPARE_TO_DIE("voice/taunt/enemy/prepare_to_die.mp3"),
   ENEMY_TAUNT_YOU_ARE_NOTHING("voice/taunt/enemy/you_are_nothing.mp3"),
   ENEMY_TAUNT_YOU_WEAK_PATHETIC_FOOL("voice/taunt/enemy/you_are_weak_pathetic_fool.mp3"),
-  
+
   ENEMY_SHOTGUN("sfx/enemy_shotgun.mp3"),
   ENEMY_ROCKET_LAUNCHER("sfx/enemy_player_rocket_launcher.mp3"),
   QUAD_DAMAGE_ATTACK("sfx/quad_damage_attack.mp3"),
@@ -96,7 +96,10 @@ public enum SoundRegistry {
   HIT_SOUND("sfx/shoot_hit_sound.mp3"),
   SPAWN1("sfx/spawn/spawn1.mp3"),
   SPAWN2("sfx/spawn/spawn2.mp3"),
-  SPAWN3("sfx/spawn/spawn3.mp3");
+  SPAWN3("sfx/spawn/spawn3.mp3"),
+
+  DOOR_OPEN("sfx/door_open.mp3"),
+  DOOR_CLOSE("sfx/door_close.mp3");
 
   @Getter
   private final String fileName;

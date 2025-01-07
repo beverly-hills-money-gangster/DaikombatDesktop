@@ -27,6 +27,7 @@ public class RectManager {
           && otherRect != rect
           && RectanglePlusFilter.ENEMY != otherRect.getFilter()
           && RectanglePlusFilter.ITEM != otherRect.getFilter()
+          && RectanglePlusFilter.DOOR != otherRect.getFilter()
           && rect.overlaps(otherRect)) {
         return true;
       }
@@ -39,7 +40,8 @@ public class RectManager {
       if (game.getOverlapFilterMan()
           .doesFiltersOverlap(playerRect.getFilter(), otherRect.getFilter())
           && otherRect != playerRect
-          && RectanglePlusFilter.ITEM == otherRect.getFilter()
+          && (RectanglePlusFilter.ITEM == otherRect.getFilter()
+          || RectanglePlusFilter.DOOR == otherRect.getFilter())
           && playerRect.overlaps(otherRect)) {
         Entity item = game.getEntMan()
             .getEntityFromId(otherRect.getConnectedEntityId());

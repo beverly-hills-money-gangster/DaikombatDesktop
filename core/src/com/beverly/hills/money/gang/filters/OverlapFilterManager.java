@@ -35,20 +35,20 @@ public class OverlapFilterManager {
     overlapFilters[2][0] = RectanglePlusFilter.DOOR.getValue();
     overlapFilters[3][0] = RectanglePlusFilter.PLAYER.getValue();
     overlapFilters[4][0] = RectanglePlusFilter.ENEMY.getValue();
-    overlapFilters[5][0] = RectanglePlusFilter.ENEMY_PROJECTILE.getValue();
+    overlapFilters[5][0] = RectanglePlusFilter.PROJECTILE.getValue();
     overlapFilters[6][0] = RectanglePlusFilter.ITEM.getValue();
 
 //		Door
     overlapFilters[2][1] = RectanglePlusFilter.PLAYER.getValue();
     overlapFilters[2][2] = RectanglePlusFilter.ENEMY.getValue();
-    overlapFilters[2][3] = RectanglePlusFilter.ENEMY_PROJECTILE.getValue();
+    overlapFilters[2][3] = RectanglePlusFilter.PROJECTILE.getValue();
 
 //		Player
     overlapFilters[3][1] = RectanglePlusFilter.WALL.getValue();
     overlapFilters[3][2] = RectanglePlusFilter.DOOR.getValue();
 //		overlapFilters[3][3] = RectanglePlusFilter.PLAYER.getValue();
     overlapFilters[3][4] = RectanglePlusFilter.ENEMY.getValue();
-    overlapFilters[3][5] = RectanglePlusFilter.ENEMY_PROJECTILE.getValue();
+    overlapFilters[3][5] = RectanglePlusFilter.PROJECTILE.getValue();
     overlapFilters[3][6] = RectanglePlusFilter.ITEM.getValue();
 
 //		Enemy
