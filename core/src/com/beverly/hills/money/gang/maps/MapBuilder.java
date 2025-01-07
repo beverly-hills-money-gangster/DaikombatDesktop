@@ -17,6 +17,8 @@ import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.cell.Cell3D;
+import com.beverly.hills.money.gang.entities.door.Door;
+import com.beverly.hills.money.gang.entities.door.Door.DoorDirection;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import org.apache.commons.math3.util.Precision;
@@ -47,6 +49,7 @@ public class MapBuilder {
     final TiledMapTileLayer floorLayer = (TiledMapTileLayer) mapLayers.get("floor");
     final TiledMapTileLayer ceilingLayer = (TiledMapTileLayer) mapLayers.get("ceiling");
     final MapObjects rects = mapLayers.get("rects").getObjects();
+    final MapObjects doors = mapLayers.get("doors").getObjects();
     final MapObjects teleports = mapLayers.get("teleports").getObjects();
 
     final Array<Cell3D> cell3DsForWorld = new Array<>();
@@ -185,6 +188,25 @@ public class MapBuilder {
     }
 
     cell3DsForWorld.clear();
+
+    for (final MapObject doorObj : doors) {
+      final String direction = (String) doorObj.getProperties().get("direction");
+      DoorDirection doorDir = switch (direction) {
+        case "north" -> DoorDirection.NORTH;
+        case "south" -> DoorDirection.SOUTH;
+        case "west" -> DoorDirection.WEST;
+        case "east" -> DoorDirection.EAST;
+        default -> throw new IllegalArgumentException("Not supported direction " + direction);
+      };
+
+      final Door door = new Door(
+          new Vector3((float) doorObj.getProperties().get("x") / TILE_SIZE - currentMapWidth / 2f,
+              0,
+              (float) doorObj.getProperties().get("y") / TILE_SIZE - currentMapHeight / 2f),
+          doorDir, game.getEntMan().getScreen());
+
+      game.getEntMan().addEntity(door);
+    }
 
     for (final MapObject teleportObj : teleports) {
       final boolean spawnOnMapLoad = teleportObj.getProperties().get("MapSpawn", Boolean.class);

@@ -202,7 +202,8 @@ public class Player extends Entity {
       final float weaponDistance) {
     return Streams.of(getScreen().getGame().getRectMan().getRects())
         .filter(rect -> (rect.getFilter() == RectanglePlusFilter.ENEMY
-            || rect.getFilter() == RectanglePlusFilter.WALL))
+            || rect.getFilter() == RectanglePlusFilter.WALL
+            || rect.getFilter() == RectanglePlusFilter.DOOR))
         .filter(rect -> Intersector.intersectSegmentRectangle(playerCam.position.x,
             playerCam.position.z,
             playerCam.position.x + playerCam.direction.x * weaponDistance,

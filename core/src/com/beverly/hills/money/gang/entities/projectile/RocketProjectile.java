@@ -78,7 +78,7 @@ public class RocketProjectile extends Projectile {
     final float rectWidth = Constants.HALF_UNIT;
     final float rectHeight = Constants.HALF_UNIT;
     rect = new RectanglePlus(this.position.x, this.position.z, rectWidth, rectHeight, getEntityId(),
-        RectanglePlusFilter.ITEM);
+        RectanglePlusFilter.PROJECTILE);
     rect.setPosition(this.position.x - rect.getWidth() / 2, this.position.z - rect.getHeight() / 2);
     screen.getGame().getRectMan().addRect(rect);
 

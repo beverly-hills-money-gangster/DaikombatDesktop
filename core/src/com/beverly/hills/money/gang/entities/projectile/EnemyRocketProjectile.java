@@ -41,7 +41,7 @@ public class EnemyRocketProjectile extends Projectile {
 
   private final Player player;
 
-  private static final int LIVES_FOR_MLS = 350;
+  private static final int LIVES_FOR_MLS = 550;
 
   private final long destroyAtMls = System.currentTimeMillis() + LIVES_FOR_MLS;
 
@@ -64,10 +64,9 @@ public class EnemyRocketProjectile extends Projectile {
         .set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
     mdlInst.materials.get(0).set(new FloatAttribute(FloatAttribute.AlphaTest));
 
-    final float rectWidth = Constants.HALF_UNIT;
-    final float rectHeight = Constants.HALF_UNIT;
-    rect = new RectanglePlus(this.position.x, this.position.z, rectWidth, rectHeight, getEntityId(),
-        RectanglePlusFilter.ITEM);
+    rect = new RectanglePlus(this.position.x, this.position.z, Constants.HALF_UNIT,
+        Constants.HALF_UNIT, getEntityId(),
+        RectanglePlusFilter.PROJECTILE);
     rect.setPosition(this.position.x - rect.getWidth() / 2, this.position.z - rect.getHeight() / 2);
     player.getScreen().getGame().getRectMan().addRect(rect);
 

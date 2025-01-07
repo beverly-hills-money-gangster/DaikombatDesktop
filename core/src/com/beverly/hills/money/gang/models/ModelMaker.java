@@ -227,16 +227,6 @@ public class ModelMaker {
     node1.rotation.set(Vector3.Y, 180f);
     node1.translation.set(0, 0, Constants.PPU * -2);
 
-    final Node node2 = mdlBuilder.node();
-    meshBuilder = mdlBuilder.part("middleSide", GL20.GL_TRIANGLES,
-        Usage.Position | Usage.Normal | Usage.TextureCoordinates, matDoorMiddle);
-    meshBuilder.rect(new Vector3(Constants.PPU * 2, Constants.HALF_UNIT, 0),
-        new Vector3(-Constants.PPU * 2, Constants.HALF_UNIT, 0),
-        new Vector3(-Constants.PPU * 2, -Constants.HALF_UNIT, 0),
-        new Vector3(Constants.PPU * 2, -Constants.HALF_UNIT, 0), new Vector3(0, 0, -1));
-
-    node2.rotation.set(Vector3.Y, -90f);
-    node2.translation.set(-0.5f, 0, 0);
     mdlDoor = mdlBuilder.end();
   }
 }
