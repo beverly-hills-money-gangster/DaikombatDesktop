@@ -48,7 +48,7 @@ public abstract class SoundMakingEntity extends Entity {
     var camDir2D = new Vector2(getPlayer().getPlayerCam().direction.x,
         getPlayer().getPlayerCam().direction.z);
     float angle = camDir2D.angleDeg(
-        getRect().getNewPosition().cpy().sub(getPlayer().getCurrent2DPosition()));
+        getRect().getPosition(new Vector2()).cpy().sub(getPlayer().getCurrent2DPosition()));
     if (Constants.LEFT_RANGE.contains(angle)) {
       return -0.65f;
     } else if (Constants.RIGHT_RANGE.contains(angle)) {
