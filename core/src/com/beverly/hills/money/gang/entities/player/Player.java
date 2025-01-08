@@ -91,7 +91,10 @@ public class Player extends Entity {
   private final PlayerEffects playerEffects = new PlayerEffects();
 
   private float camY = Constants.DEFAULT_PLAYER_CAM_Y;
-  private boolean headbob = false;
+  private boolean moved = false;
+
+  private boolean mouseRotate = false;
+
   private int currentHP = 100;
 
   @Setter
@@ -256,13 +259,19 @@ public class Player extends Entity {
 
     // otherwise the screen goes 180 degrees on startup if you don't move the mouse on main menu screens
     if (Math.abs(Gdx.input.getDeltaX()) < 500) {
-      playerCam.rotate(Vector3.Y, Gdx.input.getDeltaX() * -Constants.MOUSE_CAMERA_ROTATION_SPEED
-          * UserSettingsUISelection.MOUSE_SENS.getState().getNormalized() * delta);
+      var angle = Gdx.input.getDeltaX() * -Constants.MOUSE_CAMERA_ROTATION_SPEED
+          * UserSettingsUISelection.MOUSE_SENS.getState().getNormalized() * delta;
+      playerCam.rotate(Vector3.Y, angle);
+      if (Math.abs(angle) > 0.5) {
+        mouseRotate = true;
+      }
     }
     handleArrows();
     handleWASD();
-    if (headbob) {
+    if (moved || mouseRotate) {
       onMovementListener.accept(this);
+    }
+    if (moved) {
       camY = Constants.DEFAULT_PLAYER_CAM_Y;
       final float sinOffset = (float) (
           Math.sin(getScreen().getGame().getTimeSinceLaunch() * speed * 4f)
@@ -270,7 +279,10 @@ public class Player extends Entity {
       camY += sinOffset;
       weaponY = -25f;
       weaponY += sinOffset * 200f * 3f;
-      headbob = false;
+      moved = false;
+    }
+    if (mouseRotate) {
+      mouseRotate = false;
     }
 
     movementDirVec2.set(movementDir.x, movementDir.z);
@@ -310,19 +322,19 @@ public class Player extends Entity {
   private void handleWASD() {
     if (Gdx.input.isKeyPressed(Input.Keys.W)) {
       movementDir.add(playerCam.direction.cpy());
-      headbob = true;
+      moved = true;
     }
     if (Gdx.input.isKeyPressed(Input.Keys.S)) {
       movementDir.sub(playerCam.direction.cpy());
-      headbob = true;
+      moved = true;
     }
     if (Gdx.input.isKeyPressed(Input.Keys.A)) {
       movementDir.sub(playerCam.direction.cpy().crs(playerCam.up));
-      headbob = true;
+      moved = true;
     }
     if (Gdx.input.isKeyPressed(Input.Keys.D)) {
       movementDir.add(playerCam.direction.cpy().crs(playerCam.up));
-      headbob = true;
+      moved = true;
     }
   }
 

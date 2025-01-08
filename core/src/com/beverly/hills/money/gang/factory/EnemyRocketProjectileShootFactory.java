@@ -10,7 +10,8 @@ public class EnemyRocketProjectileShootFactory implements EnemyProjectileShootFa
 
 
   @Override
-  public Projectile create(Vector2 position, Vector2 direction, Player player) {
+  public Projectile create(Vector2 position, Vector2 direction,
+      Player player) {
     return new EnemyRocketProjectile(
         new Vector3(position.x + direction.x * 1.1f, 0,
             position.y + direction.y * 1.1f),

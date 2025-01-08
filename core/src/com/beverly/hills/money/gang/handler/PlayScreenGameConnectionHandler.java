@@ -331,18 +331,6 @@ public class PlayScreenGameConnectionHandler {
               "Not supported weapon type " + gameEvent.getWeaponType());
         } : EnemyPlayerActionType.MOVE;
 
-    if (gameEvent.hasWeaponType()) {
-      Optional.ofNullable(WeaponMapper.getWeapon(gameEvent.getWeaponType()).getProjectileRef())
-          .ifPresent(
-              projectile -> {
-                var position = Converter.convertToVector2(gameEvent.getPlayer().getPosition());
-                var direction = Converter.convertToVector2(gameEvent.getPlayer().getDirection());
-                playScreen.getGame().getEntMan()
-                    .addEntity(enemyPlayerProjectileShootingFactoriesRegistry.get(projectile)
-                        .create(position, direction, playScreen.getPlayer()));
-              });
-    }
-
     enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
         .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
             .eventSequenceId(gameEvent.getSequence())
@@ -357,6 +345,18 @@ public class PlayScreenGameConnectionHandler {
                       .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
                 } else {
                   enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), false);
+                  Optional.ofNullable(
+                          WeaponMapper.getWeapon(gameEvent.getWeaponType()).getProjectileRef())
+                      .ifPresent(projectile -> {
+                        playScreen.getGame().getEntMan()
+                            .addEntity(
+                                enemyPlayerProjectileShootingFactoriesRegistry.get(projectile)
+                                    .create(Converter.convertToVector2(
+                                            gameEvent.getPlayer().getPosition()),
+                                        Converter.convertToVector2(
+                                            gameEvent.getPlayer().getDirection()),
+                                        playScreen.getPlayer()));
+                      });
                 }
               } else if (gameEvent.hasProjectile()) {
                 var boomPosition = Converter.convertToVector2(
