@@ -173,16 +173,17 @@ public class EnemyPlayer extends Enemy {
     if (action != null) {
       Vector2 targetPosition = action.getRoute();
       lastDirection = action.getDirection();
-      Vector2 rectDirection = new Vector2();
-      rectDirection.x = targetPosition.x - getRect().x;
-      rectDirection.y = targetPosition.y - getRect().y;
-      rectDirection.nor().scl(currentSpeed * delta);
-      isIdle = false;
-      getRect().getNewPosition().add(rectDirection.x, rectDirection.y);
       if (isTooClose(getRect().getOldPosition(), targetPosition)) {
         // if we are close to the target destination then we are here
         actions.remove();
         action.getOnComplete().run();
+      } else {
+        Vector2 rectDirection = new Vector2();
+        rectDirection.x = targetPosition.x - getRect().x;
+        rectDirection.y = targetPosition.y - getRect().y;
+        rectDirection.nor().scl(currentSpeed * delta);
+        isIdle = false;
+        getRect().getNewPosition().add(rectDirection.x, rectDirection.y);
       }
     } else if (System.currentTimeMillis() >= movingAnimationUntil) {
       isIdle = true;
@@ -267,6 +268,6 @@ public class EnemyPlayer extends Enemy {
 
   private boolean isTooClose(Vector2 vector1, Vector2 vector2) {
     return Vector2.dst(vector1.x, vector1.y, vector2.x,
-        vector2.y) <= 0.1f;
+        vector2.y) <= 0.125f;
   }
 }
