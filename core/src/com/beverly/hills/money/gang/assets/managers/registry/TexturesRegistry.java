@@ -11,8 +11,11 @@ public enum TexturesRegistry {
   INVISIBILITY_ORB("invisibility_orb.png"),
   TELEPORT_SPRITES("teleport_sprites.png"),
   BOOM_SPRITES("boom_sprites.png"),
+  PLASMA_BOOM_SPRITES("plasma_sprites.png"),
   GUN_IDLE("gun_idle.png"),
   GUN_SHOOT("gun_shot.png"),
+  PLASMAGUN_IDLE("plasmagun_idle.png"),
+  PLASMAGUN_FIRE("plasmagun_fire.png"),
   PUNCH("punch.png"),
   PUNCH_IDLE("punch_idle.png"),
   RAILGUN_IDLE("railgun_idle.png"),
@@ -24,6 +27,7 @@ public enum TexturesRegistry {
   ATLAS("atlas.png"),
 
   FIREBALL("fireball.png"),
+  PLASMA("plasma.png"),
   SKY("sky.png");
 
   @Getter

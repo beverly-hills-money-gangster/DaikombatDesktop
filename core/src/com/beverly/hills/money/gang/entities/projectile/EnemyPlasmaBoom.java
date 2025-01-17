@@ -6,14 +6,14 @@ import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.entities.player.Player;
 
-public class EnemyRocketBoom extends AbstractEnemyProjectileBoom {
+public class EnemyPlasmaBoom extends AbstractEnemyProjectileBoom {
 
-  public EnemyRocketBoom(final Player player,
+  public EnemyPlasmaBoom(final Player player,
       final Vector3 position) {
     super(player, position, Animation.builder()
             .animationSteps(5).animationStepMls(50)
             .width(100).height(99)
-            .texturesRegistry(TexturesRegistry.BOOM_SPRITES).build(),
-        SoundRegistry.ROCKET_BOOM);
+            .texturesRegistry(TexturesRegistry.PLASMA_BOOM_SPRITES).build(),
+        SoundRegistry.PLASMA_BOOM);
   }
 }

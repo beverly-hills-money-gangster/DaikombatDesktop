@@ -3,6 +3,7 @@ package com.beverly.hills.money.gang.log;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -29,9 +30,7 @@ public class ChatLog {
   }
 
   public String getChatMessages() {
-    StringBuilder chatLogBuilder = new StringBuilder();
-    chatMessageQueue.forEach(message -> chatLogBuilder.append(message).append("\n"));
-    return chatLogBuilder.toString();
+    return String.join("\n", chatMessageQueue);
   }
 
 }

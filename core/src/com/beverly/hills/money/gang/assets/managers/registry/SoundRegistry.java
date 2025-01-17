@@ -11,9 +11,13 @@ public enum SoundRegistry {
   PLAYER_GOING_THROUGH_TELEPORT("sfx/player_going_through_teleport.mp3"),
   PLAYER_ROCKET_LAUNCHER("sfx/player_rocket_launcher.mp3"),
   ENEMY_PLAYER_GOING_THROUGH_TELEPORT("sfx/enemy_going_through_teleport.mp3"),
+  PLAYER_PLASMAGUN_FIRE("sfx/player_plasmagun_fire.wav"),
+// TODO make it mono
+  PLASMA_BOOM("sfx/plasma_boom.mp3"),
   ONE_FRAG_LEFT("sfx/one_frag_left.mp3"),
   TWO_FRAGS_LEFT("sfx/two_frags_left.mp3"),
   THREE_FRAGS_LEFT("sfx/three_frags_left.mp3"),
+  // TODO try sounds from C:\Users\35795\Downloads\PC Computer - Quake III Arena Team Arena - Weapons\weapons\plasma
   YOU_LEAD("sfx/you_lead.mp3"),
   LOST_LEAD("sfx/lost_lead.mp3"),
   BELL("sfx/bell.mp3"),
@@ -77,6 +81,7 @@ public enum SoundRegistry {
 
   ENEMY_SHOTGUN("sfx/enemy_shotgun.mp3"),
   ENEMY_ROCKET_LAUNCHER("sfx/enemy_player_rocket_launcher.mp3"),
+  ENEMY_PLASMAGUN_FIRE("sfx/enemy_player_plasmagun_fire.mp3"),
   QUAD_DAMAGE_ATTACK("sfx/quad_damage_attack.mp3"),
   GAUNTLET_HUMILIATION("sfx/gauntlet_humiliation.mp3"),
   // TODO sounds like ass

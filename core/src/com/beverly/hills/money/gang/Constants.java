@@ -6,7 +6,7 @@ import org.apache.commons.lang3.Range;
 
 public interface Constants {
 
-  int ROCKET_SPEED = 27;
+  int PROJECTILE_SPEED = 27;
 
   int PUNCH_ANIMATION_MLS = 155;
 

@@ -1,5 +1,6 @@
 package com.beverly.hills.money.gang.registry;
 
+import com.beverly.hills.money.gang.factory.EnemyPlasmaProjectileBoomFactory;
 import com.beverly.hills.money.gang.factory.EnemyProjectileBoomFactory;
 import com.beverly.hills.money.gang.factory.EnemyRocketProjectileBoomFactory;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponProjectile;
@@ -14,6 +15,7 @@ public class EnemyPlayerProjectileBoomFactoriesRegistry {
     for (WeaponProjectile value : WeaponProjectile.values()) {
       var factory = switch (value) {
         case ROCKET -> new EnemyRocketProjectileBoomFactory();
+        case PLASMA -> new EnemyPlasmaProjectileBoomFactory(); // TODO use a separate factory
       };
       factories.put(value, factory);
     }

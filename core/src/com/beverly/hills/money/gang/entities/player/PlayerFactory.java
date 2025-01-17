@@ -42,6 +42,7 @@ public class PlayerFactory {
             case RAILGUN -> WeaponType.RAILGUN;
             case MINIGUN -> WeaponType.MINIGUN;
             case ROCKET_LAUNCHER -> WeaponType.ROCKET_LAUNCHER;
+            case PLASMAGUN -> WeaponType.PLASMAGUN;
           };
           var direction = playerWeapon.getPlayer().getCurrent2DDirection();
           var position = playerWeapon.getPlayer().getCurrent2DPosition();
@@ -166,6 +167,7 @@ public class PlayerFactory {
   private static ProjectileType mapProjectileToWeaponType(Projectile projectile) {
     return switch (projectile.getProjectileType()) {
       case ROCKET -> ProjectileType.ROCKET;
+      case PLASMA -> ProjectileType.PLASMA;
     };
   }
 
