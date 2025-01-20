@@ -41,7 +41,6 @@ import org.apache.commons.lang3.stream.Streams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO I can't move while I'm shooting myself using plasmagun
 public class Player extends Entity {
 
   private static final Logger LOG = LoggerFactory.getLogger(Player.class);

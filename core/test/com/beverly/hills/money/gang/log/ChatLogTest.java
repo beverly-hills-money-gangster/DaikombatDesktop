@@ -31,7 +31,7 @@ public class ChatLogTest {
   @Test
   public void testAddMessage() {
     chatLog.addMessage("PLAYER NAME", "MESSAGE");
-    assertEquals("PLAYER NAME:  MESSAGE\n", chatLog.getChatMessages());
+    assertEquals("PLAYER NAME:  MESSAGE", chatLog.getChatMessages());
     assertTrue(chatLog.hasChatMessage());
     verify(onMessageRunnable).run();
   }
@@ -56,7 +56,7 @@ public class ChatLogTest {
             "PLAYER NAME:  MESSAGE2\n" +
             "PLAYER NAME:  MESSAGE3\n" +
             "PLAYER NAME:  MESSAGE4\n" +
-            "PLAYER NAME:  MESSAGE5\n", chatLog.getChatMessages());
+            "PLAYER NAME:  MESSAGE5", chatLog.getChatMessages());
     assertTrue(chatLog.hasChatMessage());
     verify(onMessageRunnable, times(5)).run();
   }
@@ -74,7 +74,7 @@ public class ChatLogTest {
             "PLAYER NAME:  MESSAGE3\n" +
             "PLAYER NAME:  MESSAGE4\n" +
             "PLAYER NAME:  MESSAGE5\n" +
-            "PLAYER NAME:  MESSAGE6\n", chatLog.getChatMessages(),
+            "PLAYER NAME:  MESSAGE6", chatLog.getChatMessages(),
         "Only last 5 messages must be returned");
     assertTrue(chatLog.hasChatMessage());
     verify(onMessageRunnable, times(6)).run();

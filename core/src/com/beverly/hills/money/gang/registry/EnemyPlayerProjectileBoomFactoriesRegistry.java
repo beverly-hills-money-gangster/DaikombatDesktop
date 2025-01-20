@@ -15,7 +15,7 @@ public class EnemyPlayerProjectileBoomFactoriesRegistry {
     for (WeaponProjectile value : WeaponProjectile.values()) {
       var factory = switch (value) {
         case ROCKET -> new EnemyRocketProjectileBoomFactory();
-        case PLASMA -> new EnemyPlasmaProjectileBoomFactory(); // TODO use a separate factory
+        case PLASMA -> new EnemyPlasmaProjectileBoomFactory();
       };
       factories.put(value, factory);
     }

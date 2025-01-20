@@ -75,7 +75,7 @@ public class AbstractEnemyProjectileBoom extends SoundMakingEntity {
     this.boomAnimation = boomAnimation;
     new TimeLimitedSound(
         getScreen().getGame().getAssMan().getUserSettingSound(boomSound)).play(
-        getSFXVolume(), getSFXPan(), 450);
+        getSFXVolume(), getSFXPan(), 350);
 
   }
 

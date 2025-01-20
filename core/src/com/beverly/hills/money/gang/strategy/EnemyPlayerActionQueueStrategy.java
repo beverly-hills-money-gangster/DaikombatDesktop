@@ -80,7 +80,6 @@ public class EnemyPlayerActionQueueStrategy {
 
   protected static float getSpeed(final Queue<EnemyPlayerAction> actions,
       final float defaultSpeed) {
-
     if (actions.size() > 20) {
       LOG.warn("Action queue is super clogged. Size {}", actions.size());
       return defaultSpeed * 4f;
@@ -95,8 +94,6 @@ public class EnemyPlayerActionQueueStrategy {
       return defaultSpeed * 1.25f;
     } else if (actions.size() > 2) {
       return defaultSpeed * 1.15f;
-      // TODO does it make sense?
-      // TODO seems to be making sense
     } else if (actions.stream().anyMatch(
         enemyPlayerAction -> enemyPlayerAction.getEnemyPlayerActionType() == EnemyPlayerActionType.ATTACK)) {
       return defaultSpeed * 3f;

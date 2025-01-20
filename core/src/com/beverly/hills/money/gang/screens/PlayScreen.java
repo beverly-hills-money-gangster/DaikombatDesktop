@@ -568,14 +568,10 @@ public class PlayScreen extends GameScreen {
       getUiFont().draw(getGame().getBatch(), enemyAim.getName(),
           getViewport().getWorldWidth() / 2f - glyphName.width / 2f,
           getViewport().getWorldHeight() / 2f - (glyphName.height / 2f) + 64);
-      GlyphLayout glyphClass = new GlyphLayout(guiFont32, enemyAim.getPlayerClass());
-      guiFont32.draw(getGame().getBatch(), enemyAim.getPlayerClass(),
-          getViewport().getWorldWidth() / 2f - glyphClass.width / 2f,
-          getViewport().getWorldHeight() / 2f - (glyphClass.height / 2f) + 64 - 32);
       GlyphLayout glyphHP = new GlyphLayout(guiFont32, enemyAim.getHp());
       guiFont32.draw(getGame().getBatch(), enemyAim.getHp(),
           getViewport().getWorldWidth() / 2f - glyphHP.width / 2f,
-          getViewport().getWorldHeight() / 2f - (glyphHP.height / 2f) + 64 - 32 - 16);
+          getViewport().getWorldHeight() / 2f - (glyphHP.height / 2f) + 64 - 32 - 8);
 
       enemyAim = null;
       guiFont32.setColor(1, 1, 1, 1);
@@ -661,7 +657,6 @@ public class PlayScreen extends GameScreen {
     }
   }
 
-  // TODO chat prompt looks off
   private float getHealthBlinkingAlphaChannel(int health) {
     if (health > 50) {
       return 0.0f;

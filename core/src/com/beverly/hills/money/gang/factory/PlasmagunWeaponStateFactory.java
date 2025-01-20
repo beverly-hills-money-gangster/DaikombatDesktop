@@ -9,14 +9,14 @@ import com.beverly.hills.money.gang.screens.ui.weapon.WeaponStats;
 
 public class PlasmagunWeaponStateFactory extends ScreenWeaponStateFactory {
 
-  private static final int PLASMAGUN_ANIMATION_MLS = 150; // TODO make delay 150 on the server side
+  private static final int PLASMAGUN_ANIMATION_MLS = 150;
 
   @Override
   public WeaponState create(DaiKombatAssetsManager assetsManager, WeaponStats weaponStats) {
     return WeaponState.builder()
         .distance(weaponStats.getMaxDistance())
         .fireSound(assetsManager.getUserSettingSound(
-            SoundRegistry.PLAYER_PLASMAGUN_FIRE)) // TODO use normal sound
+            SoundRegistry.PLAYER_PLASMAGUN_FIRE))
         .hitTargetSound(assetsManager.getUserSettingSound(SoundRegistry.HIT_SOUND))
         .projectileRadius(weaponStats.getProjectileRadius())
         .screenRatioX(0.40f)
@@ -24,7 +24,6 @@ public class PlasmagunWeaponStateFactory extends ScreenWeaponStateFactory {
         .center(false)
         .backoffDelayMls(getBackoffDelay(weaponStats, PLASMAGUN_ANIMATION_MLS))
         .animationDelayMls(PLASMAGUN_ANIMATION_MLS)
-        // TODO the texture is transparent in some places
         .fireTexture(assetsManager.getTextureRegion(TexturesRegistry.PLASMAGUN_FIRE, 0, 0,
             188, 117))
         .idleTexture(assetsManager.getTextureRegion(TexturesRegistry.PLASMAGUN_IDLE, 0, 0,

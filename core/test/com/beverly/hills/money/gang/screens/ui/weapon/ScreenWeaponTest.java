@@ -349,7 +349,7 @@ public class ScreenWeaponTest {
     screenWeapon.changeWeapon(Weapon.GAUNTLET);
     Thread.sleep(ScreenWeapon.CHANGE_WEAPON_DELAY_MLS);
     screenWeapon.changeToPrevWeapon();
-    assertEquals(Weapon.ROCKET_LAUNCHER, screenWeapon.getWeaponBeingUsed());
+    assertEquals(Weapon.PLASMAGUN, screenWeapon.getWeaponBeingUsed());
   }
 
   @Test
