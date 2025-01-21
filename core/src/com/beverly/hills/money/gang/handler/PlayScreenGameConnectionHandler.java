@@ -243,13 +243,12 @@ public class PlayScreenGameConnectionHandler {
         .getPlayerId()) {
       return;
     }
-    enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
-        .map(EnemyPlayer::getName)
-        .ifPresent(playerName -> {
-          playScreen.getChatLog().addMessage("game log", playerName + " has left the game");
-          enemiesRegistry.removeEnemy(gameEvent.getPlayer().getPlayerId())
-              .ifPresent(Enemy::destroy);
-        });
+    var playerName =
+        gameEvent.getPlayer().hasPlayerName() ? gameEvent.getPlayer().getPlayerName() : null;
+    Optional.ofNullable(playerName).ifPresent(
+        name -> playScreen.getChatLog().addMessage("game log", name + " has left the game"));
+    enemiesRegistry.removeEnemy(gameEvent.getPlayer().getPlayerId())
+        .ifPresent(Enemy::destroy);
     playScreen.getUiLeaderBoard().removePlayer(gameEvent.getPlayer().getPlayerId());
   }
 
@@ -326,7 +325,8 @@ public class PlayScreenGameConnectionHandler {
         gameEvent.hasWeaponType() ? switch (gameEvent.getWeaponType()) {
           // if we missed the punch then we just move to the position
           case PUNCH -> EnemyPlayerActionType.MOVE;
-          case SHOTGUN, RAILGUN, MINIGUN, ROCKET_LAUNCHER -> EnemyPlayerActionType.ATTACK;
+          case SHOTGUN, RAILGUN, MINIGUN, ROCKET_LAUNCHER, PLASMAGUN ->
+              EnemyPlayerActionType.ATTACK;
           default -> throw new IllegalArgumentException(
               "Not supported weapon type " + gameEvent.getWeaponType());
         } : EnemyPlayerActionType.MOVE;
@@ -570,6 +570,7 @@ public class PlayScreenGameConnectionHandler {
                 case RAILGUN -> SoundRegistry.ENEMY_RAILGUN;
                 case MINIGUN -> SoundRegistry.ENEMY_MINIGUN;
                 case ROCKET_LAUNCHER -> SoundRegistry.ENEMY_ROCKET_LAUNCHER;
+                case PLASMAGUN -> SoundRegistry.ENEMY_PLASMAGUN_FIRE;
               };
               new TimeLimitedSound(
                   playScreen.getGame().getAssMan().getUserSettingSound(sound))

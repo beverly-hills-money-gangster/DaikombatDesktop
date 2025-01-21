@@ -2,6 +2,7 @@ package com.beverly.hills.money.gang.strategy;
 
 import com.badlogic.gdx.math.Vector2;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerAction;
+import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerActionType;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.function.Consumer;
@@ -93,6 +94,9 @@ public class EnemyPlayerActionQueueStrategy {
       return defaultSpeed * 1.25f;
     } else if (actions.size() > 2) {
       return defaultSpeed * 1.15f;
+    } else if (actions.stream().anyMatch(
+        enemyPlayerAction -> enemyPlayerAction.getEnemyPlayerActionType() == EnemyPlayerActionType.ATTACK)) {
+      return defaultSpeed * 3f;
     } else {
       return defaultSpeed;
     }

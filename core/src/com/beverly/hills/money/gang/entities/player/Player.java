@@ -45,6 +45,8 @@ public class Player extends Entity {
 
   private static final Logger LOG = LoggerFactory.getLogger(Player.class);
 
+  private static final float FAR = 8.5f;
+
   private final PlayerProjectileFactoriesRegistry playerProjectileFactoriesRegistry
       = new PlayerProjectileFactoriesRegistry();
 
@@ -128,7 +130,7 @@ public class Player extends Entity {
     playerCam.position.set(new Vector3(0, Constants.DEFAULT_PLAYER_CAM_Y, 0));
     playerCam.lookAt(new Vector3(lookAt.x, Constants.DEFAULT_PLAYER_CAM_Y, lookAt.y));
     playerCam.near = 0.01f;
-    playerCam.far = 10f;
+    playerCam.far = FAR;
     playerCam.update();
     createRect(spawnPosition.cpy()
         .set(spawnPosition.x - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f,

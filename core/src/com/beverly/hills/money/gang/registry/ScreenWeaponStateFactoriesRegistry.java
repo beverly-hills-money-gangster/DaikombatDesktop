@@ -2,6 +2,7 @@ package com.beverly.hills.money.gang.registry;
 
 import com.beverly.hills.money.gang.factory.GauntletWeaponStateFactory;
 import com.beverly.hills.money.gang.factory.MinigunWeaponStateFactory;
+import com.beverly.hills.money.gang.factory.PlasmagunWeaponStateFactory;
 import com.beverly.hills.money.gang.factory.RailgunWeaponStateFactory;
 import com.beverly.hills.money.gang.factory.RocketLauncherWeaponStateFactory;
 import com.beverly.hills.money.gang.factory.ScreenWeaponStateFactory;
@@ -22,6 +23,7 @@ public class ScreenWeaponStateFactoriesRegistry {
         case GAUNTLET -> new GauntletWeaponStateFactory();
         case MINIGUN -> new MinigunWeaponStateFactory();
         case RAILGUN -> new RailgunWeaponStateFactory();
+        case PLASMAGUN -> new PlasmagunWeaponStateFactory();
       };
       factories.put(value, factory);
     }

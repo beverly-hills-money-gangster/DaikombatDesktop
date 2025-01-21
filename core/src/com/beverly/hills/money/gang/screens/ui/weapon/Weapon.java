@@ -2,7 +2,6 @@ package com.beverly.hills.money.gang.screens.ui.weapon;
 
 import com.badlogic.gdx.Input.Keys;
 import java.util.Arrays;
-import java.util.function.Predicate;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -12,8 +11,8 @@ public enum Weapon {
   SHOTGUN(Keys.NUM_1, false, null),
   RAILGUN(Keys.NUM_2, false, null),
   MINIGUN(Keys.NUM_3, true, null),
-  ROCKET_LAUNCHER(Keys.NUM_4, false, WeaponProjectile.ROCKET);
-
+  ROCKET_LAUNCHER(Keys.NUM_4, false, WeaponProjectile.ROCKET),
+  PLASMAGUN(Keys.NUM_5, true, WeaponProjectile.PLASMA);
 
   @Getter
   private final int selectKeyCode;

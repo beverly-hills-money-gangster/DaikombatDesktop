@@ -27,6 +27,7 @@ public class RectManager {
           && otherRect != rect
           && RectanglePlusFilter.ENEMY != otherRect.getFilter()
           && RectanglePlusFilter.ITEM != otherRect.getFilter()
+          && RectanglePlusFilter.PROJECTILE != otherRect.getFilter()
           && RectanglePlusFilter.DOOR != otherRect.getFilter()
           && rect.overlaps(otherRect)) {
         return true;

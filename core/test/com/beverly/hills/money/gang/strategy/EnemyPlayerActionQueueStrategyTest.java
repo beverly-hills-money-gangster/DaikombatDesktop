@@ -400,6 +400,22 @@ public class EnemyPlayerActionQueueStrategyTest {
   }
 
   @Test
+  public void testGetSpeedEmptyQueueSlightlyCloggedAttackEvent() {
+    Deque<EnemyPlayerAction> enemyPlayerActions = new ArrayDeque<>();
+    enemyPlayerActions.add(
+        EnemyPlayerAction.builder()
+            .enemyPlayerActionType(EnemyPlayerActionType.ATTACK)
+            .eventSequenceId(sequence++).build());
+    enemyPlayerActions.add(
+        EnemyPlayerAction.builder()
+            .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
+            .eventSequenceId(sequence++).build());
+
+    assertEquals(defaultSpeed * 3,
+        EnemyPlayerActionQueueStrategy.getSpeed(enemyPlayerActions, defaultSpeed));
+  }
+
+  @Test
   public void testGetSpeedEmptyQueueClogged() {
     assertEquals(defaultSpeed * 1.25,
         EnemyPlayerActionQueueStrategy.getSpeed(createActions(5), defaultSpeed));
@@ -420,7 +436,10 @@ public class EnemyPlayerActionQueueStrategyTest {
   private Deque<EnemyPlayerAction> createActions(int numberOfActions) {
     Deque<EnemyPlayerAction> enemyPlayerActions = new ArrayDeque<>();
     for (int i = 0; i < numberOfActions; i++) {
-      enemyPlayerActions.add(EnemyPlayerAction.builder().eventSequenceId(sequence++).build());
+      enemyPlayerActions.add(
+          EnemyPlayerAction.builder()
+              .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
+              .eventSequenceId(sequence++).build());
     }
     return enemyPlayerActions;
   }

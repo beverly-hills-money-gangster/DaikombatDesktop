@@ -7,6 +7,8 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -66,6 +68,7 @@ public class PlayScreen extends GameScreen {
   private static final Logger LOG = LoggerFactory.getLogger(PlayScreen.class);
   private static final int DEAD_SCREEN_INPUT_DELAY_MLS = 1_000;
   private static final int TAUNT_DELAY_MLS = 1_250;
+  private static final int SHADOW_MARGIN = 16;
   private GameScreen screenToTransition;
   private boolean showNetworkStats;
   private final SoundQueue narratorSoundQueue = new SoundQueue(1_500,
@@ -94,6 +97,10 @@ public class PlayScreen extends GameScreen {
   private final UserSettingSound twoFragsLeftSound;
   private final UserSettingSound threeFragsLeftSound;
   private final AtomicInteger actionSequence = new AtomicInteger(0);
+
+  private final Texture hudBlackTexture;
+
+  private final Texture hudRedTexture;
 
   @Getter
   @Setter
@@ -218,6 +225,17 @@ public class PlayScreen extends GameScreen {
     if (Configs.DEV_MODE && Configs.MIMIC_CONSTANT_NETWORK_ACTIVITY) {
       mimicNetworkActivity();
     }
+    hudBlackTexture = createTexture(Color.BLACK);
+    hudRedTexture = createTexture(new Color(1, 0, 0.15f, 1f));
+  }
+
+  private Texture createTexture(final Color color) {
+    Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+    pixmap.setColor(color);
+    pixmap.fill();
+    var texture = new Texture(pixmap);
+    pixmap.dispose();
+    return texture;
   }
 
   public BitmapFont getUiFont() {
@@ -490,8 +508,8 @@ public class PlayScreen extends GameScreen {
             getViewport().getWorldHeight());
 
     getGame().getBatch().end();
-    getGame().getBatch().begin();
 
+    getGame().getBatch().begin();
     if (!getPlayer().isDead()) {
       if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {
         powerUpEffect(Color.SKY, PowerUpType.QUAD_DAMAGE);
@@ -528,18 +546,17 @@ public class PlayScreen extends GameScreen {
           playerConnectionContextData.getFragsToWin());
       getUiFont().draw(getGame().getBatch(), killStats,
           getViewport().getWorldWidth() - 32 - new GlyphLayout(getUiFont(), killStats).width,
-          128 - 32);
+          128);
 
     }
     if (chatMode) {
-      getUiFont().draw(getGame().getBatch(), ">" + chatTextInputProcessor.getText(), 32,
-          128 - 32 + 64);
+      printShadowText(32, 128 - 16 + 64, ">" + chatTextInputProcessor.getText(), getUiFont(),
+          0.5f);
     }
     if (chatLog.hasChatMessage()) {
-      String chatMessages = chatLog.getChatMessages();
-      GlyphLayout glyphLayoutChatLog = new GlyphLayout(getUiFont(), chatMessages);
-      getUiFont().draw(getGame().getBatch(), chatMessages, 32,
-          128 - 32 + 64 + glyphLayoutChatLog.height);
+
+      printShadowText(32, 256, chatLog.getChatMessages(), getUiFont(), 0.15f);
+
     }
 
     if (enemyAim != null) {
@@ -551,14 +568,10 @@ public class PlayScreen extends GameScreen {
       getUiFont().draw(getGame().getBatch(), enemyAim.getName(),
           getViewport().getWorldWidth() / 2f - glyphName.width / 2f,
           getViewport().getWorldHeight() / 2f - (glyphName.height / 2f) + 64);
-      GlyphLayout glyphClass = new GlyphLayout(guiFont32, enemyAim.getPlayerClass());
-      guiFont32.draw(getGame().getBatch(), enemyAim.getPlayerClass(),
-          getViewport().getWorldWidth() / 2f - glyphClass.width / 2f,
-          getViewport().getWorldHeight() / 2f - (glyphClass.height / 2f) + 64 - 32);
       GlyphLayout glyphHP = new GlyphLayout(guiFont32, enemyAim.getHp());
       guiFont32.draw(getGame().getBatch(), enemyAim.getHp(),
           getViewport().getWorldWidth() / 2f - glyphHP.width / 2f,
-          getViewport().getWorldHeight() / 2f - (glyphHP.height / 2f) + 64 - 32 - 16);
+          getViewport().getWorldHeight() / 2f - (glyphHP.height / 2f) + 64 - 32 - 8);
 
       enemyAim = null;
       guiFont32.setColor(1, 1, 1, 1);
@@ -567,10 +580,13 @@ public class PlayScreen extends GameScreen {
 
     getGame().getBatch().setColor(1, 1, 1, 1); // Never cover HUD in blood.
     if (!getPlayer().isDead()) {
-      getUiFont().draw(getGame().getBatch(),
+
+      printShadowText(32, 128 - 32,
           getPlayer().getCurrentHP() + " HP | " + playerConnectionContextData.getConnectGameData()
               .getPlayerName() + " | " + playerConnectionContextData.getConnectGameData()
-              .getPlayerClassUISelection().toString(), 32, 128 - 32);
+              .getPlayerClassUISelection().toString(), getUiFont(), hudRedTexture,
+          getHealthBlinkingAlphaChannel(getPlayer().getCurrentHP()));
+
       getUiFont().draw(getGame().getBatch(), "+",
           getViewport().getWorldWidth() / 2f - glyphLayoutAim.width / 2f,
           getViewport().getWorldHeight() / 2f - glyphLayoutAim.height / 2f);
@@ -629,6 +645,7 @@ public class PlayScreen extends GameScreen {
     }
 
     getGame().getBatch().end();
+
     if (screenToTransition != null) {
       if (!(screenToTransition instanceof RespawnScreen)) {
         gameConnection.disconnect();
@@ -638,6 +655,16 @@ public class PlayScreen extends GameScreen {
       getGame().setScreen(screenToTransition);
       boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
     }
+  }
+
+  private float getHealthBlinkingAlphaChannel(int health) {
+    if (health > 50) {
+      return 0.0f;
+    }
+    float healthRatio = 100f / health;
+    float speed = Math.min(25, healthRatio * healthRatio);
+    return 0.5f
+        + (float) Math.sin(getGame().getTimeSinceLaunch() * speed) / 2;
   }
 
   private void renderGameTechStats() {
@@ -735,5 +762,25 @@ public class PlayScreen extends GameScreen {
 
   public void setEnemyAim(EnemyAim enemyAim) {
     this.enemyAim = enemyAim;
+  }
+
+  private void printShadowText(final int x, final int y, final String text,
+      final BitmapFont font, final Texture texture, final float alphaChannel) {
+    GlyphLayout glyphLayoutChatLog = new GlyphLayout(font, text);
+    float blockWidth = glyphLayoutChatLog.width + SHADOW_MARGIN * 2;
+    float blockHeight = glyphLayoutChatLog.height + SHADOW_MARGIN * 2;
+    float blockX = x - SHADOW_MARGIN;
+    float blockY = y - SHADOW_MARGIN;
+    var oldColor = getGame().getBatch().getColor().cpy();
+    getGame().getBatch().setColor(1, 1, 1, alphaChannel);
+    getGame().getBatch()
+        .draw(texture, blockX, blockY, blockWidth, blockHeight);
+    getGame().getBatch().setColor(oldColor);
+    getUiFont().draw(getGame().getBatch(), text, x, y + glyphLayoutChatLog.height);
+  }
+
+  private void printShadowText(final int x, final int y, final String text,
+      final BitmapFont font, final float alphaChannel) {
+    printShadowText(x, y, text, font, hudBlackTexture, alphaChannel);
   }
 }

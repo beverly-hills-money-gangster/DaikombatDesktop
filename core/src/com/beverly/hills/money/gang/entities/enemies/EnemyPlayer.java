@@ -79,7 +79,7 @@ public class EnemyPlayer extends Enemy {
       final String name,
       final SkinUISelection skinUISelection,
       final EnemyListeners enemyListeners,
-      final int speed,
+      final float speed,
       final int hp,
       final PlayerClassUISelection enemyClass) {
 
@@ -90,7 +90,7 @@ public class EnemyPlayer extends Enemy {
     this.enemyPlayerId = enemyPlayerId;
     lastDirection = direction;
     enemyTextures = new EnemyTextures(screen.getGame().getAssMan(), enemyClass, skinUISelection);
-    this.currentSpeed = (float) speed;
+    this.currentSpeed = speed;
     this.name = name;
     super.setMdlInst(new ModelInstanceBB(screen.getGame().getCellBuilder().getMdlEnemy()));
     Attributes attributes = getMdlInst().materials.get(0);
@@ -109,7 +109,7 @@ public class EnemyPlayer extends Enemy {
                     enemyPlayerAction.getRoute().y),
                 enemyPlayerAction.getDirection()),
         this::setCurrentSpeed,
-        (float) speed);
+        speed);
   }
 
   public void teleport(Vector3 position, Vector2 direction) {
