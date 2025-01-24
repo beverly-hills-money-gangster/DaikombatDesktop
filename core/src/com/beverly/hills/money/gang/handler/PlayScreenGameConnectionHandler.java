@@ -380,7 +380,8 @@ public class PlayScreenGameConnectionHandler {
       // if I hit myself
       if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
           .getPlayerId()) {
-        playScreen.getPlayer().setHP(gameEvent.getAffectedPlayer().getHealth());
+        playScreen.getPlayer().getHit(gameEvent.getAffectedPlayer().getHealth());
+        playGetHitSound();
       } else {
         enemiesRegistry.getEnemy(gameEvent.getAffectedPlayer().getPlayerId())
             .ifPresent(enemyPlayer -> {
@@ -412,10 +413,7 @@ public class PlayScreenGameConnectionHandler {
                             .create(getPlayerBoomPosition(), playScreen.getPlayer()));
                   }
                   playScreen.getPlayer().getHit(gameEvent.getAffectedPlayer().getHealth());
-                  new TimeLimitedSound(
-                      playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
-                          .VOICE_GET_HIT_SOUND_SEQ.getNext())).play(SoundVolumeType.LOW_QUIET,
-                      0.f, 1000);
+                  playGetHitSound();
                 })
                 .build());
           });
@@ -615,6 +613,13 @@ public class PlayScreenGameConnectionHandler {
         currentPosition.y + Constants.PLAYER_RECT_SIZE / 2 + currentDirection.y * 0.25f);
   }
 
+
+  private void playGetHitSound(){
+    new TimeLimitedSound(
+        playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
+            .VOICE_GET_HIT_SOUND_SEQ.getNext())).play(SoundVolumeType.LOW_QUIET,
+        0.f, 1000);
+  }
 
   private void playHitSound() {
     new TimeLimitedSound(
