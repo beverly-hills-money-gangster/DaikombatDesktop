@@ -6,7 +6,10 @@ import org.apache.commons.lang3.Range;
 
 public interface Constants {
 
-  int PROJECTILE_SPEED = 27;
+
+  int LONG_TIME_NO_MOVE_MLS = 200;
+
+  int PROJECTILE_SPEED = 30;
 
   int PUNCH_ANIMATION_MLS = 155;
 
@@ -27,7 +30,7 @@ public interface Constants {
 
   int LOGO_INDENT = 256 - 16;
   int DEFAULT_SELECTION_INDENT = 32;
-  int SPAWN_ANIMATION_MLS = 250;
+  int SPAWN_ANIMATION_MLS = 200;
   int MENU_OPTION_INDENT = 32;
 
   float DEFAULT_ENEMY_Y = 0.5057522f;

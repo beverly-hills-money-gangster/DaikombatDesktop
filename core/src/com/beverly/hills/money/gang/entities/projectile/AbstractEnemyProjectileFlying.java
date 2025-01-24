@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
@@ -127,6 +128,14 @@ public class AbstractEnemyProjectileFlying extends Projectile {
       if (otherRect != rect && rect.overlaps(otherRect) && (
           otherRect.getFilter() == RectanglePlusFilter.WALL
               || otherRect.getFilter() == RectanglePlusFilter.ENEMY)) {
+
+        if (otherRect.getFilter() == RectanglePlusFilter.ENEMY) {
+          var enemyPlayer = (EnemyPlayer) getScreen().getGame().getEntMan()
+              .getEntityFromId(otherRect.getConnectedEntityId());
+          if (!enemyPlayer.isVisible()) {
+            continue;
+          }
+        }
         destroy();
         break;
       }

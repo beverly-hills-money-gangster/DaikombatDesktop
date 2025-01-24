@@ -24,8 +24,8 @@ public class EnemiesRegistry {
     return Optional.ofNullable(enemyPlayers.get(playerId));
   }
 
-  public List<EnemyPlayer> getEnemiesInRange(final Vector2 position, final float range) {
-    return enemyPlayers.values().stream().filter(
+  public List<EnemyPlayer> getVisibleEnemiesInRange(final Vector2 position, final float range) {
+    return enemyPlayers.values().stream().filter(EnemyPlayer::isVisible).filter(
         enemyPlayer ->
             new Vector2(enemyPlayer.getPosition().x, enemyPlayer.getPosition().z).dst(position)
                 <= range).collect(Collectors.toList());

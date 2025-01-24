@@ -108,6 +108,7 @@ public class ConnectServerScreen extends ReconnectableScreen {
             } else if (response.hasServerInfo()) {
               var serverInfo = response.getServerInfo();
               playerContextDataBuilder.movesUpdateFreqMls(serverInfo.getMovesUpdateFreqMls());
+              playerContextDataBuilder.maxVisibility(serverInfo.getMaxVisibility());
               playerContextDataBuilder.fragsToWin(serverInfo.getFragsToWin());
               playerContextDataBuilder.speed(serverInfo.getPlayerSpeed());
               playerContextDataBuilder.weaponStats(getWeaponStats(

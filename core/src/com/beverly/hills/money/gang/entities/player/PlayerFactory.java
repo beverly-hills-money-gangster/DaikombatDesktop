@@ -161,7 +161,8 @@ public class PlayerFactory {
         playerConnectionContextData.getSpawn(),
         playerConnectionContextData.getDirection(),
         playerConnectionContextData.getSpeed(),
-        playerConnectionContextData.getWeaponStats());
+        playerConnectionContextData.getWeaponStats(),
+        playerConnectionContextData.getMaxVisibility());
   }
 
   private static ProjectileType mapProjectileToWeaponType(Projectile projectile) {

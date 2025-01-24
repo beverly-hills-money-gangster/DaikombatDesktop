@@ -2,7 +2,9 @@ package com.beverly.hills.money.gang.strategy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -42,14 +44,14 @@ public class EnemyPlayerActionQueueStrategyTest {
     var currentPosition = new Vector2(0, 0);
     Runnable onComplete = spy(Runnable.class);
 
-    for (int i = 0; i <= EnemyPlayerActionQueueStrategy.MAX_ACTION_QUEUE_CLOGGING; i++) {
+    for (int i = 0; i < EnemyPlayerActionQueueStrategy.MAX_ACTION_QUEUE_CLOGGING; i++) {
       var someAction = EnemyPlayerAction.builder()
           .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
           .direction(new Vector2(0, 1))
           .route(new Vector2(0, i))
           .onComplete(onComplete)
           .eventSequenceId(i).build();
-      enemyPlayerActionQueueStrategy.enqueue(someAction, currentPosition);
+      enemyPlayerActionQueueStrategy.enqueue(someAction, currentPosition, true);
     }
     reset(onSpeedChange);
 
@@ -60,9 +62,8 @@ public class EnemyPlayerActionQueueStrategyTest {
         .onComplete(onComplete)
         .eventSequenceId(EnemyPlayerActionQueueStrategy.MAX_ACTION_QUEUE_CLOGGING + 1).build();
     // over the limit
-    enemyPlayerActionQueueStrategy.enqueue(someOverTheLimitAction, currentPosition);
-    assertEquals(1, enemyPlayerActions.size(),
-        "Should be only one as the queue is clogged to the max. In this situation we should clear the queue.");
+    enemyPlayerActionQueueStrategy.enqueue(someOverTheLimitAction, currentPosition, true);
+    assertEquals(0, enemyPlayerActions.size());
     // we teleport and skip all events
     verify(onTeleport).accept(someOverTheLimitAction);
     // we should execute all "onComplete" Runnables,
@@ -70,7 +71,30 @@ public class EnemyPlayerActionQueueStrategyTest {
     verify(onComplete, times(
         EnemyPlayerActionQueueStrategy.MAX_ACTION_QUEUE_CLOGGING + 1)).run();
     // we keep normal speed as we skipped all events. no need to rush :-)
-    verify(onSpeedChange).accept((float) defaultSpeed);
+    verify(onSpeedChange, never()).accept(anyFloat());
+  }
+
+  @Test
+  public void testEnqueueNotVisible() {
+    Deque<EnemyPlayerAction> enemyPlayerActions = new ArrayDeque<>();
+    EnemyPlayerActionQueueStrategy enemyPlayerActionQueueStrategy = new EnemyPlayerActionQueueStrategy(
+        enemyPlayerActions, onTeleport, onSpeedChange, defaultSpeed);
+    var currentPosition = new Vector2(0, 0);
+    Runnable onComplete = spy(Runnable.class);
+
+    var someAction = EnemyPlayerAction.builder()
+        .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
+        .direction(new Vector2(0, 1))
+        .route(new Vector2(10, 25))
+        .onComplete(onComplete)
+        .eventSequenceId(1).build();
+
+    enemyPlayerActionQueueStrategy.enqueue(someAction, currentPosition, false);
+    assertEquals(0, enemyPlayerActions.size());
+    // we teleport and skip all events
+    verify(onTeleport).accept(someAction);
+    verify(onSpeedChange, never()).accept(anyFloat());
+    verify(onComplete).run();
   }
 
   @Test
@@ -89,8 +113,8 @@ public class EnemyPlayerActionQueueStrategyTest {
         .direction(new Vector2(0, 1))
         .route(new Vector2(0, 2))
         .eventSequenceId(2).build();
-    enemyPlayerActionQueueStrategy.enqueue(firstAction, currentPosition);
-    enemyPlayerActionQueueStrategy.enqueue(secondAction, currentPosition);
+    enemyPlayerActionQueueStrategy.enqueue(firstAction, currentPosition, true);
+    enemyPlayerActionQueueStrategy.enqueue(secondAction, currentPosition, true);
     assertEquals(2, enemyPlayerActions.size());
   }
 
@@ -113,9 +137,9 @@ public class EnemyPlayerActionQueueStrategyTest {
         .route(new Vector2(0, 1))
         .eventSequenceId(1).build();
 
-    enemyPlayerActionQueueStrategy.enqueue(move, currentPosition);
+    enemyPlayerActionQueueStrategy.enqueue(move, currentPosition, true);
     assertEquals(move, enemyPlayerActions.getLast());
-    enemyPlayerActionQueueStrategy.enqueue(punch, new Vector2(0, 1));
+    enemyPlayerActionQueueStrategy.enqueue(punch, new Vector2(0, 1), true);
     assertEquals(move, enemyPlayerActions.getLast());
     assertEquals(1, enemyPlayerActions.size(),
         "Should be just 1 MOVE event because PUNCH is out-of-order");
@@ -142,9 +166,9 @@ public class EnemyPlayerActionQueueStrategyTest {
         .route(new Vector2(0, 1))
         .eventSequenceId(1).build();
 
-    enemyPlayerActionQueueStrategy.enqueue(move, currentPosition);
+    enemyPlayerActionQueueStrategy.enqueue(move, currentPosition, true);
     assertEquals(move, enemyPlayerActions.getLast());
-    enemyPlayerActionQueueStrategy.enqueue(shoot, new Vector2(0, 1));
+    enemyPlayerActionQueueStrategy.enqueue(shoot, new Vector2(0, 1), true);
     assertEquals(move, enemyPlayerActions.getLast());
     assertEquals(1, enemyPlayerActions.size(),
         "Should be just 1 MOVE event because SHOOT is out-of-order");
@@ -173,8 +197,8 @@ public class EnemyPlayerActionQueueStrategyTest {
         .route(new Vector2(0, 2))
         .eventSequenceId(2).build();
     // out of order
-    enemyPlayerActionQueueStrategy.enqueue(secondAction, currentPosition);
-    enemyPlayerActionQueueStrategy.enqueue(firstAction, currentPosition);
+    enemyPlayerActionQueueStrategy.enqueue(secondAction, currentPosition, true);
+    enemyPlayerActionQueueStrategy.enqueue(firstAction, currentPosition, true);
 
     assertEquals(1, enemyPlayerActions.size(),
         "Only one action is expected to be enqueued because they are out of order");
@@ -204,11 +228,11 @@ public class EnemyPlayerActionQueueStrategyTest {
         .route(new Vector2(0, 101))
         .eventSequenceId(3).build();
 
-    enemyPlayerActionQueueStrategy.enqueue(teleport2, new Vector2(0, 0));
+    enemyPlayerActionQueueStrategy.enqueue(teleport2, new Vector2(0, 0), true);
     assertEquals(teleport2, enemyPlayerActions.getLast());
-    enemyPlayerActionQueueStrategy.enqueue(move1, new Vector2(0, 100));
+    enemyPlayerActionQueueStrategy.enqueue(move1, new Vector2(0, 100), true);
     assertEquals(teleport2, enemyPlayerActions.getLast());
-    enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 100));
+    enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 100), true);
     assertEquals(move3, enemyPlayerActions.getLast());
     verifyNoInteractions(onTeleport);
 
@@ -238,11 +262,11 @@ public class EnemyPlayerActionQueueStrategyTest {
         .route(new Vector2(0, 101))
         .eventSequenceId(3).build();
 
-    enemyPlayerActionQueueStrategy.enqueue(teleport2, new Vector2(0, 0));
+    enemyPlayerActionQueueStrategy.enqueue(teleport2, new Vector2(0, 0), true);
     assertEquals(teleport2, enemyPlayerActions.getLast());
-    enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 100));
+    enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 100), true);
     assertEquals(move3, enemyPlayerActions.getLast());
-    enemyPlayerActionQueueStrategy.enqueue(move1, new Vector2(0, 101));
+    enemyPlayerActionQueueStrategy.enqueue(move1, new Vector2(0, 101), true);
     assertEquals(move3, enemyPlayerActions.getLast());
 
     verifyNoInteractions(onTeleport);
@@ -273,14 +297,14 @@ public class EnemyPlayerActionQueueStrategyTest {
         .route(new Vector2(0, 101))
         .eventSequenceId(3).build();
 
-    enemyPlayerActionQueueStrategy.enqueue(move1, new Vector2(0, 0));
+    enemyPlayerActionQueueStrategy.enqueue(move1, new Vector2(0, 0), true);
     assertEquals(move1, enemyPlayerActions.getLast());
 
-    enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 1));
+    enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 1), true);
     verify(onTeleport).accept(move3);
     assertTrue(enemyPlayerActions.isEmpty(), "Should be empty because it was a big leap");
 
-    enemyPlayerActionQueueStrategy.enqueue(teleport2, new Vector2(0, 101));
+    enemyPlayerActionQueueStrategy.enqueue(teleport2, new Vector2(0, 101), true);
     assertTrue(enemyPlayerActions.isEmpty(), "Should be empty because it's out of order");
   }
 
@@ -306,9 +330,9 @@ public class EnemyPlayerActionQueueStrategyTest {
         .route(new Vector2(0, 101))
         .eventSequenceId(3).build();
 
-    enemyPlayerActionQueueStrategy.enqueue(move1, new Vector2(0, 0));
-    enemyPlayerActionQueueStrategy.enqueue(teleport2, new Vector2(0, 1));
-    enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 100));
+    enemyPlayerActionQueueStrategy.enqueue(move1, new Vector2(0, 0), true);
+    enemyPlayerActionQueueStrategy.enqueue(teleport2, new Vector2(0, 1), true);
+    enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 100), true);
     verifyNoInteractions(onTeleport);
 
     assertEquals(3, enemyPlayerActions.size());
@@ -336,14 +360,14 @@ public class EnemyPlayerActionQueueStrategyTest {
         .route(new Vector2(0, 101))
         .eventSequenceId(3).build();
 
-    enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 0));
+    enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 0), true);
     assertTrue(enemyPlayerActions.isEmpty(), "Should be empty because it's a very big leap");
     verify(onTeleport).accept(move3);
 
-    enemyPlayerActionQueueStrategy.enqueue(move1, new Vector2(0, 101));
+    enemyPlayerActionQueueStrategy.enqueue(move1, new Vector2(0, 101), true);
     assertTrue(enemyPlayerActions.isEmpty(), "Should be empty because it's out of order");
 
-    enemyPlayerActionQueueStrategy.enqueue(teleport2, new Vector2(0, 0));
+    enemyPlayerActionQueueStrategy.enqueue(teleport2, new Vector2(0, 0), true);
     assertTrue(enemyPlayerActions.isEmpty(), "Should be empty because it's out of order");
   }
 
@@ -369,14 +393,14 @@ public class EnemyPlayerActionQueueStrategyTest {
         .route(new Vector2(0, 101))
         .eventSequenceId(3).build();
 
-    enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 0));
+    enemyPlayerActionQueueStrategy.enqueue(move3, new Vector2(0, 0), true);
     assertTrue(enemyPlayerActions.isEmpty(), "Should be empty because it's a very big leap");
     verify(onTeleport).accept(move3);
 
-    enemyPlayerActionQueueStrategy.enqueue(teleport2, new Vector2(0, 101));
+    enemyPlayerActionQueueStrategy.enqueue(teleport2, new Vector2(0, 101), true);
     assertTrue(enemyPlayerActions.isEmpty(), "Should be empty because it's out of order");
 
-    enemyPlayerActionQueueStrategy.enqueue(move1, new Vector2(0, 101));
+    enemyPlayerActionQueueStrategy.enqueue(move1, new Vector2(0, 101), true);
     assertTrue(enemyPlayerActions.isEmpty(), "Should be empty because it's out of order");
 
   }

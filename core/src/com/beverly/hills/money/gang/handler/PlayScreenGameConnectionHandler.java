@@ -179,7 +179,8 @@ public class PlayScreenGameConnectionHandler {
         getSkinColor(gameEvent.getPlayer().getSkinColor()), createEnemyListeners(),
         playScreen.getPlayerConnectionContextData().getSpeed(),
         gameEvent.getPlayer().getHealth(),
-        createPlayerClass(gameEvent.getPlayer().getPlayerClass()));
+        createPlayerClass(gameEvent.getPlayer().getPlayerClass()),
+        playScreen.getPlayerConnectionContextData().getMaxVisibility());
     gameEvent.getPlayer().getActivePowerUpsList().forEach(
         gamePowerUp -> activateEnemyPowerUpOnSpawn(
             enemyPlayer, getPowerUpType(gamePowerUp.getType()), gamePowerUp.getLastsForMls()));
@@ -382,7 +383,12 @@ public class PlayScreenGameConnectionHandler {
         playScreen.getPlayer().setHP(gameEvent.getAffectedPlayer().getHealth());
       } else {
         enemiesRegistry.getEnemy(gameEvent.getAffectedPlayer().getPlayerId())
-            .ifPresent(enemyPlayer -> enemyPlayer.setHp(gameEvent.getAffectedPlayer().getHealth()));
+            .ifPresent(enemyPlayer -> {
+              if (!enemyPlayer.isVisible()) {
+                playHitSound();
+              }
+              enemyPlayer.setHp(gameEvent.getAffectedPlayer().getHealth());
+            });
       }
     } else if (gameEvent.getAffectedPlayer().getPlayerId()
         == playScreen.getPlayerConnectionContextData().getPlayerId()) {
@@ -490,7 +496,12 @@ public class PlayScreenGameConnectionHandler {
         .getPlayerId()) {
       var victimPlayerOpt = enemiesRegistry.removeEnemy(
           gameEvent.getAffectedPlayer().getPlayerId());
-      victimPlayerOpt.ifPresent(Enemy::die);
+      victimPlayerOpt.ifPresent(enemyPlayer -> {
+        if (!enemyPlayer.isVisible()) {
+          playHitSound();
+        }
+        enemyPlayer.die();
+      });
       int oldHealth = playScreen.getPlayer().getCurrentHP();
       int newHealth = gameEvent.getPlayer().getHealth();
       playScreen.getPlayer().setHP(newHealth);
@@ -498,6 +509,7 @@ public class PlayScreenGameConnectionHandler {
       playScreen.getMyPlayerKillLog()
           .myPlayerKill(victimPlayerOpt.map(EnemyPlayer::getName).orElse("victim"), buff);
       killStats.registerKill();
+
       var weapon = gameEvent.hasWeaponType() ? WeaponMapper.getWeapon(gameEvent.getWeaponType())
           : Weapon.getWeaponForProjectile(
               WeaponMapper.getWeaponProjectile(gameEvent.getProjectile().getProjectileType()));
@@ -601,6 +613,13 @@ public class PlayScreenGameConnectionHandler {
     return new Vector2(
         currentPosition.x + Constants.PLAYER_RECT_SIZE / 2 + currentDirection.x * 0.25f,
         currentPosition.y + Constants.PLAYER_RECT_SIZE / 2 + currentDirection.y * 0.25f);
+  }
+
+
+  private void playHitSound() {
+    new TimeLimitedSound(
+        playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.HIT_SOUND))
+        .play(SoundVolumeType.LOUD, 0.f, 500);
   }
 
   private static Vector2 createVector(Vector serverVector) {

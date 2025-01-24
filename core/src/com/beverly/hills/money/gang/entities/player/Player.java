@@ -1,6 +1,7 @@
 package com.beverly.hills.money.gang.entities.player;
 
 import static com.beverly.hills.money.gang.Configs.SPEED_BOOST;
+import static com.beverly.hills.money.gang.Constants.LONG_TIME_NO_MOVE_MLS;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -45,7 +46,8 @@ public class Player extends Entity {
 
   private static final Logger LOG = LoggerFactory.getLogger(Player.class);
 
-  private static final float FAR = 8.5f;
+
+  private long lastTimeMovedMls = 0;
 
   private final PlayerProjectileFactoriesRegistry playerProjectileFactoriesRegistry
       = new PlayerProjectileFactoriesRegistry();
@@ -95,8 +97,6 @@ public class Player extends Entity {
   private float camY = Constants.DEFAULT_PLAYER_CAM_Y;
   private boolean moved = false;
 
-  private boolean mouseRotate = false;
-
   private int currentHP = 100;
 
   @Setter
@@ -114,7 +114,8 @@ public class Player extends Entity {
       final Vector2 spawnPosition,
       final Vector2 lookAt,
       final int speed,
-      final Map<Weapon, WeaponStats> weaponStats) {
+      final Map<Weapon, WeaponStats> weaponStats,
+      final int maxVisibility) {
     super(screen);
     this.onProjectileSelfHit = onProjectileSelfHit;
     this.enemiesRegistry = screen.getEnemiesRegistry();
@@ -130,7 +131,7 @@ public class Player extends Entity {
     playerCam.position.set(new Vector3(0, Constants.DEFAULT_PLAYER_CAM_Y, 0));
     playerCam.lookAt(new Vector3(lookAt.x, Constants.DEFAULT_PLAYER_CAM_Y, lookAt.y));
     playerCam.near = 0.01f;
-    playerCam.far = FAR;
+    playerCam.far = maxVisibility * 0.8f;
     playerCam.update();
     createRect(spawnPosition.cpy()
         .set(spawnPosition.x - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f,
@@ -209,6 +210,15 @@ public class Player extends Entity {
         .filter(rect -> (rect.getFilter() == RectanglePlusFilter.ENEMY
             || rect.getFilter() == RectanglePlusFilter.WALL
             || rect.getFilter() == RectanglePlusFilter.DOOR))
+        .filter(rectanglePlus -> {
+          if (rectanglePlus.getFilter() == RectanglePlusFilter.ENEMY) {
+            var enemy = (EnemyPlayer) getScreen().getGame().getEntMan()
+                .getEntityFromId(rectanglePlus.getConnectedEntityId());
+            return enemy.isVisible();
+          } else {
+            return true;
+          }
+        })
         .filter(rect -> Intersector.intersectSegmentRectangle(playerCam.position.x,
             playerCam.position.z,
             playerCam.position.x + playerCam.direction.x * weaponDistance,
@@ -264,14 +274,12 @@ public class Player extends Entity {
       var angle = Gdx.input.getDeltaX() * -Constants.MOUSE_CAMERA_ROTATION_SPEED
           * UserSettingsUISelection.MOUSE_SENS.getState().getNormalized() * delta;
       playerCam.rotate(Vector3.Y, angle);
-      if (Math.abs(angle) > 0.5) {
-        mouseRotate = true;
-      }
     }
     handleArrows();
     handleWASD();
-    if (moved || mouseRotate) {
+    if (moved || longTimeNoMove()) {
       onMovementListener.accept(this);
+      lastTimeMovedMls = System.currentTimeMillis();
     }
     if (moved) {
       camY = Constants.DEFAULT_PLAYER_CAM_Y;
@@ -282,9 +290,6 @@ public class Player extends Entity {
       weaponY = -25f;
       weaponY += sinOffset * 200f * 3f;
       moved = false;
-    }
-    if (mouseRotate) {
-      mouseRotate = false;
     }
 
     movementDirVec2.set(movementDir.x, movementDir.z);
@@ -308,6 +313,10 @@ public class Player extends Entity {
             .addEntity(projectileFactory.create(this, screenWeapon.getWeaponState(currentWeapon)));
       }
     }
+  }
+
+  private boolean longTimeNoMove() {
+    return System.currentTimeMillis() - lastTimeMovedMls > LONG_TIME_NO_MOVE_MLS;
   }
 
   private void punch() {
