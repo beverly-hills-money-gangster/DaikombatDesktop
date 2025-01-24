@@ -1,6 +1,7 @@
 package com.beverly.hills.money.gang.entities.enemies;
 
 import static com.beverly.hills.money.gang.Constants.DEFAULT_ENEMY_Y;
+import static com.beverly.hills.money.gang.Constants.MAX_ENEMY_IDLE_TIME_MLS;
 import static com.beverly.hills.money.gang.Constants.SPAWN_ANIMATION_MLS;
 
 import com.badlogic.gdx.graphics.Color;
@@ -74,6 +75,8 @@ public class EnemyPlayer extends Enemy {
 
   private final int maxVisibility;
 
+  private long lastActionReceivedTimeMls;
+
   public EnemyPlayer(
       final Player player,
       final int enemyPlayerId,
@@ -116,6 +119,7 @@ public class EnemyPlayer extends Enemy {
                 enemyPlayerAction.getDirection()),
         this::setCurrentSpeed,
         speed);
+    lastActionReceivedTimeMls = System.currentTimeMillis();
   }
 
   public void teleport(Vector3 position, Vector2 direction) {
@@ -144,6 +148,7 @@ public class EnemyPlayer extends Enemy {
     if (!isInFog()) {
       visible = true;
     }
+    lastActionReceivedTimeMls = System.currentTimeMillis();
   }
 
   public void attack(Weapon weapon, boolean attackingPlayer) {
@@ -178,8 +183,13 @@ public class EnemyPlayer extends Enemy {
       }
       return;
     }
+
     final ColorAttribute colorAttribute = (ColorAttribute) getMdlInst().materials.get(0)
         .get(ColorAttribute.Diffuse);
+    if (System.currentTimeMillis() - lastActionReceivedTimeMls > MAX_ENEMY_IDLE_TIME_MLS) {
+      visible = false;
+    }
+
     EnemyPlayerAction action = actions.peek();
 
     if (action != null) {
@@ -207,18 +217,19 @@ public class EnemyPlayer extends Enemy {
     getRect().getOldPosition().set(getRect().x, getRect().y);
 
     if (visible && isInFog()) {
-      colorAttribute.color.set(1, 1, 1, 0);
       visible = false;
     }
     if (visible) {
       colorEffects();
       rotateEnemyAnimation();
+    } else {
+      colorAttribute.color.set(1, 1, 1, 0);
     }
   }
 
   private boolean isInFog() {
     return getPlayer().getCurrent2DPosition().dst(new Vector2(getPosition().x, getPosition().z))
-        > maxVisibility;
+        > maxVisibility * 0.90;
   }
 
   private void rotateEnemyAnimation() {

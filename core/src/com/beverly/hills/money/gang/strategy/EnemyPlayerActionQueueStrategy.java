@@ -35,18 +35,18 @@ public class EnemyPlayerActionQueueStrategy {
 
   public void enqueue(
       final EnemyPlayerAction enemyPlayerAction, Vector2 currentPosition, boolean visible) {
-    if (!visible) {
+    boolean inOrder = enemyPlayerAction.getEventSequenceId() > lastEventSequenceId;
+    if (inOrder && !visible) {
       skipEventsAndTeleport(enemyPlayerAction);
-    } else if (actions.size() > MAX_ACTION_QUEUE_CLOGGING) {
+    } else if (inOrder && actions.size() > MAX_ACTION_QUEUE_CLOGGING) {
       skipEventsAndTeleport(enemyPlayerAction);
-    } else if (enemyPlayerAction.getEventSequenceId() > lastEventSequenceId
-        && enemyPlayerAction.getRoute().dst(currentPosition)
+    } else if (inOrder && enemyPlayerAction.getRoute().dst(currentPosition)
         > TOO_MUCH_DISTANCE_TRAVELLED) {
       skipEventsAndTeleport(enemyPlayerAction);
     } else {
       onSpeedChange.accept(getSpeed(actions, this.defaultSpeed));
       // if out-of-order
-      if (enemyPlayerAction.getEventSequenceId() < lastEventSequenceId) {
+      if (!inOrder) {
         switch (enemyPlayerAction.getEnemyPlayerActionType()) {
           case MOVE -> {
             LOG.warn(

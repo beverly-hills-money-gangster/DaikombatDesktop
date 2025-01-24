@@ -6,8 +6,9 @@ import org.apache.commons.lang3.Range;
 
 public interface Constants {
 
-
   int LONG_TIME_NO_MOVE_MLS = 200;
+
+  int MAX_ENEMY_IDLE_TIME_MLS = LONG_TIME_NO_MOVE_MLS * 3;
 
   int PROJECTILE_SPEED = 30;
 
