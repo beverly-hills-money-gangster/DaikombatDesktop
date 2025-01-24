@@ -20,7 +20,6 @@ import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.entities.player.Player.ProjectileEnemy;
-import com.beverly.hills.money.gang.entities.player.Player.ProjectilePlayer;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
@@ -86,12 +85,6 @@ public class AbstractPlayerProjectile extends Projectile {
         enemiesInRange.forEach(enemyPlayer -> player.getOnProjectileAttackHit().accept(
             ProjectileEnemy.builder().enemyPlayer(enemyPlayer).projectile(projectile).player(player)
                 .build()));
-      }
-      // if projectile hit myself
-      if (weaponState.getProjectileRadius() > player.getCurrent2DPosition()
-          .dst(projectile.currentPosition())) {
-        player.getOnProjectileSelfHit()
-            .accept(ProjectilePlayer.builder().player(player).projectile(projectile).build());
       }
     };
     this.finishPosition = finishPosition;

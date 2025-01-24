@@ -67,9 +67,6 @@ public class Player extends Entity {
   @Getter
   private final Consumer<ProjectileEnemy> onProjectileAttackHit;
 
-  @Getter
-  private final Consumer<ProjectilePlayer> onProjectileSelfHit;
-
   private final Consumer<EnemyPlayer> onEnemyAim;
   private final Vector3 movementDir = new Vector3();
   final Vector2 movementDirVec2 = new Vector2(movementDir.x, movementDir.z);
@@ -110,14 +107,12 @@ public class Player extends Entity {
       final Consumer<EnemyPlayer> onEnemyAim,
       final Consumer<Player> onMovementListener,
       final Consumer<ProjectileEnemy> onProjectileAttackHit,
-      final Consumer<ProjectilePlayer> onProjectileSelfHit,
       final Vector2 spawnPosition,
       final Vector2 lookAt,
       final int speed,
       final Map<Weapon, WeaponStats> weaponStats,
       final int maxVisibility) {
     super(screen);
-    this.onProjectileSelfHit = onProjectileSelfHit;
     this.enemiesRegistry = screen.getEnemiesRegistry();
     this.speed = speed * SPEED_BOOST;
     screenWeapon = new ScreenWeapon(screen.getGame().getAssMan(), weaponStats,
@@ -450,14 +445,6 @@ public class Player extends Entity {
     private final Projectile projectile;
     private final Player player;
     private final EnemyPlayer enemyPlayer;
-  }
-
-  @Builder
-  @Getter
-  public static class ProjectilePlayer {
-
-    private final Projectile projectile;
-    private final Player player;
   }
 
 }

@@ -128,35 +128,6 @@ public class PlayerFactory {
         commandBuilder.setAffectedPlayerId(enemyPlayer.getEnemyPlayerId());
       });
       gameConnection.write(commandBuilder.build());
-    }, projectilePlayer -> {
-      if (projectilePlayer.getPlayer().isCollidedWithTeleport()) {
-        LOG.warn("Can't shoot projectiles while being teleported");
-        return;
-      }
-      projectilePlayer.getPlayer().getHit();
-      var projectile = projectilePlayer.getProjectile();
-      var player = projectilePlayer.getPlayer();
-      var projectilePosition = projectile.currentPosition();
-      var direction = player.getCurrent2DDirection();
-      var position = player.getCurrent2DPosition();
-      var commandBuilder = PushGameEventCommand.newBuilder()
-          .setGameId(Configs.GAME_ID)
-          .setSequence(screen.getActionSequence().incrementAndGet())
-          .setPingMls(
-              Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
-                  .orElse(0))
-          .setPlayerId(playerConnectionContextData.getPlayerId())
-          .setAffectedPlayerId(playerConnectionContextData.getPlayerId()) // self hitting
-          .setDirection(
-              Vector.newBuilder().setX(direction.x).setY(direction.y).build())
-          .setPosition(
-              Vector.newBuilder().setX(position.x).setY(position.y).build())
-          .setProjectile(ProjectileStats.newBuilder().setPosition(
-                  Vector.newBuilder().setX(projectilePosition.x).setY(projectilePosition.y)
-                      .build())
-              .setProjectileType(mapProjectileToWeaponType(projectile)).build())
-          .setEventType(GameEventType.ATTACK);
-      gameConnection.write(commandBuilder.build());
     },
         playerConnectionContextData.getSpawn(),
         playerConnectionContextData.getDirection(),
