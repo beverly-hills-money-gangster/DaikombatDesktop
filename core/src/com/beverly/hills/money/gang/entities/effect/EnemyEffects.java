@@ -1,9 +1,12 @@
 package com.beverly.hills.money.gang.entities.effect;
 
+import lombok.Getter;
+
 public class EnemyEffects extends PlayerEffects {
 
   private long beingAttackedUntilMls;
 
+  @Getter
   private long beingSpawnedUntilMls;
 
   public void beingAttacked(long until) {

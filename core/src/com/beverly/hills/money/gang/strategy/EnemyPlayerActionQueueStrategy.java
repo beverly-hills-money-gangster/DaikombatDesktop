@@ -34,38 +34,35 @@ public class EnemyPlayerActionQueueStrategy {
   private final float defaultSpeed;
 
   public void enqueue(
-      final EnemyPlayerAction enemyPlayerAction, Vector2 currentPosition) {
-    // if clogged
-    if (actions.size() > MAX_ACTION_QUEUE_CLOGGING) {
-      LOG.warn("The queue is totally clogged. Clear all events.");
+      final EnemyPlayerAction enemyPlayerAction, Vector2 currentPosition, boolean visible) {
+    if (!visible) {
       skipEventsAndTeleport(enemyPlayerAction);
-    }
-    onSpeedChange.accept(getSpeed(actions, this.defaultSpeed));
-    // if out-of-order
-    if (enemyPlayerAction.getEventSequenceId() < lastEventSequenceId) {
-      switch (enemyPlayerAction.getEnemyPlayerActionType()) {
-        case MOVE -> {
-          LOG.warn(
-              "MOVE event is out of order. Last event sequence id {} but given {}. Skip event.",
-              lastEventSequenceId, enemyPlayerAction.getEventSequenceId());
-          Optional.ofNullable(enemyPlayerAction.getOnComplete()).ifPresent(Runnable::run);
-        }
-        case ATTACK -> {
-          LOG.warn(
-              "ATTACK event is out of order. Last event sequence id {} but given {}",
-              lastEventSequenceId, enemyPlayerAction.getEventSequenceId());
-          Optional.ofNullable(enemyPlayerAction.getOnComplete()).ifPresent(Runnable::run);
-        }
-      }
-      return;
-    }
-    // if in order
-    int sequenceDiff = enemyPlayerAction.getEventSequenceId() - lastEventSequenceId;
-    if (sequenceDiff > 1 && enemyPlayerAction.getRoute().dst(currentPosition)
+    } else if (actions.size() > MAX_ACTION_QUEUE_CLOGGING) {
+      skipEventsAndTeleport(enemyPlayerAction);
+    } else if (enemyPlayerAction.getEventSequenceId() > lastEventSequenceId
+        && enemyPlayerAction.getRoute().dst(currentPosition)
         > TOO_MUCH_DISTANCE_TRAVELLED) {
-      LOG.warn("Too much distance travelled in one hop");
       skipEventsAndTeleport(enemyPlayerAction);
     } else {
+      onSpeedChange.accept(getSpeed(actions, this.defaultSpeed));
+      // if out-of-order
+      if (enemyPlayerAction.getEventSequenceId() < lastEventSequenceId) {
+        switch (enemyPlayerAction.getEnemyPlayerActionType()) {
+          case MOVE -> {
+            LOG.warn(
+                "MOVE event is out of order. Last event sequence id {} but given {}. Skip event.",
+                lastEventSequenceId, enemyPlayerAction.getEventSequenceId());
+            Optional.ofNullable(enemyPlayerAction.getOnComplete()).ifPresent(Runnable::run);
+          }
+          case ATTACK -> {
+            LOG.warn(
+                "ATTACK event is out of order. Last event sequence id {} but given {}",
+                lastEventSequenceId, enemyPlayerAction.getEventSequenceId());
+            Optional.ofNullable(enemyPlayerAction.getOnComplete()).ifPresent(Runnable::run);
+          }
+        }
+        return;
+      }
       actions.add(enemyPlayerAction);
     }
     lastEventSequenceId = enemyPlayerAction.getEventSequenceId();
@@ -76,6 +73,7 @@ public class EnemyPlayerActionQueueStrategy {
     actions.forEach(
         action -> Optional.ofNullable(action.getOnComplete()).ifPresent(Runnable::run));
     actions.clear();
+    Optional.ofNullable(enemyPlayerAction.getOnComplete()).ifPresent(Runnable::run);
   }
 
   protected static float getSpeed(final Queue<EnemyPlayerAction> actions,
@@ -95,7 +93,8 @@ public class EnemyPlayerActionQueueStrategy {
     } else if (actions.size() > 2) {
       return defaultSpeed * 1.15f;
     } else if (actions.stream().anyMatch(
-        enemyPlayerAction -> enemyPlayerAction.getEnemyPlayerActionType() == EnemyPlayerActionType.ATTACK)) {
+        enemyPlayerAction -> enemyPlayerAction.getEnemyPlayerActionType()
+            == EnemyPlayerActionType.ATTACK)) {
       return defaultSpeed * 3f;
     } else {
       return defaultSpeed;

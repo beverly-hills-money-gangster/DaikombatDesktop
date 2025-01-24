@@ -32,7 +32,6 @@ import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO show 3 dots on top of the player if it's chatting
 public class EnemyPlayer extends Enemy {
 
   private static final Logger LOG = LoggerFactory.getLogger(EnemyPlayer.class);
@@ -68,7 +67,12 @@ public class EnemyPlayer extends Enemy {
   private boolean isIdle = true;
 
   @Getter
+  private boolean visible = true;
+
+  @Getter
   private final int enemyPlayerId;
+
+  private final int maxVisibility;
 
   public EnemyPlayer(
       final Player player,
@@ -81,9 +85,11 @@ public class EnemyPlayer extends Enemy {
       final EnemyListeners enemyListeners,
       final float speed,
       final int hp,
-      final PlayerClassUISelection enemyClass) {
+      final PlayerClassUISelection enemyClass,
+      final int maxVisibility) {
 
     super(position, screen, player, enemyListeners);
+    this.maxVisibility = maxVisibility;
     this.hp = hp;
     this.enemyClass = enemyClass;
     this.skinUISelection = skinUISelection;
@@ -120,6 +126,7 @@ public class EnemyPlayer extends Enemy {
     setRect();
     getScreen().getGame().getRectMan().addRect(getRect());
     rotateEnemyAnimation();
+    visible = false;
   }
 
   private void setRect() {
@@ -133,7 +140,10 @@ public class EnemyPlayer extends Enemy {
   }
 
   public void queueAction(EnemyPlayerAction enemyPlayerAction) {
-    enemyPlayerActionQueueStrategy.enqueue(enemyPlayerAction, getRect().getOldPosition());
+    enemyPlayerActionQueueStrategy.enqueue(enemyPlayerAction, getRect().getOldPosition(), visible);
+    if (!isInFog()) {
+      visible = true;
+    }
   }
 
   public void attack(Weapon weapon, boolean attackingPlayer) {
@@ -168,6 +178,8 @@ public class EnemyPlayer extends Enemy {
       }
       return;
     }
+    final ColorAttribute colorAttribute = (ColorAttribute) getMdlInst().materials.get(0)
+        .get(ColorAttribute.Diffuse);
     EnemyPlayerAction action = actions.peek();
 
     if (action != null) {
@@ -193,8 +205,20 @@ public class EnemyPlayer extends Enemy {
     getPosition().set(getRect().x + getRect().getWidth() / 2, 0,
         getRect().y + getRect().getHeight() / 2);
     getRect().getOldPosition().set(getRect().x, getRect().y);
-    colorEffects();
-    rotateEnemyAnimation();
+
+    if (visible && isInFog()) {
+      colorAttribute.color.set(1, 1, 1, 0);
+      visible = false;
+    }
+    if (visible) {
+      colorEffects();
+      rotateEnemyAnimation();
+    }
+  }
+
+  private boolean isInFog() {
+    return getPlayer().getCurrent2DPosition().dst(new Vector2(getPosition().x, getPosition().z))
+        > maxVisibility;
   }
 
   private void rotateEnemyAnimation() {
@@ -268,6 +292,6 @@ public class EnemyPlayer extends Enemy {
 
   private boolean isTooClose(Vector2 vector1, Vector2 vector2) {
     return Vector2.dst(vector1.x, vector1.y, vector2.x,
-        vector2.y) <= 0.125f;
+        vector2.y) <= 0.225f;
   }
 }

@@ -9,6 +9,7 @@ import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.SoundMakingEntity;
+import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
@@ -30,7 +31,7 @@ public class Door extends SoundMakingEntity {
 
   private static final float START_OPEN_DISTANCE = 1.75f;
 
-  private static final float DOOR_OPEN_SPEED = 8.5f;
+  private static final float DOOR_OPEN_SPEED = 8f;
 
   private final UserSettingSound soundClose;
 
@@ -166,10 +167,17 @@ public class Door extends SoundMakingEntity {
     for (final RectanglePlus otherRect : getScreen().getGame().getRectMan().getRects()) {
       if (otherRect != rect
           && (otherRect.getFilter() == RectanglePlusFilter.PLAYER
-          || otherRect.getFilter() == RectanglePlusFilter.ENEMY
-          || otherRect.getFilter() == RectanglePlusFilter.PROJECTILE) &&
+          || otherRect.getFilter() == RectanglePlusFilter.PROJECTILE
+          || otherRect.getFilter() == RectanglePlusFilter.ENEMY) &&
           new Vector2(position.x, position.z).dst(otherRect.getPosition(new Vector2()))
               < START_OPEN_DISTANCE) {
+        if (otherRect.getFilter() == RectanglePlusFilter.ENEMY) {
+          var enemyPlayer = (EnemyPlayer) getScreen().getGame().getEntMan()
+              .getEntityFromId(otherRect.getConnectedEntityId());
+          if (!enemyPlayer.isVisible()) {
+            continue;
+          }
+        }
         return DoorState.OPEN;
       }
     }

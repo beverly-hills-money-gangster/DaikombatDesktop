@@ -222,9 +222,6 @@ public class PlayScreen extends GameScreen {
 
     );
     playScreenGameConnectionHandler = new PlayScreenGameConnectionHandler(this, enemiesRegistry);
-    if (Configs.DEV_MODE && Configs.MIMIC_CONSTANT_NETWORK_ACTIVITY) {
-      mimicNetworkActivity();
-    }
     hudBlackTexture = createTexture(Color.BLACK);
     hudRedTexture = createTexture(new Color(1, 0, 0.15f, 1f));
   }
@@ -306,20 +303,6 @@ public class PlayScreen extends GameScreen {
   public void removePowerUp(PowerUpType powerUpType) {
     LOG.info("Remove power up {}", powerUpType);
     Optional.ofNullable(powerUps.remove(powerUpType)).ifPresent(PowerUp::destroy);
-  }
-
-  private void mimicNetworkActivity() {
-    new Thread(() -> {
-      while (!isExiting() && !getPlayer().isDead()) {
-        try {
-          Thread.sleep(5);
-        } catch (InterruptedException e) {
-          throw new RuntimeException(e);
-        }
-        sendCurrentPlayerPosition();
-      }
-    }).start();
-
   }
 
   @Override

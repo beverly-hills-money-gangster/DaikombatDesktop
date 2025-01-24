@@ -17,6 +17,7 @@ import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.animation.Animation;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
+import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.entities.player.Player.ProjectileEnemy;
 import com.beverly.hills.money.gang.entities.player.Player.ProjectilePlayer;
@@ -75,7 +76,7 @@ public class AbstractPlayerProjectile extends Projectile {
     this.projectileType = projectileType;
     this.onBlowUp = projectile -> {
       var enemiesInRange = player.getEnemiesRegistry()
-          .getEnemiesInRange(projectile.currentPosition(),
+          .getVisibleEnemiesInRange(projectile.currentPosition(),
               weaponState.getProjectileRadius());
       if (enemiesInRange.isEmpty()) {
         player.getOnProjectileAttackHit().accept(
@@ -181,6 +182,13 @@ public class AbstractPlayerProjectile extends Projectile {
         if (otherRect != rect && rect.overlaps(otherRect) && (
             otherRect.getFilter() == RectanglePlusFilter.WALL
                 || otherRect.getFilter() == RectanglePlusFilter.ENEMY)) {
+          if (otherRect.getFilter() == RectanglePlusFilter.ENEMY) {
+            var enemyPlayer = (EnemyPlayer) getScreen().getGame().getEntMan()
+                .getEntityFromId(otherRect.getConnectedEntityId());
+            if (!enemyPlayer.isVisible()) {
+              continue;
+            }
+          }
           onBlowUp.accept(this);
           boom();
           break;

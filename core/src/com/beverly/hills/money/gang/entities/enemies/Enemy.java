@@ -1,5 +1,7 @@
 package com.beverly.hills.money.gang.entities.enemies;
 
+import static com.beverly.hills.money.gang.Constants.SPAWN_ANIMATION_MLS;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -59,7 +61,10 @@ public abstract class Enemy extends SoundMakingEntity {
       colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.RED, 1));
     } else if (enemyEffects.isBeingSpawned()
         && !enemyEffects.isPowerUpActive(PowerUpType.INVISIBILITY)) {
-      colorAttribute.color.set(new Color(1, 1, 1, 0.4f));
+      long animationTimeEnd =
+          enemyEffects.getBeingSpawnedUntilMls() - System.currentTimeMillis();
+      float animationFraction = animationTimeEnd / (float) SPAWN_ANIMATION_MLS;
+      colorAttribute.color.set(new Color(1, 1, 1, 1 - animationFraction));
     } else if (enemyEffects.isPowerUpActive(PowerUpType.INVISIBILITY)) {
       colorAttribute.color.set(new Color(1, 1, 1, getAlphaChannel()));
     } else if (enemyEffects.isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {
