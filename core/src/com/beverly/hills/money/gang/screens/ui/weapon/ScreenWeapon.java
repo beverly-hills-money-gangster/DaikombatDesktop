@@ -8,6 +8,7 @@ import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
+import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound.TimeLimitSoundConf;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
@@ -118,9 +119,9 @@ public class ScreenWeapon {
   public void registerHit(Weapon weapon) {
     Optional.ofNullable(weaponStates.get(weapon))
         .map(WeaponState::getHitTargetSound)
-        .ifPresent(
-            userSettingSound -> new TimeLimitedSound(userSettingSound).play(SoundVolumeType.LOUD,
-                0.f, 500));
+        .ifPresent(userSettingSound -> new TimeLimitedSound(userSettingSound).play(
+            TimeLimitSoundConf.builder()
+                .soundVolumeType(SoundVolumeType.LOUD).frequencyMls(500).build()));
 
   }
 
@@ -156,7 +157,9 @@ public class ScreenWeapon {
       animationStart.put(weaponBeingUsed, System.currentTimeMillis());
       state.getFireSound().play(Constants.DEFAULT_SFX_VOLUME);
       if (player.getPlayerEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {
-        quadDamageAttack.play(SoundVolumeType.LOUD, 0, 450);
+        quadDamageAttack.play(TimeLimitSoundConf.builder()
+            .soundVolumeType(SoundVolumeType.LOUD).frequencyMls(450)
+            .build());
       }
       return true;
     } else {

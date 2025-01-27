@@ -9,6 +9,8 @@ import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
+import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound.TimeLimitSoundConf;
+import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound.SoundConf;
 import com.beverly.hills.money.gang.entities.achievement.AchievementFactory;
 import com.beverly.hills.money.gang.entities.achievement.KillStats;
 import com.beverly.hills.money.gang.entities.enemies.Enemy;
@@ -28,7 +30,7 @@ import com.beverly.hills.money.gang.registry.EnemiesRegistry;
 import com.beverly.hills.money.gang.registry.EnemyPlayerProjectileBoomFactoriesRegistry;
 import com.beverly.hills.money.gang.registry.EnemyPlayerProjectileShootingFactoriesRegistry;
 import com.beverly.hills.money.gang.screens.PlayScreen;
-import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.taunt.GameTaunt;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
@@ -93,7 +95,12 @@ public class PlayScreenGameConnectionHandler {
       enemiesRegistry.getEnemy(chatEvent.getPlayerId()).ifPresent(
           enemyPlayer -> playScreen.getGame().getAssMan()
               .getUserSettingSound(GameTaunt.map(chatEvent.getTaunt()).getEnemySound())
-              .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan()));
+              .play(SoundConf.builder()
+                  .volume(enemyPlayer.getSFXVolume().getVolume())
+                  .pitch(enemyPlayer.getEnemyClass().getVoicePitch())
+                  .pan(enemyPlayer.getSFXPan())
+                  .build())
+      );
     }
   }
 
@@ -211,11 +218,11 @@ public class PlayScreenGameConnectionHandler {
     }
   }
 
-  private PlayerClassUISelection createPlayerClass(PlayerClass playerClass) {
+  private GamePlayerClass createPlayerClass(PlayerClass playerClass) {
     return switch (playerClass) {
-      case WARRIOR -> PlayerClassUISelection.WARRIOR;
-      case DEMON_TANK -> PlayerClassUISelection.DEMON_TANK;
-      case ANGRY_SKELETON -> PlayerClassUISelection.ANGRY_SKELETON;
+      case WARRIOR -> GamePlayerClass.WARRIOR;
+      case DEMON_TANK -> GamePlayerClass.DEMON_TANK;
+      case ANGRY_SKELETON -> GamePlayerClass.ANGRY_SKELETON;
       default -> throw new IllegalArgumentException("Not supported class " + playerClass.name());
     };
   }
@@ -343,7 +350,9 @@ public class PlayScreenGameConnectionHandler {
                   new TimeLimitedSound(
                       playScreen.getGame().getAssMan()
                           .getUserSettingSound(SoundRegistry.ENEMY_PUNCH_THROWN))
-                      .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
+                      .play(TimeLimitSoundConf.builder()
+                          .soundVolumeType(enemyPlayer.getSFXVolume())
+                          .pan(enemyPlayer.getSFXPan()).build());
                 } else {
                   enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), false);
                   Optional.ofNullable(
@@ -568,10 +577,17 @@ public class PlayScreenGameConnectionHandler {
         .builder()
         .onDeath(enemy -> playScreen.getGame().getAssMan()
             .getUserSettingSound(SoundRegistry.ENEMY_DEATH_SOUND_SEQ.getNext())
-            .play(enemy.getSFXVolume(), enemy.getSFXPan()))
+            .play(SoundConf.builder().volume(enemy.getSFXVolume().getVolume())
+                .pitch(enemy.getEnemyClass().getVoicePitch())
+                .pan(enemy.getSFXPan()).build()))
         .onGetShot(enemy -> new TimeLimitedSound(playScreen.getGame().getAssMan()
             .getUserSettingSound(SoundRegistry.ENEMY_GET_HIT_SOUND_SEQ.getNext()))
-            .play(enemy.getSFXVolume(), enemy.getSFXPan(), 1500))
+            .play(TimeLimitSoundConf.builder()
+                .soundVolumeType(enemy.getSFXVolume())
+                .pitch(enemy.getEnemyClass().getVoicePitch())
+                .pan(enemy.getSFXPan())
+                .frequencyMls(1500)
+                .build()))
         .onAttack(enemyWeapon -> {
               var enemy = enemyWeapon.getEnemy();
               var sound = switch (enemyWeapon.getWeapon()) {
@@ -584,12 +600,15 @@ public class PlayScreenGameConnectionHandler {
               };
               new TimeLimitedSound(
                   playScreen.getGame().getAssMan().getUserSettingSound(sound))
-                  .play(enemyWeapon.isAttackingPlayer() ? SoundVolumeType.HIGH_LOUD
-                          : enemy.getSFXVolume(), enemy.getSFXPan(),
-                      enemy.getEnemyEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)
+                  .play(TimeLimitSoundConf.builder()
+                      .soundVolumeType(enemyWeapon.isAttackingPlayer() ? SoundVolumeType.HIGH_LOUD
+                          : enemy.getSFXVolume())
+                      .pan(enemy.getSFXPan())
+                      .extraSound(enemy.getEnemyEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)
                           ? playScreen.getGame()
                           .getAssMan()
-                          .getUserSettingSound(SoundRegistry.ENEMY_QUAD_DAMAGE_ATTACK) : null);
+                          .getUserSettingSound(SoundRegistry.ENEMY_QUAD_DAMAGE_ATTACK) : null)
+                      .build());
             }
         ).build();
   }
@@ -597,7 +616,10 @@ public class PlayScreenGameConnectionHandler {
   private void diePlayer(final String killedBy) {
     playScreen.getPlayer().die(killedBy);
     playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
-        .VOICE_GET_HIT_SOUND_SEQ.getNext()).play(Constants.PLAYER_FX_VOLUME);
+            .VOICE_GET_HIT_SOUND_SEQ.getNext())
+        .play(SoundConf.builder().volume(Constants.PLAYER_FX_VOLUME)
+            .pitch(playScreen.getPlayer().getPlayerClass().getVoicePitch())
+            .build());
     playScreen.getGame().getAssMan()
         .getUserSettingSound(SoundRegistry.LOOSING_SOUND_SEQ.getNext())
         .play(Constants.MK_NARRATOR_FX_VOLUME);
@@ -614,17 +636,24 @@ public class PlayScreenGameConnectionHandler {
   }
 
 
-  private void playGetHitSound(){
+  private void playGetHitSound() {
     new TimeLimitedSound(
         playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
-            .VOICE_GET_HIT_SOUND_SEQ.getNext())).play(SoundVolumeType.LOW_QUIET,
-        0.f, 1000);
+            .VOICE_GET_HIT_SOUND_SEQ.getNext())).play(
+        TimeLimitSoundConf.builder()
+            .soundVolumeType(SoundVolumeType.LOW_QUIET)
+            .pitch(playScreen.getPlayer().getPlayerClass().getVoicePitch())
+            .frequencyMls(1_000)
+            .build()
+    );
   }
 
   private void playHitSound() {
     new TimeLimitedSound(
         playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.HIT_SOUND))
-        .play(SoundVolumeType.LOUD, 0.f, 500);
+        .play(TimeLimitSoundConf.builder()
+            .soundVolumeType(SoundVolumeType.LOUD).frequencyMls(500)
+            .build());
   }
 
   private static Vector2 createVector(Vector serverVector) {

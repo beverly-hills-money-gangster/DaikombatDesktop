@@ -16,7 +16,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.SkinTextureTemplate
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
-import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import java.util.Arrays;
 
@@ -101,7 +101,7 @@ public class DaiKombatAssetsManager {
   }
 
   public void loadSkins() {
-    Arrays.stream(PlayerClassUISelection.values()).forEach(
+    Arrays.stream(GamePlayerClass.values()).forEach(
         playerClassUISelection -> Arrays.stream(SkinUISelection.values()).forEach(skinUISelection
             -> assetManager.load(
             SkinTextureTemplateRegistry

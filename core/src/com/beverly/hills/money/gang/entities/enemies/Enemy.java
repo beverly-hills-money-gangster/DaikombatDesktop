@@ -14,6 +14,7 @@ import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import java.util.function.Consumer;
 import lombok.Builder;
@@ -27,6 +28,9 @@ public abstract class Enemy extends SoundMakingEntity {
 
   @Getter
   private final EnemyListeners enemyListeners;
+
+  @Getter
+  private final GamePlayerClass enemyClass;
 
   @Getter
   private long dieAnimationEndMls = Long.MIN_VALUE;
@@ -47,9 +51,11 @@ public abstract class Enemy extends SoundMakingEntity {
 
 
   public Enemy(final Vector3 position, final GameScreen screen, final Player player,
+      final GamePlayerClass enemyClass,
       final EnemyListeners enemyListeners) {
     super(screen);
     this.player = player;
+    this.enemyClass = enemyClass;
     this.position = position;
     this.enemyListeners = enemyListeners;
   }
@@ -64,7 +70,7 @@ public abstract class Enemy extends SoundMakingEntity {
       long animationTimeEnd =
           enemyEffects.getBeingSpawnedUntilMls() - System.currentTimeMillis();
       float animationFraction = animationTimeEnd / (float) SPAWN_ANIMATION_MLS;
-      colorAttribute.color.set(new Color(1, 1, 1, 1 - animationFraction));
+      colorAttribute.color.set(new Color(1, 1, 1, Math.min(0.35f, 1 - animationFraction)));
     } else if (enemyEffects.isPowerUpActive(PowerUpType.INVISIBILITY)) {
       colorAttribute.color.set(new Color(1, 1, 1, getAlphaChannel()));
     } else if (enemyEffects.isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {

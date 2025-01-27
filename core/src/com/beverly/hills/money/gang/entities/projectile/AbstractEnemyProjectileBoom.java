@@ -15,6 +15,7 @@ import com.beverly.hills.money.gang.animation.Animation;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
+import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound.TimeLimitSoundConf;
 import com.beverly.hills.money.gang.entities.SoundMakingEntity;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
@@ -75,7 +76,9 @@ public class AbstractEnemyProjectileBoom extends SoundMakingEntity {
     this.boomAnimation = boomAnimation;
     new TimeLimitedSound(
         getScreen().getGame().getAssMan().getUserSettingSound(boomSound)).play(
-        getSFXVolume(), getSFXPan(), 350);
+        TimeLimitSoundConf.builder()
+            .soundVolumeType(getSFXVolume()).pan(getSFXPan()).frequencyMls(350).build());
+
 
   }
 

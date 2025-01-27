@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.badlogic.gdx.audio.Sound;
+import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound.SoundConf;
 import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,8 +30,20 @@ public class UserSettingSoundTest {
 
   @Test
   public void testPlayWithPan() {
-    userSettingSound.play(0.5f, -1);
+    userSettingSound.play(SoundConf.builder().volume(0.5f).pan(-1).build());
     verify(sound).play(0.25f, 1, -1);
+  }
+
+  @Test
+  public void testPlayWithPitch() {
+    userSettingSound.play(SoundConf.builder().volume(0.5f).pitch(1.5f).build());
+    verify(sound).play(0.25f, 1.5f, 0);
+  }
+
+  @Test
+  public void testPlayDefaults() {
+    userSettingSound.play(SoundConf.builder().volume(0.5f).build());
+    verify(sound).play(0.25f, 1, 0);
   }
 
   @Test

@@ -27,6 +27,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundQueue;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
+import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound.SoundConf;
 import com.beverly.hills.money.gang.entities.item.PowerUp;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.PlayerFactory;
@@ -47,7 +48,7 @@ import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.screens.ui.EnemyAim;
 import com.beverly.hills.money.gang.screens.ui.selection.ActivePlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.DeadPlayUISelection;
-import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import java.util.HashMap;
@@ -349,7 +350,9 @@ public class PlayScreen extends GameScreen {
   private void handleTaunt() {
     var taunt = TAUNTS_SEQ.getNext();
     getGame().getAssMan().getUserSettingSound(taunt.getPlayerSound())
-        .play(SoundVolumeType.LOW_LOUD, 0);
+        .play(SoundConf.builder()
+            .volume(SoundVolumeType.LOW_LOUD.getVolume())
+            .pitch(getPlayer().getPlayerClass().getVoicePitch()).build());
     String message = taunt.getChatMessage();
     chatLog.addMessage(
         playerConnectionContextData.getConnectGameData().getPlayerName(),
@@ -567,7 +570,7 @@ public class PlayScreen extends GameScreen {
       printShadowText(32, 128 - 32,
           getPlayer().getCurrentHP() + " HP | " + playerConnectionContextData.getConnectGameData()
               .getPlayerName() + " | " + playerConnectionContextData.getConnectGameData()
-              .getPlayerClassUISelection().toString(), getUiFont(), hudRedTexture,
+              .getGamePlayerClass().toString(), getUiFont(), hudRedTexture,
           getHealthBlinkingAlphaChannel(getPlayer().getCurrentHP()));
 
       getUiFont().draw(getGame().getBatch(), "+",
@@ -595,10 +598,10 @@ public class PlayScreen extends GameScreen {
       showGuiMenu = true;
     }
     if (gameOver) {
-      PlayerClassUISelection winnerClass;
+      GamePlayerClass winnerClass;
       SkinUISelection winnerColor;
       if (uiLeaderBoard.getFirstPlacePlayerId() == playerConnectionContextData.getPlayerId()) {
-        winnerClass = playerConnectionContextData.getConnectGameData().getPlayerClassUISelection();
+        winnerClass = playerConnectionContextData.getConnectGameData().getGamePlayerClass();
         winnerColor = playerConnectionContextData.getConnectGameData().getSkinUISelection();
       } else {
         var enemyWinner = enemiesRegistry

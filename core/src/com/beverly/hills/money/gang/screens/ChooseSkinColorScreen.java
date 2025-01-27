@@ -10,7 +10,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.enemies.EnemyTextures;
 import com.beverly.hills.money.gang.screens.data.ConnectGameData;
-import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import com.beverly.hills.money.gang.screens.ui.skin.SkinSelectAnimation;
@@ -23,7 +23,7 @@ public class ChooseSkinColorScreen extends AbstractMainMenuScreen {
 
   private final SkinSelectAnimation skinSelectAnimation;
 
-  private final PlayerClassUISelection playerClassUISelection;
+  private final GamePlayerClass gamePlayerClass;
   private final UISelection<SkinUISelection> skinSelection = new UISelection<>(
       SkinUISelection.values());
 
@@ -31,15 +31,16 @@ public class ChooseSkinColorScreen extends AbstractMainMenuScreen {
 
   public ChooseSkinColorScreen(final DaiKombatGame game,
       final ConnectGameData.ConnectGameDataBuilder joinGameDataBuilder,
-      final PlayerClassUISelection playerClassUISelection) {
+      final GamePlayerClass gamePlayerClass) {
     super(game);
-    this.playerClassUISelection = playerClassUISelection;
+    this.gamePlayerClass = gamePlayerClass;
     guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
     this.joinGameDataBuilder = joinGameDataBuilder;
     boomSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.BOOM_1);
     dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
     showLogo = false;
-    skinSelectAnimation = new SkinSelectAnimation(new EnemyTextures(game.getAssMan(), playerClassUISelection,
+    skinSelectAnimation = new SkinSelectAnimation(new EnemyTextures(game.getAssMan(),
+        gamePlayerClass,
         SkinUISelection.GREEN), this);
   }
 
@@ -63,7 +64,7 @@ public class ChooseSkinColorScreen extends AbstractMainMenuScreen {
     }
     skinSelectAnimation.setEnemyTextures(
         new EnemyTextures(getGame().getAssMan(),
-            playerClassUISelection, skinSelection.getSelectedOption()));
+            gamePlayerClass, skinSelection.getSelectedOption()));
   }
 
   @Override
