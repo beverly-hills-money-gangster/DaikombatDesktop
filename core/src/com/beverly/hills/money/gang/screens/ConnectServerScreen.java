@@ -69,7 +69,7 @@ public class ConnectServerScreen extends ReconnectableScreen {
         }
         gameConnectionRef.set(loadBalancedGameConnection);
         connection.write(GetServerInfoCommand.newBuilder().setPlayerClass(
-            JoinGameScreen.createPlayerClass(connectGameData.getPlayerClassUISelection())).build());
+            JoinGameScreen.createPlayerClass(connectGameData.getGamePlayerClass())).build());
       } catch (Throwable e) {
         LOG.error("Can't create connection", e);
         errorMessage.set(ExceptionUtils.getMessage(e));

@@ -25,6 +25,7 @@ import com.beverly.hills.money.gang.registry.EnemiesRegistry;
 import com.beverly.hills.money.gang.registry.PlayerProjectileFactoriesRegistry;
 import com.beverly.hills.money.gang.registry.ScreenWeaponStateFactoriesRegistry;
 import com.beverly.hills.money.gang.screens.PlayScreen;
+import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
 import com.beverly.hills.money.gang.screens.ui.weapon.ScreenWeapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
@@ -101,6 +102,9 @@ public class Player extends Entity {
 
   private final int speed;
 
+  @Getter
+  private final GamePlayerClass playerClass;
+
 
   public Player(final PlayScreen screen,
       final Consumer<PlayerWeapon> onAttackListener,
@@ -111,8 +115,10 @@ public class Player extends Entity {
       final Vector2 lookAt,
       final int speed,
       final Map<Weapon, WeaponStats> weaponStats,
-      final int maxVisibility) {
+      final int maxVisibility,
+      final GamePlayerClass playerClass) {
     super(screen);
+    this.playerClass = playerClass;
     this.enemiesRegistry = screen.getEnemiesRegistry();
     this.speed = speed * SPEED_BOOST;
     screenWeapon = new ScreenWeapon(screen.getGame().getAssMan(), weaponStats,

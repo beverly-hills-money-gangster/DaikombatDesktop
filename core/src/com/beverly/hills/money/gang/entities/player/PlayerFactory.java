@@ -4,6 +4,7 @@ import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
+import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound.TimeLimitSoundConf;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.projectile.Projectile;
@@ -121,11 +122,10 @@ public class PlayerFactory {
       Optional.ofNullable(enemy).ifPresent(enemyPlayer -> {
         enemyPlayer.getHit();
         new TimeLimitedSound(
-            screen.getGame().getAssMan()
-                .getUserSettingSound(SoundRegistry.HIT_SOUND)).play(
-            SoundVolumeType.LOUD,
-            0.f, 500);
-        commandBuilder.setAffectedPlayerId(enemyPlayer.getEnemyPlayerId());
+            screen.getGame().getAssMan().getUserSettingSound(SoundRegistry.HIT_SOUND))
+            .play(TimeLimitSoundConf.builder()
+                .soundVolumeType(SoundVolumeType.LOUD).frequencyMls(500)
+                .build());
       });
       gameConnection.write(commandBuilder.build());
     },
@@ -133,7 +133,8 @@ public class PlayerFactory {
         playerConnectionContextData.getDirection(),
         playerConnectionContextData.getSpeed(),
         playerConnectionContextData.getWeaponStats(),
-        playerConnectionContextData.getMaxVisibility());
+        playerConnectionContextData.getMaxVisibility(),
+        playerConnectionContextData.getConnectGameData().getGamePlayerClass());
   }
 
   private static ProjectileType mapProjectileToWeaponType(Projectile projectile) {

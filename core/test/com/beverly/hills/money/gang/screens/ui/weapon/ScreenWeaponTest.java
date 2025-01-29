@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -140,7 +141,12 @@ public class ScreenWeaponTest {
     screenWeapon.changeWeapon(Weapon.SHOTGUN);
     assertTrue(screenWeapon.attack(player));
     verify(weaponStateMap.get(Weapon.SHOTGUN).getFireSound()).play(volume);
-    verify(quadDamageAttackSound).play(SoundVolumeType.LOUD, 0.0f);
+    verify(quadDamageAttackSound).play(argThat(argument -> {
+      assertEquals(SoundVolumeType.LOUD.getVolume(), argument.getVolume());
+      assertEquals(0, argument.getPan());
+      assertEquals(1, argument.getPitch());
+      return true;
+    }));
     assertEquals(Weapon.SHOTGUN, screenWeapon.weaponBeingUsed);
   }
 
@@ -180,21 +186,36 @@ public class ScreenWeaponTest {
   public void testRegisterHitShotgun() {
     screenWeapon.registerHit(Weapon.SHOTGUN);
     verify(weaponStateMap.get(Weapon.SHOTGUN).getHitTargetSound())
-        .play(SoundVolumeType.LOUD, 0.0f);
+        .play(argThat(argument -> {
+          assertEquals(SoundVolumeType.LOUD.getVolume(), argument.getVolume());
+          assertEquals(0, argument.getPan());
+          assertEquals(1, argument.getPitch());
+          return true;
+        }));
   }
 
   @Test
   public void testRegisterHitRailgun() {
     screenWeapon.registerHit(Weapon.RAILGUN);
     verify(weaponStateMap.get(Weapon.RAILGUN).getHitTargetSound())
-        .play(SoundVolumeType.LOUD, 0.0f);
+        .play(argThat(argument -> {
+          assertEquals(SoundVolumeType.LOUD.getVolume(), argument.getVolume());
+          assertEquals(0, argument.getPan());
+          assertEquals(1, argument.getPitch());
+          return true;
+        }));
   }
 
   @Test
   public void testRegisterHitPunch() {
     screenWeapon.registerHit(Weapon.GAUNTLET);
-    verify(weaponStateMap.get(Weapon.GAUNTLET).getHitTargetSound()).play(SoundVolumeType.LOUD,
-        0.0f);
+    verify(weaponStateMap.get(Weapon.GAUNTLET).getHitTargetSound())
+        .play(argThat(argument -> {
+          assertEquals(SoundVolumeType.LOUD.getVolume(), argument.getVolume());
+          assertEquals(0, argument.getPan());
+          assertEquals(1, argument.getPitch());
+          return true;
+        }));
   }
 
   @Test

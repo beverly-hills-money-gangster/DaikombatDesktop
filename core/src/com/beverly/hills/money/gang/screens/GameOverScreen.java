@@ -16,7 +16,7 @@ import com.beverly.hills.money.gang.entities.enemies.EnemyTextures;
 import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
 import com.beverly.hills.money.gang.screens.data.ConnectGameData;
 import com.beverly.hills.money.gang.screens.ui.selection.GameOverUISelection;
-import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import com.beverly.hills.money.gang.screens.ui.skin.SkinSelectAnimation;
@@ -42,7 +42,7 @@ public class GameOverScreen extends AbstractMainMenuScreen {
       final UILeaderBoard uiLeaderBoard,
       final ConnectGameData connectGameData,
       final SkinUISelection winnerSkinColor,
-      final PlayerClassUISelection winnerClass) {
+      final GamePlayerClass winnerClass) {
 
     super(game);
     guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);

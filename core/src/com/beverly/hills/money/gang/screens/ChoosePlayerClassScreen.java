@@ -11,7 +11,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.enemies.EnemyTextures;
 import com.beverly.hills.money.gang.screens.data.ConnectGameData;
-import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import com.beverly.hills.money.gang.screens.ui.skin.SkinSelectAnimation;
@@ -27,8 +27,8 @@ public class ChoosePlayerClassScreen extends AbstractMainMenuScreen {
 
   private static final String SELECT_CLASS = "SELECT YOUR CLASS";
 
-  private final UISelection<PlayerClassUISelection> playerClassSelection = new UISelection<>(
-      PlayerClassUISelection.values());
+  private final UISelection<GamePlayerClass> playerClassSelection = new UISelection<>(
+      GamePlayerClass.values());
 
   private final ConnectGameData.ConnectGameDataBuilder joinGameDataBuilder;
 
@@ -45,7 +45,7 @@ public class ChoosePlayerClassScreen extends AbstractMainMenuScreen {
     dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
     var enemyTextures = new EnemyTextures(
         game.getAssMan(),
-        PlayerClassUISelection.WARRIOR,
+        GamePlayerClass.WARRIOR,
         SkinUISelection.GREEN);
     skinSelectAnimation = new SkinSelectAnimation(enemyTextures, this);
   }
@@ -55,7 +55,7 @@ public class ChoosePlayerClassScreen extends AbstractMainMenuScreen {
 
     if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
       boomSound1.play(Constants.DEFAULT_SFX_VOLUME);
-      joinGameDataBuilder.playerClassUISelection(playerClassSelection.getSelectedOption());
+      joinGameDataBuilder.gamePlayerClass(playerClassSelection.getSelectedOption());
       removeAllEntities();
       getGame().setScreen(new ChooseSkinColorScreen(getGame(), joinGameDataBuilder,
           playerClassSelection.getSelectedOption()));

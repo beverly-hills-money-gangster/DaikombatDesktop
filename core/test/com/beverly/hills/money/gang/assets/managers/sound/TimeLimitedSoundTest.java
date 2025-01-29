@@ -1,12 +1,15 @@
 package com.beverly.hills.money.gang.assets.managers.sound;
 
 import static com.beverly.hills.money.gang.Constants.TIME_LIMITED_SOUND_FREQ_MLS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.badlogic.gdx.audio.Sound;
+import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound.TimeLimitSoundConf;
 import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,50 +38,112 @@ public class TimeLimitedSoundTest {
     var attackingSound2 = new TimeLimitedSound(userSettingSound2);
 
     // it's same volume but different sound. both must be played
-    attackingSound1.play(SoundVolumeType.LOUD, 1);
-    verify(userSettingSound1).play(SoundVolumeType.LOUD, 1);
+    attackingSound1.play(
+        TimeLimitSoundConf.builder().soundVolumeType(SoundVolumeType.LOUD).pan(1).build());
 
-    attackingSound2.play(SoundVolumeType.LOUD, 1);
-    verify(userSettingSound2).play(SoundVolumeType.LOUD, 1);
+    verify(userSettingSound1).play(argThat(argument -> {
+      assertEquals(1, argument.getPan());
+      assertEquals(1, argument.getPitch());
+      assertEquals(SoundVolumeType.LOUD.getVolume(), argument.getVolume());
+      return true;
+    }));
+
+    attackingSound2.play(
+        TimeLimitSoundConf.builder().soundVolumeType(SoundVolumeType.LOUD).pan(1).build());
+    verify(userSettingSound2).play(argThat(argument -> {
+      assertEquals(1, argument.getPan());
+      assertEquals(1, argument.getPitch());
+      assertEquals(SoundVolumeType.LOUD.getVolume(), argument.getVolume());
+      return true;
+    }));
   }
 
   @Test
   public void testPlayFirstTime() {
-    timeLimitedSound.play(SoundVolumeType.LOUD, 1);
-    verify(userSettingSound).play(SoundVolumeType.LOUD, 1);
+    timeLimitedSound.play(
+        TimeLimitSoundConf.builder().soundVolumeType(SoundVolumeType.LOUD).pan(1).build());
+
+    verify(userSettingSound).play(argThat(argument -> {
+      assertEquals(1, argument.getPan());
+      assertEquals(1, argument.getPitch());
+      assertEquals(SoundVolumeType.LOUD.getVolume(), argument.getVolume());
+      return true;
+    }));
+
+  }
+
+  @Test
+  public void testPlayFirstTimeDefaults() {
+    timeLimitedSound.play(
+        TimeLimitSoundConf.builder().soundVolumeType(SoundVolumeType.LOUD).build());
+    verify(userSettingSound).play(argThat(argument -> {
+      assertEquals(0, argument.getPan());
+      assertEquals(1, argument.getPitch());
+      assertEquals(SoundVolumeType.LOUD.getVolume(), argument.getVolume());
+      return true;
+    }));
+  }
+
+  @Test
+  public void testPlayFirstWithPanAndPitch() {
+    timeLimitedSound.play(
+        TimeLimitSoundConf.builder().soundVolumeType(SoundVolumeType.LOUD).pan(0.5f).pitch(1.5f)
+            .build());
+    verify(userSettingSound).play(argThat(argument -> {
+      assertEquals(0.5f, argument.getPan());
+      assertEquals(1.5f, argument.getPitch());
+      assertEquals(SoundVolumeType.LOUD.getVolume(), argument.getVolume());
+      return true;
+    }));
   }
 
   @Test
   public void testPlayTooOften() {
     // played recently
-    timeLimitedSound.play(SoundVolumeType.LOUD, 1);
+    timeLimitedSound.play(
+        TimeLimitSoundConf.builder().soundVolumeType(SoundVolumeType.LOUD).pan(1).build());
 
     // play again
-    timeLimitedSound.play(SoundVolumeType.LOUD, 1);
+    timeLimitedSound.play(
+        TimeLimitSoundConf.builder().soundVolumeType(SoundVolumeType.LOUD).pan(1).build());
 
-    verify(userSettingSound, times(1)).play(SoundVolumeType.LOUD, 1); // play only once
+    verify(userSettingSound).play(argThat(argument -> {
+      assertEquals(1, argument.getPan());
+      assertEquals(1, argument.getPitch());
+      assertEquals(SoundVolumeType.LOUD.getVolume(), argument.getVolume());
+      return true;
+    }));
   }
 
   @Test
   public void testPlayWait() throws InterruptedException {
     // played recently
-    timeLimitedSound.play(SoundVolumeType.LOUD, -1);
+    timeLimitedSound.play(
+        TimeLimitSoundConf.builder().soundVolumeType(SoundVolumeType.LOUD).pan(-1).build());
 
     Thread.sleep(TIME_LIMITED_SOUND_FREQ_MLS + 10);
 
     // play again
-    timeLimitedSound.play(SoundVolumeType.LOUD, -1);
+    timeLimitedSound.play(
+        TimeLimitSoundConf.builder().soundVolumeType(SoundVolumeType.LOUD).pan(-1).build());
 
-    verify(userSettingSound, times(2)).play(SoundVolumeType.LOUD, -1); // play twice
+    verify(userSettingSound, times(2)).play(argThat(argument -> {
+      assertEquals(-1, argument.getPan());
+      assertEquals(1, argument.getPitch());
+      assertEquals(SoundVolumeType.LOUD.getVolume(), argument.getVolume());
+      return true;
+    }));
   }
 
   @Test
   public void testPlayDifferentSoundsVolumeTypes() {
     Arrays.stream(SoundVolumeType.values())
-        .forEach(soundVolumeType -> timeLimitedSound.play(soundVolumeType, 0));
-
+        .forEach(soundVolumeType -> timeLimitedSound.play(
+            TimeLimitSoundConf.builder().soundVolumeType(soundVolumeType).pan(0).build()));
     Arrays.stream(SoundVolumeType.values())
-        .forEach(soundVolumeType -> verify(userSettingSound).play(soundVolumeType, 0));
+        .forEach(soundVolumeType -> verify(userSettingSound).play(argThat(
+            argument -> 0 == argument.getPan() && 1 == argument.getPitch()
+                && soundVolumeType.getVolume() == argument.getVolume())));
 
   }
 
@@ -86,16 +151,19 @@ public class TimeLimitedSoundTest {
   public void testPlayDifferentSoundVolumeTypesTwice() {
     // first time
     Arrays.stream(SoundVolumeType.values())
-        .forEach(soundVolumeType -> timeLimitedSound.play(soundVolumeType, 1));
+        .forEach(soundVolumeType -> timeLimitedSound.play(
+            TimeLimitSoundConf.builder().soundVolumeType(soundVolumeType).pan(1).build()));
 
     // second time
     Arrays.stream(SoundVolumeType.values())
-        .forEach(soundVolumeType -> timeLimitedSound.play(soundVolumeType, 1));
+        .forEach(soundVolumeType -> timeLimitedSound.play(
+            TimeLimitSoundConf.builder().soundVolumeType(soundVolumeType).pan(1).build()));
 
     // played once only
     Arrays.stream(SoundVolumeType.values())
         .forEach(soundVolumeType -> verify(userSettingSound, times(1))
-            .play(soundVolumeType, 1));
+            .play(argThat(argument -> 1 == argument.getPan() && 1 == argument.getPitch()
+                && soundVolumeType.getVolume() == argument.getVolume())));
 
   }
 
@@ -103,18 +171,21 @@ public class TimeLimitedSoundTest {
   public void testPlayDifferentSoundVolumeTypesWait() throws InterruptedException {
     // first time
     Arrays.stream(SoundVolumeType.values())
-        .forEach(soundVolumeType -> timeLimitedSound.play(soundVolumeType, 1));
+        .forEach(soundVolumeType -> timeLimitedSound.play(
+            TimeLimitSoundConf.builder().soundVolumeType(soundVolumeType).pan(1).build()));
 
     Thread.sleep(TIME_LIMITED_SOUND_FREQ_MLS + 10);
 
     // second time
     Arrays.stream(SoundVolumeType.values())
-        .forEach(soundVolumeType -> timeLimitedSound.play(soundVolumeType, 1));
+        .forEach(soundVolumeType -> timeLimitedSound.play(
+            TimeLimitSoundConf.builder().soundVolumeType(soundVolumeType).pan(1).build()));
 
     // played once only
     Arrays.stream(SoundVolumeType.values())
         .forEach(soundVolumeType -> verify(userSettingSound, times(2))
-            .play(soundVolumeType, 1));
+            .play(argThat(argument -> 1 == argument.getPan() && 1 == argument.getPitch()
+                && soundVolumeType.getVolume() == argument.getVolume())));
 
   }
 }

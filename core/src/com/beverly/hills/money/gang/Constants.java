@@ -8,7 +8,7 @@ public interface Constants {
 
   int LONG_TIME_NO_MOVE_MLS = 200;
 
-  int MAX_ENEMY_IDLE_TIME_MLS = LONG_TIME_NO_MOVE_MLS * 3;
+  int MAX_ENEMY_IDLE_TIME_MLS = LONG_TIME_NO_MOVE_MLS * 4;
 
   int PROJECTILE_SPEED = 30;
 

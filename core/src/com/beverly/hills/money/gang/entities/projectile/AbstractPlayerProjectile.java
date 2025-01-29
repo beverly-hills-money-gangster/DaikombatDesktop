@@ -17,6 +17,7 @@ import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.animation.Animation;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
+import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound.TimeLimitSoundConf;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.entities.player.Player.ProjectileEnemy;
@@ -200,7 +201,9 @@ public class AbstractPlayerProjectile extends Projectile {
     destroyAtMls = System.currentTimeMillis() + 200;
     new TimeLimitedSound(
         getScreen().getGame().getAssMan().getUserSettingSound(boomSound)).play(
-        getSFXVolume(), getSFXPan(), 250);
+        TimeLimitSoundConf.builder()
+            .soundVolumeType(getSFXVolume()).pan(getSFXPan()).frequencyMls(250)
+            .build());
   }
 
 

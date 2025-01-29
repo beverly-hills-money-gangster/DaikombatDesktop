@@ -22,7 +22,7 @@ import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
-import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import com.beverly.hills.money.gang.strategy.EnemyPlayerActionQueueStrategy;
@@ -46,8 +46,6 @@ public class EnemyPlayer extends Enemy {
   @Getter
   private final String name;
 
-  @Getter
-  private final PlayerClassUISelection enemyClass;
 
   @Getter
   private final SkinUISelection skinUISelection;
@@ -88,13 +86,12 @@ public class EnemyPlayer extends Enemy {
       final EnemyListeners enemyListeners,
       final float speed,
       final int hp,
-      final PlayerClassUISelection enemyClass,
+      final GamePlayerClass enemyClass,
       final int maxVisibility) {
 
-    super(position, screen, player, enemyListeners);
+    super(position, screen, player, enemyClass, enemyListeners);
     this.maxVisibility = maxVisibility;
     this.hp = hp;
-    this.enemyClass = enemyClass;
     this.skinUISelection = skinUISelection;
     this.enemyPlayerId = enemyPlayerId;
     lastDirection = direction;
@@ -186,7 +183,10 @@ public class EnemyPlayer extends Enemy {
 
     final ColorAttribute colorAttribute = (ColorAttribute) getMdlInst().materials.get(0)
         .get(ColorAttribute.Diffuse);
-    if (System.currentTimeMillis() - lastActionReceivedTimeMls > MAX_ENEMY_IDLE_TIME_MLS) {
+    long noActivityMls = System.currentTimeMillis() - lastActionReceivedTimeMls;
+    if (visible && noActivityMls > MAX_ENEMY_IDLE_TIME_MLS) {
+      LOG.info("No activity for enemy {}. Last received {}. Current mls {}. No activity for {} mls",
+          enemyPlayerId, lastActionReceivedTimeMls, System.currentTimeMillis(), noActivityMls);
       visible = false;
     }
 

@@ -3,7 +3,7 @@ package com.beverly.hills.money.gang.entities.enemies;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.SkinTextureTemplateRegistry;
-import com.beverly.hills.money.gang.screens.ui.selection.PlayerClassUISelection;
+import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,7 @@ import java.util.Map;
 public class EnemyTextures {
 
 
-  private final PlayerClassUISelection playerClassUISelection;
+  private final GamePlayerClass gamePlayerClass;
 
   private final SkinUISelection skinUISelection;
 
@@ -35,10 +35,10 @@ public class EnemyTextures {
   private final DaiKombatAssetsManager assetsManager;
 
   public EnemyTextures(DaiKombatAssetsManager assetsManager,
-      PlayerClassUISelection playerClassUISelection,
+      GamePlayerClass gamePlayerClass,
       SkinUISelection skinUISelection) {
     this.assetsManager = assetsManager;
-    this.playerClassUISelection = playerClassUISelection;
+    this.gamePlayerClass = gamePlayerClass;
     this.skinUISelection = skinUISelection;
     textures.put(EnemyTextureRegistry.IDLETEXFRONTREG, getEnemyPlayerTextureRegion(0));
     textures.put(EnemyTextureRegistry.MOVING1TEXFRONTREG, getEnemyPlayerTextureRegion(11));
@@ -106,7 +106,7 @@ public class EnemyTextures {
 
   private TextureRegion getEnemyPlayerTextureRegion(int spriteNumber, boolean mirrorX) {
     TextureRegion region = assetsManager.getTextureRegion(
-        SkinTextureTemplateRegistry.getTextureFileNameForClass(playerClassUISelection, skinUISelection),
+        SkinTextureTemplateRegistry.getTextureFileNameForClass(gamePlayerClass, skinUISelection),
         spriteNumber * ENEMY_PLAYER_SPRITE_WIDTH, 0, ENEMY_PLAYER_SPRITE_WIDTH,
         ENEMY_PLAYER_SPRITE_HEIGHT);
     if (!mirrorX) {

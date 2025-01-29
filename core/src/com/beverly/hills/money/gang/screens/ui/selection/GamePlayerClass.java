@@ -4,11 +4,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum PlayerClassUISelection {
+public enum GamePlayerClass {
   WARRIOR("Default stats"),
   ANGRY_SKELETON("Low defense, increased damage and gun speed"),
   DEMON_TANK("Increased defense, low vampirism");
-
 
   @Getter
   private final String description;
@@ -16,6 +15,14 @@ public enum PlayerClassUISelection {
   @Override
   public String toString() {
     return this.name().replace("_", " ");
+  }
+
+  public float getVoicePitch() {
+    return switch (this) {
+      case WARRIOR -> 1.125f;
+      case DEMON_TANK -> 0.965f;
+      case ANGRY_SKELETON -> 1.385f;
+    };
   }
 
 }
