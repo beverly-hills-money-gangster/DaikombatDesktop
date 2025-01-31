@@ -14,6 +14,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.entities.Entity;
+import com.beverly.hills.money.gang.entities.door.Door;
+import com.beverly.hills.money.gang.entities.door.Door.DoorState;
 import com.beverly.hills.money.gang.entities.effect.PlayerEffects;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
@@ -100,7 +102,7 @@ public class Player extends Entity {
   @Setter
   private Teleport colliedTeleport;
 
-  private final int speed;
+  private final Float speed;
 
   @Getter
   private final GamePlayerClass playerClass;
@@ -113,7 +115,7 @@ public class Player extends Entity {
       final Consumer<ProjectileEnemy> onProjectileAttackHit,
       final Vector2 spawnPosition,
       final Vector2 lookAt,
-      final int speed,
+      final Float speed,
       final Map<Weapon, WeaponStats> weaponStats,
       final int maxVisibility,
       final GamePlayerClass playerClass) {
@@ -216,6 +218,11 @@ public class Player extends Entity {
             var enemy = (EnemyPlayer) getScreen().getGame().getEntMan()
                 .getEntityFromId(rectanglePlus.getConnectedEntityId());
             return enemy.isVisible();
+          } else if (rectanglePlus.getFilter() == RectanglePlusFilter.DOOR) {
+            var door = (Door) getScreen().getGame().getEntMan()
+                .getEntityFromId(rectanglePlus.getConnectedEntityId());
+            // you can't shoot through closed doors only
+            return door.getState() == DoorState.CLOSE;
           } else {
             return true;
           }
@@ -285,7 +292,7 @@ public class Player extends Entity {
     if (moved) {
       camY = Constants.DEFAULT_PLAYER_CAM_Y;
       final float sinOffset = (float) (
-          Math.sin(getScreen().getGame().getTimeSinceLaunch() * speed * 4f)
+          Math.sin(getScreen().getGame().getTimeSinceLaunch() * speed * 3f)
               * 0.01875f);
       camY += sinOffset;
       weaponY = -25f;

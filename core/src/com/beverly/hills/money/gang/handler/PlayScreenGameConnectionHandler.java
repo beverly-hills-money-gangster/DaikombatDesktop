@@ -184,7 +184,7 @@ public class PlayScreenGameConnectionHandler {
         createVector(gameEvent.getPlayer().getDirection()),
         playScreen, gameEvent.getPlayer().getPlayerName(),
         getSkinColor(gameEvent.getPlayer().getSkinColor()), createEnemyListeners(),
-        playScreen.getPlayerConnectionContextData().getSpeed(),
+        gameEvent.getPlayer().getSpeed(),
         gameEvent.getPlayer().getHealth(),
         createPlayerClass(gameEvent.getPlayer().getPlayerClass()),
         playScreen.getPlayerConnectionContextData().getMaxVisibility());
