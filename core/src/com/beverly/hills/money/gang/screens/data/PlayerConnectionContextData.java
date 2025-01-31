@@ -28,7 +28,7 @@ public class PlayerConnectionContextData {
   @NonNull
   private final Integer movesUpdateFreqMls;
   @NonNull
-  private final Integer speed;
+  private final Float speed;
   @NonNull
   private final Map<Weapon, WeaponStats> weaponStats;
   @NonNull

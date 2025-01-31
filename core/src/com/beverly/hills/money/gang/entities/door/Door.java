@@ -15,6 +15,7 @@ import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import lombok.Getter;
 
 public class Door extends SoundMakingEntity {
 
@@ -25,6 +26,7 @@ public class Door extends SoundMakingEntity {
   private final DoorDirection direction;
 
 
+  @Getter
   private DoorState state = DoorState.CLOSE;
   private final Vector3 openPos = new Vector3();
   private final Vector3 closedPos = new Vector3();
@@ -195,7 +197,7 @@ public class Door extends SoundMakingEntity {
   }
 
 
-  private enum DoorState {
+  public enum DoorState {
     OPEN, CLOSE, TO_BE_OPEN, TO_BE_CLOSED, BEING_CLOSED, BEING_OPEN
   }
 
