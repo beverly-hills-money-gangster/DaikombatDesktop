@@ -7,6 +7,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
+import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import java.util.List;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,8 +34,10 @@ public class UILeaderBoardTest {
     int myPlayerId = 10;
 
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer.builder()
-            .kills(0).id(myPlayerId).name("my name").build()), 999,
+        List.of(LeaderBoardPlayer.builder()
+            .kills(0).id(myPlayerId).name("my name")
+            .playerClass(GamePlayerClass.WARRIOR)
+            .skinUISelection(SkinUISelection.BLUE).build()), 999,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
 
     assertEquals(0, leaderBoard.getMyKills());
@@ -51,15 +55,15 @@ public class UILeaderBoardTest {
   public void testConstructorManyPlayers() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(2).id(myPlayerId).name("my name").deaths(10)
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(10).id(999).name("top dog")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(5).id(666).name("other player")
                 .build()), 999,
@@ -81,15 +85,15 @@ public class UILeaderBoardTest {
   public void testRegisterKill() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(2).id(myPlayerId).name("my name").ping(100)
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(10).id(999).name("top dog").ping(25)
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(5).id(666).name("other player").ping(1500)
                 .build()), 999,
@@ -112,13 +116,13 @@ public class UILeaderBoardTest {
   public void testRegisterKillSuicide() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(1)
                 .deaths(0)
                 .id(myPlayerId).name("PLAYER 1").ping(100)
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(1)
                 .deaths(0)
@@ -141,11 +145,11 @@ public class UILeaderBoardTest {
   public void testRegisterKillNotLosingOrTakingLead() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(4).id(999).name("killer man")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(0).id(myPlayerId).name("my name")
                 .build()), 999,
@@ -169,15 +173,15 @@ public class UILeaderBoardTest {
   public void testRegisterTakingLead() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(2).id(myPlayerId).name("my name")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(3).id(999).name("top dog")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(0).id(666).name("other player")
                 .build()), 999,
@@ -201,19 +205,19 @@ public class UILeaderBoardTest {
   public void testRegisterLoosingLead() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(4).id(myPlayerId).name("my name")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(3).id(999).name("top dog")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(1).id(666).name("other player")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(0).id(777).name("one more other player")
                 .build()), 999,
@@ -240,25 +244,25 @@ public class UILeaderBoardTest {
   public void testAddNewPlayer() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(4).id(myPlayerId).name("my name")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(3).id(999).name("top dog")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(2).id(666).name("other player")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(1).id(777).name("one more other player")
                 .build()), 999,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
 
-    leaderBoard.addNewPlayer(UILeaderBoard.LeaderBoardPlayer
+    leaderBoard.addNewPlayer(LeaderBoardPlayer
         .builder()
         .kills(0).id(5555).name("new player")
         .build());
@@ -281,30 +285,30 @@ public class UILeaderBoardTest {
   public void testAddNewPlayerTwice() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(4).id(myPlayerId).name("my name")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(3).id(999).name("top dog")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(2).id(666).name("other player")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(1).id(777).name("one more other player")
                 .build()), 999,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
 
-    leaderBoard.addNewPlayer(UILeaderBoard.LeaderBoardPlayer
+    leaderBoard.addNewPlayer(LeaderBoardPlayer
         .builder()
         .kills(0).id(5555).name("new player")
         .build());
 
-    leaderBoard.addNewPlayer(UILeaderBoard.LeaderBoardPlayer
+    leaderBoard.addNewPlayer(LeaderBoardPlayer
         .builder()
         .kills(0).id(5555).name("new player")
         .build()); // add second time
@@ -328,11 +332,11 @@ public class UILeaderBoardTest {
   public void testRemovePlayerNotGettingLead() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(4).id(myPlayerId).name("my name")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(5).id(999).name("top dog")
                 .build()), 999,
@@ -355,15 +359,15 @@ public class UILeaderBoardTest {
   public void testRegisterKillFirstKillWontLooseLead() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(0).id(myPlayerId).name("my name")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(0).id(999).name("top dog")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(0).id(777).name("victim")
                 .build()), 999,
@@ -391,15 +395,15 @@ public class UILeaderBoardTest {
   public void testRegisterKillFiveFragsLeft() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(0).id(myPlayerId).name("my name")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(0).id(999).name("top dog")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(0).id(666).name("other player")
                 .build()), 6,
@@ -414,15 +418,15 @@ public class UILeaderBoardTest {
   public void testRegisterKillThreeFragsLeft() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(2).id(myPlayerId).name("my name")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(1).id(999).name("top dog")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(0).id(666).name("other player")
                 .build()), 6,
@@ -437,15 +441,15 @@ public class UILeaderBoardTest {
   public void testRegisterKillTwoFragsLeft() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(3).id(myPlayerId).name("my name")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(1).id(999).name("top dog")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(0).id(666).name("other player")
                 .build()), 6,
@@ -460,15 +464,15 @@ public class UILeaderBoardTest {
   public void testRegisterKillOneFragLeft() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(4).id(myPlayerId).name("my name")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(1).id(999).name("top dog")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(0).id(666).name("other player")
                 .build()), 6,
@@ -483,15 +487,15 @@ public class UILeaderBoardTest {
   public void testRegisterKillOneFragLeftDouble() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(4).id(myPlayerId).name("my name")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(1).id(999).name("top dog")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(0).id(666).name("other player")
                 .build()), 6,
@@ -508,15 +512,15 @@ public class UILeaderBoardTest {
   public void testRegisterKillOneFragLeftAfterRemove() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(4).id(myPlayerId).name("my name")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(3).id(999).name("top dog")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(2).id(666).name("other player")
                 .build()), 6,
@@ -536,15 +540,15 @@ public class UILeaderBoardTest {
   public void testRegisterKillNoFragLeft() {
     int myPlayerId = 10;
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
-        List.of(UILeaderBoard.LeaderBoardPlayer
+        List.of(LeaderBoardPlayer
                 .builder()
                 .kills(5).id(myPlayerId).name("my name")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(1).id(999).name("top dog")
                 .build(),
-            UILeaderBoard.LeaderBoardPlayer
+            LeaderBoardPlayer
                 .builder()
                 .kills(0).id(666).name("other player")
                 .build()), 6,

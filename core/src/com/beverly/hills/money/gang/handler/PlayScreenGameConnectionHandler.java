@@ -18,9 +18,7 @@ import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerAction;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerActionType;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
-import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
-import com.beverly.hills.money.gang.proto.PlayerClass;
-import com.beverly.hills.money.gang.proto.PlayerSkinColor;
+import com.beverly.hills.money.gang.entities.ui.LeaderBoardPlayer;
 import com.beverly.hills.money.gang.proto.ServerResponse;
 import com.beverly.hills.money.gang.proto.ServerResponse.GameEvent.GameEventType;
 import com.beverly.hills.money.gang.proto.ServerResponse.GamePowerUp;
@@ -37,7 +35,6 @@ import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponMapper;
 import com.beverly.hills.money.gang.utils.Converter;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -156,15 +153,7 @@ public class PlayScreenGameConnectionHandler {
 
   private void handleGameOver(ServerResponse.GameOver gameOver) {
     playScreen.setGameOver(true);
-    playScreen.getUiLeaderBoard().set(gameOver.getLeaderBoard().getItemsList().stream()
-        .map(leaderBoardItem -> UILeaderBoard.LeaderBoardPlayer.builder()
-            .name(leaderBoardItem.getPlayerName())
-            .id(leaderBoardItem.getPlayerId())
-            .ping(leaderBoardItem.getPingMls())
-            .deaths(leaderBoardItem.getDeaths())
-            .kills(leaderBoardItem.getKills())
-            .build())
-        .collect(Collectors.toList()));
+    playScreen.getUiLeaderBoard().set(LeaderBoardPlayer.createFromGameOver(gameOver));
   }
 
   private void handleSpawn(ServerResponse.GameEvent gameEvent) {
@@ -183,10 +172,10 @@ public class PlayScreenGameConnectionHandler {
             DEFAULT_ENEMY_Y, gameEvent.getPlayer().getPosition().getY()),
         createVector(gameEvent.getPlayer().getDirection()),
         playScreen, gameEvent.getPlayer().getPlayerName(),
-        getSkinColor(gameEvent.getPlayer().getSkinColor()), createEnemyListeners(),
+        SkinUISelection.getSkinColor(gameEvent.getPlayer().getSkinColor()), createEnemyListeners(),
         gameEvent.getPlayer().getSpeed(),
         gameEvent.getPlayer().getHealth(),
-        createPlayerClass(gameEvent.getPlayer().getPlayerClass()),
+        GamePlayerClass.createPlayerClass(gameEvent.getPlayer().getPlayerClass()),
         playScreen.getPlayerConnectionContextData().getMaxVisibility());
     gameEvent.getPlayer().getActivePowerUpsList().forEach(
         gamePowerUp -> activateEnemyPowerUpOnSpawn(
@@ -195,10 +184,12 @@ public class PlayScreenGameConnectionHandler {
     playScreen.getGame().getEntMan().addEntity(enemyPlayer);
     enemiesRegistry.addEnemy(gameEvent.getPlayer().getPlayerId(), enemyPlayer);
 
-    playScreen.getUiLeaderBoard().addNewPlayer(UILeaderBoard.LeaderBoardPlayer.builder()
+    playScreen.getUiLeaderBoard().addNewPlayer(LeaderBoardPlayer.builder()
         .name(enemyPlayer.getName())
         .ping(gameEvent.getPlayer().getPingMls())
         .id(enemyPlayer.getEnemyPlayerId())
+        .playerClass(enemyPlayer.getEnemyClass())
+        .skinUISelection(enemyPlayer.getSkinUISelection())
         .deaths(
             gameEvent.getPlayer().hasGameMatchStats() ? gameEvent.getPlayer().getGameMatchStats()
                 .getDeaths() : 0)
@@ -218,32 +209,11 @@ public class PlayScreenGameConnectionHandler {
     }
   }
 
-  private GamePlayerClass createPlayerClass(PlayerClass playerClass) {
-    return switch (playerClass) {
-      case WARRIOR -> GamePlayerClass.WARRIOR;
-      case DEMON_TANK -> GamePlayerClass.DEMON_TANK;
-      case ANGRY_SKELETON -> GamePlayerClass.ANGRY_SKELETON;
-      default -> throw new IllegalArgumentException("Not supported class " + playerClass.name());
-    };
-  }
 
   private void activateEnemyPowerUpOnSpawn(EnemyPlayer enemyPlayer, PowerUpType powerUpType,
       int lastsForMls) {
     enemyPlayer.getEnemyEffects().activatePowerUp(powerUpType, lastsForMls);
     playScreen.removePowerUp(powerUpType);
-  }
-
-  private SkinUISelection getSkinColor(
-      PlayerSkinColor playerSkinColor) {
-    return switch (playerSkinColor) {
-      case BLUE -> SkinUISelection.BLUE;
-      case PURPLE -> SkinUISelection.PURPLE;
-      case PINK -> SkinUISelection.PINK;
-      case GREEN -> SkinUISelection.GREEN;
-      case ORANGE -> SkinUISelection.ORANGE;
-      case YELLOW -> SkinUISelection.YELLOW;
-      default -> throw new IllegalStateException("Not supported skin color " + playerSkinColor);
-    };
   }
 
   private void handleExit(ServerResponse.GameEvent gameEvent) {

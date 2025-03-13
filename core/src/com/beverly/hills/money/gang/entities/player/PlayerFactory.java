@@ -54,6 +54,7 @@ public class PlayerFactory {
 
           var commandBuilder = PushGameEventCommand.newBuilder()
               .setGameId(Configs.GAME_ID)
+              .setMatchId(playerConnectionContextData.getMatchId())
               .setSequence(screen.getActionSequence().incrementAndGet())
               .setPingMls(
                   Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
@@ -104,6 +105,7 @@ public class PlayerFactory {
 
       var commandBuilder = PushGameEventCommand.newBuilder()
           .setGameId(Configs.GAME_ID)
+          .setMatchId(playerConnectionContextData.getMatchId())
           .setSequence(screen.getActionSequence().incrementAndGet())
           .setPingMls(
               Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())

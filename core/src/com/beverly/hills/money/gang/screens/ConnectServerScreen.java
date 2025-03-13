@@ -1,5 +1,6 @@
 package com.beverly.hills.money.gang.screens;
 
+import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.entity.HostPort;
@@ -114,6 +115,7 @@ public class ConnectServerScreen extends ReconnectableScreen {
               playerContextDataBuilder.weaponStats(getWeaponStats(
                   serverInfo.getWeaponsInfoList(),
                   serverInfo.getProjectileInfoList()));
+              playerContextDataBuilder.matchId(serverInfo.getGames(Configs.GAME_ID).getMatchId());
               removeAllEntities();
               LOG.info("Got server info. Try join the game");
               getGame().setScreen(new JoinGameScreen(getGame(),

@@ -13,11 +13,10 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.enemies.EnemyTextures;
+import com.beverly.hills.money.gang.entities.ui.LeaderBoardDataLayer;
 import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
 import com.beverly.hills.money.gang.screens.data.ConnectGameData;
 import com.beverly.hills.money.gang.screens.ui.selection.GameOverUISelection;
-import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
-import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import com.beverly.hills.money.gang.screens.ui.skin.SkinSelectAnimation;
 
@@ -29,7 +28,7 @@ public class GameOverScreen extends AbstractMainMenuScreen {
   private final UserSettingSound dingSound1;
   private final UserSettingSound youWinMusic;
   private final GlyphLayout glyphLayoutWinner;
-  private final UILeaderBoard uiLeaderBoard;
+  private final LeaderBoardDataLayer uiLeaderBoard;
   private boolean showLeaderBoard;
   private final String leaderMessage;
   private final ConnectGameData connectGameData;
@@ -39,10 +38,8 @@ public class GameOverScreen extends AbstractMainMenuScreen {
       GameOverUISelection.values());
 
   public GameOverScreen(final DaiKombatGame game,
-      final UILeaderBoard uiLeaderBoard,
-      final ConnectGameData connectGameData,
-      final SkinUISelection winnerSkinColor,
-      final GamePlayerClass winnerClass) {
+      final LeaderBoardDataLayer uiLeaderBoard,
+      final ConnectGameData connectGameData) {
 
     super(game);
     guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
@@ -61,8 +58,9 @@ public class GameOverScreen extends AbstractMainMenuScreen {
       leaderMessage = "WINNER IS " + uiLeaderBoard.getFirstPlaceString();
     }
     glyphLayoutWinner = new GlyphLayout(guiFont64, leaderMessage);
+    var winner = uiLeaderBoard.getTopPlayer().get();
     winnerSkinSelectAnimation = new SkinSelectAnimation(new EnemyTextures(game.getAssMan(),
-        winnerClass, winnerSkinColor), this);
+        winner.getPlayerClass(), winner.getSkinUISelection()), this);
   }
 
   @Override

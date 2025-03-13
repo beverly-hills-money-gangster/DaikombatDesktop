@@ -32,6 +32,7 @@ import com.beverly.hills.money.gang.entities.item.PowerUp;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.PlayerFactory;
 import com.beverly.hills.money.gang.entities.teleport.Teleport;
+import com.beverly.hills.money.gang.entities.ui.LeaderBoardPlayer;
 import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
 import com.beverly.hills.money.gang.entities.ui.UINetworkStats;
 import com.beverly.hills.money.gang.handler.PlayScreenGameConnectionHandler;
@@ -195,9 +196,11 @@ public class PlayScreen extends GameScreen {
     uiLeaderBoard = new UILeaderBoard(
         playerConnectionContextData.getPlayerId(),
         playerConnectionContextData.getLeaderBoardItemList().stream()
-            .map(leaderBoardItem -> UILeaderBoard.LeaderBoardPlayer.builder()
+            .map(leaderBoardItem -> LeaderBoardPlayer.builder()
                 .name(leaderBoardItem.getPlayerName())
                 .id(leaderBoardItem.getPlayerId())
+                .skinUISelection(SkinUISelection.getSkinColor(leaderBoardItem.getSkinColor()))
+                .playerClass(GamePlayerClass.createPlayerClass(leaderBoardItem.getPlayerClass()))
                 .deaths(leaderBoardItem.getDeaths())
                 .ping(leaderBoardItem.getPingMls())
                 .kills(leaderBoardItem.getKills())
@@ -253,6 +256,7 @@ public class PlayScreen extends GameScreen {
       var currentDirection = getPlayer().getCurrent2DDirection();
       gameConnection.write(PushGameEventCommand.newBuilder()
           .setSequence(actionSequence.incrementAndGet())
+          .setMatchId(playerConnectionContextData.getMatchId())
           .setPingMls(
               Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
                   .orElse(0))
@@ -285,6 +289,7 @@ public class PlayScreen extends GameScreen {
           var currentDirection = getPlayer().getCurrent2DDirection();
           gameConnection.write(PushGameEventCommand.newBuilder()
               .setSequence(actionSequence.incrementAndGet())
+              .setMatchId(playerConnectionContextData.getMatchId())
               .setPingMls(Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
                   .orElse(0))
               .setPlayerId(playerConnectionContextData.getPlayerId())
@@ -444,6 +449,7 @@ public class PlayScreen extends GameScreen {
     gameConnection.write(PushGameEventCommand.newBuilder()
         .setPingMls(
             Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls()).orElse(0))
+        .setMatchId(playerConnectionContextData.getMatchId())
         .setSequence(actionSequence.incrementAndGet())
         .setPlayerId(playerConnectionContextData.getPlayerId())
         .setEventType(PushGameEventCommand.GameEventType.MOVE)
@@ -598,20 +604,8 @@ public class PlayScreen extends GameScreen {
       showGuiMenu = true;
     }
     if (gameOver) {
-      GamePlayerClass winnerClass;
-      SkinUISelection winnerColor;
-      if (uiLeaderBoard.getFirstPlacePlayerId() == playerConnectionContextData.getPlayerId()) {
-        winnerClass = playerConnectionContextData.getConnectGameData().getGamePlayerClass();
-        winnerColor = playerConnectionContextData.getConnectGameData().getSkinUISelection();
-      } else {
-        var enemyWinner = enemiesRegistry
-            .getEnemy(uiLeaderBoard.getFirstPlacePlayerId()).orElseThrow(
-                () -> new IllegalStateException("Can't find enemy by id"));
-        winnerClass = enemyWinner.getEnemyClass();
-        winnerColor = enemyWinner.getSkinUISelection();
-      }
       screenToTransition = new GameOverScreen(getGame(), uiLeaderBoard,
-          playerConnectionContextData.getConnectGameData(), winnerColor, winnerClass);
+          playerConnectionContextData.getConnectGameData());
     } else if (gameConnection.isAnyDisconnected()) {
       gameConnection.pollErrors().forEach(playScreenGameConnectionHandler::handleException);
       playerConnectionContextData.getConnectGameData()
