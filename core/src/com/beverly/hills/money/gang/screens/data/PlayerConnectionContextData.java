@@ -36,4 +36,9 @@ public class PlayerConnectionContextData {
   @NonNull
   private final Integer matchId;
 
+  @NonNull
+  private final Integer audioSamplingRate;
+
+  private final boolean recordAudio;
+
 }

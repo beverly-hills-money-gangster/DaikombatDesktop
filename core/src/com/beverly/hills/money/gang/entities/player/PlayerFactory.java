@@ -8,7 +8,7 @@ import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound.TimeL
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.projectile.Projectile;
-import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
+import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.proto.ProjectileStats;
 import com.beverly.hills.money.gang.proto.ProjectileType;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand;
@@ -29,7 +29,7 @@ public class PlayerFactory {
 
   public static Player create(
       PlayScreen screen,
-      LoadBalancedGameConnection gameConnection,
+      GlobalGameConnection gameConnection,
       PlayerConnectionContextData playerConnectionContextData) {
     return new Player(screen,
         playerWeapon -> {

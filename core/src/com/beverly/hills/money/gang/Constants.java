@@ -45,17 +45,17 @@ public interface Constants {
   float PPU = 1f / 16f;
   float HALF_UNIT = 0.5f;
 
-  float DEFAULT_MUSIC_VOLUME = 0.5f;
+  float DEFAULT_MUSIC_VOLUME = 0.5f/5;
 
-  float DEFAULT_SFX_VOLUME = 0.5f;
+  float DEFAULT_SFX_VOLUME = 0.5f/5;
 
-  float DEFAULT_SFX_TYPING_VOLUME = 0.5f;
+  float DEFAULT_SFX_TYPING_VOLUME = 0.5f/5;
 
-  float PLAYER_FX_VOLUME = 0.25f;
+  float PLAYER_FX_VOLUME = 0.25f/5;
 
-  float QUAKE_NARRATOR_FX_VOLUME = 0.4f;
+  float QUAKE_NARRATOR_FX_VOLUME = 0.4f/5;
 
-  float MK_NARRATOR_FX_VOLUME = 1f;
+  float MK_NARRATOR_FX_VOLUME = 1f/5;
 
   int FBO_WIDTH_ORIGINAL = 800; // 160
   int FBO_HEIGHT_ORIGINAL = 600; // 120

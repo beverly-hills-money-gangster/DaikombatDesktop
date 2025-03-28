@@ -3,7 +3,7 @@ package com.beverly.hills.money.gang.screens;
 import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
-import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
+import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.screens.data.ConnectGameData;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
@@ -40,7 +40,7 @@ public abstract class ReconnectableScreen extends AbstractLoadingScreen {
   }
 
   protected void reconnect(final String errorMessage,
-      final LoadBalancedGameConnection gameConnection, final ConnectGameData connectGameData) {
+      final GlobalGameConnection gameConnection, final ConnectGameData connectGameData) {
     LOG.info("Reconnect. Error is '{}'", errorMessage);
     reconnectionRunnable = () -> {
       if (connectionTrial >= Configs.MAX_RECONNECTIONS) {
@@ -54,7 +54,7 @@ public abstract class ReconnectableScreen extends AbstractLoadingScreen {
       }
       LOG.info("Start reconnecting");
       removeAllEntities();
-      Optional.ofNullable(gameConnection).ifPresent(LoadBalancedGameConnection::disconnect);
+      Optional.ofNullable(gameConnection).ifPresent(GlobalGameConnection::disconnect);
       LOG.info("Retry connection");
       getGame().setScreen(new ConnectServerScreen(getGame(), connectGameData, connectionTrial + 1));
     };

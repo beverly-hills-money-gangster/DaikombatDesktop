@@ -103,12 +103,6 @@ public class AbstractEnemyProjectileFlying extends Projectile {
       return;
     }
 
-    final ColorAttribute colorAttribute = (ColorAttribute) getMdlInst().materials.get(0)
-        .get(ColorAttribute.Diffuse);
-    colorAttribute.color.set(
-        new Color(1, 1, 1,
-            Math.max(0, (destroyAtMls - System.currentTimeMillis()) / (float) LIVES_FOR_MLS)));
-
     Vector2 rectDirection = new Vector2();
     rectDirection.x = finishPosition.x - getRect().x;
     rectDirection.y = finishPosition.y - getRect().y;

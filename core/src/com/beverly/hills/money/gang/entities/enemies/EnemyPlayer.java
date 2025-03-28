@@ -17,6 +17,8 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.entities.effect.EnemyPlayerVoiceChatEffect;
+import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
@@ -42,6 +44,9 @@ public class EnemyPlayer extends Enemy {
   private final Queue<EnemyPlayerAction> actions = new ArrayDeque<>();
 
   private final EnemyPlayerActionQueueStrategy enemyPlayerActionQueueStrategy;
+
+  @Getter
+  private final EnemyPlayerVoiceChatEffect enemyPlayerVoiceChatEffect;
 
   @Getter
   private final String name;
@@ -88,8 +93,8 @@ public class EnemyPlayer extends Enemy {
       final int hp,
       final GamePlayerClass enemyClass,
       final int maxVisibility) {
-
     super(position, screen, player, enemyClass, enemyListeners);
+    enemyPlayerVoiceChatEffect = new EnemyPlayerVoiceChatEffect(position, screen);
     this.maxVisibility = maxVisibility;
     this.hp = hp;
     this.skinUISelection = skinUISelection;
@@ -118,6 +123,13 @@ public class EnemyPlayer extends Enemy {
         speed);
     lastActionReceivedTimeMls = System.currentTimeMillis();
   }
+
+  public void talking(float avgAmpl) {
+    if (!getEnemyEffects().isPowerUpActive(PowerUpType.INVISIBILITY)) {
+      enemyPlayerVoiceChatEffect.makeVisible();
+    }
+  }
+
 
   public void teleport(Vector3 position, Vector2 direction) {
     getEnemyEffects().beingSpawned(System.currentTimeMillis() + SPAWN_ANIMATION_MLS);
@@ -210,6 +222,8 @@ public class EnemyPlayer extends Enemy {
     } else if (System.currentTimeMillis() >= movingAnimationUntil) {
       isIdle = true;
     }
+    enemyPlayerVoiceChatEffect.setPosition(getRect().getNewPosition().x,
+        getRect().getNewPosition().y);
     getRect().setX(getRect().getNewPosition().x);
     getRect().setY(getRect().getNewPosition().y);
     getPosition().set(getRect().x + getRect().getWidth() / 2, 0,
@@ -298,6 +312,12 @@ public class EnemyPlayer extends Enemy {
 
   private boolean isNextStepAnimation() {
     return System.currentTimeMillis() >= movingAnimationUntil;
+  }
+
+  @Override
+  public void destroy() {
+    super.destroy();
+    enemyPlayerVoiceChatEffect.destroy();
   }
 
 

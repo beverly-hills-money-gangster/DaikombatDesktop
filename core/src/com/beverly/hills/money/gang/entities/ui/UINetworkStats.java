@@ -1,6 +1,7 @@
 package com.beverly.hills.money.gang.entities.ui;
 
-import com.beverly.hills.money.gang.stats.NetworkStatsReader;
+import com.beverly.hills.money.gang.stats.GameNetworkStatsReader;
+import com.beverly.hills.money.gang.stats.VoiceChatNetworkStatsReader;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -10,8 +11,9 @@ import org.apache.commons.io.FileUtils;
 @RequiredArgsConstructor
 public class UINetworkStats {
 
-  private final NetworkStatsReader primaryNetworkStats;
-  private final Iterable<NetworkStatsReader> secondaryNetworkStats;
+  private final GameNetworkStatsReader primaryNetworkStats;
+  private final Iterable<GameNetworkStatsReader> secondaryNetworkStats;
+  private final VoiceChatNetworkStatsReader voiceChatNetworkStats;
 
   private String networkStatsToString(int receivedMsg, int sentMsg, long inboundBytes,
       long outboundBytes, Integer pingMls) {
@@ -25,7 +27,17 @@ public class UINetworkStats {
         .toUpperCase();
   }
 
-  private String networkStatsToString(NetworkStatsReader networkStatsReader) {
+  private String networkStatsToString(VoiceChatNetworkStatsReader voiceChatNetworkStats) {
+    return String.format(Locale.ENGLISH,
+            "RCV %s MSG | SENT %s MSG | IN %s | OUT %s",
+            voiceChatNetworkStats.getReceivedMessages(),
+            voiceChatNetworkStats.getSentMessages(),
+            FileUtils.byteCountToDisplaySize(voiceChatNetworkStats.getInboundPayloadBytes()),
+            FileUtils.byteCountToDisplaySize(voiceChatNetworkStats.getOutboundPayloadBytes()))
+        .toUpperCase();
+  }
+
+  private String networkStatsToString(GameNetworkStatsReader networkStatsReader) {
     return networkStatsToString(networkStatsReader.getReceivedMessages(),
         networkStatsReader.getSentMessages(), networkStatsReader.getInboundPayloadBytes(),
         networkStatsReader.getOutboundPayloadBytes(), networkStatsReader.getPingMls());
@@ -38,11 +50,11 @@ public class UINetworkStats {
     int totalSentMsg = primaryNetworkStats.getSentMessages();
     long totalInboundBytes = primaryNetworkStats.getInboundPayloadBytes();
     long totalOutboundBytes = primaryNetworkStats.getOutboundPayloadBytes();
-    sb.append("PRIMARY ").append(networkStatsToString(primaryNetworkStats)).append("\n");
+    sb.append("TCP PRIMARY ").append(networkStatsToString(primaryNetworkStats)).append("\n");
     int totalPing = Optional.ofNullable(primaryNetworkStats.getPingMls()).orElse(0);
     int totalConnections = 1;
-    for (NetworkStatsReader networkStatsReader : secondaryNetworkStats) {
-      sb.append("SECONDARY ").append(networkStatsToString(networkStatsReader))
+    for (GameNetworkStatsReader networkStatsReader : secondaryNetworkStats) {
+      sb.append("TCP SECONDARY ").append(networkStatsToString(networkStatsReader))
           .append("\n");
       totalReceivedMsg += networkStatsReader.getReceivedMessages();
       totalSentMsg += networkStatsReader.getSentMessages();
@@ -51,10 +63,11 @@ public class UINetworkStats {
       totalPing += Optional.ofNullable(networkStatsReader.getPingMls()).orElse(0);
       totalConnections++;
     }
-    sb.append("TOTAL ").append(
+    sb.append("TCP TOTAL ").append(
             networkStatsToString(totalReceivedMsg, totalSentMsg, totalInboundBytes, totalOutboundBytes,
                 totalPing / totalConnections))
         .append("\n");
+    sb.append("UDP VOICE CHAT ").append(networkStatsToString(voiceChatNetworkStats)).append("\n");
     return sb.toString();
   }
 

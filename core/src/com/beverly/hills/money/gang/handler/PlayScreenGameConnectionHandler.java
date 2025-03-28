@@ -35,6 +35,7 @@ import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponMapper;
 import com.beverly.hills.money.gang.utils.Converter;
 import java.util.Optional;
+import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -182,6 +183,8 @@ public class PlayScreenGameConnectionHandler {
             enemyPlayer, getPowerUpType(gamePowerUp.getType()), gamePowerUp.getLastsForMls()));
 
     playScreen.getGame().getEntMan().addEntity(enemyPlayer);
+    playScreen.getGame().getEntMan().addEntity(enemyPlayer.getEnemyPlayerVoiceChatEffect());
+
     enemiesRegistry.addEnemy(gameEvent.getPlayer().getPlayerId(), enemyPlayer);
 
     playScreen.getUiLeaderBoard().addNewPlayer(LeaderBoardPlayer.builder()

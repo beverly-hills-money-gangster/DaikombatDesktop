@@ -28,6 +28,8 @@ public enum TexturesRegistry {
 
   FIREBALL("fireball.png"),
   PLASMA("plasma.png"),
+  MESSAGE("message.png"),
+  VOICE("voice.png"),
   SKY("sky.png");
 
   @Getter

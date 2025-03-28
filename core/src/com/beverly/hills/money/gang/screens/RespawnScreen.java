@@ -6,7 +6,7 @@ import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.entities.ui.LeaderBoardDataLayer;
 import com.beverly.hills.money.gang.entities.ui.LeaderBoardPlayer;
-import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
+import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.proto.RespawnCommand;
 import com.beverly.hills.money.gang.proto.ServerResponse;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
@@ -23,11 +23,11 @@ public class RespawnScreen extends AbstractLoadingScreen {
 
   private final PlayerConnectionContextData oldPlayerConnectionContextData;
 
-  private final LoadBalancedGameConnection gameConnection;
+  private final GlobalGameConnection gameConnection;
 
   public RespawnScreen(final DaiKombatGame game,
       final PlayerConnectionContextData oldPlayerConnectionContextData,
-      final LoadBalancedGameConnection gameConnection) {
+      final GlobalGameConnection gameConnection) {
     super(game);
     this.oldPlayerConnectionContextData = oldPlayerConnectionContextData;
     this.gameConnection = gameConnection;

@@ -286,6 +286,7 @@ public class Player extends Entity {
     handleArrows();
     handleWASD();
     if (moved || longTimeNoMove()) {
+      // TODO current position is not sent if chat is open!
       onMovementListener.accept(this);
       lastTimeMovedMls = System.currentTimeMillis();
     }
