@@ -1,5 +1,6 @@
 package com.beverly.hills.money.gang.screens.ui.weapon;
 
+import static com.beverly.hills.money.gang.Constants.DEFAULT_SFX_VOLUME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -126,21 +127,19 @@ public class ScreenWeaponTest {
 
   @Test
   public void testAttackShotgun() {
-    float volume = 0.5f;
     screenWeapon.changeWeapon(Weapon.SHOTGUN);
     assertTrue(screenWeapon.attack(player));
-    verify(weaponStateMap.get(Weapon.SHOTGUN).getFireSound()).play(volume);
+    verify(weaponStateMap.get(Weapon.SHOTGUN).getFireSound()).play(DEFAULT_SFX_VOLUME);
     assertEquals(Weapon.SHOTGUN, screenWeapon.weaponBeingUsed);
     verifyNoInteractions(quadDamageAttackSound);
   }
 
   @Test
   public void testAttackShotgunQuadDamage() {
-    float volume = 0.5f;
     doReturn(true).when(playerEffects).isPowerUpActive(PowerUpType.QUAD_DAMAGE);
     screenWeapon.changeWeapon(Weapon.SHOTGUN);
     assertTrue(screenWeapon.attack(player));
-    verify(weaponStateMap.get(Weapon.SHOTGUN).getFireSound()).play(volume);
+    verify(weaponStateMap.get(Weapon.SHOTGUN).getFireSound()).play(DEFAULT_SFX_VOLUME);
     verify(quadDamageAttackSound).play(argThat(argument -> {
       assertEquals(SoundVolumeType.LOUD.getVolume(), argument.getVolume());
       assertEquals(0, argument.getPan());
@@ -160,17 +159,15 @@ public class ScreenWeaponTest {
 
   @Test
   public void testAttackTwiceNoDelay() {
-    float volume = 0.5f;
     screenWeapon.changeWeapon(Weapon.SHOTGUN);
     assertTrue(screenWeapon.attack(player));
     assertFalse(screenWeapon.attack(player),
         "If no delay, then we shouldn't be able to attack");
-    verify(weaponStateMap.get(Weapon.SHOTGUN).getFireSound()).play(volume);
+    verify(weaponStateMap.get(Weapon.SHOTGUN).getFireSound()).play(DEFAULT_SFX_VOLUME);
   }
 
   @Test
   public void testAttackTwiceDelay() throws InterruptedException {
-    float volume = 0.5f;
     screenWeapon.changeWeapon(Weapon.SHOTGUN);
     assertTrue(screenWeapon.attack(player));
     // wait a little
@@ -179,7 +176,7 @@ public class ScreenWeaponTest {
             + screenWeapon.weaponStates.get(Weapon.SHOTGUN).getBackoffDelayMls() + 50);
     assertTrue(screenWeapon.attack(player),
         "If we have a  delay, then we SHOULD be able to attack");
-    verify(weaponStateMap.get(Weapon.SHOTGUN).getFireSound(), times(2)).play(volume);
+    verify(weaponStateMap.get(Weapon.SHOTGUN).getFireSound(), times(2)).play(DEFAULT_SFX_VOLUME);
   }
 
   @Test

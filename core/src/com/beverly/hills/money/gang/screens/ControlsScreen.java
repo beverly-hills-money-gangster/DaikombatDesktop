@@ -23,6 +23,7 @@ public class ControlsScreen extends AbstractMainMenuScreen {
       "CHAT - TILDE",
       "X - TAUNT",
       "LEADERBOARD - TAB",
+      "V - START VOICE CHAT TALK",
       "Q, E, MOUSE SCROLL - NEXT/PREV WEAPON",
       Arrays.stream(Weapon.values())
           .map(weapon -> Keys.toString(weapon.getSelectKeyCode()))

@@ -12,23 +12,19 @@ import com.beverly.hills.money.gang.strategy.EnemyPlayerActionQueueStrategy;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO sometimes I hear previous sounds recorded
-// TODO keep recording audio after death
 public class VoiceChatPlayer {
 
   private static final Logger LOG = LoggerFactory.getLogger(EnemyPlayerActionQueueStrategy.class);
 
-  private final static int MAX_AUDIO_PACKET_BYTE_SIZE = 1000;
+  private final static int MAX_AUDIO_PACKET_BYTE_SIZE = 2000;
 
 
   private final AtomicBoolean recordAudio = new AtomicBoolean();
 
-  private static final AtomicInteger SEQUENCE = new AtomicInteger();
 
   private AudioRecorder audioRecorder;
 
@@ -57,7 +53,6 @@ public class VoiceChatPlayer {
     recordAudio.set(record);
   }
 
-  // TODO show basic keyboard configs
   public void init() {
     try {
       this.audioRecorder = Gdx.audio.newAudioRecorder(samplingRate, true);
@@ -87,7 +82,6 @@ public class VoiceChatPlayer {
           gameConnection.write(
               VoiceChatPayload.builder().playerId(playerId)
                   .gameId(Configs.GAME_ID)
-                  .sequence(SEQUENCE.incrementAndGet())
                   .pcm(shortPCM)
                   .build());
         }
@@ -101,18 +95,20 @@ public class VoiceChatPlayer {
     }
     );
     audioPlayerThread = new Thread(() -> {
+      int mlsToBlock = 100;
+      var pcmSilence = new short[1];
       while (!Thread.currentThread().isInterrupted()) {
         try {
-          // TODO check how many times we receive dups
-          List<VoiceChatPayload> shortPCMs = gameConnection.pollPCMBlocking();
+          List<VoiceChatPayload> shortPCMs = gameConnection.pollPCMBlocking(mlsToBlock);
           if (shortPCMs.isEmpty()) {
-            continue;
+            // play silence if no pcm
+            audioPlayer.writeSamples(pcmSilence, 0, pcmSilence.length);
+          } else {
+            var mixedPCM = mixPCMs(shortPCMs);
+            shortPCMs.forEach(payload -> enemiesRegistry.getEnemy(payload.getPlayerId())
+                .ifPresent(enemyPlayer -> enemyPlayer.talking(getAvgAmpl(payload.getPcm()))));
+            audioPlayer.writeSamples(mixedPCM, 0, mixedPCM.length);
           }
-          var mixedPCM = mixPCMs(shortPCMs);
-          shortPCMs.forEach(payload -> enemiesRegistry.getEnemy(payload.getPlayerId())
-              .ifPresent(enemyPlayer -> enemyPlayer.talking(getAvgAmpl(payload.getPcm()))));
-          audioPlayer.writeSamples(mixedPCM, 0, mixedPCM.length);
-
         } catch (InterruptedException ignored) {
           LOG.info("Audio player interrupted");
           Thread.currentThread().interrupt();

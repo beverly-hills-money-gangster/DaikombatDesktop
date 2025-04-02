@@ -36,7 +36,7 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer.builder()
             .kills(0).id(myPlayerId).name("my name")
-            .playerClass(GamePlayerClass.WARRIOR)
+            .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
             .skinUISelection(SkinUISelection.BLUE).build()), 999,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
 
@@ -57,14 +57,17 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(2).id(myPlayerId).name("my name").deaths(10)
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(10).id(999).name("top dog")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(5).id(666).name("other player")
                 .build()), 999,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
@@ -87,14 +90,17 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(2).id(myPlayerId).name("my name").ping(100)
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(10).id(999).name("top dog").ping(25)
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(5).id(666).name("other player").ping(1500)
                 .build()), 999,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
@@ -118,12 +124,14 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(1)
                 .deaths(0)
                 .id(myPlayerId).name("PLAYER 1").ping(100)
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(1)
                 .deaths(0)
                 .id(999).name("PLAYER 2").ping(25).build()), 999,
@@ -147,10 +155,12 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(4).id(999).name("killer man")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(0).id(myPlayerId).name("my name")
                 .build()), 999,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
@@ -175,14 +185,17 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(2).id(myPlayerId).name("my name")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(3).id(999).name("top dog")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(0).id(666).name("other player")
                 .build()), 999,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
@@ -207,18 +220,22 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(4).id(myPlayerId).name("my name")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(3).id(999).name("top dog")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(1).id(666).name("other player")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(0).id(777).name("one more other player")
                 .build()), 999,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
@@ -246,25 +263,30 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(4).id(myPlayerId).name("my name")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(3).id(999).name("top dog")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(2).id(666).name("other player")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(1).id(777).name("one more other player")
                 .build()), 999,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
 
     leaderBoard.addNewPlayer(LeaderBoardPlayer
         .builder()
-        .kills(0).id(5555).name("new player")
+        .kills(0).id(5555).name("new player").playerClass(GamePlayerClass.WARRIOR)
+        .skinUISelection(SkinUISelection.BLUE)
         .build());
 
     assertEquals(4, leaderBoard.getMyKills());
@@ -287,18 +309,22 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(4).id(myPlayerId).name("my name")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(3).id(999).name("top dog")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(2).id(666).name("other player")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(1).id(777).name("one more other player")
                 .build()), 999,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
@@ -306,11 +332,13 @@ public class UILeaderBoardTest {
     leaderBoard.addNewPlayer(LeaderBoardPlayer
         .builder()
         .kills(0).id(5555).name("new player")
+        .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.BLUE)
         .build());
 
     leaderBoard.addNewPlayer(LeaderBoardPlayer
         .builder()
         .kills(0).id(5555).name("new player")
+        .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.BLUE)
         .build()); // add second time
 
     // nothing should change
@@ -334,10 +362,12 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(4).id(myPlayerId).name("my name")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(5).id(999).name("top dog")
                 .build()), 999,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
@@ -361,14 +391,17 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(0).id(myPlayerId).name("my name")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(0).id(999).name("top dog")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(0).id(777).name("victim")
                 .build()), 999,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
@@ -397,14 +430,17 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(0).id(myPlayerId).name("my name")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(0).id(999).name("top dog")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(0).id(666).name("other player")
                 .build()), 6,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
@@ -420,14 +456,17 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(2).id(myPlayerId).name("my name")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(1).id(999).name("top dog")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(0).id(666).name("other player")
                 .build()), 6,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
@@ -443,14 +482,17 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(3).id(myPlayerId).name("my name")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(1).id(999).name("top dog")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(0).id(666).name("other player")
                 .build()), 6,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
@@ -466,14 +508,17 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(4).id(myPlayerId).name("my name")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(1).id(999).name("top dog")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(0).id(666).name("other player")
                 .build()), 6,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
@@ -489,14 +534,17 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(4).id(myPlayerId).name("my name")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(1).id(999).name("top dog")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(0).id(666).name("other player")
                 .build()), 6,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
@@ -514,14 +562,17 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(4).id(myPlayerId).name("my name")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(3).id(999).name("top dog")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(2).id(666).name("other player")
                 .build()), 6,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);
@@ -542,14 +593,17 @@ public class UILeaderBoardTest {
     UILeaderBoard leaderBoard = new UILeaderBoard(myPlayerId,
         List.of(LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(5).id(myPlayerId).name("my name")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(1).id(999).name("top dog")
                 .build(),
             LeaderBoardPlayer
                 .builder()
+                .playerClass(GamePlayerClass.WARRIOR).skinUISelection(SkinUISelection.GREEN)
                 .kills(0).id(666).name("other player")
                 .build()), 6,
         youLeadRunnable, lostLeadRunnable, onFragsLeft);

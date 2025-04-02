@@ -3,7 +3,6 @@ package com.beverly.hills.money.gang.log;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -17,12 +16,16 @@ public class ChatLog {
   private long expireTime;
 
   public void addMessage(String playerName, String message) {
-    chatMessageQueue.add((playerName + ":  " + message).toUpperCase());
+    addChatLog(playerName + ":  " + message);
+    onNewMessage.run();
+  }
+
+  public void addChatLog(String message) {
+    chatMessageQueue.add(message.toUpperCase());
     expireTime = System.currentTimeMillis() + MAX_MSG_DURATION_MLS;
     if (chatMessageQueue.size() > MAX_MSG_TO_PRINT) {
       chatMessageQueue.remove();
     }
-    onNewMessage.run();
   }
 
   public boolean hasChatMessage() {

@@ -79,10 +79,4 @@ public class MainMenuScreen extends AbstractMainMenuScreen {
     getGame().getBatch().end();
   }
 
-  @Override
-  public void hide() {
-    super.hide();
-  }
-
-
 }

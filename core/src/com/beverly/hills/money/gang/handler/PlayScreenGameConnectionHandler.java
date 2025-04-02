@@ -35,9 +35,7 @@ import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponMapper;
 import com.beverly.hills.money.gang.utils.Converter;
 import java.util.Optional;
-import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -202,7 +200,7 @@ public class PlayScreenGameConnectionHandler {
 
     if (gameEvent.getEventType() == GameEventType.JOIN) {
       playScreen.getChatLog()
-          .addMessage("game log", gameEvent.getPlayer().getPlayerName() + " has joined the game");
+          .addChatLog(gameEvent.getPlayer().getPlayerName() + " has joined the game");
     }
     if (gameEvent.getEventType() == GameEventType.JOIN
         || gameEvent.getEventType() == GameEventType.RESPAWN) {
@@ -227,7 +225,7 @@ public class PlayScreenGameConnectionHandler {
     var playerName =
         gameEvent.getPlayer().hasPlayerName() ? gameEvent.getPlayer().getPlayerName() : null;
     Optional.ofNullable(playerName).ifPresent(
-        name -> playScreen.getChatLog().addMessage("game log", name + " has left the game"));
+        name -> playScreen.getChatLog().addChatLog(name + " has left the game"));
     enemiesRegistry.removeEnemy(gameEvent.getPlayer().getPlayerId())
         .ifPresent(Enemy::destroy);
     playScreen.getUiLeaderBoard().removePlayer(gameEvent.getPlayer().getPlayerId());
@@ -499,14 +497,14 @@ public class PlayScreenGameConnectionHandler {
                   .getUserSettingSound(achievement.getSound())));
     } else {
       enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
-          .ifPresent(enemyPlayer -> enemyPlayer.queueAction(EnemyPlayerAction.builder()
+          .ifPresent(killerPlayer -> killerPlayer.queueAction(EnemyPlayerAction.builder()
               .eventSequenceId(gameEvent.getSequence())
               .enemyPlayerActionType(enemyPlayerActionType)
               .direction(Converter.convertToVector2(gameEvent.getPlayer().getDirection()))
               .route(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))
               .onComplete(() -> {
                 if (gameEvent.hasWeaponType()) {
-                  enemyPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), false);
+                  killerPlayer.attack(WeaponMapper.getWeapon(gameEvent.getWeaponType()), false);
                 } else if (gameEvent.hasProjectile()) {
                   playScreen.getGame().getEntMan().addEntity(
                       enemyPlayerProjectileBoomFactoriesRegistry.get(
@@ -516,16 +514,19 @@ public class PlayScreenGameConnectionHandler {
                               Converter.convertToVector2(gameEvent.getProjectile().getPosition()),
                               playScreen.getPlayer()));
                 }
-                enemiesRegistry.removeEnemy(
-                    gameEvent.getAffectedPlayer().getPlayerId()).ifPresent(
-                    Enemy::die);
+                enemiesRegistry.removeEnemy(gameEvent.getAffectedPlayer().getPlayerId())
+                    .ifPresent(victimPlayer -> {
+                      victimPlayer.die();
+                      playScreen.getChatLog().addChatLog(
+                          killerPlayer.getName() + " kills " + victimPlayer.getName());
+                    });
               })
               .build()));
     }
   }
 
   public void handleErrorEvent(ServerResponse.ErrorEvent errorEvent) {
-    playScreen.setErrorMessage(errorEvent.getMessage());
+    LOG.error("Error " + errorEvent.getMessage());
   }
 
   public void handlePowerUpSpawn(ServerResponse.PowerUpSpawnEvent powerUpSpawnEvent) {
@@ -542,7 +543,6 @@ public class PlayScreenGameConnectionHandler {
 
   public void handleException(Throwable error) {
     LOG.error("Got error", error);
-    playScreen.setErrorMessage(ExceptionUtils.getMessage(error));
   }
 
   private Enemy.EnemyListeners createEnemyListeners() {

@@ -6,8 +6,7 @@ import com.beverly.hills.money.gang.screens.GameScreen;
 
 public class EnemyPlayerVoiceChatEffect extends AbstractEnemyPlayerTalkingEffect {
 
-
   public EnemyPlayerVoiceChatEffect(Vector3 position, GameScreen screen) {
-    super(position, screen, TexturesRegistry.VOICE, 150);
+    super(position, screen, TexturesRegistry.VOICE, 350);
   }
 }

@@ -101,9 +101,7 @@ public class PlayScreen extends GameScreen {
   private final UserSettingSound threeFragsLeftSound;
   private final AtomicInteger actionSequence = new AtomicInteger(0);
   private final VoiceChatPlayer voiceChatPlayer;
-
   private final Texture hudBlackTexture;
-
   private final Texture hudRedTexture;
 
   @Getter
@@ -118,9 +116,6 @@ public class PlayScreen extends GameScreen {
 
   @Setter
   private int playersOnline;
-
-  @Setter
-  private String errorMessage;
 
   @Getter
   private final UILeaderBoard uiLeaderBoard;
@@ -633,21 +628,23 @@ public class PlayScreen extends GameScreen {
     if (gameOver) {
       screenToTransition = new GameOverScreen(getGame(), uiLeaderBoard,
           playerConnectionContextData.getConnectGameData());
-    } else if (gameConnection.isAnyDisconnected()) {
-      gameConnection.pollErrors().forEach(playScreenGameConnectionHandler::handleException);
-      playerConnectionContextData.getConnectGameData()
-          .setPlayerIdToRecover(playerConnectionContextData.getPlayerId());
-      screenToTransition = new ConnectServerScreen(getGame(),
-          playerConnectionContextData.getConnectGameData());
     } else {
       try {
         playScreenGameConnectionHandler.handle();
+        if (gameConnection.isAnyDisconnected()) {
+          gameConnection.disconnect();
+          gameConnection.pollErrors().forEach(playScreenGameConnectionHandler::handleException);
+          playerConnectionContextData.getConnectGameData()
+              .setPlayerIdToRecover(playerConnectionContextData.getPlayerId());
+          // TODO check that reconnection with leaderboard recovery still works
+          screenToTransition = new ConnectServerScreen(getGame(),
+              playerConnectionContextData.getConnectGameData());
+        }
       } catch (Exception e) {
-        LOG.error("Can't handle screen actions", e);
+        LOG.error("Can't handle connection", e);
+        gameConnection.disconnect();
         screenToTransition = new ErrorScreen(getGame(),
-            StringUtils.defaultIfEmpty(e.getMessage(), "Can't handle connection")
-                + ". Check internet signal. Last ping " + gameConnection.getPrimaryNetworkStats()
-                .getPingMls() + " mls.");
+            StringUtils.defaultIfEmpty(e.getMessage(), "Can't handle connection"));
       }
     }
 
@@ -777,7 +774,6 @@ public class PlayScreen extends GameScreen {
     super.hide();
     voiceChatPlayer.stop();
   }
-
 
   private void printShadowText(final int x, final int y, final String text,
       final BitmapFont font, final Texture texture, final float alphaChannel) {

@@ -15,7 +15,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-// TODO put in another class
 public class LeaderBoardPlayer {
 
   private String name;
