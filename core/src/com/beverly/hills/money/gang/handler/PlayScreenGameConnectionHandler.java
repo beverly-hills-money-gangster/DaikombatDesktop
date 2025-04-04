@@ -614,7 +614,7 @@ public class PlayScreenGameConnectionHandler {
         playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry
             .VOICE_GET_HIT_SOUND_SEQ.getNext())).play(
         TimeLimitSoundConf.builder()
-            .soundVolumeType(SoundVolumeType.LOW_QUIET)
+            .soundVolumeType(SoundVolumeType.LOW_NORMAL)
             .pitch(playScreen.getPlayer().getPlayerClass().getVoicePitch())
             .frequencyMls(1_000)
             .build()
