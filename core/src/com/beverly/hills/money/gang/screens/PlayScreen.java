@@ -515,15 +515,7 @@ public class PlayScreen extends GameScreen {
     getGame().getBatch().end();
 
     getGame().getBatch().begin();
-    if (voiceChatPlayer.isRecording()) {
-      String recordingText =
-          voiceChatPlayer.failedToRecord() ? "FAILED TO RECORD VOICE" : "VOICE RECORDING...";
-      GlyphLayout glyphLayoutRecording = new GlyphLayout(getUiFont(), recordingText);
-      getUiFont().draw(getGame().getBatch(), recordingText,
-          getViewport().getWorldWidth() / 2f - glyphLayoutRecording.width / 2f,
-          getViewport().getWorldHeight() / 2f - glyphLayoutRecording.height / 2f
-              - getViewport().getWorldHeight() / 4f);
-    }
+
     if (!getPlayer().isDead()) {
       if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {
         powerUpEffect(Color.SKY, PowerUpType.QUAD_DAMAGE);
@@ -646,6 +638,15 @@ public class PlayScreen extends GameScreen {
         screenToTransition = new ErrorScreen(getGame(),
             StringUtils.defaultIfEmpty(e.getMessage(), "Can't handle connection"));
       }
+    }
+    if (voiceChatPlayer.isRecording()) {
+      String recordingText =
+          voiceChatPlayer.failedToRecord() ? "FAILED TO RECORD VOICE" : "VOICE RECORDING...";
+      GlyphLayout glyphLayoutRecording = new GlyphLayout(getUiFont(), recordingText);
+      getUiFont().draw(getGame().getBatch(), recordingText,
+          getViewport().getWorldWidth() / 2f - glyphLayoutRecording.width / 2f,
+          getViewport().getWorldHeight() / 2f - glyphLayoutRecording.height / 2f
+              - getViewport().getWorldHeight() / 4f);
     }
 
     getGame().getBatch().end();
