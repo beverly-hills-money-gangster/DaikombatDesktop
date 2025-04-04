@@ -2,6 +2,7 @@ package com.beverly.hills.money.gang.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
@@ -17,6 +18,7 @@ public class MainMenuScreen extends AbstractMainMenuScreen {
   private final UserSettingSound boomSound1;
   private final UserSettingSound dingSound1;
 
+
   private final UISelection<MainMenuUISelection> menuSelection
       = new UISelection<>(MainMenuUISelection.values());
 
@@ -27,7 +29,9 @@ public class MainMenuScreen extends AbstractMainMenuScreen {
 
     boomSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.BOOM_1);
     dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
+
   }
+
 
   @Override
   public void handleInput(final float delta) {

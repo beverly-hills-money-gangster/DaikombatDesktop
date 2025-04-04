@@ -285,20 +285,7 @@ public class Player extends Entity {
     }
     handleArrows();
     handleWASD();
-    if (moved || longTimeNoMove()) {
-      onMovementListener.accept(this);
-      lastTimeMovedMls = System.currentTimeMillis();
-    }
-    if (moved) {
-      camY = Constants.DEFAULT_PLAYER_CAM_Y;
-      final float sinOffset = (float) (
-          Math.sin(getScreen().getGame().getTimeSinceLaunch() * speed * 3f)
-              * 0.01875f);
-      camY += sinOffset;
-      weaponY = -25f;
-      weaponY += sinOffset * 200f * 3f;
-      moved = false;
-    }
+
 
     movementDirVec2.set(movementDir.x, movementDir.z);
     rect.getNewPosition().set(
@@ -434,6 +421,21 @@ public class Player extends Entity {
       if (bloodOverlayAlpha <= Constants.BLOOD_OVERLAY_ALPHA_MIN) {
         renderBloodOverlay = false;
       }
+    }
+
+    if (moved || longTimeNoMove()) {
+      onMovementListener.accept(this);
+      lastTimeMovedMls = System.currentTimeMillis();
+    }
+    if (moved) {
+      camY = Constants.DEFAULT_PLAYER_CAM_Y;
+      final float sinOffset = (float) (
+          Math.sin(getScreen().getGame().getTimeSinceLaunch() * speed * 3f)
+              * 0.01875f);
+      camY += sinOffset;
+      weaponY = -25f;
+      weaponY += sinOffset * 200f * 3f;
+      moved = false;
     }
 
     getScreen().checkOverlaps(rect);

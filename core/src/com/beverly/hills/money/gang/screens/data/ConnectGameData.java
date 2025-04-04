@@ -1,10 +1,12 @@
 package com.beverly.hills.money.gang.screens.data;
 
+import com.beverly.hills.money.gang.network.VoiceChatConnection;
 import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import io.micrometer.common.lang.Nullable;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 

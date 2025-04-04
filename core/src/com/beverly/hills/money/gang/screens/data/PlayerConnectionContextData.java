@@ -33,5 +33,12 @@ public class PlayerConnectionContextData {
   private final Map<Weapon, WeaponStats> weaponStats;
   @NonNull
   private final Integer maxVisibility;
+  @NonNull
+  private final Integer matchId;
+
+  @NonNull
+  private final Integer audioSamplingRate;
+
+  private final boolean recordAudio;
 
 }

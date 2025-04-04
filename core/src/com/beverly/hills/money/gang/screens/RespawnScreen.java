@@ -4,7 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.DaiKombatGame;
-import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
+import com.beverly.hills.money.gang.entities.ui.LeaderBoardDataLayer;
+import com.beverly.hills.money.gang.entities.ui.LeaderBoardPlayer;
+import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.proto.RespawnCommand;
 import com.beverly.hills.money.gang.proto.ServerResponse;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
@@ -21,11 +23,11 @@ public class RespawnScreen extends AbstractLoadingScreen {
 
   private final PlayerConnectionContextData oldPlayerConnectionContextData;
 
-  private final LoadBalancedGameConnection gameConnection;
+  private final GlobalGameConnection gameConnection;
 
   public RespawnScreen(final DaiKombatGame game,
       final PlayerConnectionContextData oldPlayerConnectionContextData,
-      final LoadBalancedGameConnection gameConnection) {
+      final GlobalGameConnection gameConnection) {
     super(game);
     this.oldPlayerConnectionContextData = oldPlayerConnectionContextData;
     this.gameConnection = gameConnection;
@@ -38,6 +40,7 @@ public class RespawnScreen extends AbstractLoadingScreen {
     } else {
       gameConnection.write(RespawnCommand.newBuilder()
           .setGameId(Configs.GAME_ID)
+          .setMatchId(oldPlayerConnectionContextData.getMatchId())
           .setPlayerId(oldPlayerConnectionContextData.getPlayerId()).build());
     }
   }
@@ -59,9 +62,18 @@ public class RespawnScreen extends AbstractLoadingScreen {
       getGame().setScreen(new ErrorScreen(getGame(), errorMessage));
       return;
     }
+
     gameConnection.pollPrimaryConnectionResponse().ifPresent(response -> {
       if (response.hasErrorEvent()) {
         errorMessage = response.getErrorEvent().getMessage();
+      } else if (response.hasGameOver()) {
+        removeAllEntities();
+        stopBgMusic();
+        getGame().setScreen(
+            new GameOverScreen(getGame(),
+                new LeaderBoardDataLayer(oldPlayerConnectionContextData.getPlayerId(),
+                    LeaderBoardPlayer.createFromGameOver(response.getGameOver())),
+                oldPlayerConnectionContextData.getConnectGameData()));
       } else if (response.hasGameEvents()) {
         var gameEvent = response.getGameEvents().getEvents(0);
         if (gameEvent.getEventType() != ServerResponse.GameEvent.GameEventType.SPAWN

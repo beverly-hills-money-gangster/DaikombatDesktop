@@ -32,13 +32,14 @@ import com.beverly.hills.money.gang.entities.item.PowerUp;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.PlayerFactory;
 import com.beverly.hills.money.gang.entities.teleport.Teleport;
+import com.beverly.hills.money.gang.entities.ui.LeaderBoardPlayer;
 import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
 import com.beverly.hills.money.gang.entities.ui.UINetworkStats;
 import com.beverly.hills.money.gang.handler.PlayScreenGameConnectionHandler;
 import com.beverly.hills.money.gang.input.TextInputProcessor;
 import com.beverly.hills.money.gang.log.ChatLog;
 import com.beverly.hills.money.gang.log.MyPlayerKillLog;
-import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
+import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.proto.PushChatEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand.GameEventType;
@@ -46,6 +47,7 @@ import com.beverly.hills.money.gang.proto.Vector;
 import com.beverly.hills.money.gang.registry.EnemiesRegistry;
 import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
 import com.beverly.hills.money.gang.screens.ui.EnemyAim;
+import com.beverly.hills.money.gang.screens.ui.audio.VoiceChatPlayer;
 import com.beverly.hills.money.gang.screens.ui.selection.ActivePlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.DeadPlayUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
@@ -98,9 +100,8 @@ public class PlayScreen extends GameScreen {
   private final UserSettingSound twoFragsLeftSound;
   private final UserSettingSound threeFragsLeftSound;
   private final AtomicInteger actionSequence = new AtomicInteger(0);
-
+  private final VoiceChatPlayer voiceChatPlayer;
   private final Texture hudBlackTexture;
-
   private final Texture hudRedTexture;
 
   @Getter
@@ -116,9 +117,6 @@ public class PlayScreen extends GameScreen {
   @Setter
   private int playersOnline;
 
-  @Setter
-  private String errorMessage;
-
   @Getter
   private final UILeaderBoard uiLeaderBoard;
   private boolean showLeaderBoard;
@@ -131,7 +129,7 @@ public class PlayScreen extends GameScreen {
 
   private final ChatLog chatLog;
   private final MyPlayerKillLog myPlayerKillLog;
-  private final LoadBalancedGameConnection gameConnection;
+  private final GlobalGameConnection gameConnection;
   private final PlayerConnectionContextData playerConnectionContextData;
 
   private final UINetworkStats uiNetworkStats;
@@ -139,12 +137,13 @@ public class PlayScreen extends GameScreen {
   private final Map<PowerUpType, PowerUp> powerUps = new HashMap<>();
 
   public PlayScreen(final DaiKombatGame game,
-      final LoadBalancedGameConnection gameConnection,
+      final GlobalGameConnection gameConnection,
       final PlayerConnectionContextData playerConnectionContextData) {
     super(game, new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
     this.gameConnection = gameConnection;
     this.uiNetworkStats = new UINetworkStats(gameConnection.getPrimaryNetworkStats(),
-        gameConnection.getSecondaryNetworkStats());
+        gameConnection.getSecondaryNetworkStats(),
+        gameConnection.getVoiceChatNetworkStatsReader());
     dingSound1 = getGame().getAssMan().getUserSettingSound(SoundRegistry.DING_1);
     playerGoingThroughTeleport = game.getAssMan()
         .getUserSettingSound(SoundRegistry.PLAYER_GOING_THROUGH_TELEPORT);
@@ -195,9 +194,11 @@ public class PlayScreen extends GameScreen {
     uiLeaderBoard = new UILeaderBoard(
         playerConnectionContextData.getPlayerId(),
         playerConnectionContextData.getLeaderBoardItemList().stream()
-            .map(leaderBoardItem -> UILeaderBoard.LeaderBoardPlayer.builder()
+            .map(leaderBoardItem -> LeaderBoardPlayer.builder()
                 .name(leaderBoardItem.getPlayerName())
                 .id(leaderBoardItem.getPlayerId())
+                .skinUISelection(SkinUISelection.getSkinColor(leaderBoardItem.getSkinColor()))
+                .playerClass(GamePlayerClass.createPlayerClass(leaderBoardItem.getPlayerClass()))
                 .deaths(leaderBoardItem.getDeaths())
                 .ping(leaderBoardItem.getPingMls())
                 .kills(leaderBoardItem.getKills())
@@ -225,6 +226,16 @@ public class PlayScreen extends GameScreen {
     playScreenGameConnectionHandler = new PlayScreenGameConnectionHandler(this, enemiesRegistry);
     hudBlackTexture = createTexture(Color.BLACK);
     hudRedTexture = createTexture(new Color(1, 0, 0.15f, 1f));
+    voiceChatPlayer = new VoiceChatPlayer(gameConnection,
+        playerConnectionContextData.getPlayerId(),
+        enemiesRegistry,
+        playerConnectionContextData.getAudioSamplingRate(),
+        playerConnectionContextData.isRecordAudio());
+  }
+
+  @Override
+  public void show() {
+    voiceChatPlayer.init();
   }
 
   private Texture createTexture(final Color color) {
@@ -253,6 +264,7 @@ public class PlayScreen extends GameScreen {
       var currentDirection = getPlayer().getCurrent2DDirection();
       gameConnection.write(PushGameEventCommand.newBuilder()
           .setSequence(actionSequence.incrementAndGet())
+          .setMatchId(playerConnectionContextData.getMatchId())
           .setPingMls(
               Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
                   .orElse(0))
@@ -285,6 +297,7 @@ public class PlayScreen extends GameScreen {
           var currentDirection = getPlayer().getCurrent2DDirection();
           gameConnection.write(PushGameEventCommand.newBuilder()
               .setSequence(actionSequence.incrementAndGet())
+              .setMatchId(playerConnectionContextData.getMatchId())
               .setPingMls(Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
                   .orElse(0))
               .setPlayerId(playerConnectionContextData.getPlayerId())
@@ -308,6 +321,9 @@ public class PlayScreen extends GameScreen {
 
   @Override
   public void handleInput(final float delta) {
+    if (Gdx.input.isKeyJustPressed(Keys.V)) {
+      voiceChatPlayer.recordAudio(!voiceChatPlayer.isRecording());
+    }
     showLeaderBoard = false;
     if (Gdx.input.isKeyJustPressed(Input.Keys.valueOf("`"))) {
       chatMode = !chatMode;
@@ -409,7 +425,9 @@ public class PlayScreen extends GameScreen {
         || Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)
         || Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
       screenToTransition = switch (deadPlayUISelectionUISelection.getSelectedOption()) {
-        case RESPAWN -> new RespawnScreen(getGame(), playerConnectionContextData,
+        case RESPAWN -> new RespawnScreen(getGame(), playerConnectionContextData.toBuilder()
+            .recordAudio(voiceChatPlayer.isRecording())
+            .build(),
             gameConnection);
         case QUIT -> new MainMenuScreen(getGame());
       };
@@ -444,6 +462,7 @@ public class PlayScreen extends GameScreen {
     gameConnection.write(PushGameEventCommand.newBuilder()
         .setPingMls(
             Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls()).orElse(0))
+        .setMatchId(playerConnectionContextData.getMatchId())
         .setSequence(actionSequence.incrementAndGet())
         .setPlayerId(playerConnectionContextData.getPlayerId())
         .setEventType(PushGameEventCommand.GameEventType.MOVE)
@@ -496,6 +515,7 @@ public class PlayScreen extends GameScreen {
     getGame().getBatch().end();
 
     getGame().getBatch().begin();
+
     if (!getPlayer().isDead()) {
       if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {
         powerUpEffect(Color.SKY, PowerUpType.QUAD_DAMAGE);
@@ -598,36 +618,35 @@ public class PlayScreen extends GameScreen {
       showGuiMenu = true;
     }
     if (gameOver) {
-      GamePlayerClass winnerClass;
-      SkinUISelection winnerColor;
-      if (uiLeaderBoard.getFirstPlacePlayerId() == playerConnectionContextData.getPlayerId()) {
-        winnerClass = playerConnectionContextData.getConnectGameData().getGamePlayerClass();
-        winnerColor = playerConnectionContextData.getConnectGameData().getSkinUISelection();
-      } else {
-        var enemyWinner = enemiesRegistry
-            .getEnemy(uiLeaderBoard.getFirstPlacePlayerId()).orElseThrow(
-                () -> new IllegalStateException("Can't find enemy by id"));
-        winnerClass = enemyWinner.getEnemyClass();
-        winnerColor = enemyWinner.getSkinUISelection();
-      }
       screenToTransition = new GameOverScreen(getGame(), uiLeaderBoard,
-          playerConnectionContextData.getConnectGameData(), winnerColor, winnerClass);
-    } else if (gameConnection.isAnyDisconnected()) {
-      gameConnection.pollErrors().forEach(playScreenGameConnectionHandler::handleException);
-      playerConnectionContextData.getConnectGameData()
-          .setPlayerIdToRecover(playerConnectionContextData.getPlayerId());
-      screenToTransition = new ConnectServerScreen(getGame(),
           playerConnectionContextData.getConnectGameData());
     } else {
       try {
         playScreenGameConnectionHandler.handle();
+        if (gameConnection.isAnyDisconnected()) {
+          gameConnection.disconnect();
+          gameConnection.pollErrors().forEach(playScreenGameConnectionHandler::handleException);
+          playerConnectionContextData.getConnectGameData()
+              .setPlayerIdToRecover(playerConnectionContextData.getPlayerId());
+          // TODO check that reconnection with leaderboard recovery still works
+          screenToTransition = new ConnectServerScreen(getGame(),
+              playerConnectionContextData.getConnectGameData());
+        }
       } catch (Exception e) {
-        LOG.error("Can't handle screen actions", e);
+        LOG.error("Can't handle connection", e);
+        gameConnection.disconnect();
         screenToTransition = new ErrorScreen(getGame(),
-            StringUtils.defaultIfEmpty(e.getMessage(), "Can't handle connection")
-                + ". Check internet signal. Last ping " + gameConnection.getPrimaryNetworkStats()
-                .getPingMls() + " mls.");
+            StringUtils.defaultIfEmpty(e.getMessage(), "Can't handle connection"));
       }
+    }
+    if (voiceChatPlayer.isRecording()) {
+      String recordingText =
+          voiceChatPlayer.failedToRecord() ? "FAILED TO RECORD VOICE" : "VOICE RECORDING...";
+      GlyphLayout glyphLayoutRecording = new GlyphLayout(getUiFont(), recordingText);
+      getUiFont().draw(getGame().getBatch(), recordingText,
+          getViewport().getWorldWidth() / 2f - glyphLayoutRecording.width / 2f,
+          getViewport().getWorldHeight() / 2f - glyphLayoutRecording.height / 2f
+              - getViewport().getWorldHeight() / 4f);
     }
 
     getGame().getBatch().end();
@@ -685,7 +704,7 @@ public class PlayScreen extends GameScreen {
     GlyphLayout glyphNetworkStats = new GlyphLayout(guiFont32, networkStats);
     guiFont32.draw(getGame().getBatch(),
         networkStats, Constants.DEFAULT_SELECTION_INDENT,
-        getViewport().getWorldHeight() - getViewport().getWorldHeight() / 3
+        getViewport().getWorldHeight() - getViewport().getWorldHeight() / 4
             + glyphNetworkStats.height / 2);
   }
 
@@ -742,19 +761,26 @@ public class PlayScreen extends GameScreen {
 
   @Override
   public void dispose() {
-    LOG.info("DISPOSE!");
+    super.dispose();
     gameConnection.disconnect();
+    Optional.ofNullable(voiceChatPlayer).ifPresent(VoiceChatPlayer::stop);
   }
 
   public void setEnemyAim(EnemyAim enemyAim) {
     this.enemyAim = enemyAim;
   }
 
+  @Override
+  public void hide() {
+    super.hide();
+    voiceChatPlayer.stop();
+  }
+
   private void printShadowText(final int x, final int y, final String text,
       final BitmapFont font, final Texture texture, final float alphaChannel) {
-    GlyphLayout glyphLayoutChatLog = new GlyphLayout(font, text);
-    float blockWidth = glyphLayoutChatLog.width + SHADOW_MARGIN * 2;
-    float blockHeight = glyphLayoutChatLog.height + SHADOW_MARGIN * 2;
+    GlyphLayout glyph = new GlyphLayout(font, text);
+    float blockWidth = glyph.width + SHADOW_MARGIN * 2;
+    float blockHeight = glyph.height + SHADOW_MARGIN * 2;
     float blockX = x - SHADOW_MARGIN;
     float blockY = y - SHADOW_MARGIN;
     var oldColor = getGame().getBatch().getColor().cpy();
@@ -762,8 +788,9 @@ public class PlayScreen extends GameScreen {
     getGame().getBatch()
         .draw(texture, blockX, blockY, blockWidth, blockHeight);
     getGame().getBatch().setColor(oldColor);
-    getUiFont().draw(getGame().getBatch(), text, x, y + glyphLayoutChatLog.height);
+    getUiFont().draw(getGame().getBatch(), text, x, y + glyph.height);
   }
+
 
   private void printShadowText(final int x, final int y, final String text,
       final BitmapFont font, final float alphaChannel) {

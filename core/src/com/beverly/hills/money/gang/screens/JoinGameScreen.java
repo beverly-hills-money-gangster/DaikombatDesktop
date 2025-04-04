@@ -3,7 +3,7 @@ package com.beverly.hills.money.gang.screens;
 import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.config.ClientConfig;
-import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
+import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.proto.JoinGameCommand;
 import com.beverly.hills.money.gang.proto.MergeConnectionCommand;
 import com.beverly.hills.money.gang.proto.PlayerClass;
@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 public class JoinGameScreen extends ReconnectableScreen {
 
   private static final Logger LOG = LoggerFactory.getLogger(JoinGameScreen.class);
-  private final LoadBalancedGameConnection gameConnection;
+  private final GlobalGameConnection gameConnection;
   private final PlayerConnectionContextData.PlayerConnectionContextDataBuilder playerContextDataBuilder;
   private final ConnectGameData connectGameData;
 
@@ -33,7 +33,7 @@ public class JoinGameScreen extends ReconnectableScreen {
   public JoinGameScreen(final DaiKombatGame game,
       final PlayerConnectionContextData.PlayerConnectionContextDataBuilder playerContextDataBuilder,
       final ConnectGameData connectGameData,
-      final LoadBalancedGameConnection gameConnection,
+      final GlobalGameConnection gameConnection,
       final int connectionTrial) {
     super(game, connectionTrial);
     this.gameConnection = gameConnection;
@@ -58,7 +58,6 @@ public class JoinGameScreen extends ReconnectableScreen {
         .ifPresent(joinGameRequestBuilder::setRecoveryPlayerId);
     gameConnection.write(joinGameRequestBuilder
         .build());
-
   }
 
   private PlayerSkinColor createSkinColorSelection(SkinUISelection skinUISelection) {
@@ -104,8 +103,10 @@ public class JoinGameScreen extends ReconnectableScreen {
         removeAllEntities();
         stopBgMusic();
         LOG.info("Joined the game. Go play");
+        var playerContextData = createPlayerContextData(response);
+        gameConnection.initVoiceChat(playerContextData.getPlayerId(), Configs.GAME_ID);
         getGame().setScreen(
-            new PlayScreen(getGame(), gameConnection, createPlayerContextData(response)));
+            new PlayScreen(getGame(), gameConnection, playerContextData));
       }
     });
 

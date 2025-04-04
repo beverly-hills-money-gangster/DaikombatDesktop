@@ -48,7 +48,7 @@ public enum UserSettingsUISelection {
     }
 
     public float getNormalized() {
-      return setting / (float) MAX_SETTING;
+      return (setting / (float) MAX_SETTING);
     }
 
     @Override

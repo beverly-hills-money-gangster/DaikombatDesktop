@@ -1,10 +1,11 @@
 package com.beverly.hills.money.gang.screens;
 
+import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.entity.HostPort;
 import com.beverly.hills.money.gang.network.GameConnection;
-import com.beverly.hills.money.gang.network.LoadBalancedGameConnection;
+import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.network.SecondaryGameConnection;
 import com.beverly.hills.money.gang.proto.GetServerInfoCommand;
 import com.beverly.hills.money.gang.proto.ServerResponse.ProjectileInfo;
@@ -33,7 +34,7 @@ public class ConnectServerScreen extends ReconnectableScreen {
 
   private final AtomicReference<String> errorMessage = new AtomicReference<>();
 
-  private final AtomicReference<LoadBalancedGameConnection> gameConnectionRef = new AtomicReference<>();
+  private final AtomicReference<GlobalGameConnection> gameConnectionRef = new AtomicReference<>();
 
   private final PlayerConnectionContextData.PlayerConnectionContextDataBuilder playerContextDataBuilder;
 
@@ -59,8 +60,8 @@ public class ConnectServerScreen extends ReconnectableScreen {
             .host(connectGameData.getServerHost())
             .port(connectGameData.getServerPort()).build();
         var connection = new GameConnection(hostPort);
-        LoadBalancedGameConnection loadBalancedGameConnection
-            = new LoadBalancedGameConnection(
+        GlobalGameConnection loadBalancedGameConnection
+            = new GlobalGameConnection(
             connection, createSecondaryConnections(hostPort));
         if (!loadBalancedGameConnection.waitUntilAllConnected(5_000)) {
           errorMessage.set("Connection timeout");
@@ -88,7 +89,7 @@ public class ConnectServerScreen extends ReconnectableScreen {
 
   @Override
   protected void onEscape() {
-    Optional.ofNullable(gameConnectionRef.get()).ifPresent(LoadBalancedGameConnection::disconnect);
+    Optional.ofNullable(gameConnectionRef.get()).ifPresent(GlobalGameConnection::disconnect);
   }
 
   @Override
@@ -111,9 +112,12 @@ public class ConnectServerScreen extends ReconnectableScreen {
               playerContextDataBuilder.maxVisibility(serverInfo.getMaxVisibility());
               playerContextDataBuilder.fragsToWin(serverInfo.getFragsToWin());
               playerContextDataBuilder.speed(serverInfo.getPlayerSpeed());
+              playerContextDataBuilder.audioSamplingRate(
+                  serverInfo.getVoiceChatSamplingFrequencyHertz());
               playerContextDataBuilder.weaponStats(getWeaponStats(
                   serverInfo.getWeaponsInfoList(),
                   serverInfo.getProjectileInfoList()));
+              playerContextDataBuilder.matchId(serverInfo.getGames(Configs.GAME_ID).getMatchId());
               removeAllEntities();
               LOG.info("Got server info. Try join the game");
               getGame().setScreen(new JoinGameScreen(getGame(),
@@ -154,7 +158,7 @@ public class ConnectServerScreen extends ReconnectableScreen {
 
   @Override
   protected void onTimeout() {
-    Optional.ofNullable(gameConnectionRef.get()).ifPresent(LoadBalancedGameConnection::disconnect);
+    Optional.ofNullable(gameConnectionRef.get()).ifPresent(GlobalGameConnection::disconnect);
   }
 
 
