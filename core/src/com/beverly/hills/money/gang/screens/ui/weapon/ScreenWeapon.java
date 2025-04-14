@@ -112,7 +112,7 @@ public class ScreenWeapon {
     changeWeapon(weaponBeingUsed.prevWeapon());
   }
 
-  private void setWeaponBeingUsed(Weapon weapon) {
+  public void setWeaponBeingUsed(Weapon weapon) {
     weaponBeingUsed = weapon;
   }
 

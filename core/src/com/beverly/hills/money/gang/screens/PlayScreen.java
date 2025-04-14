@@ -231,6 +231,8 @@ public class PlayScreen extends GameScreen {
         enemiesRegistry,
         playerConnectionContextData.getAudioSamplingRate(),
         playerConnectionContextData.isRecordAudio());
+    Optional.ofNullable(playerConnectionContextData.getLastWeapon())
+        .ifPresent(weapon -> getPlayer().setWeapon(weapon));
   }
 
   @Override
@@ -424,9 +426,11 @@ public class PlayScreen extends GameScreen {
         || Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_RIGHT)
         || Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)
         || Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
+
       screenToTransition = switch (deadPlayUISelectionUISelection.getSelectedOption()) {
         case RESPAWN -> new RespawnScreen(getGame(), playerConnectionContextData.toBuilder()
             .recordAudio(voiceChatPlayer.isRecording())
+            .lastWeapon(getPlayer().getCurrentWeapon())
             .build(),
             gameConnection);
         case QUIT -> new MainMenuScreen(getGame());

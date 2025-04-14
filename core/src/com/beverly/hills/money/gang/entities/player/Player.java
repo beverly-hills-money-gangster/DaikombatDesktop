@@ -247,6 +247,14 @@ public class Player extends Entity {
         rect.x + rect.getWidth() / 2, rect.y + rect.getHeight() / 2);
   }
 
+  public Weapon getCurrentWeapon() {
+    return screenWeapon.getWeaponBeingUsed();
+  }
+
+  public void setWeapon(Weapon weapon) {
+    screenWeapon.setWeaponBeingUsed(weapon);
+  }
+
   public void handleInput(final float delta) {
 
     movementDir.setZero();
@@ -285,7 +293,6 @@ public class Player extends Entity {
     }
     handleArrows();
     handleWASD();
-
 
     movementDirVec2.set(movementDir.x, movementDir.z);
     rect.getNewPosition().set(

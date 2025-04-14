@@ -41,4 +41,6 @@ public class PlayerConnectionContextData {
 
   private final boolean recordAudio;
 
+  private final Weapon lastWeapon;
+
 }
