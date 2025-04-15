@@ -91,46 +91,47 @@ public class PlayerFactory {
             return;
           }
           screen.sendCurrentPlayerPosition();
-        }, projectileEnemy -> {
-      if (projectileEnemy.getPlayer().isCollidedWithTeleport()) {
-        LOG.warn("Can't shoot projectiles while being teleported");
-        return;
-      }
-      var enemy = projectileEnemy.getEnemyPlayer();
-      var projectile = projectileEnemy.getProjectile();
-      var player = projectileEnemy.getPlayer();
-      var projectilePosition = projectile.currentPosition();
-      var direction = player.getCurrent2DDirection();
-      var position = player.getCurrent2DPosition();
+        },
+        projectileEnemy -> {
+          if (projectileEnemy.getPlayer().isCollidedWithTeleport()) {
+            LOG.warn("Can't shoot projectiles while being teleported");
+            return;
+          }
+          var enemies = projectileEnemy.getEnemyPlayers();
+          var projectile = projectileEnemy.getProjectile();
+          var player = projectileEnemy.getPlayer();
+          var projectilePosition = projectile.currentPosition();
+          var direction = player.getCurrent2DDirection();
+          var position = player.getCurrent2DPosition();
 
-      var commandBuilder = PushGameEventCommand.newBuilder()
-          .setGameId(Configs.GAME_ID)
-          .setMatchId(playerConnectionContextData.getMatchId())
-          .setSequence(screen.getActionSequence().incrementAndGet())
-          .setPingMls(
-              Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
-                  .orElse(0))
-          .setPlayerId(playerConnectionContextData.getPlayerId())
-          .setDirection(
-              Vector.newBuilder().setX(direction.x).setY(direction.y).build())
-          .setPosition(
-              Vector.newBuilder().setX(position.x).setY(position.y).build())
-          .setProjectile(ProjectileStats.newBuilder().setPosition(
-                  Vector.newBuilder().setX(projectilePosition.x).setY(projectilePosition.y)
-                      .build())
-              .setProjectileType(mapProjectileToWeaponType(projectile)).build())
-          .setEventType(GameEventType.ATTACK);
+          var commandBuilder = PushGameEventCommand.newBuilder()
+              .setGameId(Configs.GAME_ID)
+              .setMatchId(playerConnectionContextData.getMatchId())
+              .setSequence(screen.getActionSequence().incrementAndGet())
+              .setPingMls(
+                  Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
+                      .orElse(0))
+              .setPlayerId(playerConnectionContextData.getPlayerId())
+              .setDirection(
+                  Vector.newBuilder().setX(direction.x).setY(direction.y).build())
+              .setPosition(
+                  Vector.newBuilder().setX(position.x).setY(position.y).build())
+              .setProjectile(ProjectileStats.newBuilder().setPosition(
+                      Vector.newBuilder().setX(projectilePosition.x).setY(projectilePosition.y)
+                          .build())
+                  .setProjectileType(mapProjectileToWeaponType(projectile)).build())
+              .setEventType(GameEventType.ATTACK);
 
-      Optional.ofNullable(enemy).ifPresent(enemyPlayer -> {
-        enemyPlayer.getHit();
-        new TimeLimitedSound(
-            screen.getGame().getAssMan().getUserSettingSound(SoundRegistry.HIT_SOUND))
-            .play(TimeLimitSoundConf.builder()
-                .soundVolumeType(SoundVolumeType.LOUD).frequencyMls(500)
-                .build());
-      });
-      gameConnection.write(commandBuilder.build());
-    },
+          enemies.forEach(enemyPlayer -> {
+            enemyPlayer.getHit();
+            new TimeLimitedSound(
+                screen.getGame().getAssMan().getUserSettingSound(SoundRegistry.HIT_SOUND))
+                .play(TimeLimitSoundConf.builder()
+                    .soundVolumeType(SoundVolumeType.LOUD).frequencyMls(500)
+                    .build());
+          });
+          gameConnection.write(commandBuilder.build());
+        },
         playerConnectionContextData.getSpawn(),
         playerConnectionContextData.getDirection(),
         playerConnectionContextData.getSpeed(),
