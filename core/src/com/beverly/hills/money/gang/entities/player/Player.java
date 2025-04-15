@@ -34,6 +34,7 @@ import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponRenderData;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponStats;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -466,7 +467,7 @@ public class Player extends Entity {
 
     private final Projectile projectile;
     private final Player player;
-    private final EnemyPlayer enemyPlayer;
+    private final List<EnemyPlayer> enemyPlayers;
   }
 
 }

@@ -78,15 +78,10 @@ public class AbstractPlayerProjectile extends Projectile {
       var enemiesInRange = player.getEnemiesRegistry()
           .getVisibleEnemiesInRange(projectile.currentPosition(),
               weaponState.getProjectileRadius());
-      if (enemiesInRange.isEmpty()) {
-        player.getOnProjectileAttackHit().accept(
-            ProjectileEnemy.builder().enemyPlayer(null).projectile(projectile).player(player)
-                .build());
-      } else {
-        enemiesInRange.forEach(enemyPlayer -> player.getOnProjectileAttackHit().accept(
-            ProjectileEnemy.builder().enemyPlayer(enemyPlayer).projectile(projectile).player(player)
-                .build()));
-      }
+      player.getOnProjectileAttackHit().accept(
+          ProjectileEnemy.builder().enemyPlayers(enemiesInRange).projectile(projectile)
+              .player(player)
+              .build());
     };
     this.finishPosition = finishPosition;
     this.position = startPosition.cpy();
@@ -183,6 +178,7 @@ public class AbstractPlayerProjectile extends Projectile {
               continue;
             }
           }
+
           onBlowUp.accept(this);
           boom();
           break;
