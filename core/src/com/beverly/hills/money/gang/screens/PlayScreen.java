@@ -230,7 +230,8 @@ public class PlayScreen extends GameScreen {
         playerConnectionContextData.getPlayerId(),
         enemiesRegistry,
         playerConnectionContextData.getAudioSamplingRate(),
-        playerConnectionContextData.isRecordAudio());
+        playerConnectionContextData.isRecordAudio(),
+        playerConnectionContextData.getVoiceChatPayloadSizeBytes());
     Optional.ofNullable(playerConnectionContextData.getLastWeapon())
         .ifPresent(weapon -> getPlayer().setWeapon(weapon));
   }

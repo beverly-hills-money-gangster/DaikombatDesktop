@@ -20,7 +20,7 @@ public class VoiceChatPlayer {
 
   private static final Logger LOG = LoggerFactory.getLogger(EnemyPlayerActionQueueStrategy.class);
 
-  private final static int MAX_AUDIO_PACKET_BYTE_SIZE = 2000;
+  private final int payloadSizeBytes;
 
 
   private final AtomicBoolean recordAudio = new AtomicBoolean();
@@ -45,12 +45,13 @@ public class VoiceChatPlayer {
 
 
   public VoiceChatPlayer(GlobalGameConnection gameConnection, int playerId,
-      EnemiesRegistry enemiesRegistry, int samplingRate, boolean record) {
+      EnemiesRegistry enemiesRegistry, int samplingRate, boolean record, int payloadSizeBytes) {
     this.gameConnection = gameConnection;
     this.playerId = playerId;
     this.enemiesRegistry = enemiesRegistry;
     this.samplingRate = samplingRate;
     recordAudio.set(record);
+    this.payloadSizeBytes = payloadSizeBytes;
   }
 
   public void init() {
@@ -68,7 +69,7 @@ public class VoiceChatPlayer {
         Math.min(1, UserSettingsUISelection.SOUND.getState().getNormalized() * 2f));
 
     audioRecorderThread = new Thread(() -> {
-      short[] shortPCM = new short[MAX_AUDIO_PACKET_BYTE_SIZE / 2];
+      short[] shortPCM = new short[payloadSizeBytes / 2];
       try {
         while (!Thread.currentThread().isInterrupted()) {
           synchronized (recordAudio) {
