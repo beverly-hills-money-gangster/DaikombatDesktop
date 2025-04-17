@@ -108,12 +108,15 @@ public class ConnectServerScreen extends ReconnectableScreen {
               errorMessage.set("Can't connect. Game is over.");
             } else if (response.hasServerInfo()) {
               var serverInfo = response.getServerInfo();
+              LOG.info("Server info:\n{}", serverInfo);
               playerContextDataBuilder.movesUpdateFreqMls(serverInfo.getMovesUpdateFreqMls());
               playerContextDataBuilder.maxVisibility(serverInfo.getMaxVisibility());
               playerContextDataBuilder.fragsToWin(serverInfo.getFragsToWin());
               playerContextDataBuilder.speed(serverInfo.getPlayerSpeed());
               playerContextDataBuilder.audioSamplingRate(
                   serverInfo.getVoiceChatSamplingFrequencyHertz());
+              playerContextDataBuilder.voiceChatPayloadSizeBytes(
+                  serverInfo.getVoiceChatPayloadBytes());
               playerContextDataBuilder.weaponStats(getWeaponStats(
                   serverInfo.getWeaponsInfoList(),
                   serverInfo.getProjectileInfoList()));
