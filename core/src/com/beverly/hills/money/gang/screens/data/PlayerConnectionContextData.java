@@ -36,12 +36,6 @@ public class PlayerConnectionContextData {
   @NonNull
   private final Integer matchId;
 
-  @NonNull
-  private final Integer audioSamplingRate;
-
-  @NonNull
-  private final Integer voiceChatPayloadSizeBytes;
-
   private final boolean recordAudio;
 
   private final Weapon lastWeapon;

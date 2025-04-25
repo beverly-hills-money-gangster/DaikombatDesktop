@@ -229,9 +229,7 @@ public class PlayScreen extends GameScreen {
     voiceChatPlayer = new VoiceChatPlayer(gameConnection,
         playerConnectionContextData.getPlayerId(),
         enemiesRegistry,
-        playerConnectionContextData.getAudioSamplingRate(),
-        playerConnectionContextData.isRecordAudio(),
-        playerConnectionContextData.getVoiceChatPayloadSizeBytes());
+        playerConnectionContextData.isRecordAudio());
     Optional.ofNullable(playerConnectionContextData.getLastWeapon())
         .ifPresent(weapon -> getPlayer().setWeapon(weapon));
   }

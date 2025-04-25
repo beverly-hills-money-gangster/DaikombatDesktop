@@ -113,10 +113,6 @@ public class ConnectServerScreen extends ReconnectableScreen {
               playerContextDataBuilder.maxVisibility(serverInfo.getMaxVisibility());
               playerContextDataBuilder.fragsToWin(serverInfo.getFragsToWin());
               playerContextDataBuilder.speed(serverInfo.getPlayerSpeed());
-              playerContextDataBuilder.audioSamplingRate(
-                  serverInfo.getVoiceChatSamplingFrequencyHertz());
-              playerContextDataBuilder.voiceChatPayloadSizeBytes(
-                  serverInfo.getVoiceChatPayloadBytes());
               playerContextDataBuilder.weaponStats(getWeaponStats(
                   serverInfo.getWeaponsInfoList(),
                   serverInfo.getProjectileInfoList()));

@@ -125,7 +125,7 @@ public class EnemyPlayer extends Enemy {
   }
 
   public void talking(float avgAmpl) {
-    if (!getEnemyEffects().isPowerUpActive(PowerUpType.INVISIBILITY)) {
+    if (!getEnemyEffects().isPowerUpActive(PowerUpType.INVISIBILITY) && visible) {
       enemyPlayerVoiceChatEffect.makeVisible();
     }
   }
