@@ -6,6 +6,7 @@ import com.badlogic.gdx.audio.AudioRecorder;
 import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.entity.VoiceChatPayload;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
+import com.beverly.hills.money.gang.network.GlobalGameConnection.VoiceChatConfigs;
 import com.beverly.hills.money.gang.registry.EnemiesRegistry;
 import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
 import com.beverly.hills.money.gang.strategy.EnemyPlayerActionQueueStrategy;
@@ -20,11 +21,7 @@ public class VoiceChatPlayer {
 
   private static final Logger LOG = LoggerFactory.getLogger(EnemyPlayerActionQueueStrategy.class);
 
-  private final int payloadSizeBytes;
-
-
   private final AtomicBoolean recordAudio = new AtomicBoolean();
-
 
   private AudioRecorder audioRecorder;
 
@@ -41,37 +38,38 @@ public class VoiceChatPlayer {
   private final GlobalGameConnection gameConnection;
   private final int playerId;
   private final EnemiesRegistry enemiesRegistry;
-  private final int samplingRate;
 
+  private final VoiceChatConfigs voiceChatConfigs;
+
+  private final AtomicBoolean stop = new AtomicBoolean();
 
   public VoiceChatPlayer(GlobalGameConnection gameConnection, int playerId,
-      EnemiesRegistry enemiesRegistry, int samplingRate, boolean record, int payloadSizeBytes) {
+      EnemiesRegistry enemiesRegistry, boolean record) {
     this.gameConnection = gameConnection;
     this.playerId = playerId;
     this.enemiesRegistry = enemiesRegistry;
-    this.samplingRate = samplingRate;
     recordAudio.set(record);
-    this.payloadSizeBytes = payloadSizeBytes;
+    this.voiceChatConfigs = gameConnection.getVoiceChatConfigs();
   }
 
   public void init() {
     try {
-      this.audioRecorder = Gdx.audio.newAudioRecorder(samplingRate, true);
-      this.audioPlayer = Gdx.audio.newAudioDevice(samplingRate, true);
+
+      this.audioRecorder = Gdx.audio.newAudioRecorder(voiceChatConfigs.getSampleRate(), true);
+      this.audioPlayer = Gdx.audio.newAudioDevice(voiceChatConfigs.getSampleRate(), true);
 
     } catch (Exception e) {
       exceptionThrown.set(true);
       LOG.error("Can't record", e);
       return;
     }
-    // voice chat should be twice louder than anything else in the game because it's not very loud
-    audioPlayer.setVolume(
-        Math.min(1, UserSettingsUISelection.SOUND.getState().getNormalized() * 2f));
+    // max volume unless muted
+    audioPlayer.setVolume(UserSettingsUISelection.SOUND.getState().getNormalized() == 0 ? 0 : 1);
 
     audioRecorderThread = new Thread(() -> {
-      short[] shortPCM = new short[payloadSizeBytes / 2];
+      short[] shortPCM = new short[voiceChatConfigs.getSampleSize()];
       try {
-        while (!Thread.currentThread().isInterrupted()) {
+        while (!stop.get()) {
           synchronized (recordAudio) {
             if (!recordAudio.get()) {
               recordAudio.wait();
@@ -98,7 +96,7 @@ public class VoiceChatPlayer {
     audioPlayerThread = new Thread(() -> {
       int mlsToBlock = 100;
       var pcmSilence = new short[1];
-      while (!Thread.currentThread().isInterrupted()) {
+      while (!stop.get()) {
         try {
           List<VoiceChatPayload> shortPCMs = gameConnection.pollPCMBlocking(mlsToBlock);
           if (shortPCMs.isEmpty()) {
@@ -121,6 +119,8 @@ public class VoiceChatPlayer {
     });
     audioPlayerThread.setDaemon(true);
     audioRecorderThread.setDaemon(true);
+    audioRecorderThread.setName("Audio recorder");
+    audioPlayerThread.setName("Audio player");
     audioRecorderThread.start();
     audioPlayerThread.start();
   }
@@ -164,6 +164,8 @@ public class VoiceChatPlayer {
   }
 
   public void stop() {
+    LOG.info("Stop voice chat");
+    stop.set(true);
     Optional.ofNullable(audioPlayerThread).ifPresent(Thread::interrupt);
     Optional.ofNullable(audioRecorderThread).ifPresent(Thread::interrupt);
     Optional.ofNullable(audioRecorder).ifPresent(AudioRecorder::dispose);
