@@ -8,7 +8,7 @@ public interface Constants {
 
   int LONG_TIME_NO_MOVE_MLS = 200;
 
-  float SFX_VOLUME_COEFFICIENT = 1 / 16f;
+  float SFX_VOLUME_COEFFICIENT = 1 / 12f;
 
   int MAX_ENEMY_IDLE_TIME_MLS = LONG_TIME_NO_MOVE_MLS * 4;
 

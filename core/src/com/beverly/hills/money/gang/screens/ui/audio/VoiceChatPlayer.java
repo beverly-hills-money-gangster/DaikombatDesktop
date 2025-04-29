@@ -43,6 +43,8 @@ public class VoiceChatPlayer {
 
   private final AtomicBoolean stop = new AtomicBoolean();
 
+  private final AtomicReference<Float> normalizedAvgAmplitude = new AtomicReference<>(0f);
+
   public VoiceChatPlayer(GlobalGameConnection gameConnection, int playerId,
       EnemiesRegistry enemiesRegistry, boolean record) {
     this.gameConnection = gameConnection;
@@ -77,6 +79,7 @@ public class VoiceChatPlayer {
             }
           }
           audioRecorder.read(shortPCM, 0, shortPCM.length);
+          normalizedAvgAmplitude.set(Math.min(1, getNormalizedAvgAmpl(shortPCM) * 16f));
           recordedVoiceLastTime.set(System.currentTimeMillis());
           gameConnection.write(
               VoiceChatPayload.builder().playerId(playerId)
@@ -135,9 +138,17 @@ public class VoiceChatPlayer {
   private float getAvgAmpl(short[] pcm) {
     long total = 0;
     for (short value : pcm) {
-      total += value;
+      total += Math.abs(value);
     }
     return (float) Math.abs(total / pcm.length);
+  }
+
+  private float getNormalizedAvgAmpl(short[] pcm) {
+    return Math.min(1, getAvgAmpl(pcm) / Short.MAX_VALUE);
+  }
+
+  public float getLastNormalizedAvgAmpl() {
+    return normalizedAvgAmplitude.get();
   }
 
   private short[] mixPCMs(List<VoiceChatPayload> pcms) {

@@ -78,6 +78,7 @@ public class PlayScreen extends GameScreen {
       Constants.QUAKE_NARRATOR_FX_VOLUME);
   private final EnemiesRegistry enemiesRegistry = new EnemiesRegistry();
   private static final int MAX_CHAT_MSG_LEN = 32;
+  private static final float HUD_ALPHA_CHANNEL = 0.7f;
   private static final float BLOOD_OVERLAY_ALPHA_SWITCH = 0.5f;
   private final TextureRegion texRegBloodOverlay, texRegBlackOverlay;
   private final Environment env;
@@ -103,24 +104,19 @@ public class PlayScreen extends GameScreen {
   private final VoiceChatPlayer voiceChatPlayer;
   private final Texture hudBlackTexture;
   private final Texture hudRedTexture;
-
+  private final TextureRegion micTexture;
   @Getter
   @Setter
   private boolean gameOver;
-
   private final UISelection<ActivePlayUISelection> activePlayUISelectionUISelection
       = new UISelection<>(ActivePlayUISelection.values());
-
   private final UISelection<DeadPlayUISelection> deadPlayUISelectionUISelection
       = new UISelection<>(DeadPlayUISelection.values());
-
   @Setter
   private int playersOnline;
-
   @Getter
   private final UILeaderBoard uiLeaderBoard;
   private boolean showLeaderBoard;
-
   private long nextTimeToFlushPlayerActions;
   private boolean chatMode;
   private boolean showGuiMenu;
@@ -172,6 +168,7 @@ public class PlayScreen extends GameScreen {
     musicBackground = getGame().getAssMan()
         .getUserSettingSound(SoundRegistry.BATTLE_BG_SEQ.getNext());
     fightSound = getGame().getAssMan().getUserSettingSound(SoundRegistry.FIGHT);
+    micTexture = getGame().getAssMan().getTextureRegion(TexturesRegistry.MIC);
     boomSound1 = getGame().getAssMan().getUserSettingSound(SoundRegistry.BOOM_1);
     boomSound2 = getGame().getAssMan().getUserSettingSound(SoundRegistry.BOOM_2);
     youLead = getGame().getAssMan().getUserSettingSound(SoundRegistry.YOU_LEAD);
@@ -553,9 +550,11 @@ public class PlayScreen extends GameScreen {
       }
       String killStats = uiLeaderBoard.getMyStatsMessage(
           playerConnectionContextData.getFragsToWin());
+      getUiFont().setColor(1, 1, 1, HUD_ALPHA_CHANNEL);
       getUiFont().draw(getGame().getBatch(), killStats,
           getViewport().getWorldWidth() - 32 - new GlyphLayout(getUiFont(), killStats).width,
-          128);
+          128 - 32 + SHADOW_MARGIN);
+      getUiFont().setColor(Color.WHITE);
 
     }
     if (chatMode) {
@@ -563,9 +562,7 @@ public class PlayScreen extends GameScreen {
           0.5f);
     }
     if (chatLog.hasChatMessage()) {
-
       printShadowText(32, 256, chatLog.getChatMessages(), getUiFont(), 0.15f);
-
     }
 
     if (enemyAim != null) {
@@ -604,9 +601,11 @@ public class PlayScreen extends GameScreen {
     if (showLeaderBoard) {
       String leaderBoard = getUiLeaderBoard().toString();
       var glyphLayoutRecSentMessages = new GlyphLayout(getUiFont(), leaderBoard);
+      getUiFont().setColor(1, 1, 1, HUD_ALPHA_CHANNEL);
       getUiFont().draw(getGame().getBatch(),
           leaderBoard, getViewport().getWorldWidth() / 2f - glyphLayoutRecSentMessages.width / 2f,
           getViewport().getWorldHeight() - 128);
+      getUiFont().setColor(Color.WHITE);
     } else {
       // gui menu
       if (showGuiMenu) {
@@ -643,13 +642,7 @@ public class PlayScreen extends GameScreen {
       }
     }
     if (voiceChatPlayer.isRecording()) {
-      String recordingText =
-          voiceChatPlayer.failedToRecord() ? "FAILED TO RECORD VOICE" : "VOICE RECORDING...";
-      GlyphLayout glyphLayoutRecording = new GlyphLayout(getUiFont(), recordingText);
-      getUiFont().draw(getGame().getBatch(), recordingText,
-          getViewport().getWorldWidth() / 2f - glyphLayoutRecording.width / 2f,
-          getViewport().getWorldHeight() / 2f - glyphLayoutRecording.height / 2f
-              - getViewport().getWorldHeight() / 4f);
+      renderVoiceRecordingUI();
     }
 
     getGame().getBatch().end();
@@ -675,6 +668,39 @@ public class PlayScreen extends GameScreen {
         + (float) Math.sin(getGame().getTimeSinceLaunch() * speed) / 2;
   }
 
+  private void renderVoiceRecordingUI() {
+    if (!voiceChatPlayer.failedToRecord()) {
+      String recordingText = "VOICE RECORDING";
+      var glyphLayoutRecording = new GlyphLayout(getUiFont(), recordingText);
+      int micSize = 64;
+      float ampl = voiceChatPlayer.getLastNormalizedAvgAmpl();
+      getGame().getBatch()
+          .setColor(new Color(1, 1 - ampl, 1 - ampl, Math.max(0.1f, ampl)));
+      getGame().getBatch().draw(micTexture,
+          getViewport().getWorldWidth() / 2f - micSize / 2f,
+          getViewport().getWorldHeight() / 2f
+              - getViewport().getWorldHeight() / 4f,
+          micSize,
+          micSize);
+      getGame().getBatch().setColor(Color.WHITE);
+      getUiFont().setColor(1, 1, 1, HUD_ALPHA_CHANNEL);
+      getUiFont().draw(getGame().getBatch(), recordingText,
+          getViewport().getWorldWidth() / 2f - glyphLayoutRecording.width / 2,
+          getViewport().getWorldHeight() / 2f - glyphLayoutRecording.height / 2f
+              - getViewport().getWorldHeight() / 4f);
+      getUiFont().setColor(Color.WHITE);
+    } else {
+      String recordingText = "FAILED TO RECORD VOICE";
+      var glyphLayoutRecording = new GlyphLayout(getUiFont(), recordingText);
+      getUiFont().setColor(Color.RED);
+      getUiFont().draw(getGame().getBatch(), recordingText,
+          getViewport().getWorldWidth() / 2f - glyphLayoutRecording.width / 2,
+          getViewport().getWorldHeight() / 2f - glyphLayoutRecording.height / 2f
+              - getViewport().getWorldHeight() / 4f);
+      getUiFont().setColor(Color.WHITE);
+    }
+  }
+
   private void renderGameTechStats() {
     StringBuilder gameTechStats = new StringBuilder();
     gameTechStats.append(playersOnline).append(" ONLINE ");
@@ -684,10 +710,11 @@ public class PlayScreen extends GameScreen {
     gameTechStats.append(Gdx.graphics.getFramesPerSecond()).append(" FPS");
 
     var gameTechStatsGlyph = new GlyphLayout(getUiFont(), gameTechStats);
+    getUiFont().setColor(1, 1, 1, HUD_ALPHA_CHANNEL);
     getUiFont().draw(getGame().getBatch(), gameTechStats,
         getViewport().getWorldWidth() - 32 - gameTechStatsGlyph.width,
         getViewport().getWorldHeight() - 32 - gameTechStatsGlyph.height);
-
+    getUiFont().setColor(Color.WHITE);
     if (showNetworkStats) {
       renderDevModeGameTechStats();
     }
@@ -791,7 +818,9 @@ public class PlayScreen extends GameScreen {
     getGame().getBatch()
         .draw(texture, blockX, blockY, blockWidth, blockHeight);
     getGame().getBatch().setColor(oldColor);
+    getUiFont().setColor(1, 1, 1, HUD_ALPHA_CHANNEL);
     getUiFont().draw(getGame().getBatch(), text, x, y + glyph.height);
+    getUiFont().setColor(Color.WHITE);
   }
 
 
