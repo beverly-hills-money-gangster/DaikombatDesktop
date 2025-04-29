@@ -23,6 +23,7 @@ public enum TexturesRegistry {
   ROCKET_LAUNCHER_IDLE("rocket_launcher_idle.png"),
   ROCKET_LAUNCHER_SHOOTING("rocket_launcher_fire.png"),
   LOGO("logo.png"),
+  MIC("mic.png"),
   MAIN_MENU_BG("main_menu_bg.png"),
   ATLAS("atlas.png"),
 
