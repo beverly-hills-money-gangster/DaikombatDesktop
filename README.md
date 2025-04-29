@@ -26,9 +26,10 @@ to redemption, yet every defeat plunges him deeper into the abyss of his own dam
 ## Gameplay
 
 The player spawns on the map and joins a death-match against other players online. The player who
-gets 20(configurable) kills first is declared the winner. Notable features:
+gets most kills first is declared the winner. Notable features:
 - Online mode
-- In-game chat
+- In-game text chat
+- In-game voice chat
 - Classes (tank, warrior, berserk, etc)
 - Leaderboard
 - Power-ups
@@ -40,7 +41,7 @@ gets 20(configurable) kills first is declared the winner. Notable features:
 
 ### Video
 
-[![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white)](https://www.youtube.com/watch?v=6fgQn92oUUk)
+[![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white)](https://www.youtube.com/watch?v=kmcbZK5Piqs)
 
 ### Screenshots
 
