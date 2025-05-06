@@ -65,8 +65,7 @@ public class VoiceChatPlayer {
       LOG.error("Can't record", e);
       return;
     }
-    // max volume unless muted
-    audioPlayer.setVolume(UserSettingsUISelection.SOUND.getState().getNormalized() == 0 ? 0 : 1);
+    audioPlayer.setVolume(UserSettingsUISelection.SOUND.getState().getNormalized());
 
     audioRecorderThread = new Thread(() -> {
       short[] shortPCM = new short[voiceChatConfigs.getSampleSize()];
@@ -107,6 +106,7 @@ public class VoiceChatPlayer {
             audioPlayer.writeSamples(pcmSilence, 0, pcmSilence.length);
           } else {
             var mixedPCM = mixPCMs(shortPCMs);
+            amplify(mixedPCM, 4f);
             shortPCMs.forEach(payload -> enemiesRegistry.getEnemy(payload.getPlayerId())
                 .ifPresent(enemyPlayer -> enemyPlayer.talking(getAvgAmpl(payload.getPcm()))));
             audioPlayer.writeSamples(mixedPCM, 0, mixedPCM.length);
@@ -132,6 +132,12 @@ public class VoiceChatPlayer {
     synchronized (recordAudio) {
       recordAudio.set(record);
       recordAudio.notify();
+    }
+  }
+
+  private void amplify(short[] pcm, float ampl) {
+    for (int i = 0; i < pcm.length; i++) {
+      pcm[i] = (short) Math.max(Math.min(pcm[i] * ampl, Short.MAX_VALUE), Short.MIN_VALUE);
     }
   }
 
