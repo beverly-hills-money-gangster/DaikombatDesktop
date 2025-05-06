@@ -155,7 +155,7 @@ public class ScreenWeapon {
     if (canAttack()) {
       var state = weaponStates.get(weaponBeingUsed);
       animationStart.put(weaponBeingUsed, System.currentTimeMillis());
-      state.getFireSound().play(Constants.DEFAULT_SFX_VOLUME);
+      state.getFireSound().play(Constants.DEFAULT_SHOOTING_VOLUME);
       if (player.getPlayerEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {
         quadDamageAttack.play(TimeLimitSoundConf.builder()
             .soundVolumeType(SoundVolumeType.LOUD).frequencyMls(450)
