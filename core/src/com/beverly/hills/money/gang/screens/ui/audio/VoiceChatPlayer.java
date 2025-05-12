@@ -13,6 +13,7 @@ import com.beverly.hills.money.gang.strategy.EnemyPlayerActionQueueStrategy;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +21,6 @@ import org.slf4j.LoggerFactory;
 public class VoiceChatPlayer {
 
   private static final Logger LOG = LoggerFactory.getLogger(EnemyPlayerActionQueueStrategy.class);
-
-  private final AtomicBoolean recordAudio = new AtomicBoolean();
 
   private AudioRecorder audioRecorder;
 
@@ -43,14 +42,15 @@ public class VoiceChatPlayer {
 
   private final AtomicBoolean stop = new AtomicBoolean();
 
+  private final AtomicLong recordAudioUntil = new AtomicLong();
+
   private final AtomicReference<Float> normalizedAvgAmplitude = new AtomicReference<>(0f);
 
   public VoiceChatPlayer(GlobalGameConnection gameConnection, int playerId,
-      EnemiesRegistry enemiesRegistry, boolean record) {
+      EnemiesRegistry enemiesRegistry) {
     this.gameConnection = gameConnection;
     this.playerId = playerId;
     this.enemiesRegistry = enemiesRegistry;
-    recordAudio.set(record);
     this.voiceChatConfigs = gameConnection.getVoiceChatConfigs();
   }
 
@@ -71,9 +71,9 @@ public class VoiceChatPlayer {
       short[] shortPCM = new short[voiceChatConfigs.getSampleSize()];
       try {
         while (!stop.get()) {
-          synchronized (recordAudio) {
-            if (!recordAudio.get()) {
-              recordAudio.wait();
+          synchronized (recordAudioUntil) {
+            if (!isRecording()) {
+              recordAudioUntil.wait();
               continue;
             }
           }
@@ -129,9 +129,11 @@ public class VoiceChatPlayer {
   }
 
   public void recordAudio(boolean record) {
-    synchronized (recordAudio) {
-      recordAudio.set(record);
-      recordAudio.notify();
+    if (record) {
+      synchronized (recordAudioUntil) {
+        recordAudioUntil.set(System.currentTimeMillis() + 500);
+        recordAudioUntil.notify();
+      }
     }
   }
 
@@ -177,15 +179,16 @@ public class VoiceChatPlayer {
 
 
   public boolean isRecording() {
-    return recordAudio.get();
+    return System.currentTimeMillis() < recordAudioUntil.get();
   }
 
   public void stop() {
     LOG.info("Stop voice chat");
     stop.set(true);
-    Optional.ofNullable(audioPlayerThread).ifPresent(Thread::interrupt);
-    Optional.ofNullable(audioRecorderThread).ifPresent(Thread::interrupt);
     Optional.ofNullable(audioRecorder).ifPresent(AudioRecorder::dispose);
     Optional.ofNullable(audioPlayer).ifPresent(AudioDevice::dispose);
+    Optional.ofNullable(audioPlayerThread).ifPresent(Thread::interrupt);
+    Optional.ofNullable(audioRecorderThread).ifPresent(Thread::interrupt);
   }
+
 }

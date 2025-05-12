@@ -225,8 +225,7 @@ public class PlayScreen extends GameScreen {
     hudRedTexture = createTexture(new Color(1, 0, 0.15f, 1f));
     voiceChatPlayer = new VoiceChatPlayer(gameConnection,
         playerConnectionContextData.getPlayerId(),
-        enemiesRegistry,
-        playerConnectionContextData.isRecordAudio());
+        enemiesRegistry);
     Optional.ofNullable(playerConnectionContextData.getLastWeapon())
         .ifPresent(weapon -> getPlayer().setWeapon(weapon));
   }
@@ -319,16 +318,17 @@ public class PlayScreen extends GameScreen {
 
   @Override
   public void handleInput(final float delta) {
-    if (Gdx.input.isKeyJustPressed(Keys.V)) {
-      voiceChatPlayer.recordAudio(!voiceChatPlayer.isRecording());
-    }
+
     showLeaderBoard = false;
     if (Gdx.input.isKeyJustPressed(Input.Keys.valueOf("`"))) {
       chatMode = !chatMode;
     }
     if (chatMode) {
       handleChatInput();
-    } else if (getPlayer().isDead()) {
+      return;
+    }
+    voiceChatPlayer.recordAudio(Gdx.input.isKeyPressed(Keys.V));
+    if (getPlayer().isDead()) {
       handleDeadGuiInput();
     } else {
       if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
@@ -425,7 +425,6 @@ public class PlayScreen extends GameScreen {
 
       screenToTransition = switch (deadPlayUISelectionUISelection.getSelectedOption()) {
         case RESPAWN -> new RespawnScreen(getGame(), playerConnectionContextData.toBuilder()
-            .recordAudio(voiceChatPlayer.isRecording())
             .lastWeapon(getPlayer().getCurrentWeapon())
             .build(),
             gameConnection);
@@ -641,7 +640,7 @@ public class PlayScreen extends GameScreen {
             StringUtils.defaultIfEmpty(e.getMessage(), "Can't handle connection"));
       }
     }
-    if (voiceChatPlayer.isRecording()) {
+    if (Gdx.input.isKeyPressed(Keys.V)) {
       renderVoiceRecordingUI();
     }
 

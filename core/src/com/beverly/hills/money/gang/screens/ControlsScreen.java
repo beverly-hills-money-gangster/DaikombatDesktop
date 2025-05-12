@@ -12,23 +12,24 @@ import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class ControlsScreen extends AbstractMainMenuScreen {
 
-  private static final String[] CONTROLS_MAPPING = {
+  private static final List<String> CONTROLS_MAPPING = List.of(
       "MOVE - WASD",
       "SHOOT - LEFT MOUSE CLICK/RIGHT ALT",
       "PUNCH - RIGHT MOUSE CLICK/RIGHT CTRL",
       "CHAT - TILDE",
       "X - TAUNT",
       "LEADERBOARD - TAB",
-      "V - START VOICE CHAT TALK",
+      "V - PUSH-TO-TALK",
       "Q, E, MOUSE SCROLL - NEXT/PREV WEAPON",
       Arrays.stream(Weapon.values())
           .map(weapon -> Keys.toString(weapon.getSelectKeyCode()))
           .collect(Collectors.joining(", "))
-          + " - SELECT WEAPON"};
+          + " - SELECT WEAPON");
   private final BitmapFont guiFont64;
 
   public ControlsScreen(final DaiKombatGame game) {

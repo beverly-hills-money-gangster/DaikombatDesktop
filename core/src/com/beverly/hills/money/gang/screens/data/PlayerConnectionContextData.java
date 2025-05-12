@@ -36,8 +36,6 @@ public class PlayerConnectionContextData {
   @NonNull
   private final Integer matchId;
 
-  private final boolean recordAudio;
-
   private final Weapon lastWeapon;
 
 }
