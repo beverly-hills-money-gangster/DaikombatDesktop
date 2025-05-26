@@ -6,16 +6,24 @@ import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.screens.GameScreen;
 import java.util.List;
 import lombok.Getter;
+import lombok.Setter;
 
-public class UISelection<T extends Enum> {
+public class UISelection<T> {
 
   private int selectedOption;
 
   @Getter
   private final List<T> selections;
 
+  @Setter
+  private int menuItemSize = Constants.MENU_OPTION_INDENT;
+
   public UISelection(T[] selections) {
-    this.selections = List.of(selections);
+    this(List.of(selections));
+  }
+
+  public UISelection(List<T> selections) {
+    this.selections = selections;
   }
 
   public T getSelectedOption() {
@@ -36,11 +44,12 @@ public class UISelection<T extends Enum> {
     }
   }
 
-  public void render(final BitmapFont guiFont64,
+  public void render(
+      final BitmapFont guiFont64,
       final GameScreen gameScreen,
       final int verticalIndent) {
     int indent = verticalIndent;
-    for (int i = 0; i < this.getSelections().size(); i++) {
+    for (int i = 0; i < selections.size(); i++) {
       var mainMenuUISelection = this.getSelections().get(i);
       var optionGlyph = new GlyphLayout(guiFont64, mainMenuUISelection.toString());
       final float optionX = gameScreen.getViewport().getWorldWidth() / 2f - optionGlyph.width / 2f;
@@ -48,7 +57,8 @@ public class UISelection<T extends Enum> {
           gameScreen.getViewport().getWorldHeight() / 2f - optionGlyph.height / 2f - indent;
       guiFont64.draw(gameScreen.getGame().getBatch(), mainMenuUISelection.toString(), optionX,
           optionY);
-      indent += Constants.MENU_OPTION_INDENT;
+
+      indent += menuItemSize;
       if (getSelectedOption() == mainMenuUISelection) {
         guiFont64.draw(gameScreen.getGame().getBatch(), Constants.SELECTED_OPTION_MARK,
             optionX - Constants.DEFAULT_SELECTION_INDENT, optionY);
