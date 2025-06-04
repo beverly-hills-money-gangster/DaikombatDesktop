@@ -27,4 +27,6 @@ public class WeaponState {
   private final int backoffDelayMls;
   private final boolean center;
   private final Function<Long, Vector2> weaponScreenPositioning;
+
+  private final Integer maxAmmo;
 }

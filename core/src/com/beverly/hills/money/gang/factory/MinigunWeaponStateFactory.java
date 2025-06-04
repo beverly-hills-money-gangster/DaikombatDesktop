@@ -19,6 +19,7 @@ public class MinigunWeaponStateFactory extends ScreenWeaponStateFactory {
         .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PLAYER_MINIGUN))
         .screenRatioX(0.45f)
         .screenRatioY(0.40f)
+        .maxAmmo(weaponStats.getMaxAmmo())
         .backoffDelayMls(getBackoffDelay(weaponStats, MINIGUN_ANIMATION_MLS))
         .animationDelayMls(MINIGUN_ANIMATION_MLS)
         .center(true)

@@ -9,7 +9,7 @@ import com.beverly.hills.money.gang.entities.ui.LeaderBoardPlayer;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.proto.RespawnCommand;
 import com.beverly.hills.money.gang.proto.ServerResponse;
-import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
+import com.beverly.hills.money.gang.screens.data.GameBootstrapData;
 import com.beverly.hills.money.gang.utils.Converter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -21,15 +21,15 @@ public class RespawnScreen extends AbstractLoadingScreen {
 
   private String errorMessage;
 
-  private final PlayerConnectionContextData oldPlayerConnectionContextData;
+  private final GameBootstrapData oldGameBootstrapData;
 
   private final GlobalGameConnection gameConnection;
 
   public RespawnScreen(final DaiKombatGame game,
-      final PlayerConnectionContextData oldPlayerConnectionContextData,
+      final GameBootstrapData oldGameBootstrapData,
       final GlobalGameConnection gameConnection) {
     super(game);
-    this.oldPlayerConnectionContextData = oldPlayerConnectionContextData;
+    this.oldGameBootstrapData = oldGameBootstrapData;
     this.gameConnection = gameConnection;
   }
 
@@ -39,9 +39,9 @@ public class RespawnScreen extends AbstractLoadingScreen {
       errorMessage = "Connection lost";
     } else {
       gameConnection.write(RespawnCommand.newBuilder()
-          .setGameId(Configs.GAME_ID)
-          .setMatchId(oldPlayerConnectionContextData.getMatchId())
-          .setPlayerId(oldPlayerConnectionContextData.getPlayerId()).build());
+          .setGameId(oldGameBootstrapData.getCompleteJoinGameData().getGameRoomId())
+          .setMatchId(oldGameBootstrapData.getMatchId())
+          .setPlayerId(oldGameBootstrapData.getPlayerId()).build());
     }
   }
 
@@ -71,14 +71,14 @@ public class RespawnScreen extends AbstractLoadingScreen {
         stopBgMusic();
         getGame().setScreen(
             new GameOverScreen(getGame(),
-                new LeaderBoardDataLayer(oldPlayerConnectionContextData.getPlayerId(),
+                new LeaderBoardDataLayer(oldGameBootstrapData.getPlayerId(),
                     LeaderBoardPlayer.createFromGameOver(response.getGameOver())),
-                oldPlayerConnectionContextData.getConnectGameData()));
+                oldGameBootstrapData.getCompleteJoinGameData()));
       } else if (response.hasGameEvents()) {
         var gameEvent = response.getGameEvents().getEvents(0);
         if (gameEvent.getEventType() != ServerResponse.GameEvent.GameEventType.SPAWN
             || gameEvent.getPlayer().getPlayerId()
-            != oldPlayerConnectionContextData.getPlayerId()) {
+            != oldGameBootstrapData.getPlayerId()) {
           // not our event
           return;
         }
@@ -96,10 +96,10 @@ public class RespawnScreen extends AbstractLoadingScreen {
     });
   }
 
-  private PlayerConnectionContextData createPlayerContextData(ServerResponse response) {
+  private GameBootstrapData createPlayerContextData(ServerResponse response) {
     var gameEvent = response.getGameEvents().getEvents(0);
     int playerId = gameEvent.getPlayer().getPlayerId();
-    return oldPlayerConnectionContextData.toBuilder()
+    return oldGameBootstrapData.toBuilder()
         .playerId(playerId)
         .playersOnline(response.getGameEvents().getPlayersOnline())
         .spawn(Converter.convertToVector2(gameEvent.getPlayer().getPosition()))

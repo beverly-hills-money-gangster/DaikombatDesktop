@@ -68,6 +68,8 @@ public class Player extends Entity {
 
   private final Consumer<PlayerWeapon> onAttackListener;
 
+  private final Runnable onNoAmmo;
+
   @Getter
   private final Consumer<ProjectileEnemy> onProjectileAttackHit;
 
@@ -119,9 +121,11 @@ public class Player extends Entity {
       final Float speed,
       final Map<Weapon, WeaponStats> weaponStats,
       final int maxVisibility,
-      final GamePlayerClass playerClass) {
+      final GamePlayerClass playerClass,
+      final Runnable onNoAmmo) {
     super(screen);
     this.playerClass = playerClass;
+    this.onNoAmmo = onNoAmmo;
     this.enemiesRegistry = screen.getEnemiesRegistry();
     this.speed = speed * SPEED_BOOST;
     screenWeapon = new ScreenWeapon(screen.getGame().getAssMan(), weaponStats,
@@ -252,8 +256,16 @@ public class Player extends Entity {
     return screenWeapon.getWeaponBeingUsed();
   }
 
+  public String getCurrentWeaponAmmo() {
+    return screenWeapon.getAmmoStats();
+  }
+
   public void setWeapon(Weapon weapon) {
     screenWeapon.setWeaponBeingUsed(weapon);
+  }
+
+  public void setWeaponAmmo(Weapon weapon, int ammo) {
+    screenWeapon.setWeaponAmmo(weapon, ammo);
   }
 
   public void handleInput(final float delta) {
@@ -303,9 +315,7 @@ public class Player extends Entity {
 
   private void attack() {
     if (screenWeapon.attack(this)) {
-
       var currentWeapon = screenWeapon.getWeaponBeingUsed();
-
       onAttackListener.accept(PlayerWeapon
           .builder().player(this).weapon(currentWeapon).build());
 
@@ -315,6 +325,8 @@ public class Player extends Entity {
         getScreen().getGame().getEntMan()
             .addEntity(projectileFactory.create(this, screenWeapon.getWeaponState(currentWeapon)));
       }
+    } else if (!screenWeapon.hasAmmo()) {
+      onNoAmmo.run();
     }
   }
 

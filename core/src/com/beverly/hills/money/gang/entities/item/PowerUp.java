@@ -35,7 +35,6 @@ public class PowerUp extends SoundMakingEntity {
   private final Player player;
 
   private final Runnable onCollision;
-
   public PowerUp(final Vector3 position, final GameScreen screen, final Player player,
       final TexturesRegistry texturesRegistry, final Runnable onCollision) {
     super(screen);

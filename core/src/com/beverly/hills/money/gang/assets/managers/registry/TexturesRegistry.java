@@ -7,6 +7,9 @@ public enum TexturesRegistry {
   MINIGUN_FIRE("minigun_fire.png"),
   QUAD_DAMAGE_ORB("quad_damage_orb.png"),
   MED_KIT("medkit.png"),
+  MEDIUM_AMMO("medium_ammo.png"),
+  // TODO change text to BIG_AMMO on the box
+  BIG_AMMO("big_ammo.png"),
   DEFENCE_ORB("defence_orb.png"),
   INVISIBILITY_ORB("invisibility_orb.png"),
   TELEPORT_SPRITES("teleport_sprites.png"),

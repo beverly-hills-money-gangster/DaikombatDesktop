@@ -46,12 +46,15 @@ public class VoiceChatPlayer {
 
   private final AtomicReference<Float> normalizedAvgAmplitude = new AtomicReference<>(0f);
 
+  private final int gameId;
+
   public VoiceChatPlayer(GlobalGameConnection gameConnection, int playerId,
-      EnemiesRegistry enemiesRegistry) {
+      EnemiesRegistry enemiesRegistry, int gameId) {
     this.gameConnection = gameConnection;
     this.playerId = playerId;
     this.enemiesRegistry = enemiesRegistry;
     this.voiceChatConfigs = gameConnection.getVoiceChatConfigs();
+    this.gameId = gameId;
   }
 
   public void init() {
@@ -82,7 +85,7 @@ public class VoiceChatPlayer {
           recordedVoiceLastTime.set(System.currentTimeMillis());
           gameConnection.write(
               VoiceChatPayload.builder().playerId(playerId)
-                  .gameId(Configs.GAME_ID)
+                  .gameId(gameId)
                   .pcm(shortPCM)
                   .build());
         }
@@ -131,7 +134,7 @@ public class VoiceChatPlayer {
   public void recordAudio(boolean record) {
     if (record) {
       synchronized (recordAudioUntil) {
-        recordAudioUntil.set(System.currentTimeMillis() + 500);
+        recordAudioUntil.set(System.currentTimeMillis() + 1_000);
         recordAudioUntil.notify();
       }
     }

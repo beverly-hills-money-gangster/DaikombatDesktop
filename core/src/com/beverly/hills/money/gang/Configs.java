@@ -9,8 +9,6 @@ public interface Configs {
 
   int PORT = NumberUtils.toInt(System.getenv("DESKTOP_GAME_PORT"), 7777);
 
-  int GAME_ID = NumberUtils.toInt(System.getenv("DESKTOP_GAME_ID"), 0);
-
   boolean DEV_MODE = Boolean.parseBoolean(System.getenv("DESKTOP_DEV_MODE"));
 
   int SECONDARY_CONNECTIONS_TO_OPEN = NumberUtils.toInt(

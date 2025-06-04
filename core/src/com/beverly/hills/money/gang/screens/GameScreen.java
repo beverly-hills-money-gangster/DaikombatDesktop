@@ -3,6 +3,7 @@ package com.beverly.hills.money.gang.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.beverly.hills.money.gang.DaiKombatGame;
@@ -11,6 +12,7 @@ import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -146,6 +148,16 @@ public abstract class GameScreen implements Screen {
     if (!game.isGameIsPaused()) {
       game.getEntMan().tickAllEntities(delta);
     }
+  }
+
+  public void drawBlinking(
+      final BitmapFont bitmapFont,
+      final Consumer<BitmapFont> drawLogic) {
+    var oldColor = bitmapFont.getColor().cpy();
+    bitmapFont.setColor(oldColor.r, oldColor.g, oldColor.b,
+        Math.max(0.5f, (float) Math.sin(getGame().getTimeSinceLaunch() * 5)));
+    drawLogic.accept(bitmapFont);
+    bitmapFont.setColor(oldColor);
   }
 
   public final void exit() {

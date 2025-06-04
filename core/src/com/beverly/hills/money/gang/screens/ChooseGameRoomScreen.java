@@ -1,7 +1,11 @@
 package com.beverly.hills.money.gang.screens;
 
+import static com.beverly.hills.money.gang.Constants.PRESS_R_TO_SEE_REFRESH;
+import static com.beverly.hills.money.gang.Constants.PRESS_TAB_TO_SEE_LEADERBOARD;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.beverly.hills.money.gang.Constants;
@@ -9,8 +13,9 @@ import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
-import com.beverly.hills.money.gang.screens.data.ConnectGameData;
-import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
+import com.beverly.hills.money.gang.screens.data.CompleteJoinGameData;
+import com.beverly.hills.money.gang.screens.data.ConnectServerData;
+import com.beverly.hills.money.gang.screens.data.JoinGameData;
 import com.beverly.hills.money.gang.screens.ui.selection.GameRoom;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import java.util.List;
@@ -25,9 +30,9 @@ public class ChooseGameRoomScreen extends AbstractMainMenuScreen {
   private final UserSettingSound boomSound1;
   private final UserSettingSound dingSound1;
 
-  private final ConnectGameData connectGameData;
+  private final JoinGameData joinGameData;
 
-  private final PlayerConnectionContextData.PlayerConnectionContextDataBuilder playerContextDataBuilder;
+  private final ConnectServerData connectServerData;
 
   private static final String SELECT_GAME_ROOM = "SELECT GAME ROOM";
 
@@ -35,7 +40,8 @@ public class ChooseGameRoomScreen extends AbstractMainMenuScreen {
 
 
   public ChooseGameRoomScreen(final DaiKombatGame game,
-      final ConnectGameData connectGameData,
+      final JoinGameData joinGameData,
+      final ConnectServerData connectServerData,
       final List<GameRoom> gameRooms) {
     super(game);
     guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
@@ -44,18 +50,23 @@ public class ChooseGameRoomScreen extends AbstractMainMenuScreen {
     dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
     gameRoomSelection = new UISelection<>(gameRooms);
     gameRoomSelection.setMenuItemSize(32);
-    this.connectGameData = connectGameData;
-    playerContextDataBuilder =  PlayerConnectionContextData.builder();
+    this.joinGameData = joinGameData;
+    this.connectServerData = connectServerData;
   }
 
   @Override
   public void handleInput(final float delta) {
 
     if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-      // TODO play boom sound here
-      connectGameDataBuilder.gameRoomId(gameRoomSelection.getSelectedOption().getRoomId());
+      boomSound1.play(Constants.DEFAULT_SFX_VOLUME);
       removeAllEntities();
-      getGame().setScreen(new ConnectServerScreen(getGame(), connectGameDataBuilder.build()));
+      var completeJoinGameData = CompleteJoinGameData.builder()
+          .connectServerData(connectServerData).joinGameData(joinGameData)
+          .gameRoomId(gameRoomSelection.getSelectedOption().getRoomId()).build();
+      getGame().setScreen(new ConnectServerScreen(getGame(), completeJoinGameData));
+    } else if (Gdx.input.isKeyJustPressed(Keys.R)) {
+      removeAllEntities();
+      getGame().setScreen(new GetGameRoomsScreen(getGame(), joinGameData, connectServerData));
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));
@@ -73,10 +84,22 @@ public class ChooseGameRoomScreen extends AbstractMainMenuScreen {
     super.render(delta);
     getGame().getBatch().begin();
     if (gameRoomSelection.getSelections().size() == 1) {
-      connectGameDataBuilder.gameRoomId(gameRoomSelection.getSelectedOption().getRoomId());
+      // TODO that's duplicated code
+      var completeJoinGameData = CompleteJoinGameData.builder()
+          .connectServerData(connectServerData).joinGameData(joinGameData)
+          .gameRoomId(gameRoomSelection.getSelectedOption().getRoomId()).build();
       removeAllEntities();
-      getGame().setScreen(new ConnectServerScreen(getGame(), connectGameDataBuilder.build()));
+      getGame().setScreen(new ConnectServerScreen(getGame(), completeJoinGameData));
     } else {
+
+      drawBlinking(guiFont32, bitmapFont -> {
+        GlyphLayout glyphRefresh = new GlyphLayout(bitmapFont, PRESS_R_TO_SEE_REFRESH);
+        bitmapFont.draw(getGame().getBatch(), PRESS_R_TO_SEE_REFRESH,
+            getViewport().getWorldWidth() / 2f - glyphRefresh.width / 2f,
+            getViewport().getWorldHeight() - (getViewport().getWorldHeight() / 4)
+                - glyphRefresh.height - 64);
+      });
+
       String description = StringUtils.defaultIfBlank(
               gameRoomSelection.getSelectedOption().getDescription(), "")
           .toUpperCase(Locale.ENGLISH);

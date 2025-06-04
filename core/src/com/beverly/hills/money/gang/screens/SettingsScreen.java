@@ -26,6 +26,7 @@ public class SettingsScreen extends AbstractMainMenuScreen {
     super(game);
     guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
     dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
+    settingsSelection.setMenuItemSize(64);
   }
 
   @Override

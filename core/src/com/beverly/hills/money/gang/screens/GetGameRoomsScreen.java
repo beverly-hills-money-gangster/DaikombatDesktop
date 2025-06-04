@@ -4,7 +4,8 @@ import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.entity.HostPort;
 import com.beverly.hills.money.gang.network.GameConnection;
 import com.beverly.hills.money.gang.proto.GetServerInfoCommand;
-import com.beverly.hills.money.gang.screens.data.ConnectGameData;
+import com.beverly.hills.money.gang.screens.data.ConnectServerData;
+import com.beverly.hills.money.gang.screens.data.JoinGameData;
 import com.beverly.hills.money.gang.screens.ui.selection.GameRoom;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -17,9 +18,10 @@ import org.slf4j.LoggerFactory;
 public class GetGameRoomsScreen extends AbstractLoadingScreen {
 
   private static final Logger LOG = LoggerFactory.getLogger(GetGameRoomsScreen.class);
-  private final ConnectGameData.ConnectGameDataBuilder connectGameDataBuilder;
 
-  private final ConnectGameData connectGameData;
+  private final JoinGameData joinGameData;
+
+  private final ConnectServerData connectServerData;
 
   private final AtomicReference<String> errorMessage = new AtomicReference<>();
 
@@ -27,10 +29,11 @@ public class GetGameRoomsScreen extends AbstractLoadingScreen {
 
 
   public GetGameRoomsScreen(final DaiKombatGame game,
-      final ConnectGameData.ConnectGameDataBuilder connectGameDataBuilder) {
+      final JoinGameData joinGameData,
+      final ConnectServerData connectServerData) {
     super(game);
-    this.connectGameDataBuilder = connectGameDataBuilder;
-    this.connectGameData = connectGameDataBuilder.build();
+    this.joinGameData = joinGameData;
+    this.connectServerData = connectServerData;
 
   }
 
@@ -39,8 +42,8 @@ public class GetGameRoomsScreen extends AbstractLoadingScreen {
     new Thread(() -> {
       try {
         var hostPort = HostPort.builder()
-            .host(connectGameData.getServerHost())
-            .port(connectGameData.getServerPort()).build();
+            .host(connectServerData.getServerHost())
+            .port(connectServerData.getServerPort()).build();
         var connection = new GameConnection(hostPort);
         if (!connection.waitUntilConnected(5_000)) {
           errorMessage.set("Connection timeout");
@@ -49,7 +52,7 @@ public class GetGameRoomsScreen extends AbstractLoadingScreen {
         }
         gameConnectionRef.set(connection);
         connection.write(GetServerInfoCommand.newBuilder().setPlayerClass(
-            JoinGameScreen.createPlayerClass(connectGameData.getGamePlayerClass())).build());
+            JoinGameScreen.createPlayerClass(joinGameData.getGamePlayerClass())).build());
       } catch (Throwable e) {
         LOG.error("Can't create connection", e);
         errorMessage.set(ExceptionUtils.getMessage(e));
@@ -102,9 +105,9 @@ public class GetGameRoomsScreen extends AbstractLoadingScreen {
                       .description(gameInfo.getDescription())
                       .title(gameInfo.getTitle())
                       .build()).collect(Collectors.toList());
-
+              removeAllEntities();
               getGame().setScreen(new ChooseGameRoomScreen(getGame(),
-                  connectGameDataBuilder, gameRooms));
+                  joinGameData, connectServerData, gameRooms));
 
             }
           });

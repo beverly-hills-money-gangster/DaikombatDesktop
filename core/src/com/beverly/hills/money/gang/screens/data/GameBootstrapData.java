@@ -14,15 +14,20 @@ import lombok.ToString;
 @Getter
 @Builder(toBuilder = true)
 @ToString
-public class PlayerConnectionContextData {
+public class GameBootstrapData {
 
-  private final ConnectGameData connectGameData;
+  @NonNull
+  private final CompleteJoinGameData completeJoinGameData;
+  @NonNull
   private final Vector2 spawn;
+  @NonNull
   private final Vector2 direction;
   @NonNull
   private final Integer playerId;
+  @NonNull
   private final List<ServerResponse.LeaderBoardItem> leaderBoardItemList;
-  private final int playersOnline;
+  @NonNull
+  private final Integer playersOnline;
   @NonNull
   private final Integer fragsToWin;
   @NonNull
@@ -35,7 +40,6 @@ public class PlayerConnectionContextData {
   private final Integer maxVisibility;
   @NonNull
   private final Integer matchId;
-
   private final Weapon lastWeapon;
 
 }
