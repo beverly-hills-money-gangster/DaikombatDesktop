@@ -16,7 +16,7 @@ import com.beverly.hills.money.gang.models.ModelMaker;
 import com.beverly.hills.money.gang.pref.UserPreference;
 import com.beverly.hills.money.gang.rect.RectManager;
 import com.beverly.hills.money.gang.screens.GameScreen;
-import com.beverly.hills.money.gang.screens.MainMenuScreen;
+import com.beverly.hills.money.gang.screens.menu.MainMenuScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
 import com.beverly.hills.money.gang.utils.EntityManager;
 import java.util.Optional;
@@ -35,9 +35,7 @@ public class DaiKombatGame extends Game {
   private DaiKombatAssetsManager assMan;
   private EntityManager entMan;
   private RectManager rectMan;
-  private ModelMaker cellBuilder;
   private OverlapFilterManager overlapFilterMan;
-  private MapBuilder mapBuilder;
   private float timeSinceLaunch;
 
   @Override
@@ -51,12 +49,10 @@ public class DaiKombatGame extends Game {
 
     overlapFilterMan = new OverlapFilterManager();
 
-    cellBuilder = new ModelMaker(this); // builds models...
-
     entMan = new EntityManager();
     rectMan = new RectManager(this);
 
-    mapBuilder = new MapBuilder(this);
+
 
     // restore user configs
     UserPreference userPreference = new UserPreference();

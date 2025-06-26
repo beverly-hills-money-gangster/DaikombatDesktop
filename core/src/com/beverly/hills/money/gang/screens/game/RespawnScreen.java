@@ -1,8 +1,7 @@
-package com.beverly.hills.money.gang.screens;
+package com.beverly.hills.money.gang.screens.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.entities.ui.LeaderBoardDataLayer;
 import com.beverly.hills.money.gang.entities.ui.LeaderBoardPlayer;
@@ -10,6 +9,9 @@ import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.proto.RespawnCommand;
 import com.beverly.hills.money.gang.proto.ServerResponse;
 import com.beverly.hills.money.gang.screens.data.GameBootstrapData;
+import com.beverly.hills.money.gang.screens.loading.AbstractLoadingScreen;
+import com.beverly.hills.money.gang.screens.menu.ErrorScreen;
+import com.beverly.hills.money.gang.screens.menu.MainMenuScreen;
 import com.beverly.hills.money.gang.utils.Converter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;

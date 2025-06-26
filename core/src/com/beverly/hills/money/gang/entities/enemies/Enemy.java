@@ -13,7 +13,7 @@ import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
-import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import java.util.function.Consumer;
@@ -50,7 +50,7 @@ public abstract class Enemy extends SoundMakingEntity {
   private final EnemyEffects enemyEffects = new EnemyEffects();
 
 
-  public Enemy(final Vector3 position, final GameScreen screen, final Player player,
+  public Enemy(final Vector3 position, final PlayScreen screen, final Player player,
       final GamePlayerClass enemyClass,
       final EnemyListeners enemyListeners) {
     super(screen);

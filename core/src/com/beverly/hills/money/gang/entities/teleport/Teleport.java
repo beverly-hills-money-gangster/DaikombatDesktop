@@ -20,6 +20,7 @@ import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import java.util.function.Consumer;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -48,7 +49,7 @@ public class Teleport extends SoundMakingEntity {
 
   public Teleport(
       final Vector3 position,
-      final GameScreen screen,
+      final PlayScreen screen,
       final Player player,
       final int teleportId,
       final Consumer<Teleport> onCollision) {
@@ -61,7 +62,7 @@ public class Teleport extends SoundMakingEntity {
         .animationSteps(6).animationStepMls(120)
         .width(82).height(112).texturesRegistry(TexturesRegistry.TELEPORT_SPRITES).build();
 
-    mdlInst = new ModelInstanceBB(screen.getGame().getCellBuilder().getMdlEnemy());
+    mdlInst = new ModelInstanceBB(screen.getCellBuilder().getMdlEnemy());
     this.onCollision = onCollision;
 
     mdlInst.materials.get(0).set(

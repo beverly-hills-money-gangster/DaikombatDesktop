@@ -9,13 +9,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
-import com.beverly.hills.money.gang.assets.managers.registry.MapRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SkinTextureTemplateRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
+import com.beverly.hills.money.gang.proto.MapAssets;
 import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import java.util.Arrays;
@@ -24,13 +23,13 @@ public class DaiKombatAssetsManager {
 
   private final AssetManager assetManager = new AssetManager();
 
+  private final MapLoadService mapLoadService = new MapLoadService();
 
   public DaiKombatAssetsManager() {
     loadTextures();
     loadSkins();
     loadSounds();
     loadFonts();
-    loadMaps();
   }
 
   public void finishLoading() {
@@ -43,8 +42,26 @@ public class DaiKombatAssetsManager {
 
   public TextureRegion getTextureRegion(final TexturesRegistry texturesRegistry, int x, int y,
       int width, int height) {
-    return new TextureRegion((Texture) assetManager.get(texturesRegistry.getFileName()), x, y,
+    return new TextureRegion((Texture) assetManager.get(texturesRegistry.getFileName()), x,
+        y,
         width, height);
+  }
+
+
+  public TextureRegion getTextureRegion(
+      final Texture texture, int x, int y, int width, int height) {
+    return new TextureRegion(texture, x, y, width, height);
+  }
+
+  public TextureRegion getTextureRegionFlipped(
+      final Texture texture, int x, int y, int width, int height) {
+    var tr = getTextureRegion(texture, x, y, width, height);
+    tr.flip(true, false);
+    return tr;
+  }
+
+  public Texture getMapAtlas(final String mapName, final String mapHash) {
+    return mapLoadService.loadAtlas(mapName, mapHash);
   }
 
   public TextureRegion getTextureRegion(final String fileName, int x, int y,
@@ -61,12 +78,20 @@ public class DaiKombatAssetsManager {
     return assetManager.get(fontRegistry.getFileName());
   }
 
-  public TiledMap getMap(final MapRegistry mapRegistry) {
-    return assetManager.get(mapRegistry.getFileName());
-  }
-
   public UserSettingSound getUserSettingSound(final SoundRegistry soundRegistry) {
     return new UserSettingSound(assetManager.get(soundRegistry.getFileName()));
+  }
+
+  public TiledMap getMap(String name, String hash) {
+    return mapLoadService.loadMap(name, hash);
+  }
+
+  public boolean mapExists(String name, String hash) {
+    return mapLoadService.exists(name, hash);
+  }
+
+  public void saveMap(String name, String hash, MapAssets mapAssets) {
+    mapLoadService.saveMap(name, hash, mapAssets);
   }
 
   public Sound getSound(final SoundRegistry soundRegistry) {
@@ -79,20 +104,15 @@ public class DaiKombatAssetsManager {
         new BitmapFontLoader(resolver)); // Tile atlas should be in same folder.
 
     Arrays.stream(FontRegistry.values())
-        .forEach(fontRegistry -> assetManager.load(fontRegistry.getFileName(), BitmapFont.class));
+        .forEach(fontRegistry -> assetManager.load(fontRegistry.getFileName(),
+            BitmapFont.class));
 
-  }
-
-  public void loadMaps() {
-    assetManager.setLoader(TiledMap.class,
-        new TmxMapLoader()); // Tile atlas should be in same folder.
-    Arrays.stream(MapRegistry.values())
-        .forEach(mapRegistry -> assetManager.load(mapRegistry.getFileName(), TiledMap.class));
   }
 
   public void loadSounds() {
     Arrays.stream(SoundRegistry.values())
-        .forEach(soundRegistry -> assetManager.load(soundRegistry.getFileName(), Sound.class));
+        .forEach(
+            soundRegistry -> assetManager.load(soundRegistry.getFileName(), Sound.class));
   }
 
   public void loadTextures() {
@@ -105,6 +125,7 @@ public class DaiKombatAssetsManager {
         playerClassUISelection -> Arrays.stream(SkinUISelection.values()).forEach(skinUISelection
             -> assetManager.load(
             SkinTextureTemplateRegistry
-                .getTextureFileNameForClass(playerClassUISelection, skinUISelection), Texture.class)));
+                .getTextureFileNameForClass(playerClassUISelection, skinUISelection),
+            Texture.class)));
   }
 }

@@ -27,7 +27,7 @@ import com.beverly.hills.money.gang.proto.Vector;
 import com.beverly.hills.money.gang.registry.EnemiesRegistry;
 import com.beverly.hills.money.gang.registry.EnemyPlayerProjectileBoomFactoriesRegistry;
 import com.beverly.hills.money.gang.registry.EnemyPlayerProjectileShootingFactoriesRegistry;
-import com.beverly.hills.money.gang.screens.PlayScreen;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.taunt.GameTaunt;

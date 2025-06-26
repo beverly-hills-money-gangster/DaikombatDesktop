@@ -14,5 +14,9 @@ public class CompleteJoinGameData {
   private final JoinGameData joinGameData;
   @NonNull
   private final Integer gameRoomId;
+  @NonNull
+  private final String mapName;
+  @NonNull
+  private final String mapHash;
 
 }

@@ -15,6 +15,7 @@ import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import lombok.Getter;
 
 public class Door extends SoundMakingEntity {
@@ -45,13 +46,13 @@ public class Door extends SoundMakingEntity {
 
 
   public Door(final Vector3 position, final DoorDirection direction,
-      final GameScreen screen) {
+      final PlayScreen screen) {
     super(screen);
     this.soundOpen = screen.getGame().getAssMan().getUserSettingSound(SoundRegistry.DOOR_OPEN);
     this.soundClose = screen.getGame().getAssMan().getUserSettingSound(SoundRegistry.DOOR_CLOSE);
     this.position.set(position.cpy().add(Constants.HALF_UNIT, Constants.HALF_UNIT, 0));
     this.direction = direction;
-    mdlInstDoor = new ModelInstanceBB(screen.getGame().getCellBuilder().getMdlDoor());
+    mdlInstDoor = new ModelInstanceBB(screen.getCellBuilder().getMdlDoor());
     switch (direction) {
       case NORTH ->
           closedPos.set(this.position.cpy().add(new Vector3(0, -0.25f, 1 - Constants.PPU * 2)));

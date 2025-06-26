@@ -13,6 +13,8 @@ public class GameRoom {
   private final String title;
   private final String description;
   private final int playersOnline;
+  private final String mapName;
+  private final String mapHash;
 
 
   @Override

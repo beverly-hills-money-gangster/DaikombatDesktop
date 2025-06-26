@@ -1,6 +1,7 @@
 package com.beverly.hills.money.gang.models;
 
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -13,7 +14,6 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
-import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import lombok.Getter;
 
 
@@ -33,13 +33,16 @@ public class ModelMaker {
   private Model mdlFloor = new Model();
   private Model mdlCeiling = new Model();
 
+  private final Texture atlas;
+
   private Model mdlDoor = new Model();
 
   @Getter
   private Model mdlEnemy = new Model();
 
-  public ModelMaker(final DaiKombatGame game) {
+  public ModelMaker(final DaiKombatGame game, final Texture atlas) {
     this.game = game;
+    this.atlas = atlas;
 
     mdlBuilder = new ModelBuilder();
 
@@ -67,7 +70,7 @@ public class ModelMaker {
 
 //	NORTH WALL
 
-    final TextureRegion texRegNorth = game.getAssMan().getTextureRegion(TexturesRegistry.ATLAS,
+    final TextureRegion texRegNorth = game.getAssMan().getTextureRegion(atlas,
         32, 16, -16, 16);
 
     final TextureAttribute taNorth = new TextureAttribute(TextureAttribute.Diffuse, texRegNorth);
@@ -84,7 +87,7 @@ public class ModelMaker {
         Usage.Position | Usage.Normal | Usage.TextureCoordinates);
 
 //	SOUTH WALL
-    final TextureRegion texRegSouth = game.getAssMan().getTextureRegion(TexturesRegistry.ATLAS,
+    final TextureRegion texRegSouth = game.getAssMan().getTextureRegion(atlas,
         64, 16, -16, 16); // flip x
 
     final TextureAttribute taSouth = new TextureAttribute(TextureAttribute.Diffuse, texRegSouth);
@@ -102,7 +105,7 @@ public class ModelMaker {
     mdlWallSouth.nodes.get(0).rotation.set(Vector3.Y, 180f);
 
 //	WEST WALL
-    final TextureRegion texRegWest = game.getAssMan().getTextureRegion(TexturesRegistry.ATLAS, 0,
+    final TextureRegion texRegWest = game.getAssMan().getTextureRegion(atlas, 0,
         16, 16, 16);
 
     final TextureAttribute taWest = new TextureAttribute(TextureAttribute.Diffuse, texRegWest);
@@ -120,7 +123,7 @@ public class ModelMaker {
     mdlWallWest.nodes.get(0).rotation.set(Vector3.Y, -90f);
 
 //	EAST WALL
-    final TextureRegion texRegEast = game.getAssMan().getTextureRegion(TexturesRegistry.ATLAS, 48,
+    final TextureRegion texRegEast = game.getAssMan().getTextureRegion(atlas, 48,
         16, -16, 16); // flip y
 
     final TextureAttribute taEast = new TextureAttribute(TextureAttribute.Diffuse, texRegEast);
@@ -138,7 +141,7 @@ public class ModelMaker {
     mdlWallEast.nodes.get(0).rotation.set(Vector3.Y, 90f);
 
 //	FLOOR
-    final TextureRegion texRegFloor = game.getAssMan().getTextureRegion(TexturesRegistry.ATLAS,
+    final TextureRegion texRegFloor = game.getAssMan().getTextureRegion(atlas,
         32, 32, -16, 16); // flip x
 
     final TextureAttribute taFloor = new TextureAttribute(TextureAttribute.Diffuse, texRegFloor);
@@ -156,7 +159,7 @@ public class ModelMaker {
     mdlFloor.nodes.get(0).rotation.set(Vector3.X, 90f);
 
 //		CEILING
-    final TextureRegion texRegCeiling = game.getAssMan().getTextureRegion(TexturesRegistry.ATLAS,
+    final TextureRegion texRegCeiling = game.getAssMan().getTextureRegion(atlas,
         32, 0, -16, 16); // flip x
 
     final TextureAttribute taCeiling = new TextureAttribute(TextureAttribute.Diffuse,
@@ -177,11 +180,11 @@ public class ModelMaker {
 
 //	DOOR
     final TextureRegion texRegDoorNorth = game.getAssMan()
-        .getTextureRegion(TexturesRegistry.ATLAS, 96, 48, -16, 16);
+        .getTextureRegionFlipped(atlas, 96, 48, -16, 16);
     final TextureRegion texRegDoorSouth = game.getAssMan()
-        .getTextureRegion(TexturesRegistry.ATLAS, 80, 48, 16, 16);
+        .getTextureRegionFlipped(atlas, 80, 48, 16, 16);
     final TextureRegion texRegDoorMiddle = game.getAssMan()
-        .getTextureRegion(TexturesRegistry.ATLAS, 100, 48, -4, 16);
+        .getTextureRegionFlipped(atlas, 100, 48, -4, 16);
 
     final TextureAttribute taDoorNorth = new TextureAttribute(TextureAttribute.Diffuse,
         texRegDoorNorth);

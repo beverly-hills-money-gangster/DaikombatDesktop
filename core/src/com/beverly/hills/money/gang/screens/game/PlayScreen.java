@@ -1,4 +1,4 @@
-package com.beverly.hills.money.gang.screens;
+package com.beverly.hills.money.gang.screens.game;
 
 import static com.beverly.hills.money.gang.Constants.BLOOD_OVERLAY_ALPHA_SWITCH;
 import static com.beverly.hills.money.gang.Constants.DEAD_SCREEN_INPUT_DELAY_MLS;
@@ -28,7 +28,6 @@ import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
-import com.beverly.hills.money.gang.assets.managers.registry.MapRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundQueue;
@@ -46,13 +45,19 @@ import com.beverly.hills.money.gang.handler.PlayScreenGameConnectionHandler;
 import com.beverly.hills.money.gang.input.TextInputProcessor;
 import com.beverly.hills.money.gang.log.ChatLog;
 import com.beverly.hills.money.gang.log.MyPlayerKillLog;
+import com.beverly.hills.money.gang.maps.MapBuilder;
+import com.beverly.hills.money.gang.models.ModelMaker;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.proto.PushChatEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand.GameEventType;
 import com.beverly.hills.money.gang.proto.Vector;
 import com.beverly.hills.money.gang.registry.EnemiesRegistry;
+import com.beverly.hills.money.gang.screens.GameScreen;
 import com.beverly.hills.money.gang.screens.data.GameBootstrapData;
+import com.beverly.hills.money.gang.screens.loading.ConnectServerScreen;
+import com.beverly.hills.money.gang.screens.menu.ErrorScreen;
+import com.beverly.hills.money.gang.screens.menu.MainMenuScreen;
 import com.beverly.hills.money.gang.screens.ui.EnemyAim;
 import com.beverly.hills.money.gang.screens.ui.audio.VoiceChatPlayer;
 import com.beverly.hills.money.gang.screens.ui.selection.ActivePlayUISelection;
@@ -96,6 +101,8 @@ public class PlayScreen extends GameScreen {
   private final UserSettingSound fightSound;
   private final UserSettingSound musicBackground;
   private final UserSettingSound dingSound1;
+  private final ModelMaker cellBuilder; // builds models...
+  private final MapBuilder mapBuilder;
   private final UserSettingSound boomSound1;
   private final UserSettingSound boomSound2;
   private final UserSettingSound youLead;
@@ -159,9 +166,9 @@ public class PlayScreen extends GameScreen {
             .getUserSettingSound(SoundRegistry.TYPING_SOUND_SEQ.getNext())
             .play(Constants.DEFAULT_SFX_TYPING_VOLUME));
     texRegBloodOverlay = getGame().getAssMan().getTextureRegion(
-        TexturesRegistry.ATLAS, 0, 0, 2, 2);
+        TexturesRegistry.OVERLAY, 0, 0, 2, 2);
     texRegBlackOverlay = getGame().getAssMan().getTextureRegion(
-        TexturesRegistry.ATLAS, 3, 0, 2, 2);
+        TexturesRegistry.OVERLAY, 3, 0, 2, 2);
 
     guiFont64 = getGame().getAssMan().getFont(FontRegistry.FONT_64);
     guiFont32 = getGame().getAssMan().getFont(FontRegistry.FONT_32);
@@ -181,8 +188,16 @@ public class PlayScreen extends GameScreen {
     oneFragLeftSound = getGame().getAssMan().getUserSettingSound(SoundRegistry.ONE_FRAG_LEFT);
     twoFragsLeftSound = getGame().getAssMan().getUserSettingSound(SoundRegistry.TWO_FRAGS_LEFT);
     threeFragsLeftSound = getGame().getAssMan().getUserSettingSound(SoundRegistry.THREE_FRAGS_LEFT);
-
-    getGame().getMapBuilder().buildMap(getGame().getAssMan().getMap(MapRegistry.ONLINE_MAP));
+    var atlas = getGame().getAssMan()
+        .getMapAtlas(gameBootstrapData.getCompleteJoinGameData().getMapName(),
+            gameBootstrapData.getCompleteJoinGameData().getMapHash());
+    cellBuilder = new ModelMaker(game, atlas);
+    mapBuilder = new MapBuilder(game, this);
+    mapBuilder.buildMap(
+        getGame().getAssMan()
+            .getMap(gameBootstrapData.getCompleteJoinGameData().getMapName(),
+                gameBootstrapData.getCompleteJoinGameData().getMapHash()), atlas
+    );
 
     chatLog = new ChatLog(() -> getGame().getAssMan().getUserSettingSound(SoundRegistry.PING)
         .play(Constants.DEFAULT_SFX_VOLUME));
@@ -655,7 +670,7 @@ public class PlayScreen extends GameScreen {
             StringUtils.defaultIfEmpty(e.getMessage(), "Can't handle connection"));
       }
     }
-    if (Gdx.input.isKeyPressed(Keys.V)) {
+    if (!chatMode && Gdx.input.isKeyPressed(Keys.V)) {
       renderVoiceRecordingUI();
     }
 

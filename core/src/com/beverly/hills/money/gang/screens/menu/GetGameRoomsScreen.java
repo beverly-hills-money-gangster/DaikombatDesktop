@@ -1,4 +1,4 @@
-package com.beverly.hills.money.gang.screens;
+package com.beverly.hills.money.gang.screens.menu;
 
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.entity.HostPort;
@@ -6,6 +6,8 @@ import com.beverly.hills.money.gang.network.GameConnection;
 import com.beverly.hills.money.gang.proto.GetServerInfoCommand;
 import com.beverly.hills.money.gang.screens.data.ConnectServerData;
 import com.beverly.hills.money.gang.screens.data.JoinGameData;
+import com.beverly.hills.money.gang.screens.loading.AbstractLoadingScreen;
+import com.beverly.hills.money.gang.screens.loading.JoinGameScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.GameRoom;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -102,6 +104,8 @@ public class GetGameRoomsScreen extends AbstractLoadingScreen {
               var gameRooms = serverInfo.getGamesList().stream()
                   .map(gameInfo -> GameRoom.builder().roomId(gameInfo.getGameId())
                       .playersOnline(gameInfo.getPlayersOnline())
+                      .mapName(gameInfo.getMapMetadata().getName())
+                      .mapHash(gameInfo.getMapMetadata().getHash())
                       .description(gameInfo.getDescription())
                       .title(gameInfo.getTitle())
                       .build()).collect(Collectors.toList());

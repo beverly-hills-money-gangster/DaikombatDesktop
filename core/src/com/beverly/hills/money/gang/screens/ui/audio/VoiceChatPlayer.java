@@ -109,7 +109,8 @@ public class VoiceChatPlayer {
             audioPlayer.writeSamples(pcmSilence, 0, pcmSilence.length);
           } else {
             var mixedPCM = mixPCMs(shortPCMs);
-            amplify(mixedPCM, 4f);
+            // TODO check if it's ok
+            amplify(mixedPCM, 3.5f);
             shortPCMs.forEach(payload -> enemiesRegistry.getEnemy(payload.getPlayerId())
                 .ifPresent(enemyPlayer -> enemyPlayer.talking(getAvgAmpl(payload.getPcm()))));
             audioPlayer.writeSamples(mixedPCM, 0, mixedPCM.length);

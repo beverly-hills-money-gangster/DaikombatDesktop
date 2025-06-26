@@ -54,7 +54,7 @@ public class AbstractEnemyProjectileFlying extends Projectile {
     this.finishPosition = finishPosition.cpy().add(HALF_UNIT / 2, HALF_UNIT / 2);
     this.position = startPosition.cpy().add(HALF_UNIT / 2, 0, HALF_UNIT / 2);
 
-    mdlInst = new ModelInstanceBB(player.getScreen().getGame().getCellBuilder().getMdlEnemy());
+    mdlInst = new ModelInstanceBB(player.getScreen().getCellBuilder().getMdlEnemy());
     flyingProjectileTextureRegion.flip(true, false);
     mdlInst.materials.get(0).set(TextureAttribute.createDiffuse(flyingProjectileTextureRegion));
     mdlInst.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, Color.WHITE));

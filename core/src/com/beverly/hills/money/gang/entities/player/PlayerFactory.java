@@ -14,7 +14,7 @@ import com.beverly.hills.money.gang.proto.PushGameEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand.GameEventType;
 import com.beverly.hills.money.gang.proto.Vector;
 import com.beverly.hills.money.gang.proto.WeaponType;
-import com.beverly.hills.money.gang.screens.PlayScreen;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import com.beverly.hills.money.gang.screens.data.GameBootstrapData;
 import com.beverly.hills.money.gang.screens.ui.EnemyAim;
 import java.util.Optional;
@@ -139,7 +139,7 @@ public class PlayerFactory {
         gameBootstrapData.getCompleteJoinGameData().getJoinGameData().getGamePlayerClass()
         , () -> new TimeLimitedSound(
         screen.getGame().getAssMan().getUserSettingSound(SoundRegistry.NO_AMMO)).play(
-        TimeLimitSoundConf.builder().soundVolumeType(SoundVolumeType.NORMAL).frequencyMls(500)
+        TimeLimitSoundConf.builder().soundVolumeType(SoundVolumeType.NORMAL).frequencyMls(250)
             .build()));
   }
 
