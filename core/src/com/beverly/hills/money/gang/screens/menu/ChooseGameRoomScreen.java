@@ -120,6 +120,7 @@ public class ChooseGameRoomScreen extends AbstractMainMenuScreen {
         .mapName(selectedGameRoom.getMapName())
         .mapHash(selectedGameRoom.getMapHash())
         .build();
+    removeAllEntities();
     if (getGame().getAssMan()
         .mapExists(selectedGameRoom.getMapName(), selectedGameRoom.getMapHash())) {
       getGame().setScreen(new ConnectServerScreen(getGame(), completeJoinGameData));

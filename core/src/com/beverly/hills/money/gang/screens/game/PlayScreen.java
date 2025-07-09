@@ -324,7 +324,6 @@ public class PlayScreen extends GameScreen {
                   .setX(currentDirection.x).setY(currentDirection.y).build())
               .build();
           gameConnection.write(command);
-          LOG.info(command.toString());
           removePowerUp(powerUpType);
         });
     powerUps.put(powerUpType, power);
@@ -608,9 +607,9 @@ public class PlayScreen extends GameScreen {
 
       String playerName = gameBootstrapData.getCompleteJoinGameData().getJoinGameData()
           .getPlayerName();
-      var glyphLeaderBoard = new GlyphLayout(getUiFont(), playerName);
+      var glyphPlayerName = new GlyphLayout(getUiFont(), playerName);
       getUiFont().draw(getGame().getBatch(),
-          playerName, getViewport().getWorldWidth() / 2f - glyphLeaderBoard.width / 2f, 128 - 16);
+          playerName, getViewport().getWorldWidth() / 2f - glyphPlayerName.width / 2f, 128 - 16);
 
       printShadowText(32, 128 - 32,
           getPlayer().getCurrentHP() + " HP " + Optional.ofNullable(

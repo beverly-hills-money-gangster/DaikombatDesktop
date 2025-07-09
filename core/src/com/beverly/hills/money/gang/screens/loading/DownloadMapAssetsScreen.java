@@ -62,6 +62,7 @@ public class DownloadMapAssetsScreen extends AbstractLoadingScreen {
   @Override
   protected void onLoadingRender(final float delta) {
     if (StringUtils.isNotBlank(errorMessage.get())) {
+      removeAllEntities();
       getGame().setScreen(
           new ErrorScreen(getGame(),
               StringUtils.defaultIfBlank(errorMessage.get(), "Can't download map")));

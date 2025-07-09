@@ -236,7 +236,6 @@ public class PlayScreenGameConnectionHandler {
       if (gameEvent.getPlayer().hasHealth()) {
         playScreen.getPlayer().setHP(gameEvent.getPlayer().getHealth());
       }
-      LOG.info(gameEvent.toString());
       gameEvent.getPlayer().getCurrentAmmoList()
           .forEach(playerCurrentWeaponAmmo -> playScreen.getPlayer()
               .setWeaponAmmo(WeaponMapper.getWeapon(playerCurrentWeaponAmmo.getWeapon()),
