@@ -49,7 +49,6 @@ public enum GameTaunt {
   public static final PseudoRandomSequence<GameTaunt> TAUNTS_SEQ = new PseudoRandomSequence<>(
       GameTaunt.values());
 
-  // TODO maybe decouple?
   public static GameTaunt map(Taunt taunt) {
     return switch (taunt) {
       case I_WIN -> GameTaunt.I_WIN;

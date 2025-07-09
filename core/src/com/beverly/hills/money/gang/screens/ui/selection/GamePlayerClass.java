@@ -6,9 +6,9 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum GamePlayerClass {
-  WARRIOR("Default stats"),
-  ANGRY_SKELETON("Low defense, increased damage, speed and vampirism"),
-  DEMON_TANK("Increased defense, low vampirism and speed");
+  WARRIOR("Well-rounded fighter. Reliable in any situation."),
+  ANGRY_SKELETON("Fast, fragile, vicious. Hits hard, heals harder."),
+  DEMON_TANK("Tough demon brute. Slow but hard to kill.");
 
   @Getter
   private final String description;

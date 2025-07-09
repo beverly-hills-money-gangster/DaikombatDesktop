@@ -3,17 +3,18 @@ package com.beverly.hills.money.gang.entities;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import lombok.Getter;
 
 public class Entity {
 
   @Getter
-  private final GameScreen screen;
+  private final PlayScreen screen;
 
   @Getter
   private final int entityId;
 
-  public Entity(final GameScreen screen) {
+  public Entity(final PlayScreen screen) {
     this.screen = screen;
     entityId = screen.getGame().getEntMan().assignId();
   }

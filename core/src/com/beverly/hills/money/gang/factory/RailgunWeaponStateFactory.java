@@ -19,6 +19,7 @@ public class RailgunWeaponStateFactory extends ScreenWeaponStateFactory {
         .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PLAYER_RAILGUN))
         .screenRatioX(0.35f)
         .screenRatioY(0.40f)
+        .maxAmmo(weaponStats.getMaxAmmo())
         .center(false)
         .backoffDelayMls(getBackoffDelay(weaponStats, RAILGUN_ANIMATION_MLS))
         .animationDelayMls(RAILGUN_ANIMATION_MLS)

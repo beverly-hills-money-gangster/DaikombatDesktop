@@ -1,6 +1,5 @@
-package com.beverly.hills.money.gang.screens;
+package com.beverly.hills.money.gang.screens.loading;
 
-import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.entity.HostPort;
@@ -10,8 +9,8 @@ import com.beverly.hills.money.gang.network.SecondaryGameConnection;
 import com.beverly.hills.money.gang.proto.GetServerInfoCommand;
 import com.beverly.hills.money.gang.proto.ServerResponse.ProjectileInfo;
 import com.beverly.hills.money.gang.proto.ServerResponse.WeaponInfo;
-import com.beverly.hills.money.gang.screens.data.ConnectGameData;
-import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
+import com.beverly.hills.money.gang.screens.data.CompleteJoinGameData;
+import com.beverly.hills.money.gang.screens.data.GameBootstrapData;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponMapper;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponStats;
@@ -30,26 +29,25 @@ import org.slf4j.LoggerFactory;
 public class ConnectServerScreen extends ReconnectableScreen {
 
   private static final Logger LOG = LoggerFactory.getLogger(ConnectServerScreen.class);
-  private final ConnectGameData connectGameData;
-
+  private final CompleteJoinGameData completeJoinGameData;
   private final AtomicReference<String> errorMessage = new AtomicReference<>();
 
   private final AtomicReference<GlobalGameConnection> gameConnectionRef = new AtomicReference<>();
 
-  private final PlayerConnectionContextData.PlayerConnectionContextDataBuilder playerContextDataBuilder;
+  private final GameBootstrapData.GameBootstrapDataBuilder playerContextDataBuilder;
 
   public ConnectServerScreen(final DaiKombatGame game,
-      final ConnectGameData connectGameData,
+      final CompleteJoinGameData completeJoinGameData,
       final int connectionTrial) {
     super(game, connectionTrial);
-    this.connectGameData = connectGameData;
-    this.playerContextDataBuilder = PlayerConnectionContextData.builder();
+    this.completeJoinGameData = completeJoinGameData;
+    this.playerContextDataBuilder = GameBootstrapData.builder();
 
   }
 
   public ConnectServerScreen(final DaiKombatGame game,
-      final ConnectGameData connectGameData) {
-    this(game, connectGameData, 0);
+      final CompleteJoinGameData completeJoinGameData) {
+    this(game, completeJoinGameData, 0);
   }
 
   @Override
@@ -57,8 +55,8 @@ public class ConnectServerScreen extends ReconnectableScreen {
     new Thread(() -> {
       try {
         var hostPort = HostPort.builder()
-            .host(connectGameData.getServerHost())
-            .port(connectGameData.getServerPort()).build();
+            .host(completeJoinGameData.getConnectServerData().getServerHost())
+            .port(completeJoinGameData.getConnectServerData().getServerPort()).build();
         var connection = new GameConnection(hostPort);
         GlobalGameConnection loadBalancedGameConnection
             = new GlobalGameConnection(
@@ -70,7 +68,8 @@ public class ConnectServerScreen extends ReconnectableScreen {
         }
         gameConnectionRef.set(loadBalancedGameConnection);
         connection.write(GetServerInfoCommand.newBuilder().setPlayerClass(
-            JoinGameScreen.createPlayerClass(connectGameData.getGamePlayerClass())).build());
+            JoinGameScreen.createPlayerClass(
+                completeJoinGameData.getJoinGameData().getGamePlayerClass())).build());
       } catch (Throwable e) {
         LOG.error("Can't create connection", e);
         errorMessage.set(ExceptionUtils.getMessage(e));
@@ -95,7 +94,7 @@ public class ConnectServerScreen extends ReconnectableScreen {
   @Override
   protected void onLoadingRenderInternal(final float delta) {
     if (StringUtils.isNotBlank(errorMessage.get())) {
-      reconnect(errorMessage.get(), gameConnectionRef.get(), connectGameData);
+      reconnect(errorMessage.get(), gameConnectionRef.get(), completeJoinGameData);
       return;
     }
     Optional.ofNullable(gameConnectionRef.get()).ifPresent(
@@ -109,18 +108,25 @@ public class ConnectServerScreen extends ReconnectableScreen {
             } else if (response.hasServerInfo()) {
               var serverInfo = response.getServerInfo();
               LOG.info("Server info:\n{}", serverInfo);
+              var gameRoom = serverInfo.getGamesList().stream().filter(
+                      gameInfo -> gameInfo.getGameId() == completeJoinGameData.getGameRoomId())
+                  .findFirst().orElseThrow(
+                      () -> new IllegalStateException(
+                          "Can't find room " + completeJoinGameData.getGameRoomId()));
+
               playerContextDataBuilder.movesUpdateFreqMls(serverInfo.getMovesUpdateFreqMls());
-              playerContextDataBuilder.maxVisibility(serverInfo.getMaxVisibility());
+              playerContextDataBuilder.maxVisibility(gameRoom.getMaxVisibility());
               playerContextDataBuilder.fragsToWin(serverInfo.getFragsToWin());
-              playerContextDataBuilder.speed(serverInfo.getPlayerSpeed());
-              playerContextDataBuilder.weaponStats(getWeaponStats(
-                  serverInfo.getWeaponsInfoList(),
-                  serverInfo.getProjectileInfoList()));
-              playerContextDataBuilder.matchId(serverInfo.getGames(Configs.GAME_ID).getMatchId());
+              playerContextDataBuilder.speed(gameRoom.getPlayerSpeed());
+              var weaponStats = getWeaponStats(
+                  gameRoom.getWeaponsInfoList(), gameRoom.getProjectileInfoList());
+              LOG.info("Weapon stats {}", weaponStats);
+              playerContextDataBuilder.weaponStats(weaponStats);
+              playerContextDataBuilder.matchId(gameRoom.getMatchId());
               removeAllEntities();
               LOG.info("Got server info. Try join the game");
               getGame().setScreen(new JoinGameScreen(getGame(),
-                  playerContextDataBuilder, connectGameData, connection, connectionTrial));
+                  playerContextDataBuilder, completeJoinGameData, connection, connectionTrial));
             }
           });
           connection.pollErrors().stream().findFirst().ifPresent(throwable -> {
@@ -146,6 +152,7 @@ public class ConnectServerScreen extends ReconnectableScreen {
                           == weapon.getProjectileRef()).findFirst()
                   .map(projectile -> (float) projectile.getRadius()).orElse(null))
               .maxDistance((float) info.getMaxDistance() - Constants.HALF_UNIT)
+              .maxAmmo(info.hasMaxAmmo() ? info.getMaxAmmo() : null)
               .build());
     });
     if (weaponStats.size() != Weapon.values().length) {

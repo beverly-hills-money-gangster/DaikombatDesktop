@@ -18,10 +18,12 @@ import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// TODO add manual tests for ammo power ups
 public class PowerUp extends SoundMakingEntity {
 
   private static final Logger LOG = LoggerFactory.getLogger(PowerUp.class);
@@ -35,15 +37,14 @@ public class PowerUp extends SoundMakingEntity {
   private final Player player;
 
   private final Runnable onCollision;
-
-  public PowerUp(final Vector3 position, final GameScreen screen, final Player player,
+  public PowerUp(final Vector3 position, final PlayScreen screen, final Player player,
       final TexturesRegistry texturesRegistry, final Runnable onCollision) {
     super(screen);
     this.position = position.cpy();
     this.player = player;
     this.position.add(Constants.HALF_UNIT, 0, Constants.HALF_UNIT);
 
-    mdlInst = new ModelInstanceBB(screen.getGame().getCellBuilder().getMdlEnemy());
+    mdlInst = new ModelInstanceBB(screen.getCellBuilder().getMdlEnemy());
     this.onCollision = onCollision;
     TextureRegion currentTexReg = screen.getGame().getAssMan()
         .getTextureRegion(texturesRegistry, 0, 0, 360, 360);

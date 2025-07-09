@@ -2,7 +2,6 @@ package com.beverly.hills.money.gang.screens.ui.skin;
 
 import com.beverly.hills.money.gang.entities.enemies.EnemyTextures;
 import com.beverly.hills.money.gang.screens.GameScreen;
-import lombok.RequiredArgsConstructor;
 
 public class SkinSelectAnimation {
 

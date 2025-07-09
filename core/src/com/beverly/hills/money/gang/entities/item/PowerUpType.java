@@ -17,7 +17,12 @@ public enum PowerUpType {
       SoundRegistry.ENEMY_REGENERATION_PICK),
 
   INVISIBILITY(TexturesRegistry.INVISIBILITY_ORB, GameEventType.INVISIBILITY_POWER_UP,
-      SoundRegistry.INVISIBILITY_PICK, SoundRegistry.ENEMY_INVISIBILITY_PICK);
+      SoundRegistry.INVISIBILITY_PICK, SoundRegistry.ENEMY_INVISIBILITY_PICK),
+
+  MEDIUM_AMMO(TexturesRegistry.MEDIUM_AMMO, GameEventType.MEDIUM_AMMO_POWER_UP,
+      SoundRegistry.AMMO_PICK, SoundRegistry.ENEMY_AMMO_PICK),
+  BIG_AMMO(TexturesRegistry.BIG_AMMO, GameEventType.BIG_AMMO_POWER_UP,
+      SoundRegistry.AMMO_PICK, SoundRegistry.ENEMY_AMMO_PICK);
 
   @Getter
   private final TexturesRegistry texture;

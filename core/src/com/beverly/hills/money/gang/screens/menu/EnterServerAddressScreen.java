@@ -1,4 +1,4 @@
-package com.beverly.hills.money.gang.screens;
+package com.beverly.hills.money.gang.screens.menu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -10,7 +10,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.input.TextInputProcessor;
-import com.beverly.hills.money.gang.screens.data.ConnectGameData;
+import com.beverly.hills.money.gang.screens.data.ConnectServerData;
 import com.beverly.hills.money.gang.validator.HostPortValidator;
 import com.beverly.hills.money.gang.validator.Validator;
 import java.util.Locale;
@@ -59,8 +59,9 @@ public class EnterServerAddressScreen extends AbstractMainMenuScreen {
       removeAllEntities();
       boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
       getGame().setScreen(new EnterYourNameScreen(getGame(),
-          ConnectGameData.builder().serverHost(hostPort[0])
-              .serverPort(NumberUtils.toInt(hostPort[1]))));
+          ConnectServerData.builder()
+              .serverHost(hostPort[0])
+              .serverPort(NumberUtils.toInt(hostPort[1])).build()));
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));

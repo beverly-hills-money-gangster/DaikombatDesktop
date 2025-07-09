@@ -24,6 +24,7 @@ import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
@@ -85,7 +86,7 @@ public class EnemyPlayer extends Enemy {
       final int enemyPlayerId,
       final Vector3 position,
       final Vector2 direction,
-      final GameScreen screen,
+      final PlayScreen screen,
       final String name,
       final SkinUISelection skinUISelection,
       final EnemyListeners enemyListeners,
@@ -103,7 +104,7 @@ public class EnemyPlayer extends Enemy {
     enemyTextures = new EnemyTextures(screen.getGame().getAssMan(), enemyClass, skinUISelection);
     this.currentSpeed = speed;
     this.name = name;
-    super.setMdlInst(new ModelInstanceBB(screen.getGame().getCellBuilder().getMdlEnemy()));
+    super.setMdlInst(new ModelInstanceBB(screen.getCellBuilder().getMdlEnemy()));
     Attributes attributes = getMdlInst().materials.get(0);
     attributes.set(TextureAttribute.createDiffuse(
         enemyTextures.getEnemyPlayerTextureRegion(EnemyTextureRegistry.IDLETEXFRONTREG)));

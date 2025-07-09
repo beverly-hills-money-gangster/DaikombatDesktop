@@ -5,8 +5,8 @@ import lombok.Setter;
 
 public enum UserSettingsUISelection {
 
-  SOUND("SOUND VOLUME", new SettingState()),
-  MOUSE_SENS("MOUSE SENSITIVITY", new SettingState());
+  SOUND("SOUND", new SettingState()),
+  MOUSE_SENS("SENSITIVITY", new SettingState());
 
   @Getter
   private final SettingState state;

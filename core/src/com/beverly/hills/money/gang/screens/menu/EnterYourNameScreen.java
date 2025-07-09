@@ -1,4 +1,4 @@
-package com.beverly.hills.money.gang.screens;
+package com.beverly.hills.money.gang.screens.menu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -10,7 +10,8 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.input.TextInputProcessor;
-import com.beverly.hills.money.gang.screens.data.ConnectGameData;
+import com.beverly.hills.money.gang.screens.data.ConnectServerData;
+import com.beverly.hills.money.gang.screens.data.JoinGameData;
 import org.apache.commons.lang3.StringUtils;
 
 public class EnterYourNameScreen extends AbstractMainMenuScreen {
@@ -22,12 +23,15 @@ public class EnterYourNameScreen extends AbstractMainMenuScreen {
   private final UserSettingSound boomSound2;
   private final TextInputProcessor nameTextInputProcessor;
 
-  private final ConnectGameData.ConnectGameDataBuilder joinGameDataBuilder;
+  private final JoinGameData.JoinGameDataBuilder joinGameDataBuilder;
+
+  private final ConnectServerData connectServerData;
 
   public EnterYourNameScreen(final DaiKombatGame game,
-      final ConnectGameData.ConnectGameDataBuilder joinGameDataBuilder) {
+      final ConnectServerData connectServerData) {
     super(game);
-    this.joinGameDataBuilder = joinGameDataBuilder;
+    this.joinGameDataBuilder = JoinGameData.builder();
+    this.connectServerData = connectServerData;
     guiFont64 = getGame().getAssMan().getFont(FontRegistry.FONT_64);
     boomSound2 = getGame().getAssMan().getUserSettingSound(SoundRegistry.BOOM_2);
     nameTextInputProcessor = new TextInputProcessor(MAX_NAME_LEN,
@@ -44,7 +48,7 @@ public class EnterYourNameScreen extends AbstractMainMenuScreen {
       boomSound2.play(Constants.DEFAULT_SFX_VOLUME);
       joinGameDataBuilder.playerName(nameTextInputProcessor.getText());
       getGame().setScreen(
-          new ChoosePlayerClassScreen(getGame(), joinGameDataBuilder));
+          new ChoosePlayerClassScreen(getGame(), connectServerData, joinGameDataBuilder));
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));

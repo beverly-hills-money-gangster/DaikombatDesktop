@@ -1,6 +1,5 @@
 package com.beverly.hills.money.gang.entities.player;
 
-import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
@@ -15,8 +14,8 @@ import com.beverly.hills.money.gang.proto.PushGameEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand.GameEventType;
 import com.beverly.hills.money.gang.proto.Vector;
 import com.beverly.hills.money.gang.proto.WeaponType;
-import com.beverly.hills.money.gang.screens.PlayScreen;
-import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
+import com.beverly.hills.money.gang.screens.data.GameBootstrapData;
 import com.beverly.hills.money.gang.screens.ui.EnemyAim;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -30,7 +29,7 @@ public class PlayerFactory {
   public static Player create(
       PlayScreen screen,
       GlobalGameConnection gameConnection,
-      PlayerConnectionContextData playerConnectionContextData) {
+      GameBootstrapData gameBootstrapData) {
     return new Player(screen,
         playerWeapon -> {
           if (playerWeapon.getPlayer().isCollidedWithTeleport()) {
@@ -53,13 +52,13 @@ public class PlayerFactory {
                       playerWeapon.getPlayer().getWeaponDistance(playerWeapon.getWeapon()));
 
           var commandBuilder = PushGameEventCommand.newBuilder()
-              .setGameId(Configs.GAME_ID)
-              .setMatchId(playerConnectionContextData.getMatchId())
+              .setGameId(gameBootstrapData.getCompleteJoinGameData().getGameRoomId())
+              .setMatchId(gameBootstrapData.getMatchId())
               .setSequence(screen.getActionSequence().incrementAndGet())
               .setPingMls(
                   Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
                       .orElse(0))
-              .setPlayerId(playerConnectionContextData.getPlayerId())
+              .setPlayerId(gameBootstrapData.getPlayerId())
               .setDirection(
                   Vector.newBuilder().setX(direction.x).setY(direction.y)
                       .build())
@@ -105,13 +104,13 @@ public class PlayerFactory {
           var position = player.getCurrent2DPosition();
 
           var commandBuilder = PushGameEventCommand.newBuilder()
-              .setGameId(Configs.GAME_ID)
-              .setMatchId(playerConnectionContextData.getMatchId())
+              .setGameId(gameBootstrapData.getCompleteJoinGameData().getGameRoomId())
+              .setMatchId(gameBootstrapData.getMatchId())
               .setSequence(screen.getActionSequence().incrementAndGet())
               .setPingMls(
                   Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
                       .orElse(0))
-              .setPlayerId(playerConnectionContextData.getPlayerId())
+              .setPlayerId(gameBootstrapData.getPlayerId())
               .setDirection(
                   Vector.newBuilder().setX(direction.x).setY(direction.y).build())
               .setPosition(
@@ -132,12 +131,16 @@ public class PlayerFactory {
           });
           gameConnection.write(commandBuilder.build());
         },
-        playerConnectionContextData.getSpawn(),
-        playerConnectionContextData.getDirection(),
-        playerConnectionContextData.getSpeed(),
-        playerConnectionContextData.getWeaponStats(),
-        playerConnectionContextData.getMaxVisibility(),
-        playerConnectionContextData.getConnectGameData().getGamePlayerClass());
+        gameBootstrapData.getSpawn(),
+        gameBootstrapData.getDirection(),
+        gameBootstrapData.getSpeed(),
+        gameBootstrapData.getWeaponStats(),
+        gameBootstrapData.getMaxVisibility(),
+        gameBootstrapData.getCompleteJoinGameData().getJoinGameData().getGamePlayerClass()
+        , () -> new TimeLimitedSound(
+        screen.getGame().getAssMan().getUserSettingSound(SoundRegistry.NO_AMMO)).play(
+        TimeLimitSoundConf.builder().soundVolumeType(SoundVolumeType.NORMAL).frequencyMls(250)
+            .build()));
   }
 
   private static ProjectileType mapProjectileToWeaponType(Projectile projectile) {

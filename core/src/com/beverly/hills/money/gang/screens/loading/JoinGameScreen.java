@@ -1,6 +1,5 @@
-package com.beverly.hills.money.gang.screens;
+package com.beverly.hills.money.gang.screens.loading;
 
-import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.config.ClientConfig;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
@@ -9,8 +8,9 @@ import com.beverly.hills.money.gang.proto.MergeConnectionCommand;
 import com.beverly.hills.money.gang.proto.PlayerClass;
 import com.beverly.hills.money.gang.proto.PlayerSkinColor;
 import com.beverly.hills.money.gang.proto.ServerResponse;
-import com.beverly.hills.money.gang.screens.data.ConnectGameData;
-import com.beverly.hills.money.gang.screens.data.PlayerConnectionContextData;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
+import com.beverly.hills.money.gang.screens.data.CompleteJoinGameData;
+import com.beverly.hills.money.gang.screens.data.GameBootstrapData;
 import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.utils.Converter;
@@ -25,19 +25,19 @@ public class JoinGameScreen extends ReconnectableScreen {
 
   private static final Logger LOG = LoggerFactory.getLogger(JoinGameScreen.class);
   private final GlobalGameConnection gameConnection;
-  private final PlayerConnectionContextData.PlayerConnectionContextDataBuilder playerContextDataBuilder;
-  private final ConnectGameData connectGameData;
+  private final GameBootstrapData.GameBootstrapDataBuilder playerContextDataBuilder;
+  private final CompleteJoinGameData completeJoinGameData;
 
   private final AtomicReference<String> errorMessage = new AtomicReference<>();
 
   public JoinGameScreen(final DaiKombatGame game,
-      final PlayerConnectionContextData.PlayerConnectionContextDataBuilder playerContextDataBuilder,
-      final ConnectGameData connectGameData,
+      final GameBootstrapData.GameBootstrapDataBuilder playerContextDataBuilder,
+      final CompleteJoinGameData completeJoinGameData,
       final GlobalGameConnection gameConnection,
       final int connectionTrial) {
     super(game, connectionTrial);
     this.gameConnection = gameConnection;
-    this.connectGameData = connectGameData;
+    this.completeJoinGameData = completeJoinGameData;
     this.playerContextDataBuilder = playerContextDataBuilder;
   }
 
@@ -50,11 +50,13 @@ public class JoinGameScreen extends ReconnectableScreen {
     }
     var joinGameRequestBuilder = JoinGameCommand.newBuilder()
         .setVersion(ClientConfig.VERSION)
-        .setGameId(Configs.GAME_ID)
-        .setSkin(createSkinColorSelection(connectGameData.getSkinUISelection()))
-        .setPlayerClass(createPlayerClass(connectGameData.getGamePlayerClass()))
-        .setPlayerName(connectGameData.getPlayerName());
-    Optional.ofNullable(connectGameData.getPlayerIdToRecover())
+        .setGameId(completeJoinGameData.getGameRoomId())
+        .setSkin(
+            createSkinColorSelection(completeJoinGameData.getJoinGameData().getSkinUISelection()))
+        .setPlayerClass(
+            createPlayerClass(completeJoinGameData.getJoinGameData().getGamePlayerClass()))
+        .setPlayerName(completeJoinGameData.getJoinGameData().getPlayerName());
+    Optional.ofNullable(completeJoinGameData.getJoinGameData().getPlayerIdToRecover())
         .ifPresent(joinGameRequestBuilder::setRecoveryPlayerId);
     gameConnection.write(joinGameRequestBuilder
         .build());
@@ -89,7 +91,7 @@ public class JoinGameScreen extends ReconnectableScreen {
   @Override
   protected void onLoadingRenderInternal(final float delta) {
     if (StringUtils.isNotBlank(errorMessage.get())) {
-      reconnect(errorMessage.get(), gameConnection, connectGameData);
+      reconnect(errorMessage.get(), gameConnection, completeJoinGameData);
       return;
     }
     gameConnection.pollPrimaryConnectionResponse().ifPresent(response -> {
@@ -104,7 +106,8 @@ public class JoinGameScreen extends ReconnectableScreen {
         stopBgMusic();
         LOG.info("Joined the game. Go play");
         var playerContextData = createPlayerContextData(response);
-        gameConnection.initVoiceChat(playerContextData.getPlayerId(), Configs.GAME_ID);
+        gameConnection.initVoiceChat(playerContextData.getPlayerId(),
+            completeJoinGameData.getGameRoomId());
         getGame().setScreen(
             new PlayScreen(getGame(), gameConnection, playerContextData));
       }
@@ -117,17 +120,17 @@ public class JoinGameScreen extends ReconnectableScreen {
     });
   }
 
-  private PlayerConnectionContextData createPlayerContextData(ServerResponse response) {
+  private GameBootstrapData createPlayerContextData(ServerResponse response) {
     var mySpawnEvent = response.getGameEvents().getEvents(0);
     int playerId = mySpawnEvent.getPlayer().getPlayerId();
     gameConnection.getSecondaryGameConnections().forEach(
         secondaryGameConnection -> secondaryGameConnection.write(
-            MergeConnectionCommand.newBuilder().setGameId(Configs.GAME_ID).setPlayerId(playerId)
-                .build()));
+            MergeConnectionCommand.newBuilder().setGameId(completeJoinGameData.getGameRoomId())
+                .setPlayerId(playerId).build()));
     return playerContextDataBuilder
         .playerId(playerId)
         .playersOnline(response.getGameEvents().getPlayersOnline())
-        .connectGameData(connectGameData)
+        .completeJoinGameData(completeJoinGameData)
         .spawn(Converter.convertToVector2(mySpawnEvent.getPlayer().getPosition()))
         .direction(Converter.convertToVector2(mySpawnEvent.getPlayer().getDirection()))
         .leaderBoardItemList(mySpawnEvent.getLeaderBoard().getItemsList())

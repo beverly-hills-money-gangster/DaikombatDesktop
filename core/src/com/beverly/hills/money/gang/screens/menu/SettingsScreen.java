@@ -1,4 +1,4 @@
-package com.beverly.hills.money.gang.screens;
+package com.beverly.hills.money.gang.screens.menu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -9,6 +9,8 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.pref.UserPreference;
+import com.beverly.hills.money.gang.screens.menu.AbstractMainMenuScreen;
+import com.beverly.hills.money.gang.screens.menu.MainMenuScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
 
@@ -26,6 +28,7 @@ public class SettingsScreen extends AbstractMainMenuScreen {
     super(game);
     guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
     dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
+    settingsSelection.setMenuItemSize(64);
   }
 
   @Override
