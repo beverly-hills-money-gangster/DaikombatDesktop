@@ -1,4 +1,4 @@
-package com.beverly.hills.money.gang.screens;
+package com.beverly.hills.money.gang.screens.menu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -9,7 +9,7 @@ import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
-import com.beverly.hills.money.gang.screens.data.ConnectGameData;
+import com.beverly.hills.money.gang.screens.data.ConnectServerData;
 import com.beverly.hills.money.gang.screens.ui.selection.ServerUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 
@@ -39,9 +39,9 @@ public class ChooseServerScreen extends AbstractMainMenuScreen {
         case OFFICIAL -> {
           removeAllEntities();
           getGame().setScreen(new EnterYourNameScreen(getGame(),
-              ConnectGameData.builder()
+              ConnectServerData.builder()
                   .serverHost(Configs.HOST)
-                  .serverPort(Configs.PORT)));
+                  .serverPort(Configs.PORT).build()));
         }
         case CUSTOM -> {
           removeAllEntities();

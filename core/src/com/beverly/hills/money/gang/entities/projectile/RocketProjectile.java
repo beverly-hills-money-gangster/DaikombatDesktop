@@ -7,6 +7,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponProjectile;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponState;
 
@@ -14,7 +15,7 @@ public class RocketProjectile extends AbstractPlayerProjectile {
 
   public RocketProjectile(final Player player, final Vector3 startPosition,
       final Vector2 finishPosition,
-      final GameScreen screen,
+      final PlayScreen screen,
       final WeaponState weaponState) {
     super(player, startPosition, finishPosition, screen, screen.getGame().getAssMan()
             .getTextureRegion(TexturesRegistry.FIREBALL, 0, 0, 11, 11), Animation.builder()

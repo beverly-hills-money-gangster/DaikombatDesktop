@@ -6,9 +6,25 @@ import org.apache.commons.lang3.Range;
 
 public interface Constants {
 
+  int MAX_CHAT_MSG_LEN = 32;
+
+  float HUD_ALPHA_CHANNEL = 0.7f;
+
+  float BLOOD_OVERLAY_ALPHA_SWITCH = 0.5f;
+
+  int DEAD_SCREEN_INPUT_DELAY_MLS = 1_000;
+
+  int TAUNT_DELAY_MLS = 1_250;
+
+  int SHADOW_MARGIN = 16;
+
+  String PRESS_TAB_TO_SEE_LEADERBOARD = "PRESS TAB TO SEE LEADERBOARD";
+
+  String PRESS_R_TO_SEE_REFRESH = "PRESS R TO REFRESH";
+
   int LONG_TIME_NO_MOVE_MLS = 200;
 
-  float SFX_VOLUME_COEFFICIENT = 1 / 5f;
+  float SFX_VOLUME_COEFFICIENT = 1 / 3.5f;
 
   int MAX_ENEMY_IDLE_TIME_MLS = LONG_TIME_NO_MOVE_MLS * 4;
 

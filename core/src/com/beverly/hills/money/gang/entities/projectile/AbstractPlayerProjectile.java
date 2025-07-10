@@ -25,6 +25,7 @@ import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponProjectile;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponState;
 import java.util.function.Consumer;
@@ -65,7 +66,7 @@ public class AbstractPlayerProjectile extends Projectile {
 
   public AbstractPlayerProjectile(final Player player, final Vector3 startPosition,
       final Vector2 finishPosition,
-      final GameScreen screen,
+      final PlayScreen screen,
       final TextureRegion flyingProjectileTextureRegion,
       final Animation blowUpAnimation,
       final WeaponState weaponState,
@@ -88,7 +89,7 @@ public class AbstractPlayerProjectile extends Projectile {
     this.player = player;
     this.position.add(Constants.HALF_UNIT, 0, Constants.HALF_UNIT);
 
-    mdlInst = new ModelInstanceBB(screen.getGame().getCellBuilder().getMdlEnemy());
+    mdlInst = new ModelInstanceBB(screen.getCellBuilder().getMdlEnemy());
     flyingProjectileTextureRegion.flip(true, false);
     mdlInst.materials.get(0).set(TextureAttribute.createDiffuse(flyingProjectileTextureRegion));
     mdlInst.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, Color.WHITE));

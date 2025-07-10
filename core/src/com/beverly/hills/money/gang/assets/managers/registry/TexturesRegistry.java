@@ -3,10 +3,14 @@ package com.beverly.hills.money.gang.assets.managers.registry;
 import lombok.Getter;
 
 public enum TexturesRegistry {
+
+  OVERLAY("overlay.png"),
   MINIGUN_IDLE("minigun_idle.png"),
   MINIGUN_FIRE("minigun_fire.png"),
   QUAD_DAMAGE_ORB("quad_damage_orb.png"),
   MED_KIT("medkit.png"),
+  MEDIUM_AMMO("medium_ammo.png"),
+  BIG_AMMO("big_ammo.png"),
   DEFENCE_ORB("defence_orb.png"),
   INVISIBILITY_ORB("invisibility_orb.png"),
   TELEPORT_SPRITES("teleport_sprites.png"),
@@ -25,7 +29,6 @@ public enum TexturesRegistry {
   LOGO("logo.png"),
   MIC("mic.png"),
   MAIN_MENU_BG("main_menu_bg.png"),
-  ATLAS("atlas.png"),
 
   FIREBALL("fireball.png"),
   PLASMA("plasma.png"),

@@ -1,4 +1,4 @@
-package com.beverly.hills.money.gang.screens;
+package com.beverly.hills.money.gang.screens.loading;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -7,6 +7,9 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
+import com.beverly.hills.money.gang.screens.menu.ErrorScreen;
+import com.beverly.hills.money.gang.screens.menu.MainMenuScreen;
+import com.beverly.hills.money.gang.screens.menu.AbstractMainMenuScreen;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class AbstractLoadingScreen extends AbstractMainMenuScreen {

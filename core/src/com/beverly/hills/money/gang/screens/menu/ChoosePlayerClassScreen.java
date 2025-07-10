@@ -1,4 +1,4 @@
-package com.beverly.hills.money.gang.screens;
+package com.beverly.hills.money.gang.screens.menu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -10,7 +10,8 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.enemies.EnemyTextures;
-import com.beverly.hills.money.gang.screens.data.ConnectGameData;
+import com.beverly.hills.money.gang.screens.data.ConnectServerData;
+import com.beverly.hills.money.gang.screens.data.JoinGameData;
 import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
@@ -30,13 +31,17 @@ public class ChoosePlayerClassScreen extends AbstractMainMenuScreen {
   private final UISelection<GamePlayerClass> playerClassSelection = new UISelection<>(
       GamePlayerClass.values());
 
-  private final ConnectGameData.ConnectGameDataBuilder joinGameDataBuilder;
+  private final JoinGameData.JoinGameDataBuilder joinGameDataBuilder;
 
   private final SkinSelectAnimation skinSelectAnimation;
 
+  private final ConnectServerData connectServerData;
+
   public ChoosePlayerClassScreen(final DaiKombatGame game,
-      final ConnectGameData.ConnectGameDataBuilder joinGameDataBuilder) {
+      final ConnectServerData connectServerData,
+      final JoinGameData.JoinGameDataBuilder joinGameDataBuilder) {
     super(game);
+    this.connectServerData = connectServerData;
     guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
     guiFont32 = game.getAssMan().getFont(FontRegistry.FONT_32);
     this.joinGameDataBuilder = joinGameDataBuilder;
@@ -58,7 +63,7 @@ public class ChoosePlayerClassScreen extends AbstractMainMenuScreen {
       joinGameDataBuilder.gamePlayerClass(playerClassSelection.getSelectedOption());
       removeAllEntities();
       getGame().setScreen(new ChooseSkinColorScreen(getGame(), joinGameDataBuilder,
-          playerClassSelection.getSelectedOption()));
+          playerClassSelection.getSelectedOption(), connectServerData));
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));

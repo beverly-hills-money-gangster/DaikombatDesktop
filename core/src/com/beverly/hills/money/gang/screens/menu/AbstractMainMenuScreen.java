@@ -1,4 +1,4 @@
-package com.beverly.hills.money.gang.screens;
+package com.beverly.hills.money.gang.screens.menu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
@@ -15,6 +15,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.LoopingUserSettingSound;
 import com.beverly.hills.money.gang.config.ClientConfig;
+import com.beverly.hills.money.gang.screens.GameScreen;
 import java.util.Locale;
 
 public abstract class AbstractMainMenuScreen extends GameScreen {

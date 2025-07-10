@@ -21,6 +21,7 @@ public class PlasmagunWeaponStateFactory extends ScreenWeaponStateFactory {
         .projectileRadius(weaponStats.getProjectileRadius())
         .screenRatioX(0.40f)
         .screenRatioY(0.45f)
+        .maxAmmo(weaponStats.getMaxAmmo())
         .center(false)
         .backoffDelayMls(getBackoffDelay(weaponStats, PLASMAGUN_ANIMATION_MLS))
         .animationDelayMls(PLASMAGUN_ANIMATION_MLS)

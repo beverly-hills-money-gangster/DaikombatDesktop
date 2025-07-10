@@ -53,7 +53,7 @@ public class AbstractEnemyProjectileBoom extends SoundMakingEntity {
     this.player = player;
     this.position.add(Constants.HALF_UNIT, 0, Constants.HALF_UNIT);
 
-    mdlInst = new ModelInstanceBB(player.getScreen().getGame().getCellBuilder().getMdlEnemy());
+    mdlInst = new ModelInstanceBB(player.getScreen().getCellBuilder().getMdlEnemy());
     TextureRegion currentTexReg = player.getScreen().getGame().getAssMan()
         .getTextureRegion(TexturesRegistry.FIREBALL, 0, 0, 11, 11);
     currentTexReg.flip(true, false);

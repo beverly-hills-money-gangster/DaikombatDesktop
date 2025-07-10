@@ -26,7 +26,7 @@ import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.registry.EnemiesRegistry;
 import com.beverly.hills.money.gang.registry.PlayerProjectileFactoriesRegistry;
 import com.beverly.hills.money.gang.registry.ScreenWeaponStateFactoriesRegistry;
-import com.beverly.hills.money.gang.screens.PlayScreen;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
 import com.beverly.hills.money.gang.screens.ui.weapon.ScreenWeapon;
@@ -67,6 +67,8 @@ public class Player extends Entity {
   private final Consumer<Player> onMovementListener;
 
   private final Consumer<PlayerWeapon> onAttackListener;
+
+  private final Runnable onNoAmmo;
 
   @Getter
   private final Consumer<ProjectileEnemy> onProjectileAttackHit;
@@ -119,9 +121,11 @@ public class Player extends Entity {
       final Float speed,
       final Map<Weapon, WeaponStats> weaponStats,
       final int maxVisibility,
-      final GamePlayerClass playerClass) {
+      final GamePlayerClass playerClass,
+      final Runnable onNoAmmo) {
     super(screen);
     this.playerClass = playerClass;
+    this.onNoAmmo = onNoAmmo;
     this.enemiesRegistry = screen.getEnemiesRegistry();
     this.speed = speed * SPEED_BOOST;
     screenWeapon = new ScreenWeapon(screen.getGame().getAssMan(), weaponStats,
@@ -137,9 +141,11 @@ public class Player extends Entity {
     playerCam.near = 0.01f;
     playerCam.far = maxVisibility * 0.8f;
     playerCam.update();
-    createRect(spawnPosition.cpy()
-        .set(spawnPosition.x - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f,
-            spawnPosition.y - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f));
+    var newSpawnPosition = new Vector2(spawnPosition.x + Constants.PLAYER_RECT_SIZE / 2f,
+        spawnPosition.y + Constants.PLAYER_RECT_SIZE / 2f);
+    createRect(newSpawnPosition.cpy()
+        .set(newSpawnPosition.x - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f,
+            newSpawnPosition.y - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f));
 
     Gdx.input.setInputProcessor(new InputAdapter() {
       @Override
@@ -166,13 +172,15 @@ public class Player extends Entity {
   }
 
   public void teleport(final Vector2 position, final Vector2 lookAt) {
+    var newSpawnPosition = new Vector2(position.x + Constants.PLAYER_RECT_SIZE / 2f,
+        position.y + Constants.PLAYER_RECT_SIZE / 2f);
     getScreen().getGame().getRectMan().removeRect(rect); // never forget!
     playerCam.position.set(new Vector3(0, Constants.DEFAULT_PLAYER_CAM_Y, 0));
     playerCam.lookAt(new Vector3(lookAt.x, Constants.DEFAULT_PLAYER_CAM_Y, lookAt.y));
     // TODO fix this
-    createRect(position.cpy()
-        .set(position.x - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f,
-            position.y - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f));
+    createRect(newSpawnPosition.cpy()
+        .set(newSpawnPosition.x - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f,
+            newSpawnPosition.y - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f));
     colliedTeleport.finish();
     colliedTeleport = null;
   }
@@ -252,8 +260,16 @@ public class Player extends Entity {
     return screenWeapon.getWeaponBeingUsed();
   }
 
+  public String getCurrentWeaponAmmo() {
+    return screenWeapon.getAmmoStats();
+  }
+
   public void setWeapon(Weapon weapon) {
     screenWeapon.setWeaponBeingUsed(weapon);
+  }
+
+  public void setWeaponAmmo(Weapon weapon, int ammo) {
+    screenWeapon.setWeaponAmmo(weapon, ammo);
   }
 
   public void handleInput(final float delta) {
@@ -303,9 +319,7 @@ public class Player extends Entity {
 
   private void attack() {
     if (screenWeapon.attack(this)) {
-
       var currentWeapon = screenWeapon.getWeaponBeingUsed();
-
       onAttackListener.accept(PlayerWeapon
           .builder().player(this).weapon(currentWeapon).build());
 
@@ -315,6 +329,8 @@ public class Player extends Entity {
         getScreen().getGame().getEntMan()
             .addEntity(projectileFactory.create(this, screenWeapon.getWeaponState(currentWeapon)));
       }
+    } else if (!screenWeapon.hasAmmo()) {
+      onNoAmmo.run();
     }
   }
 

@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
-import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
 
 public class Cell3D extends Entity {
 
@@ -26,7 +26,7 @@ public class Cell3D extends Entity {
   private ModelInstanceBB mdlInstFloor;
   private ModelInstanceBB mdlInstCeiling;
 
-  public Cell3D(final Vector3 position, final GameScreen screen) {
+  public Cell3D(final Vector3 position, final PlayScreen screen) {
     super(screen);
     this.position.set(position.cpy().add(0, 0.5f, 0));
   }
@@ -34,7 +34,7 @@ public class Cell3D extends Entity {
   public void buildCell() {
     if (hasWallNorth) {
       mdlInstWallNorth = new ModelInstanceBB(
-          getScreen().getGame().getCellBuilder().getMdlWallNorth());
+          getScreen().getCellBuilder().getMdlWallNorth());
 
       if (texRegNorth != null) {
         final TextureAttribute ta = (TextureAttribute) mdlInstWallNorth.materials.get(0)
@@ -49,7 +49,7 @@ public class Cell3D extends Entity {
 
     if (hasWallSouth) {
       mdlInstWallSouth = new ModelInstanceBB(
-          getScreen().getGame().getCellBuilder().getMdlWallSouth());
+          getScreen().getCellBuilder().getMdlWallSouth());
 
       if (texRegSouth != null) {
         final TextureAttribute ta = (TextureAttribute) mdlInstWallSouth.materials.get(0)
@@ -57,13 +57,14 @@ public class Cell3D extends Entity {
         ta.set(texRegSouth);
       }
 
-      mdlInstWallSouth.transform.setToTranslation(this.position.cpy().add(new Vector3(0, -0.25f, 0.5f)));
+      mdlInstWallSouth.transform.setToTranslation(
+          this.position.cpy().add(new Vector3(0, -0.25f, 0.5f)));
       mdlInstWallSouth.transform.scale(1, 1.5f, 1);
     }
 
     if (hasWallWest) {
       mdlInstWallWest = new ModelInstanceBB(
-          getScreen().getGame().getCellBuilder().getMdlWallWest());
+          getScreen().getCellBuilder().getMdlWallWest());
 
       if (texRegWest != null) {
         final TextureAttribute ta = (TextureAttribute) mdlInstWallWest.materials.get(0)
@@ -71,13 +72,14 @@ public class Cell3D extends Entity {
         ta.set(texRegWest);
       }
 
-      mdlInstWallWest.transform.setToTranslation(this.position.cpy().add(new Vector3(0.5f, -0.25f, 0)));
+      mdlInstWallWest.transform.setToTranslation(
+          this.position.cpy().add(new Vector3(0.5f, -0.25f, 0)));
       mdlInstWallWest.transform.scale(1, 1.5f, 1);
     }
 
     if (hasWallEast) {
       mdlInstWallEast = new ModelInstanceBB(
-          getScreen().getGame().getCellBuilder().getMdlWallEast());
+          getScreen().getCellBuilder().getMdlWallEast());
 
       if (texRegEast != null) {
         final TextureAttribute ta = (TextureAttribute) mdlInstWallEast.materials.get(0)
@@ -85,12 +87,13 @@ public class Cell3D extends Entity {
         ta.set(texRegEast);
       }
 
-      mdlInstWallEast.transform.setToTranslation(this.position.cpy().add(new Vector3(-0.5f, -0.25f, 0)));
+      mdlInstWallEast.transform.setToTranslation(
+          this.position.cpy().add(new Vector3(-0.5f, -0.25f, 0)));
       mdlInstWallEast.transform.scale(1, 1.5f, 1);
     }
 
     if (hasFloor) {
-      mdlInstFloor = new ModelInstanceBB(getScreen().getGame().getCellBuilder().getMdlFloor());
+      mdlInstFloor = new ModelInstanceBB(getScreen().getCellBuilder().getMdlFloor());
 
       if (texRegFloor != null) {
         final TextureAttribute ta = (TextureAttribute) mdlInstFloor.materials.get(0)
@@ -102,7 +105,7 @@ public class Cell3D extends Entity {
     }
 
     if (hasCeiling) {
-      mdlInstCeiling = new ModelInstanceBB(getScreen().getGame().getCellBuilder().getMdlCeiling());
+      mdlInstCeiling = new ModelInstanceBB(getScreen().getCellBuilder().getMdlCeiling());
 
       if (texRegCeiling != null) {
         final TextureAttribute ta = (TextureAttribute) mdlInstCeiling.materials.get(0)

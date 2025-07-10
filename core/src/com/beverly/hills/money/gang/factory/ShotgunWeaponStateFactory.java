@@ -18,6 +18,7 @@ public class ShotgunWeaponStateFactory extends ScreenWeaponStateFactory {
         .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PLAYER_SHOTGUN))
         .hitTargetSound(assetsManager.getUserSettingSound(SoundRegistry.HIT_SOUND))
         .screenRatioX(0.35f)
+        .maxAmmo(weaponStats.getMaxAmmo())
         .screenRatioY(0.40f)
         .center(false)
         .backoffDelayMls(getBackoffDelay(weaponStats, GUNSHOT_ANIMATION_MLS))

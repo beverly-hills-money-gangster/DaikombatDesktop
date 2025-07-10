@@ -27,7 +27,7 @@ import com.beverly.hills.money.gang.proto.Vector;
 import com.beverly.hills.money.gang.registry.EnemiesRegistry;
 import com.beverly.hills.money.gang.registry.EnemyPlayerProjectileBoomFactoriesRegistry;
 import com.beverly.hills.money.gang.registry.EnemyPlayerProjectileShootingFactoriesRegistry;
-import com.beverly.hills.money.gang.screens.PlayScreen;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.taunt.GameTaunt;
@@ -39,7 +39,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO add manual tests for that
 @RequiredArgsConstructor
 public class PlayScreenGameConnectionHandler {
 
@@ -63,7 +62,7 @@ public class PlayScreenGameConnectionHandler {
     }
 
     playScreen.getUiLeaderBoard().setPing(
-        playScreen.getPlayerConnectionContextData().getPlayerId(),
+        playScreen.getGameBootstrapData().getPlayerId(),
         Optional.ofNullable(playScreen.getGameConnection()
             .getPrimaryNetworkStats().getPingMls()).orElse(0));
 
@@ -119,7 +118,7 @@ public class PlayScreenGameConnectionHandler {
 
   private void handleTeleport(ServerResponse.GameEvent gameEvent) {
     // if I'm getting teleported
-    if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
+    if (gameEvent.getPlayer().getPlayerId() == playScreen.getGameBootstrapData()
         .getPlayerId()) {
       playScreen.getPlayer().teleport(
           createVector(gameEvent.getPlayer().getPosition()),
@@ -156,7 +155,7 @@ public class PlayScreenGameConnectionHandler {
   }
 
   private void handleSpawn(ServerResponse.GameEvent gameEvent) {
-    if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
+    if (gameEvent.getPlayer().getPlayerId() == playScreen.getGameBootstrapData()
         .getPlayerId()) {
       LOG.warn("This is my own spawn");
       return;
@@ -175,7 +174,7 @@ public class PlayScreenGameConnectionHandler {
         gameEvent.getPlayer().getSpeed(),
         gameEvent.getPlayer().getHealth(),
         GamePlayerClass.createPlayerClass(gameEvent.getPlayer().getPlayerClass()),
-        playScreen.getPlayerConnectionContextData().getMaxVisibility());
+        playScreen.getGameBootstrapData().getMaxVisibility());
     gameEvent.getPlayer().getActivePowerUpsList().forEach(
         gamePowerUp -> activateEnemyPowerUpOnSpawn(
             enemyPlayer, getPowerUpType(gamePowerUp.getType()), gamePowerUp.getLastsForMls()));
@@ -218,7 +217,7 @@ public class PlayScreenGameConnectionHandler {
   }
 
   private void handleExit(ServerResponse.GameEvent gameEvent) {
-    if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
+    if (gameEvent.getPlayer().getPlayerId() == playScreen.getGameBootstrapData()
         .getPlayerId()) {
       return;
     }
@@ -232,11 +231,15 @@ public class PlayScreenGameConnectionHandler {
   }
 
   private void handleMove(ServerResponse.GameEvent gameEvent) {
-    if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
+    if (gameEvent.getPlayer().getPlayerId() == playScreen.getGameBootstrapData()
         .getPlayerId()) {
       if (gameEvent.getPlayer().hasHealth()) {
         playScreen.getPlayer().setHP(gameEvent.getPlayer().getHealth());
       }
+      gameEvent.getPlayer().getCurrentAmmoList()
+          .forEach(playerCurrentWeaponAmmo -> playScreen.getPlayer()
+              .setWeaponAmmo(WeaponMapper.getWeapon(playerCurrentWeaponAmmo.getWeapon()),
+                  playerCurrentWeaponAmmo.getAmmo()));
       gameEvent.getPlayer().getActivePowerUpsList().forEach(this::activatePlayerPowerUp);
       return;
     }
@@ -290,13 +293,15 @@ public class PlayScreenGameConnectionHandler {
       case QUAD_DAMAGE -> PowerUpType.QUAD_DAMAGE;
       case DEFENCE -> PowerUpType.DEFENCE;
       case HEALTH -> PowerUpType.HEALTH;
+      case BIG_AMMO -> PowerUpType.BIG_AMMO;
+      case MEDIUM_AMMO -> PowerUpType.MEDIUM_AMMO;
       default -> throw new IllegalArgumentException("Not supported power-up type " + powerUpType);
     };
   }
 
 
   private void handleAttackMiss(ServerResponse.GameEvent gameEvent) {
-    if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
+    if (gameEvent.getPlayer().getPlayerId() == playScreen.getGameBootstrapData()
         .getPlayerId()) {
       return;
     }
@@ -355,10 +360,10 @@ public class PlayScreenGameConnectionHandler {
     EnemyPlayerActionType enemyPlayerActionType = EnemyPlayerActionType.ATTACK;
 
     // if I hit somebody
-    if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
+    if (gameEvent.getPlayer().getPlayerId() == playScreen.getGameBootstrapData()
         .getPlayerId()) {
       // if I hit myself
-      if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
+      if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getGameBootstrapData()
           .getPlayerId()) {
         playScreen.getPlayer().getHit(gameEvent.getAffectedPlayer().getHealth());
         playGetHitSound();
@@ -372,7 +377,7 @@ public class PlayScreenGameConnectionHandler {
             });
       }
     } else if (gameEvent.getAffectedPlayer().getPlayerId()
-        == playScreen.getPlayerConnectionContextData().getPlayerId()) {
+        == playScreen.getGameBootstrapData().getPlayerId()) {
       // if I get hit
       enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
           .ifPresent(enemyPlayer -> {
@@ -439,10 +444,10 @@ public class PlayScreenGameConnectionHandler {
     playScreen.getUiLeaderBoard().registerKill(gameEvent.getPlayer().getPlayerId(),
         gameEvent.getAffectedPlayer().getPlayerId());
 
-    if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
+    if (gameEvent.getAffectedPlayer().getPlayerId() == playScreen.getGameBootstrapData()
         .getPlayerId()) {
       // if I get killed
-      if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
+      if (gameEvent.getPlayer().getPlayerId() == playScreen.getGameBootstrapData()
           .getPlayerId()) {
         // if I get killed by myself
         diePlayer("yourself");
@@ -470,7 +475,7 @@ public class PlayScreenGameConnectionHandler {
                 .build()));
       }
       LOG.info("I'm dead");
-    } else if (gameEvent.getPlayer().getPlayerId() == playScreen.getPlayerConnectionContextData()
+    } else if (gameEvent.getPlayer().getPlayerId() == playScreen.getGameBootstrapData()
         .getPlayerId()) {
       var victimPlayerOpt = enemiesRegistry.removeEnemy(
           gameEvent.getAffectedPlayer().getPlayerId());

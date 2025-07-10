@@ -19,6 +19,7 @@ import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.GameScreen;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import lombok.Getter;
 
 public abstract class AbstractEnemyPlayerTalkingEffect extends Entity {
@@ -38,7 +39,7 @@ public abstract class AbstractEnemyPlayerTalkingEffect extends Entity {
 
   public AbstractEnemyPlayerTalkingEffect(
       final Vector3 position,
-      final GameScreen screen,
+      final PlayScreen screen,
       final TexturesRegistry texturesRegistry,
       final int visibleForMls) {
     super(screen);
@@ -48,7 +49,7 @@ public abstract class AbstractEnemyPlayerTalkingEffect extends Entity {
     this.textureRegion = getScreen().getGame().getAssMan()
         .getTextureRegion(texturesRegistry, 0, 0, 16, 16);
 
-    mdlInst = new ModelInstanceBB(screen.getGame().getCellBuilder().getMdlEnemy());
+    mdlInst = new ModelInstanceBB(screen.getCellBuilder().getMdlEnemy());
 
     mdlInst.materials.get(0)
         .set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));

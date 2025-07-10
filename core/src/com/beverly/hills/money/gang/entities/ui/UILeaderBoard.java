@@ -31,7 +31,6 @@ public class UILeaderBoard extends LeaderBoardDataLayer {
 
   public void registerKill(int killerPlayerId, int victimPlayerId) {
     int myOldPlace = myPlace;
-    // TODO test it
     if (killerPlayerId != victimPlayerId) {
       leaderBoardItems.stream()
           .filter(leaderBoardPlayer -> leaderBoardPlayer.getId() == killerPlayerId)

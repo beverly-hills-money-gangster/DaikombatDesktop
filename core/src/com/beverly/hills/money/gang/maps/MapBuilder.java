@@ -3,6 +3,7 @@ package com.beverly.hills.money.gang.maps;
 
 import static com.beverly.hills.money.gang.Constants.FLOAT_COMPARE_EPS;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
@@ -10,17 +11,16 @@ import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
-import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.cell.Cell3D;
 import com.beverly.hills.money.gang.entities.door.Door;
 import com.beverly.hills.money.gang.entities.door.Door.DoorDirection;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import org.apache.commons.math3.util.Precision;
 
 public class MapBuilder {
@@ -30,15 +30,16 @@ public class MapBuilder {
   private static final int TILE_FLOOR_02_ID = 5 + 1;
   private static final int TILE_DEV_CEILING_ID = 1 + 1;
   private static final float TILE_SIZE = 16f;
-  // TODO probably not needed
-  public final Vector2 mapLoadSpawnPosition = new Vector2();
   private final DaiKombatGame game;
 
-  public MapBuilder(final DaiKombatGame game) {
+  private final PlayScreen playScreen;
+
+  public MapBuilder(final DaiKombatGame game, final PlayScreen playScreen) {
     this.game = game;
+    this.playScreen = playScreen;
   }
 
-  public void buildMap(final TiledMap map) {
+  public void buildMap(final TiledMap map, final Texture atlas) {
     final MapProperties props = map.getProperties();
     final int currentMapWidth = props.get("width", Integer.class);
     final int currentMapHeight = props.get("height", Integer.class);
@@ -50,7 +51,6 @@ public class MapBuilder {
     final TiledMapTileLayer ceilingLayer = (TiledMapTileLayer) mapLayers.get("ceiling");
     final MapObjects rects = mapLayers.get("rects").getObjects();
     final MapObjects doors = mapLayers.get("doors").getObjects();
-    final MapObjects teleports = mapLayers.get("teleports").getObjects();
 
     final Array<Cell3D> cell3DsForWorld = new Array<>();
 
@@ -62,42 +62,42 @@ public class MapBuilder {
         if (currentCell != null) {
           switch (currentCell.getTile().getId()) {
             case TILE_DEV_FLOOR_ID ->
-                currentCell3D = new Cell3D(new Vector3(x, 0, z), game.getEntMan().getScreen());
+                currentCell3D = new Cell3D(new Vector3(x, 0, z),playScreen);
             case TILE_FLOOR_01_ID -> {
-              currentCell3D = new Cell3D(new Vector3(x, 0, z), game.getEntMan().getScreen());
+              currentCell3D = new Cell3D(new Vector3(x, 0, z), playScreen);
               // TODO fix this mess
 
 //						This should be setup somewhere else but i dont have time!
               currentCell3D.texRegNorth = game.getAssMan()
-                  .getTextureRegion(TexturesRegistry.ATLAS, 32, 0, 16, 16);
+                  .getTextureRegionFlipped(atlas, 32, 0, 16, 16);
               currentCell3D.texRegSouth = game.getAssMan()
-                  .getTextureRegion(TexturesRegistry.ATLAS, 32, 0, 16, 16);
+                  .getTextureRegionFlipped(atlas, 32, 0, 16, 16);
               currentCell3D.texRegWest = game.getAssMan()
-                  .getTextureRegion(TexturesRegistry.ATLAS, 32, 0, 16, 16);
+                  .getTextureRegionFlipped(atlas, 32, 0, 16, 16);
               currentCell3D.texRegEast = game.getAssMan()
-                  .getTextureRegion(TexturesRegistry.ATLAS, 32, 0, 16, 16);
+                  .getTextureRegionFlipped(atlas, 32, 0, 16, 16);
               currentCell3D.texRegCeiling = game.getAssMan()
-                  .getTextureRegion(TexturesRegistry.ATLAS, 64, 0, 16, 16);
+                  .getTextureRegionFlipped(atlas, 64, 0, 16, 16);
               currentCell3D.texRegFloor = game.getAssMan()
-                  .getTextureRegion(TexturesRegistry.ATLAS, 48, 0, 16, 16);
+                  .getTextureRegionFlipped(atlas, 48, 0, 16, 16);
             }
             case TILE_FLOOR_02_ID -> {
-              currentCell3D = new Cell3D(new Vector3(x, 0, z), game.getEntMan().getScreen());
+              currentCell3D = new Cell3D(new Vector3(x, 0, z), playScreen);
               currentCell3D.texRegNorth = game.getAssMan()
-                  .getTextureRegion(TexturesRegistry.ATLAS, 96, 0, 16, 16);
+                  .getTextureRegionFlipped(atlas, 96, 0, 16, 16);
               currentCell3D.texRegSouth = game.getAssMan()
-                  .getTextureRegion(TexturesRegistry.ATLAS, 96, 0, 16, 16);
+                  .getTextureRegionFlipped(atlas, 96, 0, 16, 16);
               currentCell3D.texRegWest = game.getAssMan()
-                  .getTextureRegion(TexturesRegistry.ATLAS, 96, 0, 16, 16);
+                  .getTextureRegionFlipped(atlas, 96, 0, 16, 16);
               currentCell3D.texRegEast = game.getAssMan()
-                  .getTextureRegion(TexturesRegistry.ATLAS, 96, 0, 16, 16);
+                  .getTextureRegionFlipped(atlas, 96, 0, 16, 16);
               currentCell3D.texRegCeiling = game.getAssMan()
-                  .getTextureRegion(TexturesRegistry.ATLAS, 48, 0, 16, 16);
+                  .getTextureRegionFlipped(atlas, 48, 0, 16, 16);
               currentCell3D.texRegFloor = game.getAssMan()
-                  .getTextureRegion(TexturesRegistry.ATLAS, 80, 0, 16, 16);
+                  .getTextureRegionFlipped(atlas, 80, 0, 16, 16);
             }
             default ->
-                currentCell3D = new Cell3D(new Vector3(x, 0, z), game.getEntMan().getScreen());
+                currentCell3D = new Cell3D(new Vector3(x, 0, z), playScreen);
           }
 
           currentCell3D.hasFloor = true;
@@ -107,7 +107,7 @@ public class MapBuilder {
 
         if (currentCell != null && currentCell.getTile().getId() == TILE_DEV_CEILING_ID) {
           if (currentCell3D == null) {
-            currentCell3D = new Cell3D(new Vector3(x, 0, z), game.getEntMan().getScreen());
+            currentCell3D = new Cell3D(new Vector3(x, 0, z), playScreen);
           }
           currentCell3D.hasCeiling = true;
         }
@@ -199,23 +199,14 @@ public class MapBuilder {
         default -> throw new IllegalArgumentException("Not supported direction " + direction);
       };
 
+
       final Door door = new Door(
-          new Vector3((float) doorObj.getProperties().get("x") / TILE_SIZE - currentMapWidth / 2f,
+          new Vector3((float) doorObj.getProperties().get("x") / TILE_SIZE - halfCurrentMapWidth,
               0,
-              (float) doorObj.getProperties().get("y") / TILE_SIZE - currentMapHeight / 2f),
-          doorDir, game.getEntMan().getScreen());
+              (float) doorObj.getProperties().get("y") / TILE_SIZE - halfCurrentMapHeight),
+          doorDir, playScreen);
 
       game.getEntMan().addEntity(door);
-    }
-
-    for (final MapObject teleportObj : teleports) {
-      final boolean spawnOnMapLoad = teleportObj.getProperties().get("MapSpawn", Boolean.class);
-
-      if (spawnOnMapLoad) {
-        mapLoadSpawnPosition.set(
-            (float) teleportObj.getProperties().get("x") / TILE_SIZE - halfCurrentMapWidth,
-            (float) teleportObj.getProperties().get("y") / TILE_SIZE - halfCurrentMapHeight);
-      }
     }
 
   }

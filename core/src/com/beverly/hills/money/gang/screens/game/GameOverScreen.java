@@ -1,6 +1,7 @@
-package com.beverly.hills.money.gang.screens;
+package com.beverly.hills.money.gang.screens.game;
 
 import static com.beverly.hills.money.gang.Constants.DEFAULT_MUSIC_VOLUME;
+import static com.beverly.hills.money.gang.Constants.PRESS_TAB_TO_SEE_LEADERBOARD;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -14,12 +15,15 @@ import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.enemies.EnemyTextures;
 import com.beverly.hills.money.gang.entities.ui.LeaderBoardDataLayer;
-import com.beverly.hills.money.gang.entities.ui.UILeaderBoard;
-import com.beverly.hills.money.gang.screens.data.ConnectGameData;
+import com.beverly.hills.money.gang.screens.loading.ConnectServerScreen;
+import com.beverly.hills.money.gang.screens.menu.MainMenuScreen;
+import com.beverly.hills.money.gang.screens.data.CompleteJoinGameData;
+import com.beverly.hills.money.gang.screens.menu.AbstractMainMenuScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.GameOverUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import com.beverly.hills.money.gang.screens.ui.skin.SkinSelectAnimation;
 
+// TODO make shooting sounds change pitch while shooting
 public class GameOverScreen extends AbstractMainMenuScreen {
 
   private final BitmapFont guiFont64;
@@ -31,7 +35,7 @@ public class GameOverScreen extends AbstractMainMenuScreen {
   private final LeaderBoardDataLayer uiLeaderBoard;
   private boolean showLeaderBoard;
   private final String leaderMessage;
-  private final ConnectGameData connectGameData;
+  private final CompleteJoinGameData completeJoinGameData;
 
   private final SkinSelectAnimation winnerSkinSelectAnimation;
   private final UISelection<GameOverUISelection> menuSelection = new UISelection<>(
@@ -39,7 +43,7 @@ public class GameOverScreen extends AbstractMainMenuScreen {
 
   public GameOverScreen(final DaiKombatGame game,
       final LeaderBoardDataLayer uiLeaderBoard,
-      final ConnectGameData connectGameData) {
+      final CompleteJoinGameData completeJoinGameData) {
 
     super(game);
     guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
@@ -47,7 +51,7 @@ public class GameOverScreen extends AbstractMainMenuScreen {
     boomSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.BOOM_1);
     dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
     youWinMusic = game.getAssMan().getUserSettingSound(SoundRegistry.WIN_MUSIC);
-    this.connectGameData = connectGameData;
+    this.completeJoinGameData = completeJoinGameData;
     this.uiLeaderBoard = uiLeaderBoard;
     this.showLogo = false;
     if (uiLeaderBoard.getMyPlace() == 1) {
@@ -71,7 +75,7 @@ public class GameOverScreen extends AbstractMainMenuScreen {
       switch (menuSelection.getSelectedOption()) {
         case PLAY -> {
           removeAllEntities();
-          getGame().setScreen(new ConnectServerScreen(getGame(), connectGameData));
+          getGame().setScreen(new ConnectServerScreen(getGame(), completeJoinGameData));
         }
         case QUIT -> {
           removeAllEntities();
@@ -108,13 +112,13 @@ public class GameOverScreen extends AbstractMainMenuScreen {
           getViewport().getWorldHeight() - 128);
     } else {
       winnerSkinSelectAnimation.render();
-      String pressTabToSeeLeaderboard = "PRESS TAB TO SEE LEADERBOARD";
-      GlyphLayout glyphLayoutLeaderBoardHint = new GlyphLayout(guiFont32, pressTabToSeeLeaderboard);
-      guiFont32.draw(getGame().getBatch(), pressTabToSeeLeaderboard,
-          getViewport().getWorldWidth() / 2f - glyphLayoutLeaderBoardHint.width / 2f,
-          getViewport().getWorldHeight() / 2f - glyphLayoutLeaderBoardHint.height / 2f
-              - Constants.LOGO_INDENT + 64);
-
+      drawBlinking(guiFont32, bitmapFont -> {
+        var glyphLayoutLeaderBoardHint = new GlyphLayout(bitmapFont, PRESS_TAB_TO_SEE_LEADERBOARD);
+        bitmapFont.draw(getGame().getBatch(), PRESS_TAB_TO_SEE_LEADERBOARD,
+            getViewport().getWorldWidth() / 2f - glyphLayoutLeaderBoardHint.width / 2f,
+            getViewport().getWorldHeight() / 2f - glyphLayoutLeaderBoardHint.height / 2f
+                - Constants.LOGO_INDENT + 64);
+      });
       guiFont64.draw(getGame().getBatch(), leaderMessage,
           getViewport().getWorldWidth() / 2f - glyphLayoutWinner.width / 2f,
           getViewport().getWorldHeight() / 2f - glyphLayoutWinner.height / 2f

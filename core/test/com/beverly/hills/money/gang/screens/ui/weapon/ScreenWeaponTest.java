@@ -1,6 +1,5 @@
 package com.beverly.hills.money.gang.screens.ui.weapon;
 
-import static com.beverly.hills.money.gang.Constants.DEFAULT_SFX_VOLUME;
 import static com.beverly.hills.money.gang.Constants.DEFAULT_SHOOTING_VOLUME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -34,6 +33,8 @@ import java.util.Map;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 public class ScreenWeaponTest {
 
@@ -42,6 +43,8 @@ public class ScreenWeaponTest {
   private DaiKombatAssetsManager daiKombatAssetsManager;
 
   private Map<Weapon, WeaponState> weaponStateMap;
+
+  private Map<Weapon, WeaponStats> weaponStats;
 
   private UserSettingSound quadDamageAttackSound, weaponChangeSound;
 
@@ -77,21 +80,96 @@ public class ScreenWeaponTest {
       doReturn(mockWeaponState).when(screenWeaponStateFactory).create(any(), any());
       doReturn(screenWeaponStateFactory).when(screenWeaponStateFactoriesRegistry).get(eq(value));
     }
-
+    weaponStats = Map.of(
+        Weapon.SHOTGUN, WeaponStats.builder().maxDistance(7).maxAmmo(25).delayMls(100).build(),
+        Weapon.GAUNTLET,
+        WeaponStats.builder().maxDistance(1).maxAmmo(null).delayMls(50).build(),
+        Weapon.MINIGUN, WeaponStats.builder().maxDistance(7).maxAmmo(100).delayMls(50).build(),
+        Weapon.RAILGUN,
+        WeaponStats.builder().maxDistance(10).maxAmmo(15).delayMls(500).build(),
+        Weapon.PLASMAGUN,
+        WeaponStats.builder().maxDistance(999).maxDistance(75).delayMls(100).build(),
+        Weapon.ROCKET_LAUNCHER,
+        WeaponStats.builder().maxDistance(999).maxAmmo(5).delayMls(500).build());
     screenWeapon = new ScreenWeapon(daiKombatAssetsManager,
-        Map.of(
-            Weapon.SHOTGUN, WeaponStats.builder().maxDistance(7).delayMls(500).build(),
-            Weapon.GAUNTLET, WeaponStats.builder().maxDistance(1).delayMls(500).build(),
-            Weapon.MINIGUN, WeaponStats.builder().maxDistance(7).delayMls(150).build(),
-            Weapon.RAILGUN, WeaponStats.builder().maxDistance(10).delayMls(1_500).build(),
-            Weapon.ROCKET_LAUNCHER, WeaponStats.builder().maxDistance(999).delayMls(1_700).build()),
-        screenWeaponStateFactoriesRegistry
+        weaponStats, screenWeaponStateFactoriesRegistry
     );
     player = mock(Player.class);
     playerEffects = mock(PlayerEffects.class);
     doReturn(playerEffects).when(player).getPlayerEffects();
   }
 
+  @ParameterizedTest
+  @EnumSource(Weapon.class)
+  public void testHasAmmoNoShooting(Weapon weapon) {
+    var maxAmmo = weaponStats.get(weapon).getMaxAmmo();
+    if (maxAmmo == null) {
+      return;
+    }
+    screenWeapon.changeWeapon(weapon);
+    assertTrue(screenWeapon.hasAmmo());
+    assertEquals(maxAmmo + " AMMO", screenWeapon.getAmmoStats());
+  }
+
+  @ParameterizedTest
+  @EnumSource(Weapon.class)
+  public void testHasAmmoAfterOneShot(Weapon weapon) {
+    var maxAmmo = weaponStats.get(weapon).getMaxAmmo();
+    if (maxAmmo == null) {
+      return;
+    }
+    screenWeapon.changeWeapon(weapon);
+    screenWeapon.attack(player);
+    assertTrue(screenWeapon.hasAmmo());
+    assertEquals(maxAmmo - 1 + " AMMO", screenWeapon.getAmmoStats());
+  }
+
+  @ParameterizedTest
+  @EnumSource(Weapon.class)
+  public void testHasAmmoNoAmmo(Weapon weapon) {
+    var maxAmmo = weaponStats.get(weapon).getMaxAmmo();
+    if (maxAmmo == null) {
+      return;
+    }
+    screenWeapon.changeWeapon(weapon);
+    for (int i = 0; i < maxAmmo; i++) {
+      assertTrue(screenWeapon.attack(player), "Should attack successfully");
+      try {
+        var state = screenWeapon.getWeaponState(screenWeapon.getWeaponBeingUsed());
+        Thread.sleep(state.getAnimationDelayMls() + state.getBackoffDelayMls() + 50);
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    assertFalse(screenWeapon.canAttack(), "Can't attack no more because all ammo is wasted");
+    assertFalse(screenWeapon.hasAmmo(), "Should be no ammo because we have wasted it all");
+    assertEquals("0 AMMO", screenWeapon.getAmmoStats());
+
+  }
+
+  @ParameterizedTest
+  @EnumSource(Weapon.class)
+  public void testHasAmmoAfterRecovery(Weapon weapon) {
+    var maxAmmo = weaponStats.get(weapon).getMaxAmmo();
+    if (maxAmmo == null) {
+      return;
+    }
+    screenWeapon.changeWeapon(weapon);
+    for (int i = 0; i < maxAmmo; i++) {
+      assertTrue(screenWeapon.attack(player), "Should attack successfully");
+      try {
+        var state = screenWeapon.getWeaponState(screenWeapon.getWeaponBeingUsed());
+        Thread.sleep(state.getAnimationDelayMls() + state.getBackoffDelayMls() + 50);
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    screenWeapon.setWeaponAmmo(weapon, 1);
+    assertTrue(screenWeapon.canAttack());
+    assertTrue(screenWeapon.hasAmmo());
+    assertEquals("1 AMMO", screenWeapon.getAmmoStats());
+
+  }
 
   @Test
   public void testDefaults() {
@@ -177,7 +255,8 @@ public class ScreenWeaponTest {
             + screenWeapon.weaponStates.get(Weapon.SHOTGUN).getBackoffDelayMls() + 50);
     assertTrue(screenWeapon.attack(player),
         "If we have a  delay, then we SHOULD be able to attack");
-    verify(weaponStateMap.get(Weapon.SHOTGUN).getFireSound(), times(2)).play(DEFAULT_SHOOTING_VOLUME);
+    verify(weaponStateMap.get(Weapon.SHOTGUN).getFireSound(), times(2)).play(
+        DEFAULT_SHOOTING_VOLUME);
   }
 
   @Test

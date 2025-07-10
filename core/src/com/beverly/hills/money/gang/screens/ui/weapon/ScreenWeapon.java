@@ -29,6 +29,8 @@ public class ScreenWeapon {
 
   private final Map<Weapon, Long> animationStart = new HashMap<>();
 
+  protected final Map<Weapon, WeaponAmmo> ammo = new HashMap<>();
+
   private final ScreenWeaponStateFactoriesRegistry screenWeaponStateFactoriesRegistry;
 
   private final ScheduledExecutorService scheduledExecutor
@@ -70,6 +72,9 @@ public class ScreenWeapon {
       final Map<Weapon, WeaponStats> weaponStats) {
     weaponStates.put(weapon, screenWeaponStateFactoriesRegistry.get(weapon)
         .create(assetsManager, weaponStats.get(weapon)));
+    Optional.ofNullable(weaponStats.get(weapon))
+        .map(WeaponStats::getMaxAmmo).ifPresent(
+            maxAmmo -> ammo.put(weapon, new WeaponAmmo(maxAmmo)));
   }
 
   public boolean punch(Player player) {
@@ -153,6 +158,7 @@ public class ScreenWeapon {
 
   public boolean attack(Player player) {
     if (canAttack()) {
+      wasteAmmo();
       var state = weaponStates.get(weaponBeingUsed);
       animationStart.put(weaponBeingUsed, System.currentTimeMillis());
       state.getFireSound().play(Constants.DEFAULT_SHOOTING_VOLUME);
@@ -167,8 +173,29 @@ public class ScreenWeapon {
     }
   }
 
+  public boolean hasAmmo() {
+    return Optional.ofNullable(ammo.get(weaponBeingUsed))
+        .map(WeaponAmmo::hasAmmo)
+        // if weapon has no concept of ammo (like gauntlet)
+        .orElse(true);
+  }
+
+  public String getAmmoStats() {
+    return Optional.ofNullable(ammo.get(weaponBeingUsed))
+        .map(WeaponAmmo::toString).orElse("");
+  }
+
+  private void wasteAmmo() {
+    Optional.ofNullable(ammo.get(weaponBeingUsed))
+        .filter(WeaponAmmo::hasAmmo).ifPresent(WeaponAmmo::wasteAmmo);
+  }
+
+  public void setWeaponAmmo(Weapon weapon, int maxAmmo) {
+    ammo.put(weapon, new WeaponAmmo(maxAmmo));
+  }
+
   boolean canAttack() {
-    return Optional.ofNullable(weaponStates.get(weaponBeingUsed))
+    return hasAmmo() && Optional.ofNullable(weaponStates.get(weaponBeingUsed))
         .map(weaponState -> animationStart.getOrDefault(weaponBeingUsed, 0L)
             + weaponState.getAnimationDelayMls()
             + weaponState.getBackoffDelayMls()

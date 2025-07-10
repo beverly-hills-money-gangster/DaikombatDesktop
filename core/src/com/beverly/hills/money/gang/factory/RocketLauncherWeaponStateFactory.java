@@ -19,6 +19,7 @@ public class RocketLauncherWeaponStateFactory extends ScreenWeaponStateFactory {
         .hitTargetSound(assetsManager.getUserSettingSound(SoundRegistry.HIT_SOUND))
         .screenRatioX(0.50f)
         .screenRatioY(0.40f)
+        .maxAmmo(weaponStats.getMaxAmmo())
         .center(false)
         .backoffDelayMls(0)
         .animationDelayMls(weaponStats.getDelayMls())
