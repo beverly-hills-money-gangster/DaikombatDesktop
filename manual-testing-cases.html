@@ -119,7 +119,7 @@
   <tr>
     <td>Play screen</td>
     <td>3 players join the game: killer, victim and observer. killer kills victim twice. Then all
-      players turn wifi connection off and on. after re-establishing the connection, all players
+      players turn wifi connection off and on. After re-establishing the connection, all players
       should successfully reconnect and recover game stats: kills, deaths, and leaderboards. All
       stats should be consistent across all players.
     </td>
@@ -141,14 +141,6 @@
   <tr>
     <td>Play screen</td>
     <td>One player can't shoot the other through a wall.
-    </td>
-    <td><input type="checkbox"></td>
-  </tr>
-  <tr>
-    <td>Play screen</td>
-    <td>2 players join the game. Player 1 plays with a terrible jitter(use toxiproxy jitter: 1+
-      seconds, 45% toxicity). Both players can see each-other more or less ok anyway. The game
-      should not crash. No player should get disconnected.
     </td>
     <td><input type="checkbox"></td>
   </tr>
@@ -181,22 +173,6 @@
       victim sees "death" screen, observer player sees killer punching the victim. Killer is on the
       top of the
       leader board. Killer and observer hear victim death sounds. Victim makes a death sound.
-    </td>
-    <td><input type="checkbox"></td>
-  </tr>
-  <tr>
-    <td>Play screen</td>
-    <td>2 players join the game: cheater and observer. When cheater punches/shoots observer from too
-      far away, then
-      cheater stays connected but observer can't see any shooting/punching events coming from
-      cheater.
-    </td>
-    <td><input type="checkbox"></td>
-  </tr>
-  <tr>
-    <td>Play screen</td>
-    <td>Player join the game with a 5x speed boost (DESKTOP_SPEED_BOOST=5). After running on the
-      map, the player is disconnected from the server for cheating.
     </td>
     <td><input type="checkbox"></td>
   </tr>
@@ -283,8 +259,7 @@
   <tr>
     <td>Play screen</td>
     <td>2 players join the game. Player 1 shoots player 2. Then player 2 kills player 1. After that,
-      player 2 health
-      is buffed +20.
+      player 2 health is buffed(vampirism effect).
     </td>
     <td><input type="checkbox"></td>
   </tr>
@@ -325,12 +300,6 @@
   </tr>
   <tr>
     <td>Play screen</td>
-    <td>20 bots are spawned on the screen(chaos testing). Player see the bots. Game doesn't crash.
-    </td>
-    <td><input type="checkbox"></td>
-  </tr>
-  <tr>
-    <td>Play screen</td>
     <td>Server requires 5 frags to win. 3 players join the game. Player 1 kills player 2 four times.
       Player 2 kills player 1 five times. The game stops for all players. Player 2 is declared the
       winner with 5 kills and 4 deaths. Player 1 is the second in the leaderboard with 4 kills and 5
@@ -355,7 +324,7 @@
   <tr>
     <td>Play screen</td>
     <td>2 players join the game. Player 1 picks up quad damage power up. Player 1 starts blinking
-      blue. When player 1 punches player 2 once, then player 2 dies. After respawn, player 2 still
+      blue. When player 1 punches player 2 once, then player 2 dies. After quick respawn, player 2 still
       sees player 1 having the power-up. After some time, player 1 stops blinking at the same time
       on both players' screens.
     </td>
@@ -399,17 +368,15 @@
   </tr>
   <tr>
     <td>Play screen</td>
-    <td>Player 1 picks defence power-up. Player 2 punches player 1 two times. Player 1 is alive. HP
-      is 50.
-      After 15+ seconds, the power-up is gone.
+    <td>Player 1 picks defence power-up. Player 2 punches player 1 time. Player 1 is
+      alive but damage is reduced 50%. After 15+ seconds, the power-up is gone.
     </td>
     <td><input type="checkbox"></td>
   </tr>
   <tr>
     <td>Play screen</td>
-    <td>Player 1 picks all power-ups. Player 2 can barely see player 1. Player 2 punches player 1
-      two times.
-      Player 1 is alive. HP is 50. After 15+ seconds, all power-ups are gone.
+    <td>Player 1 picks all power-ups. Player 2 can barely see player 1. After 15+ seconds,
+      all power-ups are gone.
     </td>
     <td><input type="checkbox"></td>
   </tr>
@@ -508,12 +475,6 @@
   </tr>
   <tr>
     <td>Play screen</td>
-    <td>Player 1 talks. Player 1 dies. After respawn, the voice is still being recorded.
-    </td>
-    <td><input type="checkbox"></td>
-  </tr>
-  <tr>
-    <td>Play screen</td>
     <td>3 players join the game. All of them open the voice chat and play the same song.
       The song is played well.
     </td>
@@ -554,7 +515,7 @@
   </tr>
   <tr>
     <td>Any screen</td>
-    <td>Player presses alt+tab and the screen switches to Windows desktop
+    <td>If the player presses alt+tab in the fullscreen mode then screen switches to Windows desktop
     </td>
     <td><input type="checkbox"></td>
   </tr>
