@@ -85,21 +85,21 @@ public class ChoosePlayerClassScreen extends AbstractMainMenuScreen {
     super.render(delta);
     getGame().getBatch().begin();
 
+    GlyphLayout glyphLayoutEnterYourClass = new GlyphLayout(guiFont64, SELECT_CLASS);
+    guiFont64.draw(getGame().getBatch(), SELECT_CLASS,
+        getViewport().getWorldWidth() / 2f - glyphLayoutEnterYourClass.width / 2f,
+        skinSelectAnimation.getAnimationYOffset() - glyphLayoutEnterYourClass.height / 2f);
+
     String description = playerClassSelection.getSelectedOption().getDescription().toUpperCase(
         Locale.ENGLISH);
     GlyphLayout glyphLayoutClassDescription = new GlyphLayout(guiFont32, description);
     guiFont32.draw(getGame().getBatch(), description,
         getViewport().getWorldWidth() / 2f - glyphLayoutClassDescription.width / 2f,
-        getViewport().getWorldHeight() / 2f - glyphLayoutClassDescription.height / 2f
-            - Constants.LOGO_INDENT + 16);
+        skinSelectAnimation.getAnimationYOffset() - glyphLayoutClassDescription.height / 2f - 32
+            - 16);
 
-    GlyphLayout glyphLayoutEnterYourClass = new GlyphLayout(guiFont64, SELECT_CLASS);
-    guiFont64.draw(getGame().getBatch(), SELECT_CLASS,
-        getViewport().getWorldWidth() / 2f - glyphLayoutEnterYourClass.width / 2f,
-        getViewport().getWorldHeight() / 2f - glyphLayoutEnterYourClass.height / 2f
-            - Constants.LOGO_INDENT + 64);
-
-    playerClassSelection.render(guiFont64, this, Constants.LOGO_INDENT + 32);
+    playerClassSelection.render(guiFont64, this,
+        skinSelectAnimation.getAnimationYOffset() - 64 - 16);
     skinSelectAnimation.render();
     getGame().getBatch().end();
   }

@@ -65,7 +65,7 @@ public class SettingsScreen extends AbstractMainMenuScreen {
     super.render(delta);
     getGame().getBatch().begin();
 
-    settingsSelection.render(guiFont64, this, Constants.LOGO_INDENT);
+    settingsSelection.render(guiFont64, this, getLogoYOffset());
     getGame().getBatch().end();
   }
 

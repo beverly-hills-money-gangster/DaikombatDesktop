@@ -15,10 +15,10 @@ import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.enemies.EnemyTextures;
 import com.beverly.hills.money.gang.entities.ui.LeaderBoardDataLayer;
-import com.beverly.hills.money.gang.screens.loading.ConnectServerScreen;
-import com.beverly.hills.money.gang.screens.menu.MainMenuScreen;
 import com.beverly.hills.money.gang.screens.data.CompleteJoinGameData;
+import com.beverly.hills.money.gang.screens.loading.ConnectServerScreen;
 import com.beverly.hills.money.gang.screens.menu.AbstractMainMenuScreen;
+import com.beverly.hills.money.gang.screens.menu.MainMenuScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.GameOverUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import com.beverly.hills.money.gang.screens.ui.skin.SkinSelectAnimation;
@@ -116,14 +116,12 @@ public class GameOverScreen extends AbstractMainMenuScreen {
         var glyphLayoutLeaderBoardHint = new GlyphLayout(bitmapFont, PRESS_TAB_TO_SEE_LEADERBOARD);
         bitmapFont.draw(getGame().getBatch(), PRESS_TAB_TO_SEE_LEADERBOARD,
             getViewport().getWorldWidth() / 2f - glyphLayoutLeaderBoardHint.width / 2f,
-            getViewport().getWorldHeight() / 2f - glyphLayoutLeaderBoardHint.height / 2f
-                - Constants.LOGO_INDENT + 64);
+            getLogoYOffset() - glyphLayoutLeaderBoardHint.height / 2f + 64);
       });
       guiFont64.draw(getGame().getBatch(), leaderMessage,
           getViewport().getWorldWidth() / 2f - glyphLayoutWinner.width / 2f,
-          getViewport().getWorldHeight() / 2f - glyphLayoutWinner.height / 2f
-              - Constants.LOGO_INDENT + 64 - 32);
-      menuSelection.render(guiFont64, this, Constants.LOGO_INDENT + 64);
+          getLogoYOffset() - glyphLayoutWinner.height / 2f + 64 - 32);
+      menuSelection.render(guiFont64, this, getLogoYOffset() + 64);
     }
     getGame().getBatch().end();
   }

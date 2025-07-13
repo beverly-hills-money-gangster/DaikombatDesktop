@@ -140,6 +140,7 @@ public class Player extends Entity {
     playerCam.lookAt(new Vector3(lookAt.x, Constants.DEFAULT_PLAYER_CAM_Y, lookAt.y));
     playerCam.near = 0.01f;
     playerCam.far = maxVisibility * 0.8f;
+    playerCam.fieldOfView = 90;
     playerCam.update();
     var newSpawnPosition = new Vector2(spawnPosition.x + Constants.PLAYER_RECT_SIZE / 2f,
         spawnPosition.y + Constants.PLAYER_RECT_SIZE / 2f);

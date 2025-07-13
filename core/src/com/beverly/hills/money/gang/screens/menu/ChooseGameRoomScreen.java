@@ -91,22 +91,20 @@ public class ChooseGameRoomScreen extends AbstractMainMenuScreen {
                 - glyphRefresh.height - 64);
       });
 
+      var glyphSelection = new GlyphLayout(guiFont64, SELECT_GAME_ROOM);
+      guiFont64.draw(getGame().getBatch(), SELECT_GAME_ROOM,
+          getViewport().getWorldWidth() / 2f - glyphSelection.width / 2f,
+          getLogoYOffset() - glyphSelection.height / 2f);
+
       String description = StringUtils.defaultIfBlank(
               gameRoomSelection.getSelectedOption().getDescription(), "")
           .toUpperCase(Locale.ENGLISH);
       var glyphRoomDescription = new GlyphLayout(guiFont32, description);
       guiFont32.draw(getGame().getBatch(), description,
           getViewport().getWorldWidth() / 2f - glyphRoomDescription.width / 2f,
-          getViewport().getWorldHeight() / 2f - glyphRoomDescription.height / 2f
-              - Constants.LOGO_INDENT - 16);
+          getLogoYOffset() - glyphRoomDescription.height / 2f - 32 - 16);
 
-      var glyphSelection = new GlyphLayout(guiFont64, SELECT_GAME_ROOM);
-      guiFont64.draw(getGame().getBatch(), SELECT_GAME_ROOM,
-          getViewport().getWorldWidth() / 2f - glyphSelection.width / 2f,
-          getViewport().getWorldHeight() / 2f - glyphSelection.height / 2f
-              - Constants.LOGO_INDENT + 64);
-
-      gameRoomSelection.render(guiFont64, this, Constants.LOGO_INDENT + 64);
+      gameRoomSelection.render(guiFont64, this, getLogoYOffset() - 64 - 16);
     }
     getGame().getBatch().end();
   }

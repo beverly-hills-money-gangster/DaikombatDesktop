@@ -53,12 +53,11 @@ public class UISelection<T> {
       var mainMenuUISelection = this.getSelections().get(i);
       var optionGlyph = new GlyphLayout(guiFont64, mainMenuUISelection.toString());
       final float optionX = gameScreen.getViewport().getWorldWidth() / 2f - optionGlyph.width / 2f;
-      final float optionY =
-          gameScreen.getViewport().getWorldHeight() / 2f - optionGlyph.height / 2f - indent;
+      final float optionY = indent - optionGlyph.height / 2f;
       guiFont64.draw(gameScreen.getGame().getBatch(), mainMenuUISelection.toString(), optionX,
           optionY);
 
-      indent += menuItemSize;
+      indent -= menuItemSize;
       if (getSelectedOption() == mainMenuUISelection) {
         guiFont64.draw(gameScreen.getGame().getBatch(), Constants.SELECTED_OPTION_MARK,
             optionX - Constants.DEFAULT_SELECTION_INDENT, optionY);

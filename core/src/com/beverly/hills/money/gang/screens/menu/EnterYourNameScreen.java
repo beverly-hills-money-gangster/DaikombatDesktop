@@ -65,16 +65,13 @@ public class EnterYourNameScreen extends AbstractMainMenuScreen {
     GlyphLayout glyphLayoutEnterYourName = new GlyphLayout(guiFont64, ENTER_YOUR_NAME_MSG);
     guiFont64.draw(getGame().getBatch(), ENTER_YOUR_NAME_MSG,
         getViewport().getWorldWidth() / 2f - glyphLayoutEnterYourName.width / 2f,
-        getViewport().getWorldHeight() / 2f - glyphLayoutEnterYourName.height / 2f
-            - Constants.LOGO_INDENT);
+        getLogoYOffset() - glyphLayoutEnterYourName.height / 2f);
 
     String playerNameInput = ">" + nameTextInputProcessor.getText();
     GlyphLayout glyphLayoutPlayerInput = new GlyphLayout(guiFont64, playerNameInput);
     guiFont64.draw(getGame().getBatch(), playerNameInput,
         getViewport().getWorldWidth() / 2f - glyphLayoutPlayerInput.width / 2f,
-        getViewport().getWorldHeight() / 2f - glyphLayoutPlayerInput.height / 2f
-            - Constants.LOGO_INDENT
-            - Constants.MENU_OPTION_INDENT);
+        getLogoYOffset() - glyphLayoutPlayerInput.height / 2f - Constants.MENU_OPTION_INDENT);
     getGame().getBatch().end();
   }
 }
