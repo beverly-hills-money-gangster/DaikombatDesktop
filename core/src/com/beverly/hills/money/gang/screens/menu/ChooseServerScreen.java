@@ -68,7 +68,7 @@ public class ChooseServerScreen extends AbstractMainMenuScreen {
   public void render(final float delta) {
     super.render(delta);
     getGame().getBatch().begin();
-    serverSelection.render(guiFont64, this, Constants.LOGO_INDENT);
+    serverSelection.render(guiFont64, this, getLogoYOffset());
     getGame().getBatch().end();
   }
 

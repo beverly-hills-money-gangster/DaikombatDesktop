@@ -9,8 +9,6 @@ import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
-import com.beverly.hills.money.gang.screens.menu.AbstractMainMenuScreen;
-import com.beverly.hills.money.gang.screens.menu.MainMenuScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.SureExitUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 
@@ -63,13 +61,12 @@ public class SureExitScreen extends AbstractMainMenuScreen {
     super.render(delta);
     getGame().getBatch().begin();
 
-    GlyphLayout glyphLayoutEnterYourClass = new GlyphLayout(guiFont64, SURE_EXIT_MSG);
+    GlyphLayout glyphSureExit = new GlyphLayout(guiFont64, SURE_EXIT_MSG);
     guiFont64.draw(getGame().getBatch(), SURE_EXIT_MSG,
-        getViewport().getWorldWidth() / 2f - glyphLayoutEnterYourClass.width / 2f,
-        getViewport().getWorldHeight() / 2f - glyphLayoutEnterYourClass.height / 2f
-            - Constants.LOGO_INDENT + 64);
+        getViewport().getWorldWidth() / 2f - glyphSureExit.width / 2f,
+        getLogoYOffset() + 64 - glyphSureExit.height / 2f);
 
-    selection.render(guiFont64, this, Constants.LOGO_INDENT);
+    selection.render(guiFont64, this, getLogoYOffset());
     getGame().getBatch().end();
   }
 

@@ -47,7 +47,6 @@ public interface Constants {
   float BLOOD_OVERLAY_ALPHA_MIN = 0f;
   float BLOOD_OVERLAY_ALPHA_SPEED = 5f;
 
-  int LOGO_INDENT = 256 - 16;
   int DEFAULT_SELECTION_INDENT = 32;
   int SPAWN_ANIMATION_MLS = 200;
   int MENU_OPTION_INDENT = 32;

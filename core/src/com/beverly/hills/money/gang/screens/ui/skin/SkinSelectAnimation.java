@@ -11,9 +11,16 @@ public class SkinSelectAnimation {
   private int skinStep;
   private long stepUntilMls;
 
+  private final int animationY;
+
   public SkinSelectAnimation(EnemyTextures enemyTextures, GameScreen gameScreen) {
     this.enemyTextures = enemyTextures;
     this.gameScreen = gameScreen;
+    this.animationY = (int) (gameScreen.getViewport().getWorldHeight() / 2.5f);
+  }
+
+  public final int getAnimationYOffset() {
+    return animationY - 16;
   }
 
   public void setEnemyTextures(EnemyTextures enemyTextures) {
@@ -25,8 +32,7 @@ public class SkinSelectAnimation {
     float scale = (gameScreen.getViewport().getWorldWidth() / 5f) / texture.getRegionWidth();
     gameScreen.getGame().getBatch().draw(texture,
         gameScreen.getViewport().getWorldWidth() / 2 - (texture.getRegionWidth() * scale) / 2f,
-        gameScreen.getViewport().getWorldHeight() / 2.5f,
-        texture.getRegionWidth() * scale, texture.getRegionHeight() * scale);
+        animationY, texture.getRegionWidth() * scale, texture.getRegionHeight() * scale);
 
     if (System.currentTimeMillis() > stepUntilMls) {
       stepUntilMls = System.currentTimeMillis() + STEP_ANIMATION_DELAY_MLS;

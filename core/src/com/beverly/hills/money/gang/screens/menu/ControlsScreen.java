@@ -56,8 +56,7 @@ public class ControlsScreen extends AbstractMainMenuScreen {
       GlyphLayout glyphLayoutControlsMapping = new GlyphLayout(guiFont64, controlMapping);
       guiFont64.draw(getGame().getBatch(), controlMapping,
           getViewport().getWorldWidth() / 2f - glyphLayoutControlsMapping.width / 2f,
-          getViewport().getWorldHeight() / 2f - glyphLayoutControlsMapping.height / 2f
-              - Constants.LOGO_INDENT - indent);
+          getLogoYOffset() - glyphLayoutControlsMapping.height / 2f - indent);
       indent += DEFAULT_SELECTION_INDENT;
     }
     getGame().getBatch().end();

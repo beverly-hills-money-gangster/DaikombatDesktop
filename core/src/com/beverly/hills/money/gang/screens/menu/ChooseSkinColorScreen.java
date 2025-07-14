@@ -3,6 +3,7 @@ package com.beverly.hills.money.gang.screens.menu;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
@@ -21,6 +22,9 @@ public class ChooseSkinColorScreen extends AbstractMainMenuScreen {
   private final BitmapFont guiFont64;
   private final UserSettingSound boomSound1;
   private final UserSettingSound dingSound1;
+
+  private static final String SELECT_COLOR = "SELECT YOUR COLOR";
+
 
   private final SkinSelectAnimation skinSelectAnimation;
 
@@ -77,7 +81,13 @@ public class ChooseSkinColorScreen extends AbstractMainMenuScreen {
   public void render(final float delta) {
     super.render(delta);
     getGame().getBatch().begin();
-    skinSelection.render(guiFont64, this, Constants.LOGO_INDENT - 64);
+    GlyphLayout glyphSelectColor = new GlyphLayout(guiFont64, SELECT_COLOR);
+    guiFont64.draw(getGame().getBatch(), SELECT_COLOR,
+        getViewport().getWorldWidth() / 2f - glyphSelectColor.width / 2f,
+        skinSelectAnimation.getAnimationYOffset() - glyphSelectColor.height / 2f);
+
+    skinSelection.render(guiFont64, this,
+        skinSelectAnimation.getAnimationYOffset() - 64 - 16);
     skinSelectAnimation.render();
     getGame().getBatch().end();
   }

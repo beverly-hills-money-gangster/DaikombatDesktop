@@ -776,7 +776,8 @@ public class PlayScreen extends GameScreen {
     final float killedByX = halfViewportWidth - glyphLayoutKilledBy.width / 2f;
     final float killedByY = halfViewportHeight - glyphLayoutKilledBy.height / 2f - 64;
     getUiFont().draw(getGame().getBatch(), killedBy, killedByX, killedByY);
-    deadPlayUISelectionUISelection.render(getUiFont(), this, 128);
+    deadPlayUISelectionUISelection.render(getUiFont(), this,
+        (int) (getViewport().getWorldHeight() / 2f - 128));
 
     drawBlinking(guiFont32, bitmapFont -> {
       GlyphLayout glyphLayoutLeaderBoardHint = new GlyphLayout(bitmapFont,
@@ -789,7 +790,8 @@ public class PlayScreen extends GameScreen {
   }
 
   private void renderAliveGui() {
-    activePlayUISelectionUISelection.render(getUiFont(), this, 64);
+    activePlayUISelectionUISelection.render(getUiFont(), this,
+        (int) (getViewport().getWorldHeight() / 2f + 64));
   }
 
   private void renderBloodOverlay01() {

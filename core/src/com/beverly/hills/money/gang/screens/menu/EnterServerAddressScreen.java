@@ -78,8 +78,7 @@ public class EnterServerAddressScreen extends AbstractMainMenuScreen {
     GlyphLayout glyphLayoutTitle = new GlyphLayout(guiFont32, errorMessage);
     guiFont32.draw(getGame().getBatch(), errorMessage,
         getViewport().getWorldWidth() / 2f - glyphLayoutTitle.width / 2f,
-        getViewport().getWorldHeight() / 2f - glyphLayoutTitle.height / 2f
-            - Constants.LOGO_INDENT - Constants.MENU_OPTION_INDENT * 5);
+        getLogoYOffset() - glyphLayoutTitle.height / 2f - Constants.MENU_OPTION_INDENT * 5);
   }
 
 
@@ -93,22 +92,18 @@ public class EnterServerAddressScreen extends AbstractMainMenuScreen {
     GlyphLayout glyphLayoutEnterYourName = new GlyphLayout(guiFont64, ENTER_SERVER_NAME_MSG);
     guiFont64.draw(getGame().getBatch(), ENTER_SERVER_NAME_MSG,
         getViewport().getWorldWidth() / 2f - glyphLayoutEnterYourName.width / 2f,
-        getViewport().getWorldHeight() / 2f - glyphLayoutEnterYourName.height / 2f
-            - Constants.LOGO_INDENT);
+        getLogoYOffset() - glyphLayoutEnterYourName.height / 2f);
 
     GlyphLayout glyphLayoutInstruction = new GlyphLayout(guiFont32, INSTRUCTION);
     guiFont32.draw(getGame().getBatch(), INSTRUCTION,
         getViewport().getWorldWidth() / 2f - glyphLayoutInstruction.width / 2f,
-        getViewport().getWorldHeight() / 2f - glyphLayoutInstruction.height / 2f
-            - Constants.LOGO_INDENT - Constants.MENU_OPTION_INDENT * 2);
+        getLogoYOffset() - glyphLayoutInstruction.height / 2f - Constants.MENU_OPTION_INDENT * 2);
 
     String playerNameInput = ">" + nameTextInputProcessor.getText();
     GlyphLayout glyphLayoutPlayerInput = new GlyphLayout(guiFont64, playerNameInput);
     guiFont64.draw(getGame().getBatch(), playerNameInput,
         getViewport().getWorldWidth() / 2f - glyphLayoutPlayerInput.width / 2f,
-        getViewport().getWorldHeight() / 2f - glyphLayoutPlayerInput.height / 2f
-            - Constants.LOGO_INDENT
-            - Constants.MENU_OPTION_INDENT * 3);
+        getLogoYOffset() - glyphLayoutPlayerInput.height / 2f - Constants.MENU_OPTION_INDENT * 3);
     getGame().getBatch().end();
   }
 }

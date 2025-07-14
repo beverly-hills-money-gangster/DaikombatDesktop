@@ -25,16 +25,13 @@ public class MainMenuScreen extends AbstractMainMenuScreen {
   public MainMenuScreen(final DaiKombatGame game) {
     super(game);
     guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
-
     boomSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.BOOM_1);
     dingSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.DING_1);
-
   }
 
 
   @Override
   public void handleInput(final float delta) {
-
     if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
       boomSound1.play(Constants.DEFAULT_SFX_VOLUME);
       switch (menuSelection.getSelectedOption()) {
@@ -74,7 +71,7 @@ public class MainMenuScreen extends AbstractMainMenuScreen {
   public void render(final float delta) {
     super.render(delta);
     getGame().getBatch().begin();
-    menuSelection.render(guiFont64, this, Constants.LOGO_INDENT);
+    menuSelection.render(guiFont64, this, getLogoYOffset());
     getGame().getBatch().end();
   }
 

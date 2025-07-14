@@ -7,9 +7,9 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
+import com.beverly.hills.money.gang.screens.menu.AbstractMainMenuScreen;
 import com.beverly.hills.money.gang.screens.menu.ErrorScreen;
 import com.beverly.hills.money.gang.screens.menu.MainMenuScreen;
-import com.beverly.hills.money.gang.screens.menu.AbstractMainMenuScreen;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class AbstractLoadingScreen extends AbstractMainMenuScreen {
@@ -49,8 +49,7 @@ public abstract class AbstractLoadingScreen extends AbstractMainMenuScreen {
       GlyphLayout glyphLayoutLoading = new GlyphLayout(guiFont64, loadingMsg);
       guiFont64.draw(getGame().getBatch(), loadingMsg,
           getViewport().getWorldWidth() / 2f - glyphLayoutLoading.width / 2f,
-          getViewport().getWorldHeight() / 2f - glyphLayoutLoading.height / 2f
-              - Constants.LOGO_INDENT);
+          getLogoYOffset() - glyphLayoutLoading.height / 2f);
     }
     if (System.currentTimeMillis() > LOAD_UNTIL_MLS) {
       stopLoading.set(true);
