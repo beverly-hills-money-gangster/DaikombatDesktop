@@ -116,12 +116,13 @@ public class GameOverScreen extends AbstractMainMenuScreen {
         var glyphLayoutLeaderBoardHint = new GlyphLayout(bitmapFont, PRESS_TAB_TO_SEE_LEADERBOARD);
         bitmapFont.draw(getGame().getBatch(), PRESS_TAB_TO_SEE_LEADERBOARD,
             getViewport().getWorldWidth() / 2f - glyphLayoutLeaderBoardHint.width / 2f,
-            getLogoYOffset() - glyphLayoutLeaderBoardHint.height / 2f + 64);
+            getViewport().getWorldHeight() - 128);
       });
       guiFont64.draw(getGame().getBatch(), leaderMessage,
           getViewport().getWorldWidth() / 2f - glyphLayoutWinner.width / 2f,
-          getLogoYOffset() - glyphLayoutWinner.height / 2f + 64 - 32);
-      menuSelection.render(guiFont64, this, getLogoYOffset() + 64);
+          winnerSkinSelectAnimation.getAnimationYOffset() - 32);
+
+      menuSelection.render(guiFont64, this, winnerSkinSelectAnimation.getAnimationYOffset() - 64);
     }
     getGame().getBatch().end();
   }
