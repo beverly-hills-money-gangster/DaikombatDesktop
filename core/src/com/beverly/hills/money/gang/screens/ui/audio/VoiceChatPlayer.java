@@ -3,7 +3,6 @@ package com.beverly.hills.money.gang.screens.ui.audio;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.AudioDevice;
 import com.badlogic.gdx.audio.AudioRecorder;
-import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.entity.VoiceChatPayload;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.network.GlobalGameConnection.VoiceChatConfigs;
@@ -12,6 +11,7 @@ import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection
 import com.beverly.hills.money.gang.strategy.EnemyPlayerActionQueueStrategy;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -29,6 +29,8 @@ public class VoiceChatPlayer {
   private Thread audioRecorderThread;
 
   private Thread audioPlayerThread;
+
+  private final String id = UUID.randomUUID().toString();
 
   private final AtomicReference<Long> recordedVoiceLastTime = new AtomicReference<>();
 
@@ -59,7 +61,6 @@ public class VoiceChatPlayer {
 
   public void init() {
     try {
-
       this.audioRecorder = Gdx.audio.newAudioRecorder(voiceChatConfigs.getSampleRate(), true);
       this.audioPlayer = Gdx.audio.newAudioDevice(voiceChatConfigs.getSampleRate(), true);
 
@@ -109,7 +110,7 @@ public class VoiceChatPlayer {
             audioPlayer.writeSamples(pcmSilence, 0, pcmSilence.length);
           } else {
             var mixedPCM = mixPCMs(shortPCMs);
-            amplify(mixedPCM, 3.5f);
+            amplify(mixedPCM, 3.85f);
             shortPCMs.forEach(payload -> enemiesRegistry.getEnemy(payload.getPlayerId())
                 .ifPresent(enemyPlayer -> enemyPlayer.talking(getAvgAmpl(payload.getPcm()))));
             audioPlayer.writeSamples(mixedPCM, 0, mixedPCM.length);
@@ -117,9 +118,11 @@ public class VoiceChatPlayer {
         } catch (InterruptedException ignored) {
           LOG.info("Audio player interrupted");
           Thread.currentThread().interrupt();
+          stop.set(true);
         } catch (Exception e) {
           LOG.error("Failed to play audio", e);
           exceptionThrown.set(true);
+          stop.set(true);
         }
       }
     });
@@ -129,6 +132,7 @@ public class VoiceChatPlayer {
     audioPlayerThread.setName("Audio player");
     audioRecorderThread.start();
     audioPlayerThread.start();
+    LOG.info("Voice chat player {} has been initialized", id);
   }
 
   public void recordAudio(boolean record) {
@@ -186,7 +190,7 @@ public class VoiceChatPlayer {
   }
 
   public void stop() {
-    LOG.info("Stop voice chat");
+    LOG.info("Stop voice chat {}", id);
     stop.set(true);
     Optional.ofNullable(audioRecorder).ifPresent(AudioRecorder::dispose);
     Optional.ofNullable(audioPlayer).ifPresent(AudioDevice::dispose);

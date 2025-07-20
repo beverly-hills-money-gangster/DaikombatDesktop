@@ -222,4 +222,8 @@ public class ScreenWeapon {
         .positioning(Vector2.Zero).build();
   }
 
+  public void dispose() {
+    scheduledExecutor.shutdown();
+  }
+
 }

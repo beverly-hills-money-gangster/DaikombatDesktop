@@ -828,6 +828,11 @@ public class PlayScreen extends GameScreen {
     Optional.ofNullable(voiceChatPlayer).ifPresent(VoiceChatPlayer::stop);
   }
 
+  @Override
+  public void onExitScreen() {
+    Optional.ofNullable(voiceChatPlayer).ifPresent(VoiceChatPlayer::stop);
+  }
+
   public void setEnemyAim(EnemyAim enemyAim) {
     this.enemyAim = enemyAim;
   }
