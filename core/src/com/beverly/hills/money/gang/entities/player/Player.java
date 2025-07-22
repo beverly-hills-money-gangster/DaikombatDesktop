@@ -209,6 +209,7 @@ public class Player extends Entity {
   @Override
   public void destroy() {
     getScreen().getGame().getRectMan().removeRect(rect);
+    screenWeapon.dispose();
     super.destroy(); // should be last.
   }
 

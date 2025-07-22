@@ -57,6 +57,12 @@ public interface Constants {
   float DEFAULT_PLAYER_CAM_Y = 0.40f;
   String YOU_DIED = "YOU DIED!";
   String CONNECTING = "CONNECTING";
+
+  String DOWNLOAD_MAP = "DOWNLOADING MAP";
+
+  String SERVER_CONNECT = "CONNECTING TO SERVER";
+
+  String GAME_JOIN = "JOINING GAME";
   String SELECTED_OPTION_MARK = ">";
 
   float PPU = 1f / 16f;

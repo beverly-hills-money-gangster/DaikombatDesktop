@@ -3,7 +3,6 @@ package com.beverly.hills.money.gang.screens.ui.audio;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.AudioDevice;
 import com.badlogic.gdx.audio.AudioRecorder;
-import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.entity.VoiceChatPayload;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.network.GlobalGameConnection.VoiceChatConfigs;
@@ -20,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 public class VoiceChatPlayer {
 
-  private static final Logger LOG = LoggerFactory.getLogger(EnemyPlayerActionQueueStrategy.class);
+  private static final Logger LOG = LoggerFactory.getLogger(VoiceChatPlayer.class);
 
   private AudioRecorder audioRecorder;
 
@@ -59,7 +58,6 @@ public class VoiceChatPlayer {
 
   public void init() {
     try {
-
       this.audioRecorder = Gdx.audio.newAudioRecorder(voiceChatConfigs.getSampleRate(), true);
       this.audioPlayer = Gdx.audio.newAudioDevice(voiceChatConfigs.getSampleRate(), true);
 
@@ -92,9 +90,11 @@ public class VoiceChatPlayer {
       } catch (InterruptedException ignored) {
         LOG.info("Audio recorder interrupted");
         Thread.currentThread().interrupt();
+        stop.set(true);
       } catch (Exception e) {
         LOG.error("Error while recording audio", e);
         exceptionThrown.set(true);
+        stop.set(true);
       }
     }
     );
@@ -109,7 +109,7 @@ public class VoiceChatPlayer {
             audioPlayer.writeSamples(pcmSilence, 0, pcmSilence.length);
           } else {
             var mixedPCM = mixPCMs(shortPCMs);
-            amplify(mixedPCM, 3.5f);
+            amplify(mixedPCM, 3.85f);
             shortPCMs.forEach(payload -> enemiesRegistry.getEnemy(payload.getPlayerId())
                 .ifPresent(enemyPlayer -> enemyPlayer.talking(getAvgAmpl(payload.getPcm()))));
             audioPlayer.writeSamples(mixedPCM, 0, mixedPCM.length);
@@ -117,9 +117,11 @@ public class VoiceChatPlayer {
         } catch (InterruptedException ignored) {
           LOG.info("Audio player interrupted");
           Thread.currentThread().interrupt();
+          stop.set(true);
         } catch (Exception e) {
           LOG.error("Failed to play audio", e);
           exceptionThrown.set(true);
+          stop.set(true);
         }
       }
     });
@@ -129,6 +131,7 @@ public class VoiceChatPlayer {
     audioPlayerThread.setName("Audio player");
     audioRecorderThread.start();
     audioPlayerThread.start();
+    LOG.info("Voice chat player has been initialized");
   }
 
   public void recordAudio(boolean record) {
@@ -188,10 +191,22 @@ public class VoiceChatPlayer {
   public void stop() {
     LOG.info("Stop voice chat");
     stop.set(true);
+    Optional.ofNullable(audioPlayerThread).ifPresent(this::killWaitThread);
+    Optional.ofNullable(audioRecorderThread).ifPresent(this::killWaitThread);
+    // libgdx classes are generally not thread-safe
+    // I don't want shoot myself in the leg again, so I'm actually waiting for
+    // the threads to finish before disposing in the main thread
     Optional.ofNullable(audioRecorder).ifPresent(AudioRecorder::dispose);
     Optional.ofNullable(audioPlayer).ifPresent(AudioDevice::dispose);
-    Optional.ofNullable(audioPlayerThread).ifPresent(Thread::interrupt);
-    Optional.ofNullable(audioRecorderThread).ifPresent(Thread::interrupt);
+  }
+
+  private void killWaitThread(final Thread thread) {
+    thread.interrupt();
+    try {
+      thread.join(500);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
   }
 
 }

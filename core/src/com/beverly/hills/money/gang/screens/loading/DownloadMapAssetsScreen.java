@@ -1,5 +1,6 @@
 package com.beverly.hills.money.gang.screens.loading;
 
+import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.entity.HostPort;
 import com.beverly.hills.money.gang.network.GameConnection;
@@ -98,6 +99,10 @@ public class DownloadMapAssetsScreen extends AbstractLoadingScreen {
     Optional.ofNullable(gameConnectionRef.get()).ifPresent(GameConnection::disconnect);
   }
 
+  @Override
+  protected String getBaseLoadingMessage() {
+    return Constants.DOWNLOAD_MAP;
+  }
 
   @Override
   public void hide() {
