@@ -11,7 +11,6 @@ import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection
 import com.beverly.hills.money.gang.strategy.EnemyPlayerActionQueueStrategy;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -20,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 public class VoiceChatPlayer {
 
-  private static final Logger LOG = LoggerFactory.getLogger(EnemyPlayerActionQueueStrategy.class);
+  private static final Logger LOG = LoggerFactory.getLogger(VoiceChatPlayer.class);
 
   private AudioRecorder audioRecorder;
 
@@ -29,8 +28,6 @@ public class VoiceChatPlayer {
   private Thread audioRecorderThread;
 
   private Thread audioPlayerThread;
-
-  private final String id = UUID.randomUUID().toString();
 
   private final AtomicReference<Long> recordedVoiceLastTime = new AtomicReference<>();
 
@@ -93,9 +90,11 @@ public class VoiceChatPlayer {
       } catch (InterruptedException ignored) {
         LOG.info("Audio recorder interrupted");
         Thread.currentThread().interrupt();
+        stop.set(true);
       } catch (Exception e) {
         LOG.error("Error while recording audio", e);
         exceptionThrown.set(true);
+        stop.set(true);
       }
     }
     );
@@ -132,7 +131,7 @@ public class VoiceChatPlayer {
     audioPlayerThread.setName("Audio player");
     audioRecorderThread.start();
     audioPlayerThread.start();
-    LOG.info("Voice chat player {} has been initialized", id);
+    LOG.info("Voice chat player has been initialized");
   }
 
   public void recordAudio(boolean record) {
@@ -190,12 +189,24 @@ public class VoiceChatPlayer {
   }
 
   public void stop() {
-    LOG.info("Stop voice chat {}", id);
+    LOG.info("Stop voice chat");
     stop.set(true);
+    Optional.ofNullable(audioPlayerThread).ifPresent(this::killWaitThread);
+    Optional.ofNullable(audioRecorderThread).ifPresent(this::killWaitThread);
+    // libgdx classes are generally not thread-safe
+    // I don't want shoot myself in the leg again, so I'm actually waiting for
+    // the threads to finish before disposing in the main thread
     Optional.ofNullable(audioRecorder).ifPresent(AudioRecorder::dispose);
     Optional.ofNullable(audioPlayer).ifPresent(AudioDevice::dispose);
-    Optional.ofNullable(audioPlayerThread).ifPresent(Thread::interrupt);
-    Optional.ofNullable(audioRecorderThread).ifPresent(Thread::interrupt);
+  }
+
+  private void killWaitThread(final Thread thread) {
+    thread.interrupt();
+    try {
+      thread.join(500);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
   }
 
 }
