@@ -42,15 +42,18 @@ public class DaiKombatAssetsManager {
 
   public TextureRegion getTextureRegion(final TexturesRegistry texturesRegistry, int x, int y,
       int width, int height) {
-    return new TextureRegion((Texture) assetManager.get(texturesRegistry.getFileName()), x,
-        y,
-        width, height);
+    return new TextureRegion((Texture) assetManager.get(texturesRegistry.getFileName()),
+        x, y, width, height);
   }
 
+  public Texture getTexture(final TexturesRegistry texturesRegistry) {
+    return assetManager.get(texturesRegistry.getFileName());
+  }
 
-  public TextureRegion getTextureRegion(
-      final Texture texture, int x, int y, int width, int height) {
-    return new TextureRegion(texture, x, y, width, height);
+  public TextureRegion getTextureRegion(final Texture texture, int x, int y,
+      int width, int height) {
+    return new TextureRegion(texture,
+        x, y, width, height);
   }
 
   public TextureRegion getTextureRegionFlipped(

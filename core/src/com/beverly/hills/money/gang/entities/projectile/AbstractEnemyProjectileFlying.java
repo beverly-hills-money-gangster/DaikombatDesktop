@@ -41,7 +41,7 @@ public class AbstractEnemyProjectileFlying extends Projectile {
 
   private final Player player;
 
-  private static final int LIVES_FOR_MLS = 550;
+  private static final int LIVES_FOR_MLS = 350;
 
   private final long destroyAtMls = System.currentTimeMillis() + LIVES_FOR_MLS;
 

@@ -1,6 +1,4 @@
-package com.beverly.hills.money.gang.entities.teleport;
-
-import static com.badlogic.gdx.graphics.Color.WHITE;
+package com.beverly.hills.money.gang.entities.decoration;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -14,68 +12,51 @@ import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.animation.Animation;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
-import com.beverly.hills.money.gang.entities.SoundMakingEntity;
-import com.beverly.hills.money.gang.entities.player.Player;
+import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
-import com.beverly.hills.money.gang.screens.GameScreen;
 import com.beverly.hills.money.gang.screens.game.PlayScreen;
-import java.util.function.Consumer;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Teleport extends SoundMakingEntity {
+public class Decoration extends Entity {
 
-  private final int teleportId;
-
-  private static final Logger LOG = LoggerFactory.getLogger(Teleport.class);
-
+  private static final Logger LOG = LoggerFactory.getLogger(Decoration.class);
   private final Vector3 position;
   private final ModelInstanceBB mdlInst;
 
   @Getter
   private final RectanglePlus rect;
 
-  @Getter
-  private final Player player;
-
-  private final Consumer<Teleport> onCollision;
-
   private final Animation animation;
 
-  private boolean beingTeleported;
 
-  public Teleport(
-      final Vector3 position,
-      final PlayScreen screen,
-      final Player player,
-      final int teleportId,
-      final Consumer<Teleport> onCollision) {
+  public Decoration(final Vector3 position, final PlayScreen screen,
+      final TexturesRegistry texturesRegistry) {
     super(screen);
-    this.teleportId = teleportId;
     this.position = position.cpy();
-    this.player = player;
     this.position.add(Constants.HALF_UNIT, 0, Constants.HALF_UNIT);
-    this.animation = Animation.builder()
-        .animationStepMls(120)
-        .width(82).height(112).texturesRegistry(TexturesRegistry.TELEPORT_SPRITES).build();
 
     mdlInst = new ModelInstanceBB(screen.getCellBuilder().getMdlEnemy());
-    this.onCollision = onCollision;
 
-    mdlInst.materials.get(0).set(
-        new ColorAttribute(ColorAttribute.Diffuse, new Color(WHITE.r, WHITE.g, WHITE.b, 0.8f)));
+    animation = Animation.builder().width(36).height(66).animationStepMls(150)
+        .texturesRegistry(texturesRegistry).build();
+
+    mdlInst.materials.get(0)
+        .set(TextureAttribute.createDiffuse(
+            animation.getCurrentTextureRegion(screen.getGame().getAssMan())));
+    mdlInst.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, Color.WHITE));
 
     mdlInst.materials.get(0)
         .set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
     mdlInst.materials.get(0).set(new FloatAttribute(FloatAttribute.AlphaTest));
 
-    final float rectWidth = Constants.HALF_UNIT;
-    final float rectHeight = Constants.HALF_UNIT;
+    final float rectWidth = Constants.HALF_UNIT / 5;
+    final float rectHeight = Constants.HALF_UNIT / 5;
     rect = new RectanglePlus(this.position.x, this.position.z, rectWidth, rectHeight, getEntityId(),
-        RectanglePlusFilter.ITEM);
+        RectanglePlusFilter.WALL);
     rect.setPosition(this.position.x - rect.getWidth() / 2, this.position.z - rect.getHeight() / 2);
     screen.getGame().getRectMan().addRect(rect);
 
@@ -87,7 +68,7 @@ public class Teleport extends SoundMakingEntity {
   public void destroy() {
     getScreen().getGame().getRectMan().removeRect(rect);
     super.destroy(); // should be last.
-    LOG.info("Destroy teleport");
+    LOG.info("Destroy decoration");
   }
 
 
@@ -97,7 +78,7 @@ public class Teleport extends SoundMakingEntity {
         getScreen().getCurrentCam().direction.cpy().rotate(Vector3.Z, 180f),
         Vector3.Y);
     mdlInst.transform.setTranslation(position.cpy().add(0, Constants.HALF_UNIT, 0));
-    mdlInst.transform.scale(1f, 1.15f, 1);
+    mdlInst.transform.scale(0.65f, 1f, 1);
     mdlInst.setInFrustum(getScreen().frustumCull(getScreen().getCurrentCam(), mdlInst));
     if (mdlInst.isInFrustum()) {
       mdlBatch.render(mdlInst, env);
@@ -106,20 +87,9 @@ public class Teleport extends SoundMakingEntity {
 
   @Override
   public void tick(final float delta) {
+    super.tick(delta);
     mdlInst.materials.get(0).set(TextureAttribute.createDiffuse(
         animation.getCurrentTextureRegion(getScreen().getGame().getAssMan())));
-  }
-
-  public void finish() {
-    beingTeleported = false;
-  }
-
-  @Override
-  public void onCollisionWithPlayer() {
-    if (!beingTeleported) {
-      onCollision.accept(this);
-      beingTeleported = true;
-    }
   }
 
 }
