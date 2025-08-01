@@ -19,7 +19,7 @@ public class RocketProjectile extends AbstractPlayerProjectile {
       final WeaponState weaponState) {
     super(player, startPosition, finishPosition, screen, screen.getGame().getAssMan()
             .getTextureRegion(TexturesRegistry.FIREBALL, 0, 0, 11, 11), Animation.builder()
-            .animationSteps(5).animationStepMls(50)
+            .animationStepMls(50)
             .width(100).height(99).texturesRegistry(TexturesRegistry.BOOM_SPRITES).build(),
         weaponState, WeaponProjectile.ROCKET, SoundRegistry.ROCKET_BOOM);
   }

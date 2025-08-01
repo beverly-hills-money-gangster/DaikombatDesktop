@@ -11,7 +11,7 @@ public class EnemyPlasmaBoom extends AbstractEnemyProjectileBoom {
   public EnemyPlasmaBoom(final Player player,
       final Vector3 position) {
     super(player, position, Animation.builder()
-            .animationSteps(5).animationStepMls(50)
+            .animationStepMls(50)
             .width(100).height(99)
             .texturesRegistry(TexturesRegistry.PLASMA_BOOM_SPRITES).build(),
         SoundRegistry.PLASMA_BOOM);

@@ -15,12 +15,17 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
+import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.cell.Cell3D;
+import com.beverly.hills.money.gang.entities.decoration.Decoration;
 import com.beverly.hills.money.gang.entities.door.Door;
 import com.beverly.hills.money.gang.entities.door.Door.DoorDirection;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.game.PlayScreen;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.function.Predicate;
 import org.apache.commons.math3.util.Precision;
 
 public class MapBuilder {
@@ -51,6 +56,7 @@ public class MapBuilder {
     final TiledMapTileLayer ceilingLayer = (TiledMapTileLayer) mapLayers.get("ceiling");
     final MapObjects rects = mapLayers.get("rects").getObjects();
     final MapObjects doors = mapLayers.get("doors").getObjects();
+    final MapObjects decorations = mapLayers.get("decorations").getObjects();
 
     final Array<Cell3D> cell3DsForWorld = new Array<>();
 
@@ -61,8 +67,7 @@ public class MapBuilder {
 
         if (currentCell != null) {
           switch (currentCell.getTile().getId()) {
-            case TILE_DEV_FLOOR_ID ->
-                currentCell3D = new Cell3D(new Vector3(x, 0, z),playScreen);
+            case TILE_DEV_FLOOR_ID -> currentCell3D = new Cell3D(new Vector3(x, 0, z), playScreen);
             case TILE_FLOOR_01_ID -> {
               currentCell3D = new Cell3D(new Vector3(x, 0, z), playScreen);
               // TODO fix this mess
@@ -96,8 +101,7 @@ public class MapBuilder {
               currentCell3D.texRegFloor = game.getAssMan()
                   .getTextureRegionFlipped(atlas, 80, 0, 16, 16);
             }
-            default ->
-                currentCell3D = new Cell3D(new Vector3(x, 0, z), playScreen);
+            default -> currentCell3D = new Cell3D(new Vector3(x, 0, z), playScreen);
           }
 
           currentCell3D.hasFloor = true;
@@ -199,7 +203,6 @@ public class MapBuilder {
         default -> throw new IllegalArgumentException("Not supported direction " + direction);
       };
 
-
       final Door door = new Door(
           new Vector3((float) doorObj.getProperties().get("x") / TILE_SIZE - halfCurrentMapWidth,
               0,
@@ -208,6 +211,22 @@ public class MapBuilder {
 
       game.getEntMan().addEntity(door);
     }
+
+    for (final MapObject decorationObj : decorations) {
+      var decorationTexture = Arrays.stream(TexturesRegistry.values()).filter(
+          texturesRegistry -> texturesRegistry.name()
+              .equals(decorationObj.getName().toUpperCase(Locale.ENGLISH)))
+          .findFirst().orElse(TexturesRegistry.BARREL);
+
+      final Decoration decoration = new Decoration(
+          new Vector3(
+              (float) decorationObj.getProperties().get("x") / TILE_SIZE - halfCurrentMapWidth,
+              0,
+              (float) decorationObj.getProperties().get("y") / TILE_SIZE - halfCurrentMapHeight)
+          , playScreen, decorationTexture);
+      game.getEntMan().addEntity(decoration);
+    }
+
 
   }
 }
