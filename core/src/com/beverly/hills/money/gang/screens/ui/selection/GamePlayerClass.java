@@ -6,9 +6,9 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum GamePlayerClass {
-  WARRIOR("Well-rounded fighter. Reliable in any situation."),
-  ANGRY_SKELETON("Fast, fragile, vicious. Hits hard, heals harder."),
-  DEMON_TANK("Tough demon brute. Slow but hard to kill.");
+  WARRIOR("Well-rounded fighter. Reliable in any situation. Can shoot all weapons."),
+  ANGRY_SKELETON("Fast, fragile, vicious. Hits hard, heals harder. Prefers sci-fi weapons only."),
+  DEMON_TANK("Tough demon brute. Slow but hard to kill. Likes heavy guns.");
 
   @Getter
   private final String description;
@@ -31,7 +31,7 @@ public enum GamePlayerClass {
       case WARRIOR -> GamePlayerClass.WARRIOR;
       case DEMON_TANK -> GamePlayerClass.DEMON_TANK;
       case ANGRY_SKELETON -> GamePlayerClass.ANGRY_SKELETON;
-      default -> throw new IllegalArgumentException("Not supported class " + playerClass.name());
+      case UNRECOGNIZED ->  throw new IllegalArgumentException("Not supported class " + playerClass.name());
     };
   }
 

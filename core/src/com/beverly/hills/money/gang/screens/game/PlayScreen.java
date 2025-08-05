@@ -539,6 +539,8 @@ public class PlayScreen extends GameScreen {
         powerUpEffect(Color.SKY, PowerUpType.QUAD_DAMAGE);
       } else if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.DEFENCE)) {
         powerUpEffect(Color.LIME, PowerUpType.DEFENCE);
+      } else if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.BEAST)) {
+        powerUpEffect(Color.PURPLE, PowerUpType.BEAST);
       } else if (getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.INVISIBILITY)) {
         powerUpEffect(Color.WHITE, PowerUpType.INVISIBILITY);
       }

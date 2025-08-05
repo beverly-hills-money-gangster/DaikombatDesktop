@@ -82,9 +82,12 @@ public enum SoundRegistry {
   ENEMY_ROCKET_LAUNCHER("sfx/enemy_player_rocket_launcher.mp3"),
   ENEMY_PLASMAGUN_FIRE("sfx/enemy_player_plasmagun_fire.mp3"),
   QUAD_DAMAGE_ATTACK("sfx/quad_damage_attack.mp3"),
+  DEFENCE_ON_HIT("sfx/defence_on_hit.mp3"),
   GAUNTLET_HUMILIATION("sfx/gauntlet_humiliation.mp3"),
   // TODO sounds like ass
   QUAD_DAMAGE_PICK("sfx/quad_damage_pick.mp3"),
+  BEAST_PICK("sfx/player_beast_pickup.mp3"),
+  ENEMY_BEAST_PICK("sfx/enemy_beast_pickup.mp3"),
   DEFENCE_PICK("sfx/defence_pick.mp3"),
   REGENERATION_PICK("sfx/regeneration.mp3"),
   ENEMY_REGENERATION_PICK("sfx/enemy_regeneration.mp3"),

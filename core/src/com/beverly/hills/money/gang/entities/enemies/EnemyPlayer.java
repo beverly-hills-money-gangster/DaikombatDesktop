@@ -36,6 +36,7 @@ import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// TODO it feels like enemies should be moving a little faster because I see weapons lagging a little even if ping is 0
 public class EnemyPlayer extends Enemy {
 
   private static final Logger LOG = LoggerFactory.getLogger(EnemyPlayer.class);

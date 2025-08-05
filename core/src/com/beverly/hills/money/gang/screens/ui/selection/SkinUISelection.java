@@ -20,7 +20,7 @@ public enum SkinUISelection {
       case GREEN -> SkinUISelection.GREEN;
       case ORANGE -> SkinUISelection.ORANGE;
       case YELLOW -> SkinUISelection.YELLOW;
-      default -> throw new IllegalStateException("Not supported skin color " + playerSkinColor);
+      case UNRECOGNIZED ->  throw new IllegalStateException("Not supported skin color " + playerSkinColor);
     };
   }
 

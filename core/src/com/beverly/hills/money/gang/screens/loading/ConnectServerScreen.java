@@ -155,9 +155,6 @@ public class ConnectServerScreen extends ReconnectableScreen {
               .maxAmmo(info.hasMaxAmmo() ? info.getMaxAmmo() : null)
               .build());
     });
-    if (weaponStats.size() != Weapon.values().length) {
-      throw new IllegalStateException("Not all weapons have max distance");
-    }
     return weaponStats;
   }
 

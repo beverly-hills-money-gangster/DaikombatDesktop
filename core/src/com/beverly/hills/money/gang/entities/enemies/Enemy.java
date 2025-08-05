@@ -77,6 +77,8 @@ public abstract class Enemy extends SoundMakingEntity {
       powerUpEffect(colorAttribute, Color.SKY, PowerUpType.QUAD_DAMAGE);
     } else if (enemyEffects.isPowerUpActive(PowerUpType.DEFENCE)) {
       powerUpEffect(colorAttribute, Color.LIME, PowerUpType.DEFENCE);
+    } else if (enemyEffects.isPowerUpActive(PowerUpType.BEAST)) {
+      powerUpEffect(colorAttribute, Color.PURPLE, PowerUpType.BEAST);
     } else {
       colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.WHITE, 0));
       colorAttribute.color.set(Color.WHITE.cpy().lerp(Color.RED, 0));

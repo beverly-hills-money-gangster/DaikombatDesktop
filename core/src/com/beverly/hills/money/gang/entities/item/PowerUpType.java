@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 public enum PowerUpType {
   QUAD_DAMAGE(TexturesRegistry.QUAD_DAMAGE_ORB, GameEventType.QUAD_DAMAGE_POWER_UP,
       SoundRegistry.QUAD_DAMAGE_PICK, SoundRegistry.ENEMY_QUAD_DAMAGE_PICK),
+
+  BEAST(TexturesRegistry.BEAST_ORB, GameEventType.BEAST_POWER_UP, SoundRegistry.BEAST_PICK,
+      SoundRegistry.ENEMY_BEAST_PICK),
   DEFENCE(TexturesRegistry.DEFENCE_ORB, GameEventType.DEFENCE_POWER_UP, SoundRegistry.DEFENCE_PICK,
       SoundRegistry.ENEMY_DEFENCE_PICK),
 
