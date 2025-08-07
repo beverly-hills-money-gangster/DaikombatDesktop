@@ -122,7 +122,6 @@ public class ConnectServerScreen extends ReconnectableScreen {
                   gameRoom.getWeaponsInfoList(), gameRoom.getProjectileInfoList());
               LOG.info("Weapon stats {}", weaponStats);
               playerContextDataBuilder.weaponStats(weaponStats);
-              playerContextDataBuilder.matchId(gameRoom.getMatchId());
               removeAllEntities();
               LOG.info("Got server info. Try join the game");
               getGame().setScreen(new JoinGameScreen(getGame(),

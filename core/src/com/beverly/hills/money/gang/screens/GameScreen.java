@@ -1,16 +1,26 @@
 package com.beverly.hills.money.gang.screens;
 
+import static com.beverly.hills.money.gang.Constants.HUD_ALPHA_CHANNEL;
+import static com.beverly.hills.money.gang.Constants.SHADOW_MARGIN;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.beverly.hills.money.gang.Configs;
 import com.beverly.hills.money.gang.DaiKombatGame;
+import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import lombok.Getter;
@@ -31,6 +41,9 @@ public abstract class GameScreen implements Screen {
   @Setter
   private Player player;
 
+  protected final BitmapFont guiFont64;
+  protected final BitmapFont guiFont32;
+
   private final AtomicBoolean exiting = new AtomicBoolean(false);
 
   public GameScreen(final DaiKombatGame game, final Viewport viewport) {
@@ -38,12 +51,40 @@ public abstract class GameScreen implements Screen {
     this.viewport = viewport;
     this.game.setGameIsPaused(false);
     game.getEntMan().setScreen(this);
+    guiFont64 = getGame().getAssMan().getFont(FontRegistry.FONT_64);
+    guiFont32 = getGame().getAssMan().getFont(FontRegistry.FONT_32);
+  }
+
+  public BitmapFont getUiFont() {
+    if (Configs.DEV_MODE) {
+      return guiFont32;
+    } else {
+      return guiFont64;
+    }
   }
 
   public boolean isExiting() {
     return exiting.get();
   }
 
+
+  public void renderHint(String hint) {
+    renderHints(List.of(hint));
+  }
+
+  public void renderHints(final List<String> hints) {
+    int indent = 32;
+    for (int i = 0; i < hints.size(); i++) {
+      final var hint = hints.get(i);
+      final var currentIndent = i * indent;
+      drawBlinking(guiFont32, bitmapFont -> {
+        var glyphHint = new GlyphLayout(bitmapFont, hint);
+        bitmapFont.draw(getGame().getBatch(), hint,
+            getViewport().getWorldWidth() / 2f - glyphHint.width / 2f,
+            getViewport().getWorldHeight() - 128 - currentIndent);
+      });
+    }
+  }
 
   public void checkOverlaps(final RectanglePlus rect) {
     checkOverlapX(rect);
@@ -66,6 +107,33 @@ public abstract class GameScreen implements Screen {
     }
 
     rect.setX(rect.getNewPosition().x);
+  }
+
+
+  protected void printShadowText(final int x, final int y, final String text,
+      final BitmapFont font, final Texture texture, final float alphaChannel) {
+    GlyphLayout glyph = new GlyphLayout(font, text);
+    float blockWidth = glyph.width + SHADOW_MARGIN * 2;
+    float blockHeight = glyph.height + SHADOW_MARGIN * 2;
+    float blockX = x - SHADOW_MARGIN;
+    float blockY = y - SHADOW_MARGIN;
+    var oldColor = getGame().getBatch().getColor().cpy();
+    getGame().getBatch().setColor(1, 1, 1, alphaChannel);
+    getGame().getBatch()
+        .draw(texture, blockX, blockY, blockWidth, blockHeight);
+    getGame().getBatch().setColor(oldColor);
+    getUiFont().setColor(1, 1, 1, HUD_ALPHA_CHANNEL);
+    getUiFont().draw(getGame().getBatch(), text, x, y + glyph.height);
+    getUiFont().setColor(Color.WHITE);
+  }
+
+  protected Texture createTexture(final Color color) {
+    Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+    pixmap.setColor(color);
+    pixmap.fill();
+    var texture = new Texture(pixmap);
+    pixmap.dispose();
+    return texture;
   }
 
   /**
@@ -160,12 +228,12 @@ public abstract class GameScreen implements Screen {
     bitmapFont.setColor(oldColor);
   }
 
-  public final void exit() {
+  public final void exit(GameScreen screenToTransitionTo) {
     exiting.set(true);
-    onExitScreen();
+    onExitScreen(screenToTransitionTo);
   }
 
-  public void onExitScreen() {
+  public void onExitScreen(GameScreen screenToTransitionTo) {
     // do nothing by default
   }
 

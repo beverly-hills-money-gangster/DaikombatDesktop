@@ -126,7 +126,7 @@ public class EnemyPlayer extends Enemy {
     lastActionReceivedTimeMls = System.currentTimeMillis();
   }
 
-  public void talking(float avgAmpl) {
+  public void talking() {
     if (!getEnemyEffects().isPowerUpActive(PowerUpType.INVISIBILITY) && visible) {
       enemyPlayerVoiceChatEffect.makeVisible();
     }

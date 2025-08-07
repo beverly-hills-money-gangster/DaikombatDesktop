@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -19,6 +20,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
+import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
@@ -27,6 +29,7 @@ import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.factory.ScreenWeaponStateFactory;
 import com.beverly.hills.money.gang.registry.ScreenWeaponStateFactoriesRegistry;
+import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,14 +67,17 @@ public class ScreenWeaponTest {
         .getUserSettingSound(SoundRegistry.QUAD_DAMAGE_ATTACK);
     doReturn(weaponChangeSound).when(daiKombatAssetsManager)
         .getUserSettingSound(SoundRegistry.WEAPON_CHANGE);
+    doReturn(mock(TextureRegion.class)).when(daiKombatAssetsManager).getTextureRegion(
+        any(TexturesRegistry.class), anyInt(), anyInt(), anyInt(), anyInt());
+
     var screenWeaponStateFactoriesRegistry = mock(ScreenWeaponStateFactoriesRegistry.class);
     for (Weapon value : Weapon.values()) {
       var screenWeaponStateFactory = mock(ScreenWeaponStateFactory.class);
       var mockWeaponState = mock(WeaponState.class);
       doReturn(mock(UserSettingSound.class)).when(mockWeaponState).getFireSound();
       doReturn(mock(UserSettingSound.class)).when(mockWeaponState).getHitTargetSound();
-      doReturn(mock(TextureRegion.class)).when(mockWeaponState).getFireTexture();
-      doReturn(mock(TextureRegion.class)).when(mockWeaponState).getIdleTexture();
+
+
       doReturn(100).when(mockWeaponState).getBackoffDelayMls();
       doReturn(150).when(mockWeaponState).getAnimationDelayMls();
       doReturn((Function<Long, Vector2>) aLong
@@ -92,7 +98,7 @@ public class ScreenWeaponTest {
         Weapon.ROCKET_LAUNCHER,
         WeaponStats.builder().maxDistance(999).maxAmmo(5).delayMls(500).build());
     screenWeapon = new ScreenWeapon(daiKombatAssetsManager,
-        weaponStats, screenWeaponStateFactoriesRegistry
+        weaponStats, screenWeaponStateFactoriesRegistry, GamePlayerClass.WARRIOR
     );
     player = mock(Player.class);
     playerEffects = mock(PlayerEffects.class);
@@ -298,7 +304,7 @@ public class ScreenWeaponTest {
   @Test
   public void testGetActiveWeaponForRenderingIdle() {
     var renderingData = screenWeapon.getActiveWeaponForRendering();
-    assertEquals(weaponStateMap.get(Weapon.SHOTGUN).getIdleTexture(),
+    assertEquals(weaponStateMap.get(Weapon.SHOTGUN).getIdleTextures().get(GamePlayerClass.WARRIOR),
         renderingData.getTextureRegion(),
         "Be default, idle texture should be returned");
   }
@@ -308,7 +314,7 @@ public class ScreenWeaponTest {
     screenWeapon.changeWeapon(Weapon.SHOTGUN);
     screenWeapon.attack(player);
     var renderingData = screenWeapon.getActiveWeaponForRendering();
-    assertEquals(weaponStateMap.get(Weapon.SHOTGUN).getFireTexture(),
+    assertEquals(weaponStateMap.get(Weapon.SHOTGUN).getFireTextures().get(GamePlayerClass.WARRIOR),
         renderingData.getTextureRegion());
   }
 
@@ -317,7 +323,7 @@ public class ScreenWeaponTest {
     screenWeapon.changeWeapon(Weapon.GAUNTLET);
     screenWeapon.attack(player);
     var renderingData = screenWeapon.getActiveWeaponForRendering();
-    assertEquals(weaponStateMap.get(Weapon.GAUNTLET).getFireTexture(),
+    assertEquals(weaponStateMap.get(Weapon.GAUNTLET).getFireTextures().get(GamePlayerClass.WARRIOR),
         renderingData.getTextureRegion());
   }
 
@@ -329,7 +335,7 @@ public class ScreenWeaponTest {
     Thread.sleep(
         screenWeapon.weaponStates.get(Weapon.SHOTGUN).getAnimationDelayMls() + 50);
     var renderingData = screenWeapon.getActiveWeaponForRendering();
-    assertEquals(weaponStateMap.get(Weapon.SHOTGUN).getIdleTexture(),
+    assertEquals(weaponStateMap.get(Weapon.SHOTGUN).getFireTextures().get(GamePlayerClass.WARRIOR),
         renderingData.getTextureRegion(),
         "After animation finish, idle texture should be returned");
   }

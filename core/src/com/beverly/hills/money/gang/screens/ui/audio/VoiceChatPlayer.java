@@ -1,22 +1,30 @@
 package com.beverly.hills.money.gang.screens.ui.audio;
 
+import static com.beverly.hills.money.gang.Constants.HUD_ALPHA_CHANNEL;
+
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.audio.AudioDevice;
 import com.badlogic.gdx.audio.AudioRecorder;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.entity.VoiceChatPayload;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.network.GlobalGameConnection.VoiceChatConfigs;
-import com.beverly.hills.money.gang.registry.EnemiesRegistry;
+import com.beverly.hills.money.gang.screens.GameScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
-import com.beverly.hills.money.gang.strategy.EnemyPlayerActionQueueStrategy;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// TODO fix skeleton textures they have green dots
 public class VoiceChatPlayer {
 
   private static final Logger LOG = LoggerFactory.getLogger(VoiceChatPlayer.class);
@@ -35,7 +43,6 @@ public class VoiceChatPlayer {
 
   private final GlobalGameConnection gameConnection;
   private final int playerId;
-  private final EnemiesRegistry enemiesRegistry;
 
   private final VoiceChatConfigs voiceChatConfigs;
 
@@ -46,14 +53,24 @@ public class VoiceChatPlayer {
   private final AtomicReference<Float> normalizedAvgAmplitude = new AtomicReference<>(0f);
 
   private final int gameId;
+  private final GameScreen gameScreen;
+  private final TextureRegion micTexture;
 
-  public VoiceChatPlayer(GlobalGameConnection gameConnection, int playerId,
-      EnemiesRegistry enemiesRegistry, int gameId) {
+  private final Consumer<VoiceChatPayload> onPlayerTalking;
+
+  public VoiceChatPlayer(
+      GlobalGameConnection gameConnection,
+      int playerId,
+      int gameId,
+      final GameScreen gameScreen,
+      final Consumer<VoiceChatPayload> onPlayerTalking) {
     this.gameConnection = gameConnection;
     this.playerId = playerId;
-    this.enemiesRegistry = enemiesRegistry;
     this.voiceChatConfigs = gameConnection.getVoiceChatConfigs();
     this.gameId = gameId;
+    this.gameScreen = gameScreen;
+    this.micTexture = gameScreen.getGame().getAssMan().getTextureRegion(TexturesRegistry.MIC);
+    this.onPlayerTalking = onPlayerTalking;
   }
 
   public void init() {
@@ -110,8 +127,7 @@ public class VoiceChatPlayer {
           } else {
             var mixedPCM = mixPCMs(shortPCMs);
             amplify(mixedPCM, 3.85f);
-            shortPCMs.forEach(payload -> enemiesRegistry.getEnemy(payload.getPlayerId())
-                .ifPresent(enemyPlayer -> enemyPlayer.talking(getAvgAmpl(payload.getPcm()))));
+            shortPCMs.forEach(onPlayerTalking);
             audioPlayer.writeSamples(mixedPCM, 0, mixedPCM.length);
           }
         } catch (InterruptedException ignored) {
@@ -134,12 +150,54 @@ public class VoiceChatPlayer {
     LOG.info("Voice chat player has been initialized");
   }
 
-  public void recordAudio(boolean record) {
+  private void recordAudio(boolean record) {
     if (record) {
       synchronized (recordAudioUntil) {
         recordAudioUntil.set(System.currentTimeMillis() + 1_000);
         recordAudioUntil.notify();
       }
+    }
+  }
+
+  public void handleInput() {
+    recordAudio(Gdx.input.isKeyPressed(Keys.V));
+  }
+
+  public boolean isVoiceChatMode() {
+    return Gdx.input.isKeyPressed(Keys.V);
+  }
+
+  public void renderGui() {
+    if (!failedToRecord()) {
+      String recordingText = "VOICE RECORDING";
+      var glyphLayoutRecording = new GlyphLayout(gameScreen.getUiFont(), recordingText);
+      int micSize = 64;
+      float ampl = getLastNormalizedAvgAmpl();
+      // TODO refactor
+      gameScreen.getGame().getBatch()
+          .setColor(new Color(1, 1 - ampl, 1 - ampl, Math.max(0.1f, ampl)));
+      gameScreen.getGame().getBatch().draw(micTexture,
+          gameScreen.getViewport().getWorldWidth() / 2f - micSize / 2f,
+          gameScreen.getViewport().getWorldHeight() / 2f
+              - gameScreen.getViewport().getWorldHeight() / 4f,
+          micSize,
+          micSize);
+      gameScreen.getGame().getBatch().setColor(Color.WHITE);
+      gameScreen.getUiFont().setColor(1, 1, 1, HUD_ALPHA_CHANNEL);
+      gameScreen.getUiFont().draw(gameScreen.getGame().getBatch(), recordingText,
+          gameScreen.getViewport().getWorldWidth() / 2f - glyphLayoutRecording.width / 2,
+          gameScreen.getViewport().getWorldHeight() / 2f - glyphLayoutRecording.height / 2f
+              - gameScreen.getViewport().getWorldHeight() / 4f);
+      gameScreen.getUiFont().setColor(Color.WHITE);
+    } else {
+      String recordingText = "FAILED TO RECORD VOICE";
+      var glyphLayoutRecording = new GlyphLayout(gameScreen.getUiFont(), recordingText);
+      gameScreen.getUiFont().setColor(Color.RED);
+      gameScreen.getUiFont().draw(gameScreen.getGame().getBatch(), recordingText,
+          gameScreen.getViewport().getWorldWidth() / 2f - glyphLayoutRecording.width / 2,
+          gameScreen.getViewport().getWorldHeight() / 2f - glyphLayoutRecording.height / 2f
+              - gameScreen.getViewport().getWorldHeight() / 4f);
+      gameScreen.getUiFont().setColor(Color.WHITE);
     }
   }
 
@@ -149,7 +207,7 @@ public class VoiceChatPlayer {
     }
   }
 
-  private float getAvgAmpl(short[] pcm) {
+  public static float getAvgAmpl(short[] pcm) {
     long total = 0;
     for (short value : pcm) {
       total += Math.abs(value);
@@ -177,14 +235,14 @@ public class VoiceChatPlayer {
     return mixed;
   }
 
-  public boolean failedToRecord() {
+  private boolean failedToRecord() {
     var lastTimeRecorded = recordedVoiceLastTime.get();
     return exceptionThrown.get() || lastTimeRecorded != null && isRecording() &&
         (System.currentTimeMillis() - lastTimeRecorded > 1_000);
   }
 
 
-  public boolean isRecording() {
+  private boolean isRecording() {
     return System.currentTimeMillis() < recordAudioUntil.get();
   }
 

@@ -11,8 +11,6 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.filters.OverlapFilterManager;
-import com.beverly.hills.money.gang.maps.MapBuilder;
-import com.beverly.hills.money.gang.models.ModelMaker;
 import com.beverly.hills.money.gang.pref.UserPreference;
 import com.beverly.hills.money.gang.rect.RectManager;
 import com.beverly.hills.money.gang.screens.GameScreen;
@@ -20,6 +18,7 @@ import com.beverly.hills.money.gang.screens.menu.MainMenuScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
 import com.beverly.hills.money.gang.utils.EntityManager;
 import java.util.Optional;
+import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.SystemUtils;
@@ -51,8 +50,6 @@ public class DaiKombatGame extends Game {
 
     entMan = new EntityManager();
     rectMan = new RectManager(this);
-
-
 
     // restore user configs
     UserPreference userPreference = new UserPreference();
@@ -98,7 +95,7 @@ public class DaiKombatGame extends Game {
   public void setScreen(GameScreen screen) {
     Optional.ofNullable(getScreen())
         .filter(GameScreen.class::isInstance)
-        .map(GameScreen.class::cast).ifPresent(GameScreen::exit);
+        .map(GameScreen.class::cast).ifPresent(gameScreen -> gameScreen.exit(screen));
 
     super.setScreen(screen);
   }

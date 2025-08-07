@@ -42,7 +42,6 @@ public class RespawnScreen extends AbstractLoadingScreen {
     } else {
       gameConnection.write(RespawnCommand.newBuilder()
           .setGameId(oldGameBootstrapData.getCompleteJoinGameData().getGameRoomId())
-          .setMatchId(oldGameBootstrapData.getMatchId())
           .setPlayerId(oldGameBootstrapData.getPlayerId()).build());
     }
   }
@@ -75,7 +74,7 @@ public class RespawnScreen extends AbstractLoadingScreen {
             new GameOverScreen(getGame(),
                 new LeaderBoardDataLayer(oldGameBootstrapData.getPlayerId(),
                     LeaderBoardPlayer.createFromGameOver(response.getGameOver())),
-                oldGameBootstrapData.getCompleteJoinGameData()));
+                oldGameBootstrapData, gameConnection));
       } else if (response.hasGameEvents()) {
         var gameEvent = response.getGameEvents().getEvents(0);
         if (gameEvent.getEventType() != ServerResponse.GameEvent.GameEventType.SPAWN

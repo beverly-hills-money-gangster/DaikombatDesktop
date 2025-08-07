@@ -38,8 +38,6 @@ public class GameBootstrapData {
   private final Map<Weapon, WeaponStats> weaponStats;
   @NonNull
   private final Integer maxVisibility;
-  @NonNull
-  private final Integer matchId;
   private final Weapon lastWeapon;
 
 }

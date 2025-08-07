@@ -3,10 +3,8 @@ package com.beverly.hills.money.gang.screens.menu;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.beverly.hills.money.gang.DaiKombatGame;
-import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.screens.loading.JoinGameScreen;
 import java.util.Locale;
 import org.slf4j.Logger;
@@ -17,16 +15,12 @@ public class ErrorScreen extends AbstractMainMenuScreen {
   private static final Logger LOG = LoggerFactory.getLogger(JoinGameScreen.class);
 
   private final String errorMessage;
-  private final BitmapFont guiFont32;
-
-  private final BitmapFont guiFont64;
 
   public ErrorScreen(final DaiKombatGame game, final String errorMessage) {
     super(game);
     this.errorMessage = errorMessage.toUpperCase(Locale.ENGLISH);
+    this.showLogo = false;
     LOG.error("Go to error screen with error '{}'", errorMessage);
-    guiFont32 = game.getAssMan().getFont(FontRegistry.FONT_32);
-    guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
   }
 
   @Override

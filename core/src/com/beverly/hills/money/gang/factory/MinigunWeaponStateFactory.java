@@ -12,15 +12,16 @@ import java.util.Map;
 public class MinigunWeaponStateFactory extends ScreenWeaponStateFactory {
 
   private static final int MINIGUN_ANIMATION_MLS = 100;
-
   private static final int TEXTURE_WIDTH = 185;
   private static final int TEXTURE_HEIGHT = 96;
 
   @Override
   public WeaponState create(DaiKombatAssetsManager assetsManager, WeaponStats weaponStats) {
 
+    // TODO test rpg class specific code
     var warriorFireTexture = assetsManager.getTextureRegion(TexturesRegistry.MINIGUN_FIRE,
         0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+
     var demonFireTexture = assetsManager.getTextureRegion(
         TexturesRegistry.DEMON_MINIGUN_FIRE, 0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 

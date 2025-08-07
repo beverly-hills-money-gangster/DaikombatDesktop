@@ -24,7 +24,6 @@ public abstract class AbstractMainMenuScreen extends GameScreen {
       + ClientConfig.VERSION).toUpperCase(Locale.ENGLISH);
 
   private final GlyphLayout glyphLayoutNetworkClient;
-  private final BitmapFont guiFont32;
 
   protected boolean showLogo = true;
 
@@ -50,7 +49,6 @@ public abstract class AbstractMainMenuScreen extends GameScreen {
 
     skyBg = getGame().getAssMan().getTextureRegion(TexturesRegistry.MAIN_MENU_BG);
     guiTitle = getGame().getAssMan().getTextureRegion(TexturesRegistry.LOGO);
-    guiFont32 = game.getAssMan().getFont(FontRegistry.FONT_32);
     glyphLayoutNetworkClient = new GlyphLayout(guiFont32, networkClientVersion);
 
     startBgMusic();
