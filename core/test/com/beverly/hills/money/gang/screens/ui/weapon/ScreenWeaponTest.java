@@ -1,13 +1,14 @@
 package com.beverly.hills.money.gang.screens.ui.weapon;
 
 import static com.beverly.hills.money.gang.Constants.DEFAULT_SHOOTING_VOLUME;
+import static com.beverly.hills.money.gang.factory.ScreenWeaponStateFactory.sameTextureForAllClasses;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -20,7 +21,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
-import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
@@ -55,6 +55,9 @@ public class ScreenWeaponTest {
 
   private PlayerEffects playerEffects;
 
+  private Map<Weapon, TextureRegion> fireWeaponTextures = new HashMap<>();
+
+  private Map<Weapon, TextureRegion> idleWeaponTextures = new HashMap<>();
 
   @BeforeEach
   public void setUp() {
@@ -67,19 +70,24 @@ public class ScreenWeaponTest {
         .getUserSettingSound(SoundRegistry.QUAD_DAMAGE_ATTACK);
     doReturn(weaponChangeSound).when(daiKombatAssetsManager)
         .getUserSettingSound(SoundRegistry.WEAPON_CHANGE);
-    doReturn(mock(TextureRegion.class)).when(daiKombatAssetsManager).getTextureRegion(
-        any(TexturesRegistry.class), anyInt(), anyInt(), anyInt(), anyInt());
 
     var screenWeaponStateFactoriesRegistry = mock(ScreenWeaponStateFactoriesRegistry.class);
     for (Weapon value : Weapon.values()) {
+      var mockFireTexture = mock(TextureRegion.class);
+      fireWeaponTextures.put(value, mockFireTexture);
+      var mockIdleTexture = mock(TextureRegion.class);
+      idleWeaponTextures.put(value, mockIdleTexture);
+
       var screenWeaponStateFactory = mock(ScreenWeaponStateFactory.class);
       var mockWeaponState = mock(WeaponState.class);
       doReturn(mock(UserSettingSound.class)).when(mockWeaponState).getFireSound();
       doReturn(mock(UserSettingSound.class)).when(mockWeaponState).getHitTargetSound();
 
-
       doReturn(100).when(mockWeaponState).getBackoffDelayMls();
       doReturn(150).when(mockWeaponState).getAnimationDelayMls();
+      doReturn(sameTextureForAllClasses(mockFireTexture)).when(mockWeaponState).getFireTextures();
+      doReturn(sameTextureForAllClasses(mockIdleTexture)).when(mockWeaponState).getIdleTextures();
+
       doReturn((Function<Long, Vector2>) aLong
           -> new Vector2(0, 0)).when(mockWeaponState).getWeaponScreenPositioning();
       weaponStateMap.put(value, mockWeaponState);
@@ -304,7 +312,7 @@ public class ScreenWeaponTest {
   @Test
   public void testGetActiveWeaponForRenderingIdle() {
     var renderingData = screenWeapon.getActiveWeaponForRendering();
-    assertEquals(weaponStateMap.get(Weapon.SHOTGUN).getIdleTextures().get(GamePlayerClass.WARRIOR),
+    assertEquals(idleWeaponTextures.get(Weapon.SHOTGUN),
         renderingData.getTextureRegion(),
         "Be default, idle texture should be returned");
   }
@@ -314,7 +322,7 @@ public class ScreenWeaponTest {
     screenWeapon.changeWeapon(Weapon.SHOTGUN);
     screenWeapon.attack(player);
     var renderingData = screenWeapon.getActiveWeaponForRendering();
-    assertEquals(weaponStateMap.get(Weapon.SHOTGUN).getFireTextures().get(GamePlayerClass.WARRIOR),
+    assertEquals(fireWeaponTextures.get(Weapon.SHOTGUN),
         renderingData.getTextureRegion());
   }
 
@@ -323,7 +331,7 @@ public class ScreenWeaponTest {
     screenWeapon.changeWeapon(Weapon.GAUNTLET);
     screenWeapon.attack(player);
     var renderingData = screenWeapon.getActiveWeaponForRendering();
-    assertEquals(weaponStateMap.get(Weapon.GAUNTLET).getFireTextures().get(GamePlayerClass.WARRIOR),
+    assertEquals(fireWeaponTextures.get(Weapon.GAUNTLET),
         renderingData.getTextureRegion());
   }
 
@@ -335,7 +343,7 @@ public class ScreenWeaponTest {
     Thread.sleep(
         screenWeapon.weaponStates.get(Weapon.SHOTGUN).getAnimationDelayMls() + 50);
     var renderingData = screenWeapon.getActiveWeaponForRendering();
-    assertEquals(weaponStateMap.get(Weapon.SHOTGUN).getFireTextures().get(GamePlayerClass.WARRIOR),
+    assertEquals(idleWeaponTextures.get(Weapon.SHOTGUN),
         renderingData.getTextureRegion(),
         "After animation finish, idle texture should be returned");
   }
@@ -436,6 +444,32 @@ public class ScreenWeaponTest {
     Thread.sleep(ScreenWeapon.CHANGE_WEAPON_DELAY_MLS);
     screenWeapon.changeToNextWeapon();
     assertEquals(Weapon.SHOTGUN, screenWeapon.getWeaponBeingUsed());
+  }
+
+  @Test
+  public void testChangeToNextWeaponSkipGauntlet() throws InterruptedException {
+    screenWeapon.changeWeapon(Weapon.GAUNTLET);
+    Thread.sleep(ScreenWeapon.CHANGE_WEAPON_DELAY_MLS);
+    // switch weapon 10 times
+    for (int i = 0; i < 10; i++) {
+      screenWeapon.changeToNextWeapon();
+      Thread.sleep(ScreenWeapon.CHANGE_WEAPON_DELAY_MLS);
+      assertNotSame(screenWeapon.getWeaponBeingUsed(), Weapon.GAUNTLET,
+          "We shouldn't get GAUNTLET while switching weapons");
+    }
+  }
+
+  @Test
+  public void testChangeToPrevWeaponSkipGauntlet() throws InterruptedException {
+    screenWeapon.changeWeapon(Weapon.GAUNTLET);
+    Thread.sleep(ScreenWeapon.CHANGE_WEAPON_DELAY_MLS);
+    // switch weapon 10 times
+    for (int i = 0; i < 10; i++) {
+      screenWeapon.changeToPrevWeapon();
+      Thread.sleep(ScreenWeapon.CHANGE_WEAPON_DELAY_MLS);
+      assertNotSame(screenWeapon.getWeaponBeingUsed(), Weapon.GAUNTLET,
+          "We shouldn't get GAUNTLET while switching weapons");
+    }
   }
 
   @Test

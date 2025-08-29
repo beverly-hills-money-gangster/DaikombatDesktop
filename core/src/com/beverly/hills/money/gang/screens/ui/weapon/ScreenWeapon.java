@@ -29,9 +29,6 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
-// TODO it doesn't feel like demon is slower than skeleton
-// TODO bind weapons to keyboard
-// TODO create weapons based based on class (skeleton + demon hands)
 public class ScreenWeapon {
 
   private final Map<Weapon, Long> animationStart = new HashMap<>();

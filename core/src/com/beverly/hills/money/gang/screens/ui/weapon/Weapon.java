@@ -28,6 +28,7 @@ public enum Weapon {
         weapon -> weapon.getProjectileRef() == weaponProjectile).findFirst().get();
   }
 
+  // TODO test that only available weapons switch
   public Weapon nextWeapon(Set<Weapon> availableWeapons) {
     var weaponsForSwitching = getWeaponsForSwitching(availableWeapons);
     var index = getWeaponIndex(weaponsForSwitching, this);

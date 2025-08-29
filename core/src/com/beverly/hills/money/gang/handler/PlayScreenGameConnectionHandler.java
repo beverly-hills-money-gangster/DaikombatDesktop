@@ -171,8 +171,7 @@ public class PlayScreenGameConnectionHandler {
         createVector(gameEvent.getPlayer().getDirection()),
         playScreen, gameEvent.getPlayer().getPlayerName(),
         SkinUISelection.getSkinColor(gameEvent.getPlayer().getSkinColor()), createEnemyListeners(),
-        // TODO if it's going to make sense in real network conditions
-        // TODO comment it
+        // move a little faster. otherwise I see a little lag even with 0 ping
         gameEvent.getPlayer().getSpeed() * 1.1f,
         gameEvent.getPlayer().getHealth(),
         GamePlayerClass.createPlayerClass(gameEvent.getPlayer().getPlayerClass()),
@@ -631,7 +630,6 @@ public class PlayScreenGameConnectionHandler {
     );
     if (playScreen.getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.DEFENCE)
         || playScreen.getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.BEAST)) {
-      // TODO test it
       new TimeLimitedSound(
           playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.DEFENCE_ON_HIT))
           .play(TimeLimitSoundConf.builder()

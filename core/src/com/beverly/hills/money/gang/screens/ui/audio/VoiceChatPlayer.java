@@ -24,7 +24,6 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO fix skeleton textures they have green dots
 public class VoiceChatPlayer {
 
   private static final Logger LOG = LoggerFactory.getLogger(VoiceChatPlayer.class);
@@ -168,35 +167,37 @@ public class VoiceChatPlayer {
   }
 
   public void renderGui() {
+    var game = gameScreen.getGame();
+    var viewPort = gameScreen.getViewport();
     if (!failedToRecord()) {
       String recordingText = "VOICE RECORDING";
       var glyphLayoutRecording = new GlyphLayout(gameScreen.getUiFont(), recordingText);
       int micSize = 64;
       float ampl = getLastNormalizedAvgAmpl();
       // TODO refactor
-      gameScreen.getGame().getBatch()
+
+      game.getBatch()
           .setColor(new Color(1, 1 - ampl, 1 - ampl, Math.max(0.1f, ampl)));
-      gameScreen.getGame().getBatch().draw(micTexture,
-          gameScreen.getViewport().getWorldWidth() / 2f - micSize / 2f,
-          gameScreen.getViewport().getWorldHeight() / 2f
-              - gameScreen.getViewport().getWorldHeight() / 4f,
+      game.getBatch().draw(micTexture,
+          viewPort.getWorldWidth() / 2f - micSize / 2f,
+          viewPort.getWorldHeight() / 2f - viewPort.getWorldHeight() / 4f,
           micSize,
           micSize);
-      gameScreen.getGame().getBatch().setColor(Color.WHITE);
+      game.getBatch().setColor(Color.WHITE);
       gameScreen.getUiFont().setColor(1, 1, 1, HUD_ALPHA_CHANNEL);
-      gameScreen.getUiFont().draw(gameScreen.getGame().getBatch(), recordingText,
-          gameScreen.getViewport().getWorldWidth() / 2f - glyphLayoutRecording.width / 2,
-          gameScreen.getViewport().getWorldHeight() / 2f - glyphLayoutRecording.height / 2f
-              - gameScreen.getViewport().getWorldHeight() / 4f);
+      gameScreen.getUiFont().draw(game.getBatch(), recordingText,
+          viewPort.getWorldWidth() / 2f - glyphLayoutRecording.width / 2,
+          viewPort.getWorldHeight() / 2f - glyphLayoutRecording.height / 2f
+              - viewPort.getWorldHeight() / 4f);
       gameScreen.getUiFont().setColor(Color.WHITE);
     } else {
       String recordingText = "FAILED TO RECORD VOICE";
       var glyphLayoutRecording = new GlyphLayout(gameScreen.getUiFont(), recordingText);
       gameScreen.getUiFont().setColor(Color.RED);
-      gameScreen.getUiFont().draw(gameScreen.getGame().getBatch(), recordingText,
-          gameScreen.getViewport().getWorldWidth() / 2f - glyphLayoutRecording.width / 2,
-          gameScreen.getViewport().getWorldHeight() / 2f - glyphLayoutRecording.height / 2f
-              - gameScreen.getViewport().getWorldHeight() / 4f);
+      gameScreen.getUiFont().draw(game.getBatch(), recordingText,
+          viewPort.getWorldWidth() / 2f - glyphLayoutRecording.width / 2,
+          viewPort.getWorldHeight() / 2f - glyphLayoutRecording.height / 2f
+              - viewPort.getWorldHeight() / 4f);
       gameScreen.getUiFont().setColor(Color.WHITE);
     }
   }

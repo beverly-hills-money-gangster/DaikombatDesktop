@@ -13,6 +13,7 @@ public class ShotgunWeaponStateFactory extends ScreenWeaponStateFactory {
 
   @Override
   public WeaponState create(DaiKombatAssetsManager assetsManager, WeaponStats weaponStats) {
+    System.out.println(assetsManager);
     return WeaponState.builder()
         .distance(weaponStats.getMaxDistance())
         .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PLAYER_SHOTGUN))

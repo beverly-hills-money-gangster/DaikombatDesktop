@@ -16,7 +16,7 @@ public abstract class ScreenWeaponStateFactory {
     return Math.max(0, weaponStats.getDelayMls() - animationMls);
   }
 
-  protected static Map<GamePlayerClass, TextureRegion> sameTextureForAllClasses(
+  public static Map<GamePlayerClass, TextureRegion> sameTextureForAllClasses(
       TextureRegion textureRegion) {
     Map<GamePlayerClass, TextureRegion> textures = new HashMap<>();
     for (GamePlayerClass value : GamePlayerClass.values()) {

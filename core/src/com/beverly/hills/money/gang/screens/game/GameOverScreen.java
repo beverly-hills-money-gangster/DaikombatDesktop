@@ -175,11 +175,8 @@ public class GameOverScreen extends AbstractMainMenuScreen {
     getGame().getBatch().end();
   }
 
-  // TODO show how many folks online
-  // TODO check that I don't get messages from the new game
   private void handleConnection() {
     gameConnection.pollResponses().forEach(serverResponse -> {
-      // TODO make sure I don't send events from new match in the same game
       if (serverResponse.hasChatEvents()) {
         var chatEvent = serverResponse.getChatEvents();
         chatBox.getChatLog().addMessage(chatEvent.getName(), chatEvent.getMessage());
@@ -189,7 +186,6 @@ public class GameOverScreen extends AbstractMainMenuScreen {
         serverResponse.getGameEvents().getEventsList().stream().filter(
                 gameEvent -> gameEvent.getEventType() == GameEventType.EXIT)
             .forEach(this::handleExit);
-
       }
     });
     gameConnection.pollErrors().forEach(this::handleException);
