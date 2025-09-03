@@ -18,6 +18,7 @@ import com.beverly.hills.money.gang.entities.ui.LeaderBoardDataLayer;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.proto.ServerResponse;
 import com.beverly.hills.money.gang.proto.ServerResponse.GameEvent.GameEventType;
+import com.beverly.hills.money.gang.proto.ServerResponse.GameEvents;
 import com.beverly.hills.money.gang.screens.ChatBox;
 import com.beverly.hills.money.gang.screens.GameScreen;
 import com.beverly.hills.money.gang.screens.data.CompleteJoinGameData;
@@ -64,11 +65,16 @@ public class GameOverScreen extends AbstractMainMenuScreen {
 
   private final VoiceChatPlayer voiceChatPlayer;
 
+  private int playersOnline;
+
+
   public GameOverScreen(final DaiKombatGame game,
       final LeaderBoardDataLayer uiLeaderBoard,
       final GameBootstrapData gameBootstrapData,
       final GlobalGameConnection gameConnection) {
     super(game);
+    LOG.info("Game over");
+    this.playersOnline = uiLeaderBoard.size();
     this.gameConnection = gameConnection;
     this.gameBootstrapData = gameBootstrapData;
     boomSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.BOOM_1);
@@ -145,6 +151,7 @@ public class GameOverScreen extends AbstractMainMenuScreen {
     List<String> hints = new ArrayList<>();
     getGame().getBatch().begin();
     handleConnection();
+    renderGameTechStats(playersOnline, gameConnection);
     if (showLeaderBoard) {
       String leaderBoard = uiLeaderBoard.toString();
       var glyphLayoutRecSentMessages = new GlyphLayout(guiFont64, leaderBoard);
@@ -177,13 +184,17 @@ public class GameOverScreen extends AbstractMainMenuScreen {
 
   private void handleConnection() {
     gameConnection.pollResponses().forEach(serverResponse -> {
+      LOG.info("Got response {}", serverResponse);
       if (serverResponse.hasChatEvents()) {
         var chatEvent = serverResponse.getChatEvents();
         chatBox.getChatLog().addMessage(chatEvent.getName(), chatEvent.getMessage());
       } else if (serverResponse.hasErrorEvent()) {
         handleException(new RuntimeException(serverResponse.getChatEvents().getMessage()));
       } else if (serverResponse.hasGameEvents()) {
-        serverResponse.getGameEvents().getEventsList().stream().filter(
+        var gameEvents = serverResponse.getGameEvents();
+        Optional.of(gameEvents).filter(GameEvents::hasPlayersOnline).ifPresent(
+            events -> playersOnline = events.getPlayersOnline());
+        gameEvents.getEventsList().stream().filter(
                 gameEvent -> gameEvent.getEventType() == GameEventType.EXIT)
             .forEach(this::handleExit);
       }

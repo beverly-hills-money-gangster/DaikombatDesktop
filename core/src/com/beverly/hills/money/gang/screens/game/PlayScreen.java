@@ -67,7 +67,6 @@ import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -646,19 +645,7 @@ public class PlayScreen extends GameScreen {
 
 
   private void renderGameTechStats() {
-    StringBuilder gameTechStats = new StringBuilder();
-    gameTechStats.append(playersOnline).append(" ONLINE ");
-    gameTechStats.append("| PING ")
-        .append(Objects.toString(gameConnection.getPrimaryNetworkStats().getPingMls(), "-"))
-        .append(" MS | ");
-    gameTechStats.append(Gdx.graphics.getFramesPerSecond()).append(" FPS");
-
-    var gameTechStatsGlyph = new GlyphLayout(getUiFont(), gameTechStats);
-    getUiFont().setColor(1, 1, 1, HUD_ALPHA_CHANNEL);
-    getUiFont().draw(getGame().getBatch(), gameTechStats,
-        getViewport().getWorldWidth() - 32 - gameTechStatsGlyph.width,
-        getViewport().getWorldHeight() - 32 - gameTechStatsGlyph.height);
-    getUiFont().setColor(Color.WHITE);
+    renderGameTechStats(playersOnline, gameConnection);
     if (showNetworkStats) {
       renderDevModeGameTechStats();
     }

@@ -19,8 +19,10 @@ import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
+import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import lombok.Getter;
@@ -175,6 +177,22 @@ public abstract class GameScreen implements Screen {
   @Override
   public void pause() {
 
+  }
+
+  protected void renderGameTechStats(int playersOnline, GlobalGameConnection gameConnection) {
+    StringBuilder gameTechStats = new StringBuilder();
+    gameTechStats.append(playersOnline).append(" ONLINE ");
+    gameTechStats.append("| PING ")
+        .append(Objects.toString(gameConnection.getPrimaryNetworkStats().getPingMls(), "-"))
+        .append(" MS | ");
+    gameTechStats.append(Gdx.graphics.getFramesPerSecond()).append(" FPS");
+
+    var gameTechStatsGlyph = new GlyphLayout(getUiFont(), gameTechStats);
+    getUiFont().setColor(1, 1, 1, HUD_ALPHA_CHANNEL);
+    getUiFont().draw(getGame().getBatch(), gameTechStats,
+        getViewport().getWorldWidth() - 32 - gameTechStatsGlyph.width,
+        getViewport().getWorldHeight() - 32 - gameTechStatsGlyph.height);
+    getUiFont().setColor(Color.WHITE);
   }
 
   protected void removeAllEntities() {
