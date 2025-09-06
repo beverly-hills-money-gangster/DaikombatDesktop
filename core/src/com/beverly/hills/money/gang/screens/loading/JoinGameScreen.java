@@ -84,6 +84,12 @@ public class JoinGameScreen extends ReconnectableScreen {
 
 
   @Override
+  public void dispose() {
+    super.dispose();
+    gameConnection.disconnect();
+  }
+
+  @Override
   protected void onEscape() {
     gameConnection.disconnect();
   }

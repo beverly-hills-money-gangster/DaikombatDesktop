@@ -164,6 +164,12 @@ public class ConnectServerScreen extends ReconnectableScreen {
   }
 
   @Override
+  public void dispose() {
+    super.dispose();
+    Optional.ofNullable(gameConnectionRef.get()).ifPresent(GlobalGameConnection::disconnect);
+  }
+
+  @Override
   protected String getBaseLoadingMessage() {
     return Constants.SERVER_CONNECT;
   }

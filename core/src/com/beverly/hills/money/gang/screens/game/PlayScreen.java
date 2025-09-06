@@ -669,6 +669,11 @@ public class PlayScreen extends GameScreen {
             + glyphNetworkStats.height / 2);
   }
 
+  @Override
+  public void dispose() {
+    gameConnection.disconnect();
+    voiceChatPlayer.stop();
+  }
 
   private void renderDeadGui() {
     float halfViewportWidth = getViewport().getWorldWidth() / 2f;

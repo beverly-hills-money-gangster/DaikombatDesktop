@@ -110,6 +110,11 @@ public class RespawnScreen extends AbstractLoadingScreen {
   }
 
   @Override
+  public void dispose() {
+    gameConnection.disconnect();
+  }
+
+  @Override
   protected void onEscape() {
     gameConnection.disconnect();
   }

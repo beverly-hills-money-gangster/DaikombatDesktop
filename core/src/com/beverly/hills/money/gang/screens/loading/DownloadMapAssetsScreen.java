@@ -61,6 +61,12 @@ public class DownloadMapAssetsScreen extends AbstractLoadingScreen {
   }
 
   @Override
+  public void dispose() {
+    super.dispose();
+    Optional.ofNullable(gameConnectionRef.get()).ifPresent(GameConnection::disconnect);
+  }
+
+  @Override
   protected void onLoadingRender(final float delta) {
     if (StringUtils.isNotBlank(errorMessage.get())) {
       removeAllEntities();

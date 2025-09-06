@@ -228,6 +228,12 @@ public class GameOverScreen extends AbstractMainMenuScreen {
         new ErrorScreen(getGame(), ExceptionUtils.getRootCause(error).getMessage()));
   }
 
+  @Override
+  public void dispose() {
+    gameConnection.disconnect();
+    voiceChatPlayer.stop();
+  }
+
   private void handleExit(ServerResponse.GameEvent gameEvent) {
     if (gameEvent.getPlayer().getPlayerId() == gameBootstrapData.getPlayerId()) {
       return;

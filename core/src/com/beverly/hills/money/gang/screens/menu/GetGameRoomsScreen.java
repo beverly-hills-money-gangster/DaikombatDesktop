@@ -67,7 +67,6 @@ public class GetGameRoomsScreen extends AbstractLoadingScreen {
     Optional.ofNullable(gameConnectionRef.get()).ifPresent(GameConnection::disconnect);
   }
 
-
   @Override
   protected void onTimeout() {
     Optional.ofNullable(gameConnectionRef.get()).ifPresent(GameConnection::disconnect);
