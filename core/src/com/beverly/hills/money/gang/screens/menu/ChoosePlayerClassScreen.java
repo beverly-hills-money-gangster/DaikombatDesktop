@@ -20,9 +20,7 @@ import java.util.Locale;
 
 public class ChoosePlayerClassScreen extends AbstractMainMenuScreen {
 
-  private final BitmapFont guiFont64;
 
-  private final BitmapFont guiFont32;
   private final UserSettingSound boomSound1;
   private final UserSettingSound dingSound1;
 
@@ -42,8 +40,6 @@ public class ChoosePlayerClassScreen extends AbstractMainMenuScreen {
       final JoinGameData.JoinGameDataBuilder joinGameDataBuilder) {
     super(game);
     this.connectServerData = connectServerData;
-    guiFont64 = game.getAssMan().getFont(FontRegistry.FONT_64);
-    guiFont32 = game.getAssMan().getFont(FontRegistry.FONT_32);
     this.joinGameDataBuilder = joinGameDataBuilder;
     showLogo = false;
     boomSound1 = game.getAssMan().getUserSettingSound(SoundRegistry.BOOM_1);

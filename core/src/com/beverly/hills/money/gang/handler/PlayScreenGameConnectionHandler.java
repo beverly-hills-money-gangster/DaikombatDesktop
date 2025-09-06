@@ -171,7 +171,8 @@ public class PlayScreenGameConnectionHandler {
         createVector(gameEvent.getPlayer().getDirection()),
         playScreen, gameEvent.getPlayer().getPlayerName(),
         SkinUISelection.getSkinColor(gameEvent.getPlayer().getSkinColor()), createEnemyListeners(),
-        gameEvent.getPlayer().getSpeed(),
+        // move a little faster. otherwise I see a little lag even with 0 ping
+        gameEvent.getPlayer().getSpeed() * 1.1f,
         gameEvent.getPlayer().getHealth(),
         GamePlayerClass.createPlayerClass(gameEvent.getPlayer().getPlayerClass()),
         playScreen.getGameBootstrapData().getMaxVisibility());
@@ -295,7 +296,9 @@ public class PlayScreenGameConnectionHandler {
       case HEALTH -> PowerUpType.HEALTH;
       case BIG_AMMO -> PowerUpType.BIG_AMMO;
       case MEDIUM_AMMO -> PowerUpType.MEDIUM_AMMO;
-      default -> throw new IllegalArgumentException("Not supported power-up type " + powerUpType);
+      case BEAST -> PowerUpType.BEAST;
+      case UNRECOGNIZED ->
+          throw new IllegalArgumentException("Not supported power-up type " + powerUpType);
     };
   }
 
@@ -311,7 +314,7 @@ public class PlayScreenGameConnectionHandler {
           case PUNCH -> EnemyPlayerActionType.MOVE;
           case SHOTGUN, RAILGUN, MINIGUN, ROCKET_LAUNCHER, PLASMAGUN ->
               EnemyPlayerActionType.ATTACK;
-          default -> throw new IllegalArgumentException(
+          case UNRECOGNIZED -> throw new IllegalArgumentException(
               "Not supported weapon type " + gameEvent.getWeaponType());
         } : EnemyPlayerActionType.MOVE;
 
@@ -583,6 +586,7 @@ public class PlayScreenGameConnectionHandler {
                           : enemy.getSFXVolume())
                       .pan(enemy.getSFXPan())
                       .extraSound(enemy.getEnemyEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)
+                          || enemy.getEnemyEffects().isPowerUpActive(PowerUpType.BEAST)
                           ? playScreen.getGame()
                           .getAssMan()
                           .getUserSettingSound(SoundRegistry.ENEMY_QUAD_DAMAGE_ATTACK) : null)
@@ -624,6 +628,16 @@ public class PlayScreenGameConnectionHandler {
             .frequencyMls(1_000)
             .build()
     );
+    if (playScreen.getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.DEFENCE)
+        || playScreen.getPlayer().getPlayerEffects().isPowerUpActive(PowerUpType.BEAST)) {
+      new TimeLimitedSound(
+          playScreen.getGame().getAssMan().getUserSettingSound(SoundRegistry.DEFENCE_ON_HIT))
+          .play(TimeLimitSoundConf.builder()
+              .soundVolumeType(SoundVolumeType.HIGH_NORMAL)
+              .frequencyMls(750)
+              .build()
+          );
+    }
   }
 
   private void playHitSound() {

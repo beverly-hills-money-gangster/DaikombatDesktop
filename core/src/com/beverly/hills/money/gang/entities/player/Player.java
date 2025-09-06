@@ -1,5 +1,6 @@
 package com.beverly.hills.money.gang.entities.player;
 
+import static com.badlogic.gdx.Input.Keys.NUM_0;
 import static com.beverly.hills.money.gang.Configs.SPEED_BOOST;
 import static com.beverly.hills.money.gang.Constants.LONG_TIME_NO_MOVE_MLS;
 
@@ -33,7 +34,6 @@ import com.beverly.hills.money.gang.screens.ui.weapon.ScreenWeapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponRenderData;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponStats;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -68,7 +68,7 @@ public class Player extends Entity {
 
   private final Consumer<PlayerWeapon> onAttackListener;
 
-  private final Runnable onNoAmmo;
+  private final Consumer<ScreenWeapon> onNoAmmo;
 
   @Getter
   private final Consumer<ProjectileEnemy> onProjectileAttackHit;
@@ -122,14 +122,14 @@ public class Player extends Entity {
       final Map<Weapon, WeaponStats> weaponStats,
       final int maxVisibility,
       final GamePlayerClass playerClass,
-      final Runnable onNoAmmo) {
+      final Consumer<ScreenWeapon> onNoAmmo) {
     super(screen);
     this.playerClass = playerClass;
     this.onNoAmmo = onNoAmmo;
     this.enemiesRegistry = screen.getEnemiesRegistry();
     this.speed = speed * SPEED_BOOST;
     screenWeapon = new ScreenWeapon(screen.getGame().getAssMan(), weaponStats,
-        new ScreenWeaponStateFactoriesRegistry());
+        new ScreenWeaponStateFactoriesRegistry(), playerClass);
     this.onMovementListener = onMovementListener;
     this.onProjectileAttackHit = onProjectileAttackHit;
     this.onAttackListener = onAttackListener;
@@ -282,9 +282,6 @@ public class Player extends Entity {
         (Gdx.input.isButtonPressed(Input.Buttons.LEFT)
             || Gdx.input.isKeyPressed(Input.Keys.ALT_RIGHT))) {
       attack();
-    } else if (Gdx.input.isButtonPressed(Buttons.RIGHT)
-        || Gdx.input.isKeyPressed(Input.Keys.CONTROL_RIGHT)) {
-      punch();
     } else if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)
         || Gdx.input.isKeyJustPressed(Input.Keys.ALT_RIGHT)) {
       attack();
@@ -298,11 +295,14 @@ public class Player extends Entity {
     } else if (Gdx.input.isKeyJustPressed(Keys.Q)) {
       screenWeapon.changeToPrevWeapon();
     }
-    Arrays.stream(Weapon.values()).forEach(weapon -> {
-      if (Gdx.input.isKeyJustPressed(weapon.getSelectKeyCode())) {
-        screenWeapon.changeWeapon(weapon);
+
+    int weaponIndex = 0;
+    for (Weapon availableWeapon : screenWeapon.getAvailableWeapons()) {
+      if (Gdx.input.isKeyJustPressed(NUM_0 + weaponIndex)) {
+        screenWeapon.changeWeapon(availableWeapon);
       }
-    });
+      weaponIndex++;
+    }
 
     // otherwise the screen goes 180 degrees on startup if you don't move the mouse on main menu screens
     if (Math.abs(Gdx.input.getDeltaX()) < 500) {
@@ -332,7 +332,7 @@ public class Player extends Entity {
             .addEntity(projectileFactory.create(this, screenWeapon.getWeaponState(currentWeapon)));
       }
     } else if (!screenWeapon.hasAmmo()) {
-      onNoAmmo.run();
+      onNoAmmo.accept(screenWeapon);
     }
   }
 

@@ -122,7 +122,6 @@ public class ConnectServerScreen extends ReconnectableScreen {
                   gameRoom.getWeaponsInfoList(), gameRoom.getProjectileInfoList());
               LOG.info("Weapon stats {}", weaponStats);
               playerContextDataBuilder.weaponStats(weaponStats);
-              playerContextDataBuilder.matchId(gameRoom.getMatchId());
               removeAllEntities();
               LOG.info("Got server info. Try join the game");
               getGame().setScreen(new JoinGameScreen(getGame(),
@@ -155,15 +154,18 @@ public class ConnectServerScreen extends ReconnectableScreen {
               .maxAmmo(info.hasMaxAmmo() ? info.getMaxAmmo() : null)
               .build());
     });
-    if (weaponStats.size() != Weapon.values().length) {
-      throw new IllegalStateException("Not all weapons have max distance");
-    }
     return weaponStats;
   }
 
 
   @Override
   protected void onTimeout() {
+    Optional.ofNullable(gameConnectionRef.get()).ifPresent(GlobalGameConnection::disconnect);
+  }
+
+  @Override
+  public void dispose() {
+    super.dispose();
     Optional.ofNullable(gameConnectionRef.get()).ifPresent(GlobalGameConnection::disconnect);
   }
 

@@ -18,7 +18,12 @@ public interface Constants {
 
   int SHADOW_MARGIN = 16;
 
+  // TODO store configs in constants
   String PRESS_TAB_TO_SEE_LEADERBOARD = "PRESS TAB TO SEE LEADERBOARD";
+
+  String PRESS_V_TO_TALK = "PUSH V TO TALK";
+
+  String PRESS_TILDE_TO_CHAT = "PRESS TILDE(~) TO CHAT";
 
   String PRESS_R_TO_SEE_REFRESH = "PRESS R TO REFRESH";
 

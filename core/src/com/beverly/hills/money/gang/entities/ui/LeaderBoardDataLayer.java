@@ -174,5 +174,9 @@ public class LeaderBoardDataLayer {
     return sb.toString().toUpperCase(Locale.ENGLISH);
   }
 
+  public int size() {
+    return leaderBoardItems.size();
+  }
+
 
 }

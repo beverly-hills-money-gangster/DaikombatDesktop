@@ -4,16 +4,11 @@ import static com.beverly.hills.money.gang.Constants.DEFAULT_SELECTION_INDENT;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
-import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ControlsScreen extends AbstractMainMenuScreen {
 
@@ -26,10 +21,7 @@ public class ControlsScreen extends AbstractMainMenuScreen {
       "LEADERBOARD - TAB",
       "V - PUSH-TO-TALK",
       "Q, E, MOUSE SCROLL - NEXT/PREV WEAPON",
-      Arrays.stream(Weapon.values())
-          .map(weapon -> Keys.toString(weapon.getSelectKeyCode()))
-          .collect(Collectors.joining(", "))
-          + " - SELECT WEAPON");
+      "NUMBERS - SWITCH WEAPON");
   private final BitmapFont guiFont64;
 
   public ControlsScreen(final DaiKombatGame game) {

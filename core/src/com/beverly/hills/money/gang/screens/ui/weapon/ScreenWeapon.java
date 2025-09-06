@@ -13,21 +13,27 @@ import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.registry.ScreenWeaponStateFactoriesRegistry;
+import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import java.util.ArrayDeque;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 public class ScreenWeapon {
 
   private final Map<Weapon, Long> animationStart = new HashMap<>();
+
+  private final GamePlayerClass playerClass;
 
   protected final Map<Weapon, WeaponAmmo> ammo = new HashMap<>();
 
@@ -40,7 +46,7 @@ public class ScreenWeapon {
 
   private final Queue<Runnable> tasks = new ArrayDeque<>();
 
-  protected static final int CHANGE_WEAPON_DELAY_MLS = 75;
+  protected static final int CHANGE_WEAPON_DELAY_MLS = 100;
 
   private final TimeLimitedSound quadDamageAttack;
 
@@ -57,24 +63,28 @@ public class ScreenWeapon {
   public ScreenWeapon(
       final DaiKombatAssetsManager assetsManager,
       final Map<Weapon, WeaponStats> weaponStats,
-      final ScreenWeaponStateFactoriesRegistry screenWeaponStateFactoriesRegistry) {
+      final ScreenWeaponStateFactoriesRegistry screenWeaponStateFactoriesRegistry,
+      final GamePlayerClass playerClass) {
+    this.playerClass = playerClass;
     this.screenWeaponStateFactoriesRegistry = screenWeaponStateFactoriesRegistry;
     quadDamageAttack = new TimeLimitedSound(
         assetsManager.getUserSettingSound(SoundRegistry.QUAD_DAMAGE_ATTACK));
     weaponChangeSound = assetsManager.getUserSettingSound(SoundRegistry.WEAPON_CHANGE);
-    for (Weapon value : Weapon.values()) {
-      putWeapon(value, assetsManager, weaponStats);
-    }
-    setWeaponBeingUsed(Weapon.SHOTGUN);
+    registerWeapons(assetsManager, weaponStats);
+    // TODO check on server side that at least one weapon is available per class
+    setWeaponBeingUsed(getAvailableWeapons().stream()
+        .filter(weapon -> weapon != Weapon.GAUNTLET).findFirst().get());
   }
 
-  private void putWeapon(final Weapon weapon, final DaiKombatAssetsManager assetsManager,
-      final Map<Weapon, WeaponStats> weaponStats) {
-    weaponStates.put(weapon, screenWeaponStateFactoriesRegistry.get(weapon)
-        .create(assetsManager, weaponStats.get(weapon)));
-    Optional.ofNullable(weaponStats.get(weapon))
-        .map(WeaponStats::getMaxAmmo).ifPresent(
-            maxAmmo -> ammo.put(weapon, new WeaponAmmo(maxAmmo)));
+  private void registerWeapons(final DaiKombatAssetsManager assetsManager,
+      final Map<Weapon, WeaponStats> weaponsStats) {
+    weaponsStats.forEach((weapon, weaponStats) -> {
+      weaponStates.put(weapon, screenWeaponStateFactoriesRegistry.get(weapon)
+          .create(assetsManager, weaponStats));
+      Optional.ofNullable(weaponStats)
+          .map(WeaponStats::getMaxAmmo).ifPresent(
+              maxAmmo -> ammo.put(weapon, new WeaponAmmo(maxAmmo)));
+    });
   }
 
   public boolean punch(Player player) {
@@ -110,11 +120,30 @@ public class ScreenWeapon {
   }
 
   public void changeToNextWeapon() {
-    changeWeapon(weaponBeingUsed.nextWeapon());
+    if (weaponStates.size() <= 1) {
+      return;
+    }
+    var newWeapon = weaponBeingUsed.nextWeapon(weaponStates.keySet());
+    if (newWeapon == Weapon.GAUNTLET) {
+      newWeapon = newWeapon.nextWeapon(weaponStates.keySet());
+    }
+    changeWeapon(newWeapon);
+  }
+
+  public List<Weapon> getAvailableWeapons() {
+    return weaponStates.keySet().stream().sorted(Comparator.comparingInt(Enum::ordinal))
+        .collect(Collectors.toList());
   }
 
   public void changeToPrevWeapon() {
-    changeWeapon(weaponBeingUsed.prevWeapon());
+    if (weaponStates.size() <= 1) {
+      return;
+    }
+    var newWeapon = weaponBeingUsed.prevWeapon(weaponStates.keySet());
+    if (newWeapon == Weapon.GAUNTLET) {
+      newWeapon = newWeapon.prevWeapon(weaponStates.keySet());
+    }
+    changeWeapon(newWeapon);
   }
 
   public void setWeaponBeingUsed(Weapon weapon) {
@@ -144,7 +173,8 @@ public class ScreenWeapon {
     }
     return Optional.ofNullable(weaponStates.get(weaponBeingUsed))
         .map(currentActiveWeaponState
-            -> WeaponRenderData.builder().textureRegion(currentActiveWeaponState.getFireTexture())
+            -> WeaponRenderData.builder()
+            .textureRegion(currentActiveWeaponState.getFireTextures().get(playerClass))
             .distance(currentActiveWeaponState.getDistance())
             .center(currentActiveWeaponState.isCenter())
             .positioning(currentActiveWeaponState.getWeaponScreenPositioning()
@@ -162,7 +192,8 @@ public class ScreenWeapon {
       var state = weaponStates.get(weaponBeingUsed);
       animationStart.put(weaponBeingUsed, System.currentTimeMillis());
       state.getFireSound().play(Constants.DEFAULT_SHOOTING_VOLUME);
-      if (player.getPlayerEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)) {
+      if (player.getPlayerEffects().isPowerUpActive(PowerUpType.QUAD_DAMAGE)
+          || player.getPlayerEffects().isPowerUpActive(PowerUpType.BEAST)) {
         quadDamageAttack.play(TimeLimitSoundConf.builder()
             .soundVolumeType(SoundVolumeType.LOUD).frequencyMls(450)
             .build());
@@ -214,7 +245,7 @@ public class ScreenWeapon {
 
   private WeaponRenderData getIdleWeaponRendering() {
     var weaponState = weaponStates.get(weaponBeingUsed);
-    return WeaponRenderData.builder().textureRegion(weaponState.getIdleTexture())
+    return WeaponRenderData.builder().textureRegion(weaponState.getIdleTextures().get(playerClass))
         .distance(weaponState.getDistance())
         .center(weaponState.isCenter())
         .screenRatioX(weaponState.getScreenRatioX())

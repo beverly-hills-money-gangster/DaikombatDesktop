@@ -13,7 +13,7 @@ public interface WeaponMapper {
       case MINIGUN -> Weapon.MINIGUN;
       case ROCKET_LAUNCHER -> Weapon.ROCKET_LAUNCHER;
       case PLASMAGUN -> Weapon.PLASMAGUN;
-      default -> throw new IllegalArgumentException("Not supported weapon type");
+      case UNRECOGNIZED ->  throw new IllegalArgumentException("Not supported weapon type");
     };
   }
 
@@ -21,7 +21,7 @@ public interface WeaponMapper {
     return switch (projectileType) {
       case ROCKET -> WeaponProjectile.ROCKET;
       case PLASMA -> WeaponProjectile.PLASMA;
-      default -> throw new IllegalArgumentException("Not supported projectile type");
+      case UNRECOGNIZED ->  throw new IllegalArgumentException("Not supported projectile type");
     };
   }
 }

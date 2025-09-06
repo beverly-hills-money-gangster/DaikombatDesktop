@@ -13,6 +13,7 @@ public class ShotgunWeaponStateFactory extends ScreenWeaponStateFactory {
 
   @Override
   public WeaponState create(DaiKombatAssetsManager assetsManager, WeaponStats weaponStats) {
+    System.out.println(assetsManager);
     return WeaponState.builder()
         .distance(weaponStats.getMaxDistance())
         .fireSound(assetsManager.getUserSettingSound(SoundRegistry.PLAYER_SHOTGUN))
@@ -23,10 +24,12 @@ public class ShotgunWeaponStateFactory extends ScreenWeaponStateFactory {
         .center(false)
         .backoffDelayMls(getBackoffDelay(weaponStats, GUNSHOT_ANIMATION_MLS))
         .animationDelayMls(GUNSHOT_ANIMATION_MLS)
-        .fireTexture(assetsManager.getTextureRegion(TexturesRegistry.GUN_SHOOT, 0, 0,
-            149, 117 - 10))
-        .idleTexture(assetsManager.getTextureRegion(TexturesRegistry.GUN_IDLE, 0, 0,
-            149, 117 - 10))
+        .fireTextures(sameTextureForAllClasses(
+            assetsManager.getTextureRegion(TexturesRegistry.GUN_SHOOT, 0, 0,
+                149, 117 - 10)))
+        .idleTextures(
+            sameTextureForAllClasses(assetsManager.getTextureRegion(TexturesRegistry.GUN_IDLE, 0, 0,
+                149, 117 - 10)))
         .weaponScreenPositioning(
             animationTime -> new Vector2(0, -GUNSHOT_ANIMATION_MLS + animationTime))
         .build();

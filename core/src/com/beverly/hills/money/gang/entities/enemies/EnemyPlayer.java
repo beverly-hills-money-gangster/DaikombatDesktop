@@ -52,7 +52,6 @@ public class EnemyPlayer extends Enemy {
   @Getter
   private final String name;
 
-
   @Getter
   private final SkinUISelection skinUISelection;
 
@@ -125,7 +124,7 @@ public class EnemyPlayer extends Enemy {
     lastActionReceivedTimeMls = System.currentTimeMillis();
   }
 
-  public void talking(float avgAmpl) {
+  public void talking() {
     if (!getEnemyEffects().isPowerUpActive(PowerUpType.INVISIBILITY) && visible) {
       enemyPlayerVoiceChatEffect.makeVisible();
     }

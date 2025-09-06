@@ -3,6 +3,8 @@ package com.beverly.hills.money.gang.screens.ui.weapon;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
+import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
+import java.util.Map;
 import java.util.function.Function;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,9 +20,9 @@ public class WeaponState {
   private final UserSettingSound fireSound;
   private final UserSettingSound hitTargetSound;
   @NonNull
-  private final TextureRegion fireTexture;
+  private final Map<GamePlayerClass, TextureRegion> fireTextures;
   @NonNull
-  private final TextureRegion idleTexture;
+  private final Map<GamePlayerClass, TextureRegion> idleTextures;
   private final int animationDelayMls;
   private final float screenRatioX;
   private final float screenRatioY;

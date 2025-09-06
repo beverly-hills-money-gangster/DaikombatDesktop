@@ -14,8 +14,8 @@ import com.beverly.hills.money.gang.proto.PushGameEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand.GameEventType;
 import com.beverly.hills.money.gang.proto.Vector;
 import com.beverly.hills.money.gang.proto.WeaponType;
-import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import com.beverly.hills.money.gang.screens.data.GameBootstrapData;
+import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import com.beverly.hills.money.gang.screens.ui.EnemyAim;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -53,7 +53,6 @@ public class PlayerFactory {
 
           var commandBuilder = PushGameEventCommand.newBuilder()
               .setGameId(gameBootstrapData.getCompleteJoinGameData().getGameRoomId())
-              .setMatchId(gameBootstrapData.getMatchId())
               .setSequence(screen.getActionSequence().incrementAndGet())
               .setPingMls(
                   Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
@@ -105,7 +104,6 @@ public class PlayerFactory {
 
           var commandBuilder = PushGameEventCommand.newBuilder()
               .setGameId(gameBootstrapData.getCompleteJoinGameData().getGameRoomId())
-              .setMatchId(gameBootstrapData.getMatchId())
               .setSequence(screen.getActionSequence().incrementAndGet())
               .setPingMls(
                   Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
@@ -137,10 +135,10 @@ public class PlayerFactory {
         gameBootstrapData.getWeaponStats(),
         gameBootstrapData.getMaxVisibility(),
         gameBootstrapData.getCompleteJoinGameData().getJoinGameData().getGamePlayerClass()
-        , () -> new TimeLimitedSound(
-        screen.getGame().getAssMan().getUserSettingSound(SoundRegistry.NO_AMMO)).play(
-        TimeLimitSoundConf.builder().soundVolumeType(SoundVolumeType.NORMAL).frequencyMls(250)
-            .build()));
+        , weapon -> new TimeLimitedSound(
+            screen.getGame().getAssMan().getUserSettingSound(SoundRegistry.NO_AMMO)).play(
+            TimeLimitSoundConf.builder().soundVolumeType(SoundVolumeType.NORMAL).frequencyMls(250)
+                .build()));
   }
 
   private static ProjectileType mapProjectileToWeaponType(Projectile projectile) {
