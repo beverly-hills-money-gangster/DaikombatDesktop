@@ -1,7 +1,7 @@
 package com.beverly.hills.money.gang.screens;
 
-import static com.beverly.hills.money.gang.Constants.HUD_ALPHA_CHANNEL;
-import static com.beverly.hills.money.gang.Constants.SHADOW_MARGIN;
+import static com.beverly.hills.money.gang.configs.Constants.HUD_ALPHA_CHANNEL;
+import static com.beverly.hills.money.gang.configs.Constants.SHADOW_MARGIN;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -13,7 +13,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.beverly.hills.money.gang.Configs;
+import com.beverly.hills.money.gang.configs.EnvConfigs;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.entities.Entity;
@@ -58,7 +58,7 @@ public abstract class GameScreen implements Screen {
   }
 
   public BitmapFont getUiFont() {
-    if (Configs.DEV_MODE) {
+    if (EnvConfigs.DEV_MODE) {
       return guiFont32;
     } else {
       return guiFont64;

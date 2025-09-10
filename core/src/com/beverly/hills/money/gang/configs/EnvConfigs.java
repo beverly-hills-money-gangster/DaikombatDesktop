@@ -1,9 +1,9 @@
-package com.beverly.hills.money.gang;
+package com.beverly.hills.money.gang.configs;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
-public interface Configs {
+public interface EnvConfigs {
 
   String HOST = StringUtils.defaultIfBlank(System.getenv("DESKTOP_GAME_HOST"), "64.226.66.192");
 

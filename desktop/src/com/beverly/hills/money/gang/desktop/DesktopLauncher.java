@@ -3,8 +3,8 @@ package com.beverly.hills.money.gang.desktop;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import com.beverly.hills.money.gang.Configs;
-import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.configs.EnvConfigs;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 
 
@@ -20,7 +20,7 @@ public class DesktopLauncher {
     config.setInitialBackgroundColor(Constants.FOG_COLOR);
     config.useVsync(true);
 
-    if (Configs.DEV_MODE) {
+    if (EnvConfigs.DEV_MODE) {
       config.setWindowSizeLimits(1024, 768, 1024, 768);
       config.setResizable(false);
       config.setWindowedMode(1024, 768);

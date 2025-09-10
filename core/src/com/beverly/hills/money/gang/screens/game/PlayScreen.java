@@ -1,13 +1,13 @@
 package com.beverly.hills.money.gang.screens.game;
 
-import static com.beverly.hills.money.gang.Constants.BLOOD_OVERLAY_ALPHA_SWITCH;
-import static com.beverly.hills.money.gang.Constants.DEAD_SCREEN_INPUT_DELAY_MLS;
-import static com.beverly.hills.money.gang.Constants.HUD_ALPHA_CHANNEL;
-import static com.beverly.hills.money.gang.Constants.PRESS_TAB_TO_SEE_LEADERBOARD;
-import static com.beverly.hills.money.gang.Constants.PRESS_TILDE_TO_CHAT;
-import static com.beverly.hills.money.gang.Constants.PRESS_V_TO_TALK;
-import static com.beverly.hills.money.gang.Constants.SHADOW_MARGIN;
-import static com.beverly.hills.money.gang.Constants.TAUNT_DELAY_MLS;
+import static com.beverly.hills.money.gang.configs.Constants.BLOOD_OVERLAY_ALPHA_SWITCH;
+import static com.beverly.hills.money.gang.configs.Constants.DEAD_SCREEN_INPUT_DELAY_MLS;
+import static com.beverly.hills.money.gang.configs.Constants.HUD_ALPHA_CHANNEL;
+import static com.beverly.hills.money.gang.configs.Constants.PRESS_TO_SEE_LEADERBOARD;
+import static com.beverly.hills.money.gang.configs.Constants.PRESS_TO_CHAT;
+import static com.beverly.hills.money.gang.configs.Constants.PRESS_TO_TALK;
+import static com.beverly.hills.money.gang.configs.Constants.SHADOW_MARGIN;
+import static com.beverly.hills.money.gang.configs.Constants.TAUNT_DELAY_MLS;
 import static com.beverly.hills.money.gang.screens.ui.taunt.GameTaunt.TAUNTS_SEQ;
 
 import com.badlogic.gdx.Gdx;
@@ -23,8 +23,8 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
-import com.beverly.hills.money.gang.Configs;
-import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.configs.EnvConfigs;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
@@ -32,6 +32,7 @@ import com.beverly.hills.money.gang.assets.managers.sound.SoundQueue;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound.SoundConf;
+import com.beverly.hills.money.gang.configs.KeyMappings;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.item.PowerUp;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
@@ -238,6 +239,7 @@ public class PlayScreen extends GameScreen {
     Optional.ofNullable(gameBootstrapData.getLastWeapon())
         .ifPresent(weapon -> getPlayer().setWeapon(weapon));
     chatBox = new ChatBox(gameBootstrapData, gameConnection, this);
+    this.chatBox.greetPlayers(uiLeaderBoard.size());
   }
 
   @Override
@@ -330,7 +332,7 @@ public class PlayScreen extends GameScreen {
         if (showGuiMenu) {
           handleAliveGuiInput();
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.TAB)) {
+        if (Gdx.input.isKeyPressed(KeyMappings.LEADERBOARD.getKey())) {
           showLeaderBoard = true;
         }
         if (Gdx.input.isKeyJustPressed(Keys.P)) {
@@ -340,7 +342,7 @@ public class PlayScreen extends GameScreen {
         if (Gdx.input.isKeyJustPressed(Keys.N)) {
           showNetworkStats = !showNetworkStats;
         }
-        if (Gdx.input.isKeyJustPressed(Keys.X)
+        if (Gdx.input.isKeyJustPressed(KeyMappings.TAUNT.getKey())
             && System.currentTimeMillis() > lastTauntTime + TAUNT_DELAY_MLS) {
           handleTaunt();
         }
@@ -369,7 +371,7 @@ public class PlayScreen extends GameScreen {
   }
 
   private void handleAliveGuiInput() {
-    if (Configs.DEV_MODE) {
+    if (EnvConfigs.DEV_MODE) {
       Gdx.input.setCursorCatched(false);
     }
     if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
@@ -397,7 +399,7 @@ public class PlayScreen extends GameScreen {
       return;
     }
     showLeaderBoard = false;
-    if (Gdx.input.isKeyPressed(Input.Keys.TAB)) {
+    if (Gdx.input.isKeyPressed(KeyMappings.LEADERBOARD.getKey())) {
       showLeaderBoard = true;
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
       deadPlayUISelectionUISelection.next();
@@ -580,11 +582,11 @@ public class PlayScreen extends GameScreen {
         if (getPlayer().isDead()) {
           renderDeadGui();
           var hints = new ArrayList<String>();
-          hints.add(PRESS_TAB_TO_SEE_LEADERBOARD);
+          hints.add(PRESS_TO_SEE_LEADERBOARD);
           if (!chatBox.isChatMode()) {
-            hints.add(PRESS_TILDE_TO_CHAT);
+            hints.add(PRESS_TO_CHAT);
             if (!voiceChatPlayer.isVoiceChatMode()) {
-              hints.add(PRESS_V_TO_TALK);
+              hints.add(PRESS_TO_TALK);
             }
           }
           renderHints(hints);

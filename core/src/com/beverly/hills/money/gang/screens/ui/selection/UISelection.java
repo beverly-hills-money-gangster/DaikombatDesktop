@@ -2,7 +2,7 @@ package com.beverly.hills.money.gang.screens.ui.selection;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.screens.GameScreen;
 import java.util.List;
 import lombok.Getter;

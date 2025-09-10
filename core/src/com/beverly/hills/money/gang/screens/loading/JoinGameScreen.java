@@ -1,6 +1,6 @@
 package com.beverly.hills.money.gang.screens.loading;
 
-import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.config.ClientConfig;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;

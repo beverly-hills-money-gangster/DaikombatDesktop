@@ -1,15 +1,15 @@
 package com.beverly.hills.money.gang.screens.ui.audio;
 
-import static com.beverly.hills.money.gang.Constants.HUD_ALPHA_CHANNEL;
+import static com.beverly.hills.money.gang.configs.Constants.HUD_ALPHA_CHANNEL;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.audio.AudioDevice;
 import com.badlogic.gdx.audio.AudioRecorder;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
+import com.beverly.hills.money.gang.configs.KeyMappings;
 import com.beverly.hills.money.gang.entity.VoiceChatPayload;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.network.GlobalGameConnection.VoiceChatConfigs;
@@ -94,9 +94,9 @@ public class VoiceChatPlayer {
               continue;
             }
           }
+          recordedVoiceLastTime.set(System.currentTimeMillis());
           audioRecorder.read(shortPCM, 0, shortPCM.length);
           normalizedAvgAmplitude.set(Math.min(1, getNormalizedAvgAmpl(shortPCM) * 16f));
-          recordedVoiceLastTime.set(System.currentTimeMillis());
           gameConnection.write(
               VoiceChatPayload.builder().playerId(playerId)
                   .gameId(gameId)
@@ -159,11 +159,11 @@ public class VoiceChatPlayer {
   }
 
   public void handleInput() {
-    recordAudio(Gdx.input.isKeyPressed(Keys.V));
+    recordAudio(isVoiceChatMode());
   }
 
   public boolean isVoiceChatMode() {
-    return Gdx.input.isKeyPressed(Keys.V);
+    return Gdx.input.isKeyPressed(KeyMappings.TALK.getKey());
   }
 
   public void renderGui() {

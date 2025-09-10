@@ -1,6 +1,6 @@
 package com.beverly.hills.money.gang.assets.managers.sound;
 
-import static com.beverly.hills.money.gang.Constants.TIME_LIMITED_SOUND_FREQ_MLS;
+import static com.beverly.hills.money.gang.configs.Constants.TIME_LIMITED_SOUND_FREQ_MLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;

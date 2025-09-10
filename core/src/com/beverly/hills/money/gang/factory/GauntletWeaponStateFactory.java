@@ -1,6 +1,6 @@
 package com.beverly.hills.money.gang.factory;
 
-import static com.beverly.hills.money.gang.Constants.PUNCH_ANIMATION_MLS;
+import static com.beverly.hills.money.gang.configs.Constants.PUNCH_ANIMATION_MLS;
 
 import com.badlogic.gdx.math.Vector2;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;

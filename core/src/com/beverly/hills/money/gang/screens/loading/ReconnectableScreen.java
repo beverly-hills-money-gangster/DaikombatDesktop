@@ -1,7 +1,7 @@
 package com.beverly.hills.money.gang.screens.loading;
 
-import com.beverly.hills.money.gang.Configs;
-import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.configs.EnvConfigs;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.screens.data.CompleteJoinGameData;
@@ -44,7 +44,7 @@ public abstract class ReconnectableScreen extends AbstractLoadingScreen {
       final GlobalGameConnection gameConnection, final CompleteJoinGameData completeJoinGameData) {
     LOG.info("Reconnect. Error is '{}'", errorMessage);
     reconnectionRunnable = () -> {
-      if (connectionTrial >= Configs.MAX_RECONNECTIONS) {
+      if (connectionTrial >= EnvConfigs.MAX_RECONNECTIONS) {
         LOG.info("Go to error screen");
         removeAllEntities();
         getGame().setScreen(

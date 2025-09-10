@@ -1,6 +1,6 @@
 package com.beverly.hills.money.gang.entities.enemies;
 
-import static com.beverly.hills.money.gang.Constants.SPAWN_ANIMATION_MLS;
+import static com.beverly.hills.money.gang.configs.Constants.SPAWN_ANIMATION_MLS;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Environment;

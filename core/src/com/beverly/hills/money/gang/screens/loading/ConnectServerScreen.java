@@ -1,7 +1,8 @@
 package com.beverly.hills.money.gang.screens.loading;
 
-import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
+import com.beverly.hills.money.gang.configs.EnvConfigs;
 import com.beverly.hills.money.gang.entity.HostPort;
 import com.beverly.hills.money.gang.network.GameConnection;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
@@ -80,7 +81,7 @@ public class ConnectServerScreen extends ReconnectableScreen {
   private List<SecondaryGameConnection> createSecondaryConnections(HostPort hostPort)
       throws IOException {
     List<SecondaryGameConnection> secondaryGameConnections = new ArrayList<>();
-    for (int i = 0; i < com.beverly.hills.money.gang.Configs.SECONDARY_CONNECTIONS_TO_OPEN; i++) {
+    for (int i = 0; i < EnvConfigs.SECONDARY_CONNECTIONS_TO_OPEN; i++) {
       secondaryGameConnections.add(new SecondaryGameConnection(hostPort));
     }
     return secondaryGameConnections;

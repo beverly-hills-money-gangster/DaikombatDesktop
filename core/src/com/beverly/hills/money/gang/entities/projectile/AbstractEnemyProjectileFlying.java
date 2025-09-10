@@ -1,7 +1,7 @@
 package com.beverly.hills.money.gang.entities.projectile;
 
-import static com.beverly.hills.money.gang.Constants.HALF_UNIT;
-import static com.beverly.hills.money.gang.Constants.PROJECTILE_SPEED;
+import static com.beverly.hills.money.gang.configs.Constants.HALF_UNIT;
+import static com.beverly.hills.money.gang.configs.Constants.PROJECTILE_SPEED;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -14,7 +14,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;

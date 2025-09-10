@@ -1,18 +1,19 @@
 package com.beverly.hills.money.gang.screens.game;
 
-import static com.beverly.hills.money.gang.Constants.DEFAULT_MUSIC_VOLUME;
-import static com.beverly.hills.money.gang.Constants.PRESS_TAB_TO_SEE_LEADERBOARD;
-import static com.beverly.hills.money.gang.Constants.PRESS_TILDE_TO_CHAT;
-import static com.beverly.hills.money.gang.Constants.PRESS_V_TO_TALK;
+import static com.beverly.hills.money.gang.configs.Constants.DEFAULT_MUSIC_VOLUME;
+import static com.beverly.hills.money.gang.configs.Constants.PRESS_TO_SEE_LEADERBOARD;
+import static com.beverly.hills.money.gang.configs.Constants.PRESS_TO_CHAT;
+import static com.beverly.hills.money.gang.configs.Constants.PRESS_TO_TALK;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
+import com.beverly.hills.money.gang.configs.KeyMappings;
 import com.beverly.hills.money.gang.entities.enemies.EnemyTextures;
 import com.beverly.hills.money.gang.entities.ui.LeaderBoardDataLayer;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
@@ -73,7 +74,6 @@ public class GameOverScreen extends AbstractMainMenuScreen {
       final GameBootstrapData gameBootstrapData,
       final GlobalGameConnection gameConnection) {
     super(game);
-    LOG.info("Game over");
     this.playersOnline = uiLeaderBoard.size();
     this.gameConnection = gameConnection;
     this.gameBootstrapData = gameBootstrapData;
@@ -101,6 +101,7 @@ public class GameOverScreen extends AbstractMainMenuScreen {
           // do nothing
         });
     this.chatBox = new ChatBox(gameBootstrapData, gameConnection, this);
+    this.chatBox.greetPlayers(uiLeaderBoard.size());
   }
 
   @Override
@@ -111,7 +112,7 @@ public class GameOverScreen extends AbstractMainMenuScreen {
   @Override
   public void handleInput(final float delta) {
     showLeaderBoard = false;
-    if (Gdx.input.isKeyPressed(Keys.TAB)) {
+    if (Gdx.input.isKeyPressed(KeyMappings.LEADERBOARD.getKey())) {
       showLeaderBoard = true;
       return;
     } else if (chatBox.handleChatInput()) {
@@ -159,15 +160,15 @@ public class GameOverScreen extends AbstractMainMenuScreen {
           leaderBoard, getViewport().getWorldWidth() / 2f - glyphLayoutRecSentMessages.width / 2f,
           getViewport().getWorldHeight() - 128);
     } else {
-      hints.add(PRESS_TAB_TO_SEE_LEADERBOARD);
+      hints.add(PRESS_TO_SEE_LEADERBOARD);
       chatBox.renderChat();
       winnerSkinSelectAnimation.render();
       if (!chatBox.isChatMode()) {
-        hints.add(PRESS_TILDE_TO_CHAT);
+        hints.add(PRESS_TO_CHAT);
         if (voiceChatPlayer.isVoiceChatMode()) {
           voiceChatPlayer.renderGui();
         } else {
-          hints.add(PRESS_V_TO_TALK);
+          hints.add(PRESS_TO_TALK);
         }
       }
 

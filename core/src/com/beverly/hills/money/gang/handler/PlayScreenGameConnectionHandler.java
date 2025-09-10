@@ -1,11 +1,11 @@
 package com.beverly.hills.money.gang.handler;
 
-import static com.beverly.hills.money.gang.Constants.DEFAULT_ENEMY_Y;
+import static com.beverly.hills.money.gang.configs.Constants.DEFAULT_ENEMY_Y;
 import static com.beverly.hills.money.gang.proto.WeaponType.PUNCH;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;

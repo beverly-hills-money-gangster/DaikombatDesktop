@@ -1,7 +1,7 @@
 package com.beverly.hills.money.gang.maps;
 
 
-import static com.beverly.hills.money.gang.Constants.FLOAT_COMPARE_EPS;
+import static com.beverly.hills.money.gang.configs.Constants.FLOAT_COMPARE_EPS;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.MapLayers;
@@ -13,7 +13,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
 import com.beverly.hills.money.gang.cell.Cell3D;
@@ -25,7 +25,6 @@ import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.function.Predicate;
 import org.apache.commons.math3.util.Precision;
 
 public class MapBuilder {

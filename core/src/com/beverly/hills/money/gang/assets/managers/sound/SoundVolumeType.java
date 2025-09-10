@@ -1,6 +1,6 @@
 package com.beverly.hills.money.gang.assets.managers.sound;
 
-import static com.beverly.hills.money.gang.Constants.SFX_VOLUME_COEFFICIENT;
+import static com.beverly.hills.money.gang.configs.Constants.SFX_VOLUME_COEFFICIENT;
 
 import lombok.Getter;
 

@@ -1,6 +1,6 @@
 package com.beverly.hills.money.gang.factory;
 
-import static com.beverly.hills.money.gang.Constants.HALF_UNIT;
+import static com.beverly.hills.money.gang.configs.Constants.HALF_UNIT;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;

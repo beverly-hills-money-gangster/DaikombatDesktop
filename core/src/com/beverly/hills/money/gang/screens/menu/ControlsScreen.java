@@ -1,6 +1,6 @@
 package com.beverly.hills.money.gang.screens.menu;
 
-import static com.beverly.hills.money.gang.Constants.DEFAULT_SELECTION_INDENT;
+import static com.beverly.hills.money.gang.configs.Constants.DEFAULT_SELECTION_INDENT;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
+import com.beverly.hills.money.gang.configs.KeyMappings;
 import java.util.List;
 
 public class ControlsScreen extends AbstractMainMenuScreen {
@@ -16,12 +17,13 @@ public class ControlsScreen extends AbstractMainMenuScreen {
       "MOVE - WASD",
       "SHOOT - LEFT MOUSE CLICK/RIGHT ALT",
       "PUNCH - RIGHT MOUSE CLICK/RIGHT CTRL",
-      "CHAT - TILDE",
-      "X - TAUNT",
-      "LEADERBOARD - TAB",
-      "V - PUSH-TO-TALK",
-      "Q, E, MOUSE SCROLL - NEXT/PREV WEAPON",
-      "NUMBERS - SWITCH WEAPON");
+      "CHAT - " + KeyMappings.CHAT.getKeyName(),
+      "TAUNT - " + KeyMappings.TAUNT.getKeyName(),
+      "LEADERBOARD - " + KeyMappings.LEADERBOARD.getKeyName(),
+      "PUSH-TO-TALK - " + KeyMappings.TALK.getKeyName(),
+      "NEXT/PREV WEAPON - MOUSE SCROLL, " + KeyMappings.NEXT_WEAPONS.getKeyName() + "/"
+          + KeyMappings.PREV_WEAPONS.getKeyName(),
+      "SWITCH WEAPON - NUMBERS");
   private final BitmapFont guiFont64;
 
   public ControlsScreen(final DaiKombatGame game) {

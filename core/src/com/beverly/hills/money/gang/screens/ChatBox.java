@@ -1,21 +1,21 @@
 package com.beverly.hills.money.gang.screens;
 
-import static com.beverly.hills.money.gang.Constants.MAX_CHAT_MSG_LEN;
-import static com.beverly.hills.money.gang.Constants.PRESS_TILDE_TO_CHAT;
+import static com.beverly.hills.money.gang.configs.Constants.MAX_CHAT_MSG_LEN;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.beverly.hills.money.gang.Constants;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
+import com.beverly.hills.money.gang.configs.Constants;
+import com.beverly.hills.money.gang.configs.KeyMappings;
 import com.beverly.hills.money.gang.input.TextInputProcessor;
 import com.beverly.hills.money.gang.log.ChatLog;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.proto.PushChatEventCommand;
 import com.beverly.hills.money.gang.screens.data.GameBootstrapData;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -58,7 +58,7 @@ public class ChatBox {
 
   public boolean handleChatInput() {
 
-    if (Gdx.input.isKeyJustPressed(Input.Keys.valueOf("`"))) {
+    if (Gdx.input.isKeyJustPressed(KeyMappings.CHAT.getKey())) {
       chatMode = !chatMode;
     }
     if (chatMode) {
@@ -106,5 +106,21 @@ public class ChatBox {
     }
   }
 
+  public void greetPlayers(final int players) {
+    Optional.ofNullable(getGreeting(players)).ifPresent(chatLog::addChatLog);
+  }
+
+  static String getGreeting(int players) {
+    if (players == 0) {
+      return null;
+    }
+    String greeting;
+    if (players == 1) {
+      greeting = "JOINED CHAT.";
+    } else {
+      greeting = "YOU + " + (players - 1) + " MORE IN CHAT.";
+    }
+    return greeting + " PRESS " + KeyMappings.CHAT.getKeyName() + " TO TEXT";
+  }
 
 }

@@ -1,6 +1,6 @@
 package com.beverly.hills.money.gang.entities.projectile;
 
-import static com.beverly.hills.money.gang.Constants.PROJECTILE_SPEED;
+import static com.beverly.hills.money.gang.configs.Constants.PROJECTILE_SPEED;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -13,7 +13,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.animation.Animation;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
@@ -24,7 +24,6 @@ import com.beverly.hills.money.gang.entities.player.Player.ProjectileEnemy;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
-import com.beverly.hills.money.gang.screens.GameScreen;
 import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponProjectile;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponState;
