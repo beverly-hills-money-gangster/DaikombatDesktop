@@ -1,6 +1,6 @@
 package com.beverly.hills.money.gang.screens.menu;
 
-import static com.beverly.hills.money.gang.Constants.DEFAULT_SELECTION_INDENT;
+import static com.beverly.hills.money.gang.configs.Constants.DEFAULT_SELECTION_INDENT;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;

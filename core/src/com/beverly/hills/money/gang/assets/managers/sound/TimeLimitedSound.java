@@ -1,6 +1,6 @@
 package com.beverly.hills.money.gang.assets.managers.sound;
 
-import static com.beverly.hills.money.gang.Constants.TIME_LIMITED_SOUND_FREQ_MLS;
+import static com.beverly.hills.money.gang.configs.Constants.TIME_LIMITED_SOUND_FREQ_MLS;
 
 import com.badlogic.gdx.audio.Sound;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound.SoundConf;

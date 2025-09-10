@@ -1,8 +1,8 @@
 package com.beverly.hills.money.gang.entities.player;
 
 import static com.badlogic.gdx.Input.Keys.NUM_0;
-import static com.beverly.hills.money.gang.Configs.SPEED_BOOST;
-import static com.beverly.hills.money.gang.Constants.LONG_TIME_NO_MOVE_MLS;
+import static com.beverly.hills.money.gang.configs.EnvConfigs.SPEED_BOOST;
+import static com.beverly.hills.money.gang.configs.Constants.LONG_TIME_NO_MOVE_MLS;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -13,7 +13,8 @@ import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.configs.Constants;
+import com.beverly.hills.money.gang.configs.KeyMappings;
 import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.entities.door.Door;
 import com.beverly.hills.money.gang.entities.door.Door.DoorState;
@@ -290,9 +291,9 @@ public class Player extends Entity {
       punch();
     }
 
-    if (Gdx.input.isKeyJustPressed(Keys.E)) {
+    if (Gdx.input.isKeyJustPressed(KeyMappings.NEXT_WEAPONS.getKey())) {
       screenWeapon.changeToNextWeapon();
-    } else if (Gdx.input.isKeyJustPressed(Keys.Q)) {
+    } else if (Gdx.input.isKeyJustPressed(KeyMappings.PREV_WEAPONS.getKey())) {
       screenWeapon.changeToPrevWeapon();
     }
 

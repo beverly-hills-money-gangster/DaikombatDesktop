@@ -12,7 +12,7 @@ import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
-import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import lombok.Getter;
 

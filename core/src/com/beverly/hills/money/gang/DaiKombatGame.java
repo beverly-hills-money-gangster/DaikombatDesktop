@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
+import com.beverly.hills.money.gang.configs.Constants;
+import com.beverly.hills.money.gang.configs.EnvConfigs;
 import com.beverly.hills.money.gang.filters.OverlapFilterManager;
 import com.beverly.hills.money.gang.pref.UserPreference;
 import com.beverly.hills.money.gang.rect.RectManager;
@@ -18,7 +20,6 @@ import com.beverly.hills.money.gang.screens.menu.MainMenuScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
 import com.beverly.hills.money.gang.utils.EntityManager;
 import java.util.Optional;
-import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.SystemUtils;
@@ -55,7 +56,7 @@ public class DaiKombatGame extends Game {
     UserPreference userPreference = new UserPreference();
     UserSettingsUISelection.MOUSE_SENS.getState().setSetting(userPreference.getMouseSensitivity());
     UserSettingsUISelection.SOUND.getState().setSetting(userPreference.getSoundVolume());
-    if (!Configs.DEV_MODE && SystemUtils.IS_OS_WINDOWS) {
+    if (!EnvConfigs.DEV_MODE && SystemUtils.IS_OS_WINDOWS) {
       // support alt+tab for full screen
       Gdx.graphics.setUndecorated(true);
       Graphics.DisplayMode displayMode = Gdx.graphics.getDisplayMode();

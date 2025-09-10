@@ -1,8 +1,8 @@
 package com.beverly.hills.money.gang.entities.enemies;
 
-import static com.beverly.hills.money.gang.Constants.DEFAULT_ENEMY_Y;
-import static com.beverly.hills.money.gang.Constants.MAX_ENEMY_IDLE_TIME_MLS;
-import static com.beverly.hills.money.gang.Constants.SPAWN_ANIMATION_MLS;
+import static com.beverly.hills.money.gang.configs.Constants.DEFAULT_ENEMY_Y;
+import static com.beverly.hills.money.gang.configs.Constants.MAX_ENEMY_IDLE_TIME_MLS;
+import static com.beverly.hills.money.gang.configs.Constants.SPAWN_ANIMATION_MLS;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -16,14 +16,13 @@ import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.entities.effect.EnemyPlayerVoiceChatEffect;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
 import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
-import com.beverly.hills.money.gang.screens.GameScreen;
 import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;

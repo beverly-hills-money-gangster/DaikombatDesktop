@@ -1,11 +1,10 @@
 package com.beverly.hills.money.gang.entities;
 
 import com.badlogic.gdx.math.Vector2;
-import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.rect.RectanglePlus;
-import com.beverly.hills.money.gang.screens.GameScreen;
 import com.beverly.hills.money.gang.screens.game.PlayScreen;
 
 public abstract class SoundMakingEntity extends Entity {

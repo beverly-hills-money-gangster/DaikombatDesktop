@@ -1,15 +1,16 @@
 package com.beverly.hills.money.gang.screens.menu;
 
-import static com.beverly.hills.money.gang.Constants.PRESS_R_TO_SEE_REFRESH;
+import static com.beverly.hills.money.gang.configs.Constants.PRESS_TO_REFRESH;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.beverly.hills.money.gang.Constants;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
+import com.beverly.hills.money.gang.configs.KeyMappings;
 import com.beverly.hills.money.gang.screens.data.CompleteJoinGameData;
 import com.beverly.hills.money.gang.screens.data.ConnectServerData;
 import com.beverly.hills.money.gang.screens.data.JoinGameData;
@@ -54,7 +55,7 @@ public class ChooseGameRoomScreen extends AbstractMainMenuScreen {
     if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
       boomSound1.play(Constants.DEFAULT_SFX_VOLUME);
       onSelected();
-    } else if (Gdx.input.isKeyJustPressed(Keys.R)) {
+    } else if (Gdx.input.isKeyJustPressed(KeyMappings.REFRESH.getKey())) {
       removeAllEntities();
       getGame().setScreen(new GetGameRoomsScreen(getGame(), joinGameData, connectServerData));
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
@@ -76,7 +77,7 @@ public class ChooseGameRoomScreen extends AbstractMainMenuScreen {
     if (gameRoomSelection.getSelections().size() == 1) {
       onSelected();
     } else {
-      renderHint(PRESS_R_TO_SEE_REFRESH);
+      renderHint(PRESS_TO_REFRESH);
       var glyphSelection = new GlyphLayout(guiFont64, SELECT_GAME_ROOM);
       guiFont64.draw(getGame().getBatch(), SELECT_GAME_ROOM,
           getViewport().getWorldWidth() / 2f - glyphSelection.width / 2f,

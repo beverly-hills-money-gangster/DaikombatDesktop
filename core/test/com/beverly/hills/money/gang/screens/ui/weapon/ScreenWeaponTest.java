@@ -1,6 +1,6 @@
 package com.beverly.hills.money.gang.screens.ui.weapon;
 
-import static com.beverly.hills.money.gang.Constants.DEFAULT_SHOOTING_VOLUME;
+import static com.beverly.hills.money.gang.configs.Constants.DEFAULT_SHOOTING_VOLUME;
 import static com.beverly.hills.money.gang.factory.ScreenWeaponStateFactory.sameTextureForAllClasses;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
