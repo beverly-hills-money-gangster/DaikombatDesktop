@@ -12,10 +12,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.beverly.hills.money.gang.configs.EnvConfigs;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
+import com.beverly.hills.money.gang.configs.EnvConfigs;
 import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
@@ -27,8 +28,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class GameScreen implements Screen {
+
+  private static final Logger LOG = LoggerFactory.getLogger(GameScreen.class);
 
   @Getter
   private final DaiKombatGame game;
@@ -196,7 +201,9 @@ public abstract class GameScreen implements Screen {
   }
 
   protected void removeAllEntities() {
-    for (final Entity ent : game.getEntMan().entities) {
+    var copy = new Array<>(game.getEntMan().entities);
+    for (final Entity ent : copy) {
+      LOG.info("Destroy entity {} {}", ent.getClass().getSimpleName(), ent.getEntityId());
       ent.destroy();
     }
 

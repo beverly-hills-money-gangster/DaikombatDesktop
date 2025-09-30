@@ -14,6 +14,7 @@ import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import com.beverly.hills.money.gang.screens.ui.skin.SkinSelectAnimation;
+import com.beverly.hills.money.gang.utils.KeyUtil;
 import java.util.Locale;
 
 public class ChoosePlayerClassScreen extends AbstractMainMenuScreen {
@@ -61,10 +62,10 @@ public class ChoosePlayerClassScreen extends AbstractMainMenuScreen {
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+    } else if (KeyUtil.upJustPressed()) {
       playerClassSelection.next();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+    } else if (KeyUtil.downJustPressed()) {
       playerClassSelection.prev();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     }

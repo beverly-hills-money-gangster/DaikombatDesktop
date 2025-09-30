@@ -11,6 +11,7 @@ import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.pref.UserPreference;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
+import com.beverly.hills.money.gang.utils.KeyUtil;
 
 public class SettingsScreen extends AbstractMainMenuScreen {
 
@@ -38,10 +39,10 @@ public class SettingsScreen extends AbstractMainMenuScreen {
       userPreference.flush();
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+    } else if (KeyUtil.upJustPressed()) {
       settingsSelection.next();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+    } else if (KeyUtil.downJustPressed()) {
       settingsSelection.prev();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {

@@ -11,6 +11,7 @@ import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.screens.ui.selection.SureExitUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
+import com.beverly.hills.money.gang.utils.KeyUtil;
 
 public class SureExitScreen extends AbstractMainMenuScreen {
 
@@ -46,10 +47,10 @@ public class SureExitScreen extends AbstractMainMenuScreen {
       }
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       Gdx.app.exit();
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+    } else if (KeyUtil.upJustPressed()) {
       selection.next();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+    } else if (KeyUtil.downJustPressed()) {
       selection.prev();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     }

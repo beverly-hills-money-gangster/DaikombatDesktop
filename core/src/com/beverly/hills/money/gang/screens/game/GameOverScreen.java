@@ -32,6 +32,7 @@ import com.beverly.hills.money.gang.screens.ui.audio.VoiceChatPlayer;
 import com.beverly.hills.money.gang.screens.ui.selection.GameOverUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import com.beverly.hills.money.gang.screens.ui.skin.SkinSelectAnimation;
+import com.beverly.hills.money.gang.utils.KeyUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -136,10 +137,10 @@ public class GameOverScreen extends AbstractMainMenuScreen {
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+    } else if (KeyUtil.upJustPressed()) {
       menuSelection.next();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+    } else if (KeyUtil.downJustPressed()) {
       menuSelection.prev();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     }

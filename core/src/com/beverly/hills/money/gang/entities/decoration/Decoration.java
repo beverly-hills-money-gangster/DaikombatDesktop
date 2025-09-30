@@ -68,7 +68,6 @@ public class Decoration extends Entity {
   public void destroy() {
     getScreen().getGame().getRectMan().removeRect(rect);
     super.destroy(); // should be last.
-    LOG.info("Destroy decoration");
   }
 
 
