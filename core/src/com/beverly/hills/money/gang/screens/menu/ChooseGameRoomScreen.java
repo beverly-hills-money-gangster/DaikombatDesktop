@@ -18,6 +18,7 @@ import com.beverly.hills.money.gang.screens.loading.ConnectServerScreen;
 import com.beverly.hills.money.gang.screens.loading.DownloadMapAssetsScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.GameRoom;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
+import com.beverly.hills.money.gang.utils.KeyUtil;
 import java.util.List;
 import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
@@ -61,10 +62,10 @@ public class ChooseGameRoomScreen extends AbstractMainMenuScreen {
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+    } else if (KeyUtil.upJustPressed()) {
       gameRoomSelection.next();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+    } else if (KeyUtil.downJustPressed()) {
       gameRoomSelection.prev();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     }

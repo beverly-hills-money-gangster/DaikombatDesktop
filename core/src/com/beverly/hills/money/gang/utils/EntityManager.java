@@ -40,11 +40,15 @@ public class EntityManager {
   }
 
   public void removeEntity(final int id) {
+    int indexToRemove = -1;
     for (int i = 0; i < entities.size; i++) {
       if (id == entities.get(i).getEntityId()) {
-        entities.removeIndex(i);
+        indexToRemove = i;
         break;
       }
+    }
+    if (indexToRemove >= 0) {
+      entities.removeIndex(indexToRemove);
     }
   }
 

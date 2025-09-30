@@ -86,7 +86,6 @@ public class Teleport extends SoundMakingEntity {
   public void destroy() {
     getScreen().getGame().getRectMan().removeRect(rect);
     super.destroy(); // should be last.
-    LOG.info("Destroy teleport");
   }
 
 

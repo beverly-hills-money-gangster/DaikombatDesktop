@@ -16,6 +16,7 @@ import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import com.beverly.hills.money.gang.screens.ui.skin.SkinSelectAnimation;
+import com.beverly.hills.money.gang.utils.KeyUtil;
 
 public class ChooseSkinColorScreen extends AbstractMainMenuScreen {
 
@@ -65,10 +66,10 @@ public class ChooseSkinColorScreen extends AbstractMainMenuScreen {
     } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+    } else if (KeyUtil.upJustPressed()) {
       skinSelection.next();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+    } else if (KeyUtil.downJustPressed()) {
       skinSelection.prev();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
     }
