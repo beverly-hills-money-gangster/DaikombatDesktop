@@ -65,4 +65,26 @@ public class PlayerEffectsTest {
     assertEquals(Intensity.LOW, playerEffects.getPowerUpEffectIntensity(PowerUpType.DEFENCE));
   }
 
+  @Test
+  public void testGetActivePowerUpMessageNoPowerUpInEffect() {
+    assertTrue(playerEffects.getActivePowerUpMessage().isEmpty());
+  }
+
+  @Test
+  public void testGetActivePowerUpMessageDefenseInEffect() {
+    int timeoutMls = 5_500;
+    playerEffects.activatePowerUp(PowerUpType.DEFENCE, timeoutMls);
+    assertEquals("DEFENCE 5 SEC", playerEffects.getActivePowerUpMessage());
+  }
+
+
+  @Test
+  public void testGetActivePowerUpMessageDefenceActiveDeactivate() throws InterruptedException {
+    int timeoutMls = 1000;
+    playerEffects.activatePowerUp(PowerUpType.DEFENCE, timeoutMls);
+    Thread.sleep(timeoutMls + 150);
+    assertTrue(playerEffects.getActivePowerUpMessage().isEmpty(),
+        "Should be empty because defence power-up is not active anymore");
+  }
+
 }

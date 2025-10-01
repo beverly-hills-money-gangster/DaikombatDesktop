@@ -39,4 +39,9 @@ public enum PowerUpType {
   @Getter
   private final SoundRegistry enemyPickSound;
 
+  // TODO test it
+  public String getCanonicalName() {
+    return this.name().replace("_", " ");
+  }
+
 }

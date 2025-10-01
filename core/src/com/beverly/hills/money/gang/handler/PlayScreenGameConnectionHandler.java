@@ -5,12 +5,12 @@ import static com.beverly.hills.money.gang.proto.WeaponType.PUNCH;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound.TimeLimitSoundConf;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound.SoundConf;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.entities.achievement.AchievementFactory;
 import com.beverly.hills.money.gang.entities.achievement.KillStats;
 import com.beverly.hills.money.gang.entities.enemies.Enemy;
@@ -525,8 +525,14 @@ public class PlayScreenGameConnectionHandler {
                 enemiesRegistry.removeEnemy(gameEvent.getAffectedPlayer().getPlayerId())
                     .ifPresent(victimPlayer -> {
                       victimPlayer.die();
-                      playScreen.getChatLog().addChatLog(
-                          killerPlayer.getName() + " kills " + victimPlayer.getName());
+                      // TODO test it
+                      String killMessage;
+                      if (victimPlayer.getEnemyPlayerId() == killerPlayer.getEnemyPlayerId()) {
+                        killMessage = killerPlayer.getName() + " self-destructed";
+                      } else {
+                        killMessage = killerPlayer.getName() + " kills " + victimPlayer.getName();
+                      }
+                      playScreen.getChatLog().addChatLog(killMessage);
                     });
               })
               .build()));
