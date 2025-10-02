@@ -1,8 +1,10 @@
 package com.beverly.hills.money.gang.entities.effect;
 
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.Getter;
@@ -24,6 +26,21 @@ public class PlayerEffects {
 
   public void activatePowerUp(PowerUpType powerUpType, int timeoutMls) {
     powerUpsInEffect.put(powerUpType, System.currentTimeMillis() + timeoutMls);
+  }
+
+  public String getActivePowerUpMessage() {
+    List<String> messages = new ArrayList<>();
+    powerUpsInEffect.entrySet().stream().filter(
+        powerUpEntry -> isPowerUpActive(powerUpEntry.getKey())).forEach(
+        activePowerUp -> {
+          var sb = new StringBuilder();
+          long timeoutTimeMls = activePowerUp.getValue();
+          int secondsLeft = (int) ((timeoutTimeMls - System.currentTimeMillis()) / 1000);
+          sb.append(activePowerUp.getKey().getCanonicalName())
+              .append(" ").append(secondsLeft).append(" SEC");
+          messages.add(sb.toString());
+        });
+    return String.join("\n", messages);
   }
 
   public Intensity getPowerUpEffectIntensity(PowerUpType powerUpType) {

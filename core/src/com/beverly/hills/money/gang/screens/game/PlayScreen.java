@@ -3,8 +3,8 @@ package com.beverly.hills.money.gang.screens.game;
 import static com.beverly.hills.money.gang.configs.Constants.BLOOD_OVERLAY_ALPHA_SWITCH;
 import static com.beverly.hills.money.gang.configs.Constants.DEAD_SCREEN_INPUT_DELAY_MLS;
 import static com.beverly.hills.money.gang.configs.Constants.HUD_ALPHA_CHANNEL;
-import static com.beverly.hills.money.gang.configs.Constants.PRESS_TO_SEE_LEADERBOARD;
 import static com.beverly.hills.money.gang.configs.Constants.PRESS_TO_CHAT;
+import static com.beverly.hills.money.gang.configs.Constants.PRESS_TO_SEE_LEADERBOARD;
 import static com.beverly.hills.money.gang.configs.Constants.PRESS_TO_TALK;
 import static com.beverly.hills.money.gang.configs.Constants.SHADOW_MARGIN;
 import static com.beverly.hills.money.gang.configs.Constants.TAUNT_DELAY_MLS;
@@ -23,8 +23,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
-import com.beverly.hills.money.gang.configs.EnvConfigs;
-import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
@@ -32,6 +30,8 @@ import com.beverly.hills.money.gang.assets.managers.sound.SoundQueue;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound.SoundConf;
+import com.beverly.hills.money.gang.configs.Constants;
+import com.beverly.hills.money.gang.configs.EnvConfigs;
 import com.beverly.hills.money.gang.configs.KeyMappings;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.item.PowerUp;
@@ -112,6 +112,7 @@ public class PlayScreen extends GameScreen {
   private final AtomicInteger actionSequence = new AtomicInteger(0);
   private final VoiceChatPlayer voiceChatPlayer;
   private final Texture hudRedTexture;
+  private final Texture hudBlueTexture;
   private final TextureRegion micTexture;
   @Getter
   @Setter
@@ -231,6 +232,7 @@ public class PlayScreen extends GameScreen {
     playScreenGameConnectionHandler = new PlayScreenGameConnectionHandler(this, enemiesRegistry);
 
     hudRedTexture = createTexture(new Color(1, 0, 0.15f, 1f));
+    hudBlueTexture = createTexture(new Color(0, 0, 0.85f, 1f));
     voiceChatPlayer = new VoiceChatPlayer(gameConnection,
         gameBootstrapData.getPlayerId(),
         gameBootstrapData.getCompleteJoinGameData().getGameRoomId(), this,
@@ -525,6 +527,10 @@ public class PlayScreen extends GameScreen {
           128 - 32 + SHADOW_MARGIN);
       getUiFont().setColor(Color.WHITE);
 
+      Optional.of(getPlayer().getPlayerEffects().getActivePowerUpMessage()).filter(
+          StringUtils::isNotBlank).ifPresent(
+          powerUpMessage -> printShadowText(32, 256 * 2 + 32, powerUpMessage, getUiFont(),
+              hudBlueTexture, 0.5f));
     }
     chatBox.renderChat();
 

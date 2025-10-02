@@ -27,8 +27,6 @@ import org.apache.commons.lang3.SystemUtils;
 @Getter
 public class DaiKombatGame extends Game {
 
-  @Setter
-  private boolean gameIsPaused;
   private SpriteBatch batch;
   private ModelBatch mdlBatch;
   private FrameBuffer fbo;

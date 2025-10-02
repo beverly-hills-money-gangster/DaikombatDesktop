@@ -56,7 +56,6 @@ public abstract class GameScreen implements Screen {
   public GameScreen(final DaiKombatGame game, final Viewport viewport) {
     this.game = game;
     this.viewport = viewport;
-    this.game.setGameIsPaused(false);
     game.getEntMan().setScreen(this);
     guiFont64 = getGame().getAssMan().getFont(FontRegistry.FONT_64);
     guiFont32 = getGame().getAssMan().getFont(FontRegistry.FONT_32);
@@ -238,9 +237,7 @@ public abstract class GameScreen implements Screen {
   }
 
   public void tick(final float delta) {
-    if (!game.isGameIsPaused()) {
-      game.getEntMan().tickAllEntities(delta);
-    }
+    game.getEntMan().tickAllEntities(delta);
   }
 
   public void drawBlinking(
