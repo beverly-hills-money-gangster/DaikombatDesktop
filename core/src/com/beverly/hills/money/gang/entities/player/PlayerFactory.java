@@ -4,11 +4,12 @@ import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound.TimeLimitSoundConf;
+import com.beverly.hills.money.gang.configs.EnvConfigs;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.projectile.Projectile;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
-import com.beverly.hills.money.gang.proto.ProjectileStats;
+import com.beverly.hills.money.gang.proto.ProjectileCoordinates;
 import com.beverly.hills.money.gang.proto.ProjectileType;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand;
 import com.beverly.hills.money.gang.proto.PushGameEventCommand.GameEventType;
@@ -113,7 +114,7 @@ public class PlayerFactory {
                   Vector.newBuilder().setX(direction.x).setY(direction.y).build())
               .setPosition(
                   Vector.newBuilder().setX(position.x).setY(position.y).build())
-              .setProjectile(ProjectileStats.newBuilder().setPosition(
+              .setProjectile(ProjectileCoordinates.newBuilder().setBlowUpPosition(
                       Vector.newBuilder().setX(projectilePosition.x).setY(projectilePosition.y)
                           .build())
                   .setProjectileType(mapProjectileToWeaponType(projectile)).build())

@@ -1,8 +1,8 @@
 package com.beverly.hills.money.gang.entities.player;
 
 import static com.badlogic.gdx.Input.Keys.NUM_0;
-import static com.beverly.hills.money.gang.configs.EnvConfigs.SPEED_BOOST;
 import static com.beverly.hills.money.gang.configs.Constants.LONG_TIME_NO_MOVE_MLS;
+import static com.beverly.hills.money.gang.configs.EnvConfigs.SPEED_BOOST;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.configs.Constants;
+import com.beverly.hills.money.gang.configs.EnvConfigs;
 import com.beverly.hills.money.gang.configs.KeyMappings;
 import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.entities.door.Door;
@@ -38,6 +39,7 @@ import com.beverly.hills.money.gang.screens.ui.weapon.WeaponStats;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import lombok.Builder;
@@ -51,6 +53,8 @@ public class Player extends Entity {
 
   private static final Logger LOG = LoggerFactory.getLogger(Player.class);
 
+  private static final Set<RectanglePlusFilter> ENEMY_COLLISION_FILTERS
+      = Set.of(RectanglePlusFilter.ENEMY, RectanglePlusFilter.DOOR, RectanglePlusFilter.WALL);
 
   private long lastTimeMovedMls = 0;
 
@@ -222,21 +226,26 @@ public class Player extends Entity {
   public final Optional<EnemyPlayer> getEnemyRectInRangeFromCam(
       final float weaponDistance) {
     return Streams.of(getScreen().getGame().getRectMan().getRects())
-        .filter(rect -> (rect.getFilter() == RectanglePlusFilter.ENEMY
-            || rect.getFilter() == RectanglePlusFilter.WALL
-            || rect.getFilter() == RectanglePlusFilter.DOOR))
+        .filter(rect -> ENEMY_COLLISION_FILTERS.contains(rect.getFilter()))
         .filter(rectanglePlus -> {
-          if (rectanglePlus.getFilter() == RectanglePlusFilter.ENEMY) {
-            var enemy = (EnemyPlayer) getScreen().getGame().getEntMan()
-                .getEntityFromId(rectanglePlus.getConnectedEntityId());
-            return enemy.isVisible();
-          } else if (rectanglePlus.getFilter() == RectanglePlusFilter.DOOR) {
-            var door = (Door) getScreen().getGame().getEntMan()
-                .getEntityFromId(rectanglePlus.getConnectedEntityId());
-            // you can't shoot through closed doors only
-            return door.getState() == DoorState.CLOSE;
-          } else {
-            return true;
+          switch (rectanglePlus.getFilter()) {
+            case ENEMY -> {
+              var enemy = (EnemyPlayer) getScreen().getGame().getEntMan()
+                  .getEntityFromId(rectanglePlus.getConnectedEntityId());
+              return enemy.isVisible();
+            }
+            case DOOR -> {
+              var door = (Door) getScreen().getGame().getEntMan()
+                  .getEntityFromId(rectanglePlus.getConnectedEntityId());
+              // you can't shoot through closed doors only
+              return door.getState() == DoorState.CLOSE;
+            }
+            case WALL -> {
+              return !EnvConfigs.SHOOT_THRU_WALLS;
+            }
+            default -> {
+              return true;
+            }
           }
         })
         .filter(rect -> Intersector.intersectSegmentRectangle(playerCam.position.x,

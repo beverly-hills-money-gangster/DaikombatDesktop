@@ -108,7 +108,7 @@ public abstract class GameScreen implements Screen {
 
     rect.setOverlapX(game.getRectMan().checkCollision(rect));
 
-    if (rect.isOverlapX()) {
+    if (rect.isOverlapX() && !EnvConfigs.MOVE_THRU_WALLS) {
       rect.getNewPosition().x = rect.getOldPosition().x;
     }
 
@@ -150,7 +150,7 @@ public abstract class GameScreen implements Screen {
 
     rect.setOverlapY(game.getRectMan().checkCollision(rect));
 
-    if (rect.isOverlapY()) {
+    if (rect.isOverlapY() && !EnvConfigs.MOVE_THRU_WALLS) {
       rect.getNewPosition().y = rect.getOldPosition().y;
     }
     rect.setY(rect.getNewPosition().y);
