@@ -1,6 +1,5 @@
 package com.beverly.hills.money.gang.screens.ui.weapon;
 
-import com.beverly.hills.money.gang.configs.EnvConfigs;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -18,14 +17,12 @@ public enum Weapon {
   ROCKET_LAUNCHER(false, WeaponProjectile.ROCKET),
   PLASMAGUN(true, WeaponProjectile.PLASMA);
 
+  @Getter
   private final boolean automatic;
 
   @Getter
   private final WeaponProjectile projectileRef;
 
-  public boolean isAutomatic() {
-    return automatic || EnvConfigs.ALL_WEAPON_AUTOMATIC;
-  }
 
   public static Weapon getWeaponForProjectile(WeaponProjectile weaponProjectile) {
     return Arrays.stream(Weapon.values()).filter(

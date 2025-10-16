@@ -27,7 +27,4 @@ public interface EnvConfigs {
 
   boolean NO_AMMO_CHECK = Boolean.parseBoolean(System.getenv("DESKTOP_NO_AMMO_CHECK"));
 
-  boolean ALL_WEAPON_AUTOMATIC = Boolean.parseBoolean(
-      System.getenv("DESKTOP_ALL_WEAPON_AUTOMATIC"));
-
 }

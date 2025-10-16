@@ -46,7 +46,7 @@ public interface Constants {
   Range<Float> LEFT_RANGE = Range.of(45f, 180f - 44.9f);
   Range<Float> RIGHT_RANGE = Range.of(180 + 45.01f, 320f);
 
-  float PLAYER_RECT_SIZE = 0.25f + 0.300f;
+  float PLAYER_RECT_SIZE = 0.45f;
 
   int TIME_LIMITED_SOUND_FREQ_MLS = 125;
 

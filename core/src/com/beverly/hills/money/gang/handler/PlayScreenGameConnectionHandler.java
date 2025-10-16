@@ -618,8 +618,8 @@ public class PlayScreenGameConnectionHandler {
     var currentPosition = playScreen.getPlayer().getCurrent2DPosition();
     var currentDirection = playScreen.getPlayer().getCurrent2DDirection();
     return new Vector2(
-        currentPosition.x + Constants.PLAYER_RECT_SIZE / 2 + currentDirection.x * 0.25f,
-        currentPosition.y + Constants.PLAYER_RECT_SIZE / 2 + currentDirection.y * 0.25f);
+        currentPosition.x + currentDirection.x * 0.25f,
+        currentPosition.y + currentDirection.y * 0.25f);
   }
 
 

@@ -16,10 +16,14 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
@@ -78,11 +82,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // TODO show selected weapon name on weapon change
-// TODO show chat hint on death
 @Getter
 public class PlayScreen extends GameScreen {
 
   private static final Logger LOG = LoggerFactory.getLogger(PlayScreen.class);
+
+  private final Model pointModel;
 
   private GameScreen screenToTransition;
   private boolean showNetworkStats;
@@ -168,6 +173,14 @@ public class PlayScreen extends GameScreen {
     glyphLayoutHeadsupDead = new GlyphLayout(getUiFont(), Constants.YOU_DIED);
     glyphLayoutAim = new GlyphLayout(getUiFont(), "+");
 
+    final ModelBuilder modelBuilder = new ModelBuilder();
+
+    pointModel = modelBuilder.createSphere(
+        0.1f, 0.1f, 0.1f, 8, 8, // small sphere
+        new Material(ColorAttribute.createDiffuse(Color.RED)),
+        VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal
+    );
+
     musicBackground = getGame().getAssMan()
         .getUserSettingSound(SoundRegistry.BATTLE_BG_SEQ.getNext());
     fightSound = getGame().getAssMan().getUserSettingSound(SoundRegistry.FIGHT);
@@ -190,7 +203,6 @@ public class PlayScreen extends GameScreen {
             .getMap(gameBootstrapData.getCompleteJoinGameData().getMapName(),
                 gameBootstrapData.getCompleteJoinGameData().getMapHash()), atlas
     );
-
     setPlayer(PlayerFactory.create(this, gameConnection, gameBootstrapData));
     getGame().getEntMan().addEntity(getPlayer());
     setCurrentCam(getPlayer().getPlayerCam());
@@ -323,6 +335,7 @@ public class PlayScreen extends GameScreen {
     if (chatBox.handleChatInput()) {
       return;
     }
+
     voiceChatPlayer.handleInput();
     if (getPlayer().isDead()) {
       handleDeadGuiInput();
@@ -338,8 +351,9 @@ public class PlayScreen extends GameScreen {
           showLeaderBoard = true;
         }
         if (Gdx.input.isKeyJustPressed(Keys.P)) {
+          var position = getPlayer().getCurrent2DPosition();
           LOG.info("Player position {}, direction {}",
-              getPlayer().getCurrent2DPosition(), getPlayer().getCurrent2DDirection());
+              position, getPlayer().getCurrent2DDirection());
         }
         if (Gdx.input.isKeyJustPressed(Keys.N)) {
           showNetworkStats = !showNetworkStats;
@@ -630,7 +644,6 @@ public class PlayScreen extends GameScreen {
     if (!chatBox.isChatMode() && voiceChatPlayer.isVoiceChatMode()) {
       voiceChatPlayer.renderGui();
     }
-
     getGame().getBatch().end();
 
     if (screenToTransition != null) {

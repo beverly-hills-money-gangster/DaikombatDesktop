@@ -147,11 +147,9 @@ public class Player extends Entity {
     playerCam.far = maxVisibility * 0.8f;
     playerCam.fieldOfView = 90;
     playerCam.update();
-    var newSpawnPosition = new Vector2(spawnPosition.x + Constants.PLAYER_RECT_SIZE / 2f,
-        spawnPosition.y + Constants.PLAYER_RECT_SIZE / 2f);
-    createRect(newSpawnPosition.cpy()
-        .set(newSpawnPosition.x - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f,
-            newSpawnPosition.y - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f));
+    createRect(spawnPosition.cpy()
+        .set(spawnPosition.x,
+            spawnPosition.y));
 
     Gdx.input.setInputProcessor(new InputAdapter() {
       @Override
@@ -174,19 +172,16 @@ public class Player extends Entity {
   }
 
   public Vector2 getCurrent2DPosition() {
-    return new Vector2(this.rect.x, this.rect.y);
+    return new Vector2(
+        this.playerCam.position.x,
+        this.playerCam.position.z);
   }
 
   public void teleport(final Vector2 position, final Vector2 lookAt) {
-    var newSpawnPosition = new Vector2(position.x + Constants.PLAYER_RECT_SIZE / 2f,
-        position.y + Constants.PLAYER_RECT_SIZE / 2f);
     getScreen().getGame().getRectMan().removeRect(rect); // never forget!
     playerCam.position.set(new Vector3(0, Constants.DEFAULT_PLAYER_CAM_Y, 0));
     playerCam.lookAt(new Vector3(lookAt.x, Constants.DEFAULT_PLAYER_CAM_Y, lookAt.y));
-    // TODO fix this
-    createRect(newSpawnPosition.cpy()
-        .set(newSpawnPosition.x - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f,
-            newSpawnPosition.y - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f));
+    createRect(position.cpy().set(position.x, position.y));
     colliedTeleport.finish();
     colliedTeleport = null;
   }
@@ -197,8 +192,8 @@ public class Player extends Entity {
 
   private void createRect(final Vector2 position) {
     rect = new RectanglePlus(
-        position.x + Constants.HALF_UNIT - Constants.PLAYER_RECT_SIZE / 2f,
-        position.y + Constants.HALF_UNIT - Constants.PLAYER_RECT_SIZE / 2f,
+        position.x - Constants.PLAYER_RECT_SIZE / 2,
+        position.y - Constants.PLAYER_RECT_SIZE / 2,
         Constants.PLAYER_RECT_SIZE, Constants.PLAYER_RECT_SIZE, getEntityId(),
         RectanglePlusFilter.PLAYER);
     rect.getOldPosition().set(position.x, position.y);
@@ -206,8 +201,7 @@ public class Player extends Entity {
         .set(position.x, position.y); // Needed for spawning at correct position.
 
     getScreen().getGame().getRectMan().addRect(rect); // never forget!
-    playerCam.position.set(rect.x + rect.width / 2f, Constants.DEFAULT_PLAYER_CAM_Y,
-        rect.y + rect.height / 2f);
+    playerCam.position.set(position.x, Constants.DEFAULT_PLAYER_CAM_Y, position.y);
 
   }
 
@@ -264,7 +258,9 @@ public class Player extends Entity {
 
 
   private float distToPlayer(final RectanglePlus rect) {
-    return Vector2.dst2(playerCam.position.x, playerCam.position.z,
+    return Vector2.dst2(
+        playerCam.position.x,
+        playerCam.position.z,
         rect.x + rect.getWidth() / 2, rect.y + rect.getHeight() / 2);
   }
 
@@ -476,7 +472,8 @@ public class Player extends Entity {
 
     getScreen().checkOverlaps(rect);
     getScreen().getGame().getRectMan().onCollisionWithPlayer(rect);
-    playerCam.position.set(rect.x + rect.width / 2f, camY, rect.y + rect.height / 2f);
+    playerCam.position.set(rect.x + Constants.PLAYER_RECT_SIZE / 2, camY,
+        rect.y + Constants.PLAYER_RECT_SIZE / 2);
     rect.getOldPosition().set(rect.x, rect.y);
   }
 
