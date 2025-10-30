@@ -3,11 +3,11 @@ package com.beverly.hills.money.gang.screens.menu;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.assets.managers.registry.FontRegistry;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.pref.UserPreference;
 import com.beverly.hills.money.gang.screens.ui.selection.UISelection;
 import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection;
@@ -45,12 +45,12 @@ public class SettingsScreen extends AbstractMainMenuScreen {
     } else if (KeyUtil.downJustPressed()) {
       settingsSelection.prev();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
+    } else if (KeyUtil.leftJustPressed()) {
       var setting = settingsSelection.getSelectedOption().getState();
       setting.decrease();
       this.refreshBgMusicVolume();
       dingSound1.play(Constants.DEFAULT_SFX_VOLUME);
-    } else if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+    } else if (KeyUtil.rightJustPressed()) {
       var setting = settingsSelection.getSelectedOption().getState();
       setting.increase();
       this.refreshBgMusicVolume();
