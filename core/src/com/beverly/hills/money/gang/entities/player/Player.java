@@ -181,7 +181,7 @@ public class Player extends Entity {
     getScreen().getGame().getRectMan().removeRect(rect); // never forget!
     playerCam.position.set(new Vector3(0, Constants.DEFAULT_PLAYER_CAM_Y, 0));
     playerCam.lookAt(new Vector3(lookAt.x, Constants.DEFAULT_PLAYER_CAM_Y, lookAt.y));
-    createRect(position.cpy().set(position.x, position.y));
+    createRect(position.cpy());
     colliedTeleport.finish();
     colliedTeleport = null;
   }

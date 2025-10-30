@@ -87,7 +87,6 @@ public class PlayScreen extends GameScreen {
 
   private static final Logger LOG = LoggerFactory.getLogger(PlayScreen.class);
 
-  private final Model pointModel;
 
   private GameScreen screenToTransition;
   private boolean showNetworkStats;
@@ -172,15 +171,6 @@ public class PlayScreen extends GameScreen {
 
     glyphLayoutHeadsupDead = new GlyphLayout(getUiFont(), Constants.YOU_DIED);
     glyphLayoutAim = new GlyphLayout(getUiFont(), "+");
-
-    final ModelBuilder modelBuilder = new ModelBuilder();
-
-    pointModel = modelBuilder.createSphere(
-        0.1f, 0.1f, 0.1f, 8, 8, // small sphere
-        new Material(ColorAttribute.createDiffuse(Color.RED)),
-        VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal
-    );
-
     musicBackground = getGame().getAssMan()
         .getUserSettingSound(SoundRegistry.BATTLE_BG_SEQ.getNext());
     fightSound = getGame().getAssMan().getUserSettingSound(SoundRegistry.FIGHT);

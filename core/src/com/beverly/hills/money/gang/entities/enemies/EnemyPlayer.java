@@ -232,7 +232,8 @@ public class EnemyPlayer extends Enemy {
         getRect().getNewPosition().y);
     getRect().setX(getRect().getNewPosition().x);
     getRect().setY(getRect().getNewPosition().y);
-    getPosition().set(getRect().x, 0, getRect().y);
+    getPosition().set(getRect().x + getRect().getWidth() / 2, 0,
+        getRect().y + getRect().getHeight() / 2);
     getRect().getOldPosition().set(getRect().x, getRect().y);
 
     if (visible && isInFog()) {
