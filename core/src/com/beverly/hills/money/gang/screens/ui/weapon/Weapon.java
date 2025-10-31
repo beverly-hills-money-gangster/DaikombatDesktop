@@ -23,6 +23,7 @@ public enum Weapon {
   @Getter
   private final WeaponProjectile projectileRef;
 
+
   public static Weapon getWeaponForProjectile(WeaponProjectile weaponProjectile) {
     return Arrays.stream(Weapon.values()).filter(
         weapon -> weapon.getProjectileRef() == weaponProjectile).findFirst().get();

@@ -17,6 +17,14 @@ public interface EnvConfigs {
   int MAX_RECONNECTIONS = NumberUtils.toInt(
       System.getenv("DESKTOP_MAX_RECONNECTIONS"), 5);
 
+  // Cheats
+
   int SPEED_BOOST = NumberUtils.toInt(System.getenv("DESKTOP_SPEED_BOOST"), 1);
+
+  boolean SHOOT_THRU_WALLS = Boolean.parseBoolean(System.getenv("DESKTOP_SHOOT_THRU_WALLS"));
+
+  boolean MOVE_THRU_WALLS = Boolean.parseBoolean(System.getenv("DESKTOP_MOVE_THRU_WALLS"));
+
+  boolean NO_AMMO_CHECK = Boolean.parseBoolean(System.getenv("DESKTOP_NO_AMMO_CHECK"));
 
 }

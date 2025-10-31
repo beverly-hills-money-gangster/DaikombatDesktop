@@ -91,3 +91,11 @@ To turn dev mode on, please run the game with `DESKTOP_DEV_MODE=true` environmen
 #### Debug controls
 - N - see network metrics
 - P - log current player position
+
+#### Cheats
+Some cheats that can be used for testing server-side anti-cheat.
+
+- `DESKTOP_SPEED_BOOST` Running speed boost. Default - `1` (no effect).
+- `DESKTOP_SHOOT_THRU_WALLS` Allows shooting through walls. Default - `false`.
+- `DESKTOP_MOVE_THRU_WALLS` Allows moving through walls. Default - `false`.
+- `DESKTOP_NO_AMMO_CHECK` Controls ammo check. If `true`, ammo check is disabled. Default - `false`.

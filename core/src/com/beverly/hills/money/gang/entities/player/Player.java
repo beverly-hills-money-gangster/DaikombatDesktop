@@ -1,8 +1,8 @@
 package com.beverly.hills.money.gang.entities.player;
 
 import static com.badlogic.gdx.Input.Keys.NUM_0;
-import static com.beverly.hills.money.gang.configs.EnvConfigs.SPEED_BOOST;
 import static com.beverly.hills.money.gang.configs.Constants.LONG_TIME_NO_MOVE_MLS;
+import static com.beverly.hills.money.gang.configs.EnvConfigs.SPEED_BOOST;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.configs.Constants;
+import com.beverly.hills.money.gang.configs.EnvConfigs;
 import com.beverly.hills.money.gang.configs.KeyMappings;
 import com.beverly.hills.money.gang.entities.Entity;
 import com.beverly.hills.money.gang.entities.door.Door;
@@ -38,6 +39,7 @@ import com.beverly.hills.money.gang.screens.ui.weapon.WeaponStats;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import lombok.Builder;
@@ -51,6 +53,8 @@ public class Player extends Entity {
 
   private static final Logger LOG = LoggerFactory.getLogger(Player.class);
 
+  private static final Set<RectanglePlusFilter> ENEMY_COLLISION_FILTERS
+      = Set.of(RectanglePlusFilter.ENEMY, RectanglePlusFilter.DOOR, RectanglePlusFilter.WALL);
 
   private long lastTimeMovedMls = 0;
 
@@ -143,11 +147,9 @@ public class Player extends Entity {
     playerCam.far = maxVisibility * 0.8f;
     playerCam.fieldOfView = 90;
     playerCam.update();
-    var newSpawnPosition = new Vector2(spawnPosition.x + Constants.PLAYER_RECT_SIZE / 2f,
-        spawnPosition.y + Constants.PLAYER_RECT_SIZE / 2f);
-    createRect(newSpawnPosition.cpy()
-        .set(newSpawnPosition.x - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f,
-            newSpawnPosition.y - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f));
+    createRect(spawnPosition.cpy()
+        .set(spawnPosition.x,
+            spawnPosition.y));
 
     Gdx.input.setInputProcessor(new InputAdapter() {
       @Override
@@ -170,19 +172,16 @@ public class Player extends Entity {
   }
 
   public Vector2 getCurrent2DPosition() {
-    return new Vector2(this.rect.x, this.rect.y);
+    return new Vector2(
+        this.playerCam.position.x,
+        this.playerCam.position.z);
   }
 
   public void teleport(final Vector2 position, final Vector2 lookAt) {
-    var newSpawnPosition = new Vector2(position.x + Constants.PLAYER_RECT_SIZE / 2f,
-        position.y + Constants.PLAYER_RECT_SIZE / 2f);
     getScreen().getGame().getRectMan().removeRect(rect); // never forget!
     playerCam.position.set(new Vector3(0, Constants.DEFAULT_PLAYER_CAM_Y, 0));
     playerCam.lookAt(new Vector3(lookAt.x, Constants.DEFAULT_PLAYER_CAM_Y, lookAt.y));
-    // TODO fix this
-    createRect(newSpawnPosition.cpy()
-        .set(newSpawnPosition.x - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f,
-            newSpawnPosition.y - Constants.HALF_UNIT + Constants.PLAYER_RECT_SIZE / 2f));
+    createRect(position.cpy());
     colliedTeleport.finish();
     colliedTeleport = null;
   }
@@ -193,8 +192,8 @@ public class Player extends Entity {
 
   private void createRect(final Vector2 position) {
     rect = new RectanglePlus(
-        position.x + Constants.HALF_UNIT - Constants.PLAYER_RECT_SIZE / 2f,
-        position.y + Constants.HALF_UNIT - Constants.PLAYER_RECT_SIZE / 2f,
+        position.x - Constants.PLAYER_RECT_SIZE / 2,
+        position.y - Constants.PLAYER_RECT_SIZE / 2,
         Constants.PLAYER_RECT_SIZE, Constants.PLAYER_RECT_SIZE, getEntityId(),
         RectanglePlusFilter.PLAYER);
     rect.getOldPosition().set(position.x, position.y);
@@ -202,8 +201,7 @@ public class Player extends Entity {
         .set(position.x, position.y); // Needed for spawning at correct position.
 
     getScreen().getGame().getRectMan().addRect(rect); // never forget!
-    playerCam.position.set(rect.x + rect.width / 2f, Constants.DEFAULT_PLAYER_CAM_Y,
-        rect.y + rect.height / 2f);
+    playerCam.position.set(position.x, Constants.DEFAULT_PLAYER_CAM_Y, position.y);
 
   }
 
@@ -222,21 +220,26 @@ public class Player extends Entity {
   public final Optional<EnemyPlayer> getEnemyRectInRangeFromCam(
       final float weaponDistance) {
     return Streams.of(getScreen().getGame().getRectMan().getRects())
-        .filter(rect -> (rect.getFilter() == RectanglePlusFilter.ENEMY
-            || rect.getFilter() == RectanglePlusFilter.WALL
-            || rect.getFilter() == RectanglePlusFilter.DOOR))
+        .filter(rect -> ENEMY_COLLISION_FILTERS.contains(rect.getFilter()))
         .filter(rectanglePlus -> {
-          if (rectanglePlus.getFilter() == RectanglePlusFilter.ENEMY) {
-            var enemy = (EnemyPlayer) getScreen().getGame().getEntMan()
-                .getEntityFromId(rectanglePlus.getConnectedEntityId());
-            return enemy.isVisible();
-          } else if (rectanglePlus.getFilter() == RectanglePlusFilter.DOOR) {
-            var door = (Door) getScreen().getGame().getEntMan()
-                .getEntityFromId(rectanglePlus.getConnectedEntityId());
-            // you can't shoot through closed doors only
-            return door.getState() == DoorState.CLOSE;
-          } else {
-            return true;
+          switch (rectanglePlus.getFilter()) {
+            case ENEMY -> {
+              var enemy = (EnemyPlayer) getScreen().getGame().getEntMan()
+                  .getEntityFromId(rectanglePlus.getConnectedEntityId());
+              return enemy.isVisible();
+            }
+            case DOOR -> {
+              var door = (Door) getScreen().getGame().getEntMan()
+                  .getEntityFromId(rectanglePlus.getConnectedEntityId());
+              // you can't shoot through closed doors only
+              return door.getState() == DoorState.CLOSE;
+            }
+            case WALL -> {
+              return !EnvConfigs.SHOOT_THRU_WALLS;
+            }
+            default -> {
+              return true;
+            }
           }
         })
         .filter(rect -> Intersector.intersectSegmentRectangle(playerCam.position.x,
@@ -255,7 +258,9 @@ public class Player extends Entity {
 
 
   private float distToPlayer(final RectanglePlus rect) {
-    return Vector2.dst2(playerCam.position.x, playerCam.position.z,
+    return Vector2.dst2(
+        playerCam.position.x,
+        playerCam.position.z,
         rect.x + rect.getWidth() / 2, rect.y + rect.getHeight() / 2);
   }
 
@@ -467,7 +472,8 @@ public class Player extends Entity {
 
     getScreen().checkOverlaps(rect);
     getScreen().getGame().getRectMan().onCollisionWithPlayer(rect);
-    playerCam.position.set(rect.x + rect.width / 2f, camY, rect.y + rect.height / 2f);
+    playerCam.position.set(rect.x + Constants.PLAYER_RECT_SIZE / 2, camY,
+        rect.y + Constants.PLAYER_RECT_SIZE / 2);
     rect.getOldPosition().set(rect.x, rect.y);
   }
 

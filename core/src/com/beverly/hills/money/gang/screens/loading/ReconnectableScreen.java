@@ -11,6 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// TODO don't reconnect on cheating errors
+// TODO prefer enemies to be shot by an projectile if too close
 public abstract class ReconnectableScreen extends AbstractLoadingScreen {
 
   private static final Logger LOG = LoggerFactory.getLogger(ReconnectableScreen.class);

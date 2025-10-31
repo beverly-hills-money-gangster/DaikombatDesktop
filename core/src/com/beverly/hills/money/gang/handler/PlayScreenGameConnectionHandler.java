@@ -349,7 +349,7 @@ public class PlayScreenGameConnectionHandler {
                 }
               } else if (gameEvent.hasProjectile()) {
                 var boomPosition = Converter.convertToVector2(
-                    gameEvent.getProjectile().getPosition());
+                    gameEvent.getProjectile().getBlowUpPosition());
                 playScreen.getGame().getEntMan().addEntity(
                     enemyPlayerProjectileBoomFactoriesRegistry.get(WeaponMapper.getWeaponProjectile(
                             gameEvent.getProjectile().getProjectileType()))
@@ -427,7 +427,7 @@ public class PlayScreenGameConnectionHandler {
                                         gameEvent.getProjectile().getProjectileType()))
                                 .create(
                                     Converter.convertToVector2(
-                                        gameEvent.getProjectile().getPosition()),
+                                        gameEvent.getProjectile().getBlowUpPosition()),
                                     playScreen.getPlayer()));
                       }
                       enemiesRegistry.getEnemy(gameEvent.getAffectedPlayer().getPlayerId())
@@ -518,14 +518,13 @@ public class PlayScreenGameConnectionHandler {
                       enemyPlayerProjectileBoomFactoriesRegistry.get(
                               WeaponMapper.getWeaponProjectile(
                                   gameEvent.getProjectile().getProjectileType()))
-                          .create(
-                              Converter.convertToVector2(gameEvent.getProjectile().getPosition()),
+                          .create(Converter.convertToVector2(
+                                  gameEvent.getProjectile().getBlowUpPosition()),
                               playScreen.getPlayer()));
                 }
                 enemiesRegistry.removeEnemy(gameEvent.getAffectedPlayer().getPlayerId())
                     .ifPresent(victimPlayer -> {
                       victimPlayer.die();
-                      // TODO test it
                       String killMessage;
                       if (victimPlayer.getEnemyPlayerId() == killerPlayer.getEnemyPlayerId()) {
                         killMessage = killerPlayer.getName() + " self-destructed";
@@ -619,8 +618,8 @@ public class PlayScreenGameConnectionHandler {
     var currentPosition = playScreen.getPlayer().getCurrent2DPosition();
     var currentDirection = playScreen.getPlayer().getCurrent2DDirection();
     return new Vector2(
-        currentPosition.x + Constants.PLAYER_RECT_SIZE / 2 + currentDirection.x * 0.25f,
-        currentPosition.y + Constants.PLAYER_RECT_SIZE / 2 + currentDirection.y * 0.25f);
+        currentPosition.x + currentDirection.x * 0.25f,
+        currentPosition.y + currentDirection.y * 0.25f);
   }
 
 

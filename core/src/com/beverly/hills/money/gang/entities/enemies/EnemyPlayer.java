@@ -143,7 +143,8 @@ public class EnemyPlayer extends Enemy {
 
   private void setRect() {
     setRect(
-        new RectanglePlus(this.getPosition().x, this.getPosition().z, Constants.PLAYER_RECT_SIZE,
+        new RectanglePlus(this.getPosition().x - Constants.PLAYER_RECT_SIZE / 2,
+            this.getPosition().z - Constants.PLAYER_RECT_SIZE / 2, Constants.PLAYER_RECT_SIZE,
             Constants.PLAYER_RECT_SIZE, getEntityId(),
             RectanglePlusFilter.ENEMY));
     getRect().setPosition(getRect().x, getRect().y);
@@ -172,9 +173,12 @@ public class EnemyPlayer extends Enemy {
   public void render3D(final ModelBatch mdlBatch, final Environment env, final float delta) {
     getMdlInst().transform.setToLookAt(
         getScreen().getCurrentCam().direction.cpy().rotate(Vector3.Z, 180f), Vector3.Y);
-    getMdlInst().transform.setTranslation(getPosition().cpy().add(0, Constants.HALF_UNIT, 0));
+    getMdlInst().transform.setTranslation(
+        new Vector3(getRect().x + getRect().getWidth() / 2,
+            Constants.HALF_UNIT,
+            getRect().y + getRect().getHeight() / 2));
     // otherwise, the enemy is too "fat"
-    getMdlInst().transform.scale(0.8f, 1f, 1);
+    getMdlInst().transform.scale(0.75f, 1f, 1);
     super.render3D(mdlBatch, env, delta);
   }
 
@@ -206,14 +210,17 @@ public class EnemyPlayer extends Enemy {
     if (action != null) {
       Vector2 targetPosition = action.getRoute();
       lastDirection = action.getDirection();
-      if (isTooClose(getRect().getOldPosition(), targetPosition)) {
+      if (isTooClose(getRect().getOldPosition().cpy()
+          .add(Constants.PLAYER_RECT_SIZE / 2, Constants.PLAYER_RECT_SIZE / 2), targetPosition)) {
+        getRect().getNewPosition().set(targetPosition.x - Constants.PLAYER_RECT_SIZE / 2,
+            targetPosition.y - Constants.PLAYER_RECT_SIZE / 2);
         // if we are close to the target destination then we are here
         actions.remove();
         action.getOnComplete().run();
       } else {
         Vector2 rectDirection = new Vector2();
-        rectDirection.x = targetPosition.x - getRect().x;
-        rectDirection.y = targetPosition.y - getRect().y;
+        rectDirection.x = targetPosition.x - getRect().getWidth() / 2 - (getRect().x);
+        rectDirection.y = targetPosition.y - getRect().getHeight() / 2 - (getRect().y);
         rectDirection.nor().scl(currentSpeed * delta);
         isIdle = false;
         getRect().getNewPosition().add(rectDirection.x, rectDirection.y);
@@ -322,6 +329,6 @@ public class EnemyPlayer extends Enemy {
 
   private boolean isTooClose(Vector2 vector1, Vector2 vector2) {
     return Vector2.dst(vector1.x, vector1.y, vector2.x,
-        vector2.y) <= 0.225f;
+        vector2.y) <= 0.05f;
   }
 }

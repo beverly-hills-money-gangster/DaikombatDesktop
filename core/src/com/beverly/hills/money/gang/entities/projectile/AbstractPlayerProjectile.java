@@ -13,11 +13,12 @@ import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.animation.Animation;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound.TimeLimitSoundConf;
+import com.beverly.hills.money.gang.configs.Constants;
+import com.beverly.hills.money.gang.configs.EnvConfigs;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayer;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.entities.player.Player.ProjectileEnemy;
@@ -27,11 +28,15 @@ import com.beverly.hills.money.gang.rect.filters.RectanglePlusFilter;
 import com.beverly.hills.money.gang.screens.game.PlayScreen;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponProjectile;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponState;
+import java.util.Set;
 import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.Setter;
 
 public class AbstractPlayerProjectile extends Projectile {
+
+  private static final Set<RectanglePlusFilter> ENEMY_COLLISION_FILTERS
+      = Set.of(RectanglePlusFilter.ENEMY, RectanglePlusFilter.WALL);
 
   @Getter
   private final Vector3 position;
@@ -168,17 +173,18 @@ public class AbstractPlayerProjectile extends Projectile {
         return;
       }
       for (final RectanglePlus otherRect : getScreen().getGame().getRectMan().getRects()) {
-        if (otherRect != rect && rect.overlaps(otherRect) && (
-            otherRect.getFilter() == RectanglePlusFilter.WALL
-                || otherRect.getFilter() == RectanglePlusFilter.ENEMY)) {
+        if (otherRect != rect && ENEMY_COLLISION_FILTERS.contains(otherRect.getFilter())
+            && rect.overlaps(otherRect)) {
           if (otherRect.getFilter() == RectanglePlusFilter.ENEMY) {
             var enemyPlayer = (EnemyPlayer) getScreen().getGame().getEntMan()
                 .getEntityFromId(otherRect.getConnectedEntityId());
             if (!enemyPlayer.isVisible()) {
               continue;
             }
+          } else if (otherRect.getFilter() == RectanglePlusFilter.WALL
+              && EnvConfigs.SHOOT_THRU_WALLS) {
+            continue;
           }
-
           onBlowUp.accept(this);
           boom();
           break;

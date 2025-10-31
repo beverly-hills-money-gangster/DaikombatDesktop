@@ -3,13 +3,14 @@ package com.beverly.hills.money.gang.screens.ui.weapon;
 import static com.beverly.hills.money.gang.configs.Constants.PUNCH_ANIMATION_MLS;
 
 import com.badlogic.gdx.math.Vector2;
-import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.assets.managers.DaiKombatAssetsManager;
 import com.beverly.hills.money.gang.assets.managers.registry.SoundRegistry;
 import com.beverly.hills.money.gang.assets.managers.sound.SoundVolumeType;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound;
 import com.beverly.hills.money.gang.assets.managers.sound.TimeLimitedSound.TimeLimitSoundConf;
 import com.beverly.hills.money.gang.assets.managers.sound.UserSettingSound;
+import com.beverly.hills.money.gang.configs.Constants;
+import com.beverly.hills.money.gang.configs.EnvConfigs;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.registry.ScreenWeaponStateFactoriesRegistry;
@@ -208,7 +209,7 @@ public class ScreenWeapon {
     return Optional.ofNullable(ammo.get(weaponBeingUsed))
         .map(WeaponAmmo::hasAmmo)
         // if weapon has no concept of ammo (like gauntlet)
-        .orElse(true);
+        .orElse(true) || EnvConfigs.NO_AMMO_CHECK;
   }
 
   public String getAmmoStats() {
