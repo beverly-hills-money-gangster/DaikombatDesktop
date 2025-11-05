@@ -13,10 +13,11 @@ public class RocketProjectileFactory implements ProjectileFactory {
   public Projectile create(final Player player, final WeaponState weaponState) {
     var playerCam = player.getPlayerCam();
     var screen = player.getScreen();
+    // TODO make sure we remove -0.5 everywhere
     return new RocketProjectile(player,
-        new Vector3(playerCam.position.x - 0.5f + playerCam.direction.x * 0.001f, 0,
-            playerCam.position.z - 0.5f + playerCam.direction.z * 0.001f),
-        new Vector2(playerCam.position.x - 0.5f + playerCam.direction.x * weaponState.getDistance(),
+        new Vector3(playerCam.position.x + playerCam.direction.x * 0.001f, 0,
+            playerCam.position.z + playerCam.direction.z * 0.001f),
+        new Vector2(playerCam.position.x + playerCam.direction.x * weaponState.getDistance(),
             playerCam.position.z + playerCam.direction.z * weaponState.getDistance()),
         screen, weaponState);
   }

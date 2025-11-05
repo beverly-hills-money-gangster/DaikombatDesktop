@@ -36,7 +36,8 @@ public abstract class Enemy extends SoundMakingEntity {
   private long dieAnimationEndMls = Long.MIN_VALUE;
 
   @Getter
-  private final Vector3 position;
+  protected final Vector3 position;
+
   @Setter
   @Getter
   private ModelInstanceBB mdlInst;

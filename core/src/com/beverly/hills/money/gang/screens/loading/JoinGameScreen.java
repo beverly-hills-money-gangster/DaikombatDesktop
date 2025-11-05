@@ -1,17 +1,19 @@
 package com.beverly.hills.money.gang.screens.loading;
 
-import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.config.ClientConfig;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.proto.JoinGameCommand;
 import com.beverly.hills.money.gang.proto.MergeConnectionCommand;
 import com.beverly.hills.money.gang.proto.PlayerClass;
 import com.beverly.hills.money.gang.proto.PlayerSkinColor;
 import com.beverly.hills.money.gang.proto.ServerResponse;
+import com.beverly.hills.money.gang.screens.GameScreen;
 import com.beverly.hills.money.gang.screens.data.CompleteJoinGameData;
 import com.beverly.hills.money.gang.screens.data.GameBootstrapData;
 import com.beverly.hills.money.gang.screens.game.PlayScreen;
+import com.beverly.hills.money.gang.screens.menu.ErrorScreen;
 import com.beverly.hills.money.gang.screens.ui.selection.GamePlayerClass;
 import com.beverly.hills.money.gang.screens.ui.selection.SkinUISelection;
 import com.beverly.hills.money.gang.utils.Converter;
@@ -87,6 +89,13 @@ public class JoinGameScreen extends ReconnectableScreen {
   public void dispose() {
     super.dispose();
     gameConnection.disconnect();
+  }
+
+  @Override
+  public void onExitScreen(GameScreen screen) {
+    if (screen instanceof ErrorScreen) {
+      gameConnection.disconnect();
+    }
   }
 
   @Override

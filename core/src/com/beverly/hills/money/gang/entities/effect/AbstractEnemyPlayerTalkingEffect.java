@@ -56,9 +56,9 @@ public abstract class AbstractEnemyPlayerTalkingEffect extends Entity {
 
     final float rectWidth = Constants.HALF_UNIT;
     final float rectHeight = Constants.HALF_UNIT;
-    rect = new RectanglePlus(this.position.x, this.position.z, rectWidth, rectHeight, getEntityId(),
+    rect = new RectanglePlus(this.position.x - rectWidth/2,
+        this.position.z-rectHeight/2, rectWidth, rectHeight, getEntityId(),
         RectanglePlusFilter.ITEM);
-    rect.setPosition(this.position.x - rect.getWidth() / 2, this.position.z - rect.getHeight() / 2);
     screen.getGame().getRectMan().addRect(rect);
 
     rect.getOldPosition().set(rect.x, rect.y);

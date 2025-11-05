@@ -1,6 +1,5 @@
 package com.beverly.hills.money.gang.entities.projectile;
 
-import static com.beverly.hills.money.gang.configs.Constants.HALF_UNIT;
 import static com.beverly.hills.money.gang.configs.Constants.PROJECTILE_SPEED;
 
 import com.badlogic.gdx.graphics.Color;
@@ -51,8 +50,8 @@ public class AbstractEnemyProjectileFlying extends Projectile {
       final TextureRegion flyingProjectileTextureRegion) {
     super(player.getScreen());
     this.player = player;
-    this.finishPosition = finishPosition.cpy().add(HALF_UNIT / 2, HALF_UNIT / 2);
-    this.position = startPosition.cpy().add(HALF_UNIT / 2, 0, HALF_UNIT / 2);
+    this.finishPosition = finishPosition;
+    this.position = startPosition;
 
     mdlInst = new ModelInstanceBB(player.getScreen().getCellBuilder().getMdlEnemy());
     flyingProjectileTextureRegion.flip(true, false);
@@ -63,10 +62,10 @@ public class AbstractEnemyProjectileFlying extends Projectile {
         .set(new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
     mdlInst.materials.get(0).set(new FloatAttribute(FloatAttribute.AlphaTest));
 
-    rect = new RectanglePlus(this.position.x, this.position.z, Constants.HALF_UNIT,
+    rect = new RectanglePlus(this.position.x - Constants.HALF_UNIT / 2,
+        this.position.z - Constants.HALF_UNIT / 2, Constants.HALF_UNIT,
         Constants.HALF_UNIT, getEntityId(),
         RectanglePlusFilter.PROJECTILE);
-    rect.setPosition(this.position.x - rect.getWidth() / 2, this.position.z - rect.getHeight() / 2);
     player.getScreen().getGame().getRectMan().addRect(rect);
 
     rect.getOldPosition().set(rect.x, rect.y);
@@ -103,18 +102,8 @@ public class AbstractEnemyProjectileFlying extends Projectile {
       return;
     }
 
-    Vector2 rectDirection = new Vector2();
-    rectDirection.x = finishPosition.x - getRect().x;
-    rectDirection.y = finishPosition.y - getRect().y;
-    rectDirection.nor().scl(PROJECTILE_SPEED * delta);
-    getRect().getNewPosition().add(rectDirection.x, rectDirection.y);
-    getRect().setX(getRect().getNewPosition().x);
-    getRect().setY(getRect().getNewPosition().y);
-    getPosition().set(getRect().x + getRect().getWidth() / 2, 0,
-        getRect().y + getRect().getHeight() / 2);
-    getRect().getOldPosition().set(getRect().x, getRect().y);
-
-    if (isTooClose(getRect().getOldPosition(), finishPosition)) {
+    getPosition().set(getRect().moveToDirection(finishPosition, delta, PROJECTILE_SPEED));
+    if (getRect().isTooClose(finishPosition)) {
       destroy();
       return;
     }
@@ -137,11 +126,6 @@ public class AbstractEnemyProjectileFlying extends Projectile {
   }
 
 
-  private boolean isTooClose(Vector2 vector1, Vector2 vector2) {
-    return Vector2.dst(vector1.x, vector1.y, vector2.x,
-        vector2.y) <= 0.1f;
-  }
-
   @Override
   public WeaponProjectile getProjectileType() {
     return WeaponProjectile.ROCKET;
@@ -149,7 +133,7 @@ public class AbstractEnemyProjectileFlying extends Projectile {
 
   @Override
   public Vector2 currentPosition() {
-    return new Vector2(getRect().x, getRect().y);
+    return getRect().getCenter();
   }
 
   @Override
