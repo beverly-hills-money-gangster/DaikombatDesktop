@@ -11,9 +11,9 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector3;
-import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.animation.Animation;
 import com.beverly.hills.money.gang.assets.managers.registry.TexturesRegistry;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.entities.SoundMakingEntity;
 import com.beverly.hills.money.gang.entities.player.Player;
 import com.beverly.hills.money.gang.models.ModelInstanceBB;
@@ -73,9 +73,9 @@ public class Teleport extends SoundMakingEntity {
 
     final float rectWidth = Constants.HALF_UNIT;
     final float rectHeight = Constants.HALF_UNIT;
-    rect = new RectanglePlus(this.position.x, this.position.z, rectWidth, rectHeight, getEntityId(),
+    rect = new RectanglePlus(this.position.x - rectWidth / 2, this.position.z - rectHeight / 2,
+        rectWidth, rectHeight, getEntityId(),
         RectanglePlusFilter.ITEM);
-    rect.setPosition(this.position.x - rect.getWidth() / 2, this.position.z - rect.getHeight() / 2);
     screen.getGame().getRectMan().addRect(rect);
 
     rect.getOldPosition().set(rect.x, rect.y);

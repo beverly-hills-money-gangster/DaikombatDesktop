@@ -4,6 +4,7 @@ import com.beverly.hills.money.gang.DaiKombatGame;
 import com.beverly.hills.money.gang.entity.HostPort;
 import com.beverly.hills.money.gang.network.GameConnection;
 import com.beverly.hills.money.gang.proto.GetServerInfoCommand;
+import com.beverly.hills.money.gang.screens.GameScreen;
 import com.beverly.hills.money.gang.screens.data.ConnectServerData;
 import com.beverly.hills.money.gang.screens.data.JoinGameData;
 import com.beverly.hills.money.gang.screens.loading.AbstractLoadingScreen;
@@ -66,6 +67,12 @@ public class GetGameRoomsScreen extends AbstractLoadingScreen {
   protected void onEscape() {
     Optional.ofNullable(gameConnectionRef.get()).ifPresent(GameConnection::disconnect);
   }
+
+  @Override
+  public void onExitScreen(GameScreen screen) {
+    Optional.ofNullable(gameConnectionRef.get()).ifPresent(GameConnection::disconnect);
+  }
+
 
   @Override
   protected void onTimeout() {

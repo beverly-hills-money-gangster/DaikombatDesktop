@@ -147,7 +147,6 @@ public class EnemyPlayer extends Enemy {
             this.getPosition().z - Constants.PLAYER_RECT_SIZE / 2, Constants.PLAYER_RECT_SIZE,
             Constants.PLAYER_RECT_SIZE, getEntityId(),
             RectanglePlusFilter.ENEMY));
-    getRect().setPosition(getRect().x, getRect().y);
     getRect().getOldPosition().set(getRect().x, getRect().y);
     getRect().getNewPosition().set(getRect().x, getRect().y);
   }
@@ -210,32 +209,20 @@ public class EnemyPlayer extends Enemy {
     if (action != null) {
       Vector2 targetPosition = action.getRoute();
       lastDirection = action.getDirection();
-      if (isTooClose(getRect().getOldPosition().cpy()
-          .add(Constants.PLAYER_RECT_SIZE / 2, Constants.PLAYER_RECT_SIZE / 2), targetPosition)) {
-        getRect().getNewPosition().set(targetPosition.x - Constants.PLAYER_RECT_SIZE / 2,
-            targetPosition.y - Constants.PLAYER_RECT_SIZE / 2);
+      if (getRect().isTooClose(targetPosition)) {
+        position.set(getRect().center(targetPosition));
         // if we are close to the target destination then we are here
         actions.remove();
         action.getOnComplete().run();
       } else {
-        Vector2 rectDirection = new Vector2();
-        rectDirection.x = targetPosition.x - getRect().getWidth() / 2 - (getRect().x);
-        rectDirection.y = targetPosition.y - getRect().getHeight() / 2 - (getRect().y);
-        rectDirection.nor().scl(currentSpeed * delta);
+        position.set(getRect().moveToDirection(targetPosition, delta, currentSpeed));
         isIdle = false;
-        getRect().getNewPosition().add(rectDirection.x, rectDirection.y);
       }
     } else if (System.currentTimeMillis() >= movingAnimationUntil) {
       isIdle = true;
     }
     enemyPlayerVoiceChatEffect.setPosition(getRect().getNewPosition().x,
         getRect().getNewPosition().y);
-    getRect().setX(getRect().getNewPosition().x);
-    getRect().setY(getRect().getNewPosition().y);
-    getPosition().set(getRect().x + getRect().getWidth() / 2, 0,
-        getRect().y + getRect().getHeight() / 2);
-    getRect().getOldPosition().set(getRect().x, getRect().y);
-
     if (visible && isInFog()) {
       visible = false;
     }
@@ -326,9 +313,4 @@ public class EnemyPlayer extends Enemy {
     enemyPlayerVoiceChatEffect.destroy();
   }
 
-
-  private boolean isTooClose(Vector2 vector1, Vector2 vector2) {
-    return Vector2.dst(vector1.x, vector1.y, vector2.x,
-        vector2.y) <= 0.05f;
-  }
 }

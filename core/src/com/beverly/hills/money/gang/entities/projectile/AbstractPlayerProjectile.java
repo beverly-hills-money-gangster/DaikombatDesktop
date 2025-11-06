@@ -81,7 +81,7 @@ public class AbstractPlayerProjectile extends Projectile {
     this.projectileType = projectileType;
     this.onBlowUp = projectile -> {
       var enemiesInRange = player.getEnemiesRegistry()
-          .getVisibleEnemiesInRange(projectile.currentPosition(),
+          .getVisibleEnemiesInRange(projectile.currentPosition(), // TODO is that correct position?
               weaponState.getProjectileRadius());
       player.getOnProjectileAttackHit().accept(
           ProjectileEnemy.builder().enemyPlayers(enemiesInRange).projectile(projectile)
@@ -91,7 +91,6 @@ public class AbstractPlayerProjectile extends Projectile {
     this.finishPosition = finishPosition;
     this.position = startPosition.cpy();
     this.player = player;
-    this.position.add(Constants.HALF_UNIT, 0, Constants.HALF_UNIT);
 
     mdlInst = new ModelInstanceBB(screen.getCellBuilder().getMdlEnemy());
     flyingProjectileTextureRegion.flip(true, false);
@@ -104,9 +103,11 @@ public class AbstractPlayerProjectile extends Projectile {
 
     final float rectWidth = Constants.HALF_UNIT;
     final float rectHeight = Constants.HALF_UNIT;
-    rect = new RectanglePlus(this.position.x, this.position.z, rectWidth, rectHeight, getEntityId(),
+    rect = new RectanglePlus(
+        this.position.x - rectWidth / 2,
+        this.position.z - rectHeight / 2,
+        rectWidth, rectHeight, getEntityId(),
         RectanglePlusFilter.PROJECTILE);
-    rect.setPosition(this.position.x - rect.getWidth() / 2, this.position.z - rect.getHeight() / 2);
     screen.getGame().getRectMan().addRect(rect);
 
     rect.getOldPosition().set(rect.x, rect.y);
@@ -156,18 +157,9 @@ public class AbstractPlayerProjectile extends Projectile {
       } else {
         colorAttribute.color.set(new Color(1, 1, 1, 1));
       }
-      Vector2 rectDirection = new Vector2();
-      rectDirection.x = finishPosition.x - getRect().x;
-      rectDirection.y = finishPosition.y - getRect().y;
-      rectDirection.nor().scl(PROJECTILE_SPEED * delta);
-      getRect().getNewPosition().add(rectDirection.x, rectDirection.y);
-      getRect().setX(getRect().getNewPosition().x);
-      getRect().setY(getRect().getNewPosition().y);
-      getPosition().set(getRect().x + getRect().getWidth() / 2, 0,
-          getRect().y + getRect().getHeight() / 2);
-      getRect().getOldPosition().set(getRect().x, getRect().y);
 
-      if (isTooClose(getRect().getOldPosition(), finishPosition)) {
+      getPosition().set(getRect().moveToDirection(finishPosition, delta, PROJECTILE_SPEED));
+      if (getRect().isTooClose(finishPosition)) {
         onBlowUp.accept(this);
         boom();
         return;
@@ -209,11 +201,6 @@ public class AbstractPlayerProjectile extends Projectile {
   }
 
 
-  private boolean isTooClose(Vector2 vector1, Vector2 vector2) {
-    return Vector2.dst(vector1.x, vector1.y, vector2.x,
-        vector2.y) <= 0.1f;
-  }
-
   @Override
   public WeaponProjectile getProjectileType() {
     return projectileType;
@@ -221,6 +208,6 @@ public class AbstractPlayerProjectile extends Projectile {
 
   @Override
   public Vector2 currentPosition() {
-    return new Vector2(getRect().x, getRect().y);
+    return getRect().getCenter();
   }
 }

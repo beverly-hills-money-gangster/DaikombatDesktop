@@ -1,7 +1,5 @@
 package com.beverly.hills.money.gang.factory;
 
-import static com.beverly.hills.money.gang.configs.Constants.HALF_UNIT;
-
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.beverly.hills.money.gang.entities.SoundMakingEntity;
@@ -12,7 +10,6 @@ public class EnemyRocketProjectileBoomFactory implements EnemyProjectileBoomFact
 
   @Override
   public SoundMakingEntity create(Vector2 position, Player player) {
-    return new EnemyRocketBoom(player,
-        new Vector3(position.x - HALF_UNIT, 0, position.y - HALF_UNIT));
+    return new EnemyRocketBoom(player, new Vector3(position.x, 0, position.y));
   }
 }
