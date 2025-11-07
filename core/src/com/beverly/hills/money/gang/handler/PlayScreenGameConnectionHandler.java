@@ -117,6 +117,7 @@ public class PlayScreenGameConnectionHandler {
   }
 
   private void handleTeleport(ServerResponse.GameEvent gameEvent) {
+    LOG.info("Got teleport event {}", gameEvent);
     // if I'm getting teleported
     if (gameEvent.getPlayer().getPlayerId() == playScreen.getGameBootstrapData()
         .getPlayerId()) {
@@ -125,28 +126,24 @@ public class PlayScreenGameConnectionHandler {
           createVector(gameEvent.getPlayer().getDirection()));
       return;
     }
-
     enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
         .ifPresent(enemyPlayer -> {
+          playTeleportSound(enemyPlayer);
           enemyPlayer.queueAction(EnemyPlayerAction
               .builder()
               .eventSequenceId(gameEvent.getSequence())
-              .direction(enemyPlayer.getLastDirection())
-              .route(enemyPlayer.getRect().getOldPosition())
-              .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
-              .onComplete(() -> {
-                playScreen.getGame().getAssMan()
-                    .getUserSettingSound(SoundRegistry.ENEMY_PLAYER_GOING_THROUGH_TELEPORT)
-                    .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
-                enemyPlayer.teleport(new Vector3(gameEvent.getPlayer().getPosition().getX(),
-                        DEFAULT_ENEMY_Y, gameEvent.getPlayer().getPosition().getY()),
-                    createVector(gameEvent.getPlayer().getDirection()));
-                playScreen.getGame().getAssMan()
-                    .getUserSettingSound(SoundRegistry.SPAWN_SOUND_SEQ.getNext())
-                    .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
-              })
+              .direction(createVector(gameEvent.getPlayer().getDirection()))
+              .route(createVector(gameEvent.getPlayer().getPosition()))
+              .enemyPlayerActionType(EnemyPlayerActionType.TELEPORT)
+              .onComplete(() -> playTeleportSound(enemyPlayer))
               .build());
         });
+  }
+
+  private void playTeleportSound(final EnemyPlayer enemyPlayer) {
+    playScreen.getGame().getAssMan()
+        .getUserSettingSound(SoundRegistry.ENEMY_PLAYER_GOING_THROUGH_TELEPORT)
+        .play(enemyPlayer.getSFXVolume(), enemyPlayer.getSFXPan());
   }
 
   private void handleGameOver(ServerResponse.GameOver gameOver) {
