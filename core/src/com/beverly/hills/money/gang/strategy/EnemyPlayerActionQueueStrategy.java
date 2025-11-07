@@ -36,7 +36,9 @@ public class EnemyPlayerActionQueueStrategy {
   public void enqueue(
       final EnemyPlayerAction enemyPlayerAction, Vector2 currentPosition, boolean visible) {
     boolean inOrder = enemyPlayerAction.getEventSequenceId() > lastEventSequenceId;
-    if (inOrder && !visible) {
+    if (enemyPlayerAction.getEnemyPlayerActionType() == EnemyPlayerActionType.TELEPORT) {
+      skipEventsAndTeleport(enemyPlayerAction);
+    } else if (inOrder && !visible) {
       skipEventsAndTeleport(enemyPlayerAction);
     } else if (inOrder && actions.size() > MAX_ACTION_QUEUE_CLOGGING) {
       skipEventsAndTeleport(enemyPlayerAction);

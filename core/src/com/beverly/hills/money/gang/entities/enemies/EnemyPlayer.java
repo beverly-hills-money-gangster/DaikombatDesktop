@@ -131,6 +131,7 @@ public class EnemyPlayer extends Enemy {
 
 
   public void teleport(Vector3 position, Vector2 direction) {
+    LOG.info("Teleport player {}", enemyPlayerId);
     getEnemyEffects().beingSpawned(System.currentTimeMillis() + SPAWN_ANIMATION_MLS);
     this.getPosition().set(position);
     this.lastDirection = direction;
