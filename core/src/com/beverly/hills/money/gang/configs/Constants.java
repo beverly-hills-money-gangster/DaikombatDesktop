@@ -77,7 +77,7 @@ public interface Constants {
   float PPU = 1f / 16f;
   float HALF_UNIT = 0.5f;
 
-  float DEFAULT_MUSIC_VOLUME = 0.5f * SFX_VOLUME_COEFFICIENT;
+  float DEFAULT_MUSIC_VOLUME = 0.25f * SFX_VOLUME_COEFFICIENT;
 
   float DEFAULT_SFX_VOLUME = 0.5f * SFX_VOLUME_COEFFICIENT;
 
