@@ -9,6 +9,8 @@ import lombok.Setter;
 
 public class RectanglePlus extends Rectangle {
 
+  private static final float TOO_CLOSE = 0.005f;
+
   @Getter
   private final Vector2 oldPosition = new Vector2();
   @Getter
@@ -58,13 +60,19 @@ public class RectanglePlus extends Rectangle {
         targetPosition.y - getHeight() / 2);
     rectDirection.x = targetRect.x - x;
     rectDirection.y = targetRect.y - y;
+    var distance = rectDirection.len();
     rectDirection.nor().scl(speed * delta);
-    getNewPosition().add(rectDirection.x, rectDirection.y);
+    var newDistance = rectDirection.len();
+    if (newDistance > distance) {
+      return center(targetPosition);
+    } else {
+      getNewPosition().add(rectDirection.x, rectDirection.y);
+      setX(getNewPosition().x);
+      setY(getNewPosition().y);
+      getOldPosition().set(x, y);
+      return new Vector3(x + getWidth() / 2, 0, y + getHeight() / 2);
+    }
 
-    setX(getNewPosition().x);
-    setY(getNewPosition().y);
-    getOldPosition().set(x, y);
-    return new Vector3(x + getWidth() / 2, 0, y + getHeight() / 2);
   }
 
   public Vector2 getCenter() {
@@ -73,7 +81,7 @@ public class RectanglePlus extends Rectangle {
 
   private boolean isTooClose(Vector2 vector1, Vector2 vector2) {
     return Vector2.dst(vector1.x, vector1.y, vector2.x,
-        vector2.y) <= 0.05f;
+        vector2.y) <= TOO_CLOSE;
   }
 
 }
