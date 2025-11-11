@@ -435,7 +435,7 @@ public class EnemyPlayerActionQueueStrategyTest {
             .enemyPlayerActionType(EnemyPlayerActionType.MOVE)
             .eventSequenceId(sequence++).build());
 
-    assertEquals(defaultSpeed * 3,
+    assertEquals(defaultSpeed * 2,
         EnemyPlayerActionQueueStrategy.getSpeed(enemyPlayerActions, defaultSpeed));
   }
 

@@ -168,8 +168,7 @@ public class PlayScreenGameConnectionHandler {
         createVector(gameEvent.getPlayer().getDirection()),
         playScreen, gameEvent.getPlayer().getPlayerName(),
         SkinUISelection.getSkinColor(gameEvent.getPlayer().getSkinColor()), createEnemyListeners(),
-        // move a little faster. otherwise I see a little lag even with 0 ping
-        gameEvent.getPlayer().getSpeed() * 1.1f,
+        gameEvent.getPlayer().getSpeed(),
         gameEvent.getPlayer().getHealth(),
         GamePlayerClass.createPlayerClass(gameEvent.getPlayer().getPlayerClass()),
         playScreen.getGameBootstrapData().getMaxVisibility());

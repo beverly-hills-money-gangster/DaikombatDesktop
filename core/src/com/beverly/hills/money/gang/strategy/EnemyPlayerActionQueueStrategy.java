@@ -89,15 +89,15 @@ public class EnemyPlayerActionQueueStrategy {
     } else if (actions.size() > 10) {
       LOG.warn("Action queue is very clogged. Size {}", actions.size());
       return defaultSpeed * 2f;
+    } else if (actions.stream().anyMatch(
+        enemyPlayerAction -> enemyPlayerAction.getEnemyPlayerActionType()
+            == EnemyPlayerActionType.ATTACK)) {
+      return defaultSpeed * 2f;
     } else if (actions.size() >= 5) {
       LOG.warn("Action queue is clogged. Size {}", actions.size());
       return defaultSpeed * 1.25f;
     } else if (actions.size() > 2) {
       return defaultSpeed * 1.15f;
-    } else if (actions.stream().anyMatch(
-        enemyPlayerAction -> enemyPlayerAction.getEnemyPlayerActionType()
-            == EnemyPlayerActionType.ATTACK)) {
-      return defaultSpeed * 3f;
     } else {
       return defaultSpeed;
     }
