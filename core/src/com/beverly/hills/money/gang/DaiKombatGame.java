@@ -21,7 +21,6 @@ import com.beverly.hills.money.gang.screens.ui.selection.UserSettingsUISelection
 import com.beverly.hills.money.gang.utils.EntityManager;
 import java.util.Optional;
 import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.lang3.SystemUtils;
 
 @Getter
@@ -52,8 +51,10 @@ public class DaiKombatGame extends Game {
 
     // restore user configs
     UserPreference userPreference = new UserPreference();
-    UserSettingsUISelection.MOUSE_SENS.getState().setSetting(userPreference.getMouseSensitivity());
-    UserSettingsUISelection.SOUND.getState().setSetting(userPreference.getSoundVolume());
+    for (UserSettingsUISelection settingsUISelection : UserSettingsUISelection.values()) {
+      settingsUISelection.getState().setSetting(userPreference.get(settingsUISelection));
+
+    }
     if (!EnvConfigs.DEV_MODE && SystemUtils.IS_OS_WINDOWS) {
       // support alt+tab for full screen
       Gdx.graphics.setUndecorated(true);

@@ -33,9 +33,10 @@ public class SettingsScreen extends AbstractMainMenuScreen {
   @Override
   public void handleInput(final float delta) {
     if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-      userPreference.setMouseSensitivity(
-          UserSettingsUISelection.MOUSE_SENS.getState().getSetting());
-      userPreference.setSoundVolume(UserSettingsUISelection.SOUND.getState().getSetting());
+      for (UserSettingsUISelection settingsUISelection : UserSettingsUISelection.values()) {
+        userPreference.set(settingsUISelection,
+            settingsUISelection.getState().getSetting());
+      }
       userPreference.flush();
       removeAllEntities();
       getGame().setScreen(new MainMenuScreen(getGame()));

@@ -82,7 +82,7 @@ public class VoiceChatPlayer {
       LOG.error("Can't record", e);
       return;
     }
-    audioPlayer.setVolume(UserSettingsUISelection.SOUND.getState().getNormalized());
+    audioPlayer.setVolume(UserSettingsUISelection.VOICE.getState().getNormalized());
 
     audioRecorderThread = new Thread(() -> {
       short[] shortPCM = new short[voiceChatConfigs.getSampleSize()];
@@ -125,7 +125,7 @@ public class VoiceChatPlayer {
             audioPlayer.writeSamples(pcmSilence, 0, pcmSilence.length);
           } else {
             var mixedPCM = mixPCMs(shortPCMs);
-            amplify(mixedPCM, 3.85f);
+            amplify(mixedPCM, 4f);
             shortPCMs.forEach(onPlayerTalking);
             audioPlayer.writeSamples(mixedPCM, 0, mixedPCM.length);
           }
