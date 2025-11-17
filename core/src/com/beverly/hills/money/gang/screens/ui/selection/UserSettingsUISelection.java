@@ -5,7 +5,8 @@ import lombok.Setter;
 
 public enum UserSettingsUISelection {
 
-  SOUND("SOUND", new SettingState()),
+  SOUND("SOUND EFFECTS", new SettingState()),
+  VOICE("VOICE CHAT", new SettingState()),
   MOUSE_SENS("SENSITIVITY", new SettingState());
 
   @Getter
