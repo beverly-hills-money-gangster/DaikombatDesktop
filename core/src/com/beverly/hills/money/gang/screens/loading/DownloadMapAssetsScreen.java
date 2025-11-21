@@ -1,10 +1,11 @@
 package com.beverly.hills.money.gang.screens.loading;
 
-import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.entity.HostPort;
-import com.beverly.hills.money.gang.network.GameConnection;
+import com.beverly.hills.money.gang.network.TCPGameConnection;
 import com.beverly.hills.money.gang.proto.DownloadMapAssetsCommand;
+import com.beverly.hills.money.gang.queue.GameQueues;
 import com.beverly.hills.money.gang.screens.data.CompleteJoinGameData;
 import com.beverly.hills.money.gang.screens.menu.ErrorScreen;
 import java.util.Optional;
@@ -19,17 +20,15 @@ public class DownloadMapAssetsScreen extends AbstractLoadingScreen {
   private static final Logger LOG = LoggerFactory.getLogger(DownloadMapAssetsScreen.class);
   private final CompleteJoinGameData completeJoinGameData;
   private final AtomicReference<String> errorMessage = new AtomicReference<>();
-
-  private final AtomicReference<GameConnection> gameConnectionRef = new AtomicReference<>();
+  private final GameQueues gameQueues = new GameQueues();
+  private final AtomicReference<TCPGameConnection> gameConnectionRef = new AtomicReference<>();
 
 
   public DownloadMapAssetsScreen(final DaiKombatGame game,
       final CompleteJoinGameData completeJoinGameData) {
     super(game);
     this.completeJoinGameData = completeJoinGameData;
-
   }
-
 
   @Override
   public void show() {
@@ -38,7 +37,7 @@ public class DownloadMapAssetsScreen extends AbstractLoadingScreen {
         var hostPort = HostPort.builder()
             .host(completeJoinGameData.getConnectServerData().getServerHost())
             .port(completeJoinGameData.getConnectServerData().getServerPort()).build();
-        var connection = new GameConnection(hostPort);
+        var connection = new TCPGameConnection(hostPort, gameQueues);
         if (!connection.waitUntilConnected(5_000)) {
           errorMessage.set("Connection timeout");
           connection.disconnect();
@@ -57,13 +56,13 @@ public class DownloadMapAssetsScreen extends AbstractLoadingScreen {
 
   @Override
   protected void onEscape() {
-    Optional.ofNullable(gameConnectionRef.get()).ifPresent(GameConnection::disconnect);
+    Optional.ofNullable(gameConnectionRef.get()).ifPresent(TCPGameConnection::disconnect);
   }
 
   @Override
   public void dispose() {
     super.dispose();
-    Optional.ofNullable(gameConnectionRef.get()).ifPresent(GameConnection::disconnect);
+    Optional.ofNullable(gameConnectionRef.get()).ifPresent(TCPGameConnection::disconnect);
   }
 
   @Override
@@ -75,34 +74,32 @@ public class DownloadMapAssetsScreen extends AbstractLoadingScreen {
               StringUtils.defaultIfBlank(errorMessage.get(), "Can't download map")));
       return;
     }
-    Optional.ofNullable(gameConnectionRef.get()).ifPresent(
-        connection -> {
-          connection.getResponse().poll().ifPresent(response -> {
-            if (response.hasErrorEvent()) {
-              errorMessage.set(response.getErrorEvent().getMessage());
-            } else if (response.hasMapAssets()) {
-              var mapAssets = response.getMapAssets();
-              // this is blocking
-              getGame().getAssMan()
-                  .saveMap(completeJoinGameData.getMapName(),
-                      completeJoinGameData.getMapHash(),
-                      mapAssets);
-              removeAllEntities();
-              getGame().setScreen(new ConnectServerScreen(getGame(), completeJoinGameData));
-            }
-          });
-          connection.getErrors().poll().ifPresent(throwable -> {
-            LOG.error("Error while loading", throwable);
-            connection.disconnect();
-            errorMessage.set(ExceptionUtils.getMessage(throwable));
-          });
-        });
+
+    gameQueues.getResponsesQueueAPI().poll().ifPresent(response -> {
+      if (response.hasErrorEvent()) {
+        errorMessage.set(response.getErrorEvent().getMessage());
+      } else if (response.hasMapAssets()) {
+        var mapAssets = response.getMapAssets();
+        // this is blocking
+        getGame().getAssMan()
+            .saveMap(completeJoinGameData.getMapName(), completeJoinGameData.getMapHash(),
+                mapAssets);
+        removeAllEntities();
+        getGame().setScreen(new ConnectServerScreen(getGame(), completeJoinGameData));
+      }
+    });
+
+    gameQueues.getErrorsQueueAPI().poll().ifPresent(throwable -> {
+      LOG.error("Error while loading", throwable);
+      Optional.ofNullable(gameConnectionRef.get()).ifPresent(TCPGameConnection::disconnect);
+      errorMessage.set(ExceptionUtils.getMessage(throwable));
+    });
   }
 
 
   @Override
   protected void onTimeout() {
-    Optional.ofNullable(gameConnectionRef.get()).ifPresent(GameConnection::disconnect);
+    Optional.ofNullable(gameConnectionRef.get()).ifPresent(TCPGameConnection::disconnect);
   }
 
   @Override
@@ -113,7 +110,7 @@ public class DownloadMapAssetsScreen extends AbstractLoadingScreen {
   @Override
   public void hide() {
     super.hide();
-    Optional.ofNullable(gameConnectionRef.get()).ifPresent(GameConnection::disconnect);
+    Optional.ofNullable(gameConnectionRef.get()).ifPresent(TCPGameConnection::disconnect);
   }
 
 }

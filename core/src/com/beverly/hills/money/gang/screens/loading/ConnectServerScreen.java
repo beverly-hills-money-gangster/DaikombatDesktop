@@ -1,12 +1,9 @@
 package com.beverly.hills.money.gang.screens.loading;
 
-import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.DaiKombatGame;
-import com.beverly.hills.money.gang.configs.EnvConfigs;
+import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.entity.HostPort;
-import com.beverly.hills.money.gang.network.GameConnection;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
-import com.beverly.hills.money.gang.network.SecondaryGameConnection;
 import com.beverly.hills.money.gang.proto.GetServerInfoCommand;
 import com.beverly.hills.money.gang.proto.ServerResponse.ProjectileInfo;
 import com.beverly.hills.money.gang.proto.ServerResponse.WeaponInfo;
@@ -15,8 +12,6 @@ import com.beverly.hills.money.gang.screens.data.GameBootstrapData;
 import com.beverly.hills.money.gang.screens.ui.weapon.Weapon;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponMapper;
 import com.beverly.hills.money.gang.screens.ui.weapon.WeaponStats;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,16 +53,13 @@ public class ConnectServerScreen extends ReconnectableScreen {
         var hostPort = HostPort.builder()
             .host(completeJoinGameData.getConnectServerData().getServerHost())
             .port(completeJoinGameData.getConnectServerData().getServerPort()).build();
-        var connection = new GameConnection(hostPort);
-        GlobalGameConnection loadBalancedGameConnection
-            = new GlobalGameConnection(
-            connection, createSecondaryConnections(hostPort));
-        if (!loadBalancedGameConnection.waitUntilAllConnected(5_000)) {
+        GlobalGameConnection connection = GlobalGameConnection.create(hostPort);
+        if (!connection.waitUntilConnected(5_000)) {
           errorMessage.set("Connection timeout");
-          loadBalancedGameConnection.disconnect();
+          connection.disconnect();
           return;
         }
-        gameConnectionRef.set(loadBalancedGameConnection);
+        gameConnectionRef.set(connection);
         connection.write(GetServerInfoCommand.newBuilder().setPlayerClass(
             JoinGameScreen.createPlayerClass(
                 completeJoinGameData.getJoinGameData().getGamePlayerClass())).build());
@@ -76,15 +68,6 @@ public class ConnectServerScreen extends ReconnectableScreen {
         errorMessage.set(ExceptionUtils.getMessage(e));
       }
     }).start();
-  }
-
-  private List<SecondaryGameConnection> createSecondaryConnections(HostPort hostPort)
-      throws IOException {
-    List<SecondaryGameConnection> secondaryGameConnections = new ArrayList<>();
-    for (int i = 0; i < EnvConfigs.SECONDARY_CONNECTIONS_TO_OPEN; i++) {
-      secondaryGameConnections.add(new SecondaryGameConnection(hostPort));
-    }
-    return secondaryGameConnections;
   }
 
   @Override
@@ -100,7 +83,7 @@ public class ConnectServerScreen extends ReconnectableScreen {
     }
     Optional.ofNullable(gameConnectionRef.get()).ifPresent(
         connection -> {
-          connection.pollPrimaryConnectionResponse().ifPresent(response -> {
+          connection.pollResponse().ifPresent(response -> {
             if (response.hasErrorEvent()) {
               errorMessage.set(response.getErrorEvent().getMessage());
             } else if (response.hasGameOver()) {

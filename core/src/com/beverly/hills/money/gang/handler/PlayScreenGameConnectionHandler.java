@@ -19,10 +19,10 @@ import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerAction;
 import com.beverly.hills.money.gang.entities.enemies.EnemyPlayerActionType;
 import com.beverly.hills.money.gang.entities.item.PowerUpType;
 import com.beverly.hills.money.gang.entities.ui.LeaderBoardPlayer;
+import com.beverly.hills.money.gang.proto.GamePowerUpType;
 import com.beverly.hills.money.gang.proto.ServerResponse;
 import com.beverly.hills.money.gang.proto.ServerResponse.GameEvent.GameEventType;
 import com.beverly.hills.money.gang.proto.ServerResponse.GamePowerUp;
-import com.beverly.hills.money.gang.proto.ServerResponse.GamePowerUpType;
 import com.beverly.hills.money.gang.proto.Vector;
 import com.beverly.hills.money.gang.registry.EnemiesRegistry;
 import com.beverly.hills.money.gang.registry.EnemyPlayerProjectileBoomFactoriesRegistry;
@@ -64,7 +64,7 @@ public class PlayScreenGameConnectionHandler {
     playScreen.getUiLeaderBoard().setPing(
         playScreen.getGameBootstrapData().getPlayerId(),
         Optional.ofNullable(playScreen.getGameConnection()
-            .getPrimaryNetworkStats().getPingMls()).orElse(0));
+            .getTCPNetworkStats().getPingMls()).orElse(0));
 
     playScreen.getGameConnection().pollResponses().forEach(serverResponse -> {
       if (serverResponse.hasChatEvents()) {
@@ -108,6 +108,7 @@ public class PlayScreenGameConnectionHandler {
         case SPAWN, JOIN, RESPAWN -> handleSpawn(gameEvent);
         case EXIT -> handleExit(gameEvent);
         case KILL -> handleDeath(gameEvent);
+        case POWER_UP_PICKUP -> handlePowerUpPickup(gameEvent);
         case MOVE -> handleMove(gameEvent);
         case ATTACK -> handleAttackMiss(gameEvent);
         case GET_ATTACKED -> handleGetHit(gameEvent);
@@ -117,7 +118,6 @@ public class PlayScreenGameConnectionHandler {
   }
 
   private void handleTeleport(ServerResponse.GameEvent gameEvent) {
-    LOG.info("Got teleport event {}", gameEvent);
     // if I'm getting teleported
     if (gameEvent.getPlayer().getPlayerId() == playScreen.getGameBootstrapData()
         .getPlayerId()) {
@@ -227,7 +227,7 @@ public class PlayScreenGameConnectionHandler {
     playScreen.getUiLeaderBoard().removePlayer(gameEvent.getPlayer().getPlayerId());
   }
 
-  private void handleMove(ServerResponse.GameEvent gameEvent) {
+  private void handlePowerUpPickup(ServerResponse.GameEvent gameEvent) {
     if (gameEvent.getPlayer().getPlayerId() == playScreen.getGameBootstrapData()
         .getPlayerId()) {
       if (gameEvent.getPlayer().hasHealth()) {
@@ -247,6 +247,23 @@ public class PlayScreenGameConnectionHandler {
           }
           gameEvent.getPlayer().getActivePowerUpsList().forEach(gamePowerUp
               -> activateEnemyPowerUp(enemyPlayer, gamePowerUp));
+        });
+  }
+
+  private void handleMove(ServerResponse.GameEvent gameEvent) {
+    if (gameEvent.getPlayer().getPlayerId() == playScreen.getGameBootstrapData()
+        .getPlayerId()) {
+      if (gameEvent.getPlayer().hasHealth()) {
+        playScreen.getPlayer().setHP(gameEvent.getPlayer().getHealth());
+      }
+
+      return;
+    }
+    enemiesRegistry.getEnemy(gameEvent.getPlayer().getPlayerId())
+        .ifPresent(enemyPlayer -> {
+          if (gameEvent.getPlayer().hasHealth()) {
+            enemyPlayer.setHp(gameEvent.getPlayer().getHealth());
+          }
           playScreen.getUiLeaderBoard()
               .setPing(gameEvent.getPlayer().getPlayerId(), gameEvent.getPlayer().getPingMls());
           enemyPlayer.queueAction(EnemyPlayerAction.builder()

@@ -187,7 +187,7 @@ public abstract class GameScreen implements Screen {
     StringBuilder gameTechStats = new StringBuilder();
     gameTechStats.append(playersOnline).append(" ONLINE ");
     gameTechStats.append("| PING ")
-        .append(Objects.toString(gameConnection.getPrimaryNetworkStats().getPingMls(), "-"))
+        .append(Objects.toString(gameConnection.getTCPNetworkStats().getPingMls(), "-"))
         .append(" MS | ");
     gameTechStats.append(Gdx.graphics.getFramesPerSecond()).append(" FPS");
 

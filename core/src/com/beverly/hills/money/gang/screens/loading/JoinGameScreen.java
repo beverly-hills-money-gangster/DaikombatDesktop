@@ -5,10 +5,10 @@ import com.beverly.hills.money.gang.config.ClientConfig;
 import com.beverly.hills.money.gang.configs.Constants;
 import com.beverly.hills.money.gang.network.GlobalGameConnection;
 import com.beverly.hills.money.gang.proto.JoinGameCommand;
-import com.beverly.hills.money.gang.proto.MergeConnectionCommand;
 import com.beverly.hills.money.gang.proto.PlayerClass;
 import com.beverly.hills.money.gang.proto.PlayerSkinColor;
-import com.beverly.hills.money.gang.proto.ServerResponse;
+import com.beverly.hills.money.gang.proto.ServerResponse.GameEvent;
+import com.beverly.hills.money.gang.proto.ServerResponse.GameEvent.GameEventType;
 import com.beverly.hills.money.gang.screens.GameScreen;
 import com.beverly.hills.money.gang.screens.data.CompleteJoinGameData;
 import com.beverly.hills.money.gang.screens.data.GameBootstrapData;
@@ -110,7 +110,7 @@ public class JoinGameScreen extends ReconnectableScreen {
       reconnect(errorMessage.get(), gameConnection, completeJoinGameData);
       return;
     }
-    gameConnection.pollPrimaryConnectionResponse().ifPresent(response -> {
+    gameConnection.pollResponse().ifPresent(response -> {
       if (response.hasErrorEvent()) {
         LOG.error("Error {}", errorMessage);
         errorMessage.set(response.getErrorEvent().getMessage());
@@ -118,12 +118,17 @@ public class JoinGameScreen extends ReconnectableScreen {
         LOG.info("Game is over. Try to reconnect");
         errorMessage.set("Can't connect. Game is over.");
       } else if (response.hasGameEvents()) {
+        var mySpawnEvent = response.getGameEvents().getEventsList().stream().filter(
+                gameEvent -> gameEvent.getEventType() == GameEventType.INIT).findFirst()
+            .orElse(null);
+        if (mySpawnEvent == null) {
+          return;
+        }
         removeAllEntities();
         stopBgMusic();
         LOG.info("Joined the game. Go play");
-        var playerContextData = createPlayerContextData(response);
-        gameConnection.initVoiceChat(playerContextData.getPlayerId(),
-            completeJoinGameData.getGameRoomId());
+        var playerContextData = createPlayerContextData(mySpawnEvent,
+            response.getGameEvents().getPlayersOnline());
         getGame().setScreen(
             new PlayScreen(getGame(), gameConnection, playerContextData));
       }
@@ -136,16 +141,13 @@ public class JoinGameScreen extends ReconnectableScreen {
     });
   }
 
-  private GameBootstrapData createPlayerContextData(ServerResponse response) {
-    var mySpawnEvent = response.getGameEvents().getEvents(0);
+  private GameBootstrapData createPlayerContextData(
+      final GameEvent mySpawnEvent,
+      final int playersOnline) {
     int playerId = mySpawnEvent.getPlayer().getPlayerId();
-    gameConnection.getSecondaryGameConnections().forEach(
-        secondaryGameConnection -> secondaryGameConnection.write(
-            MergeConnectionCommand.newBuilder().setGameId(completeJoinGameData.getGameRoomId())
-                .setPlayerId(playerId).build()));
     return playerContextDataBuilder
         .playerId(playerId)
-        .playersOnline(response.getGameEvents().getPlayersOnline())
+        .playersOnline(playersOnline)
         .completeJoinGameData(completeJoinGameData)
         .spawn(Converter.convertToVector2(mySpawnEvent.getPlayer().getPosition()))
         .direction(Converter.convertToVector2(mySpawnEvent.getPlayer().getDirection()))
