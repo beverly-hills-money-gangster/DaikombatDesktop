@@ -121,6 +121,7 @@ public class EnemyPlayer extends Enemy {
         this::setCurrentSpeed,
         speed);
     lastActionReceivedTimeMls = System.currentTimeMillis();
+    LOG.info("Enemy player {} id {} created", name, enemyPlayerId);
   }
 
   public void talking() {

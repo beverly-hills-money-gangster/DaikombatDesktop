@@ -178,12 +178,14 @@ public class Player extends Entity {
   }
 
   public void teleport(final Vector2 position, final Vector2 lookAt) {
-    getScreen().getGame().getRectMan().removeRect(rect); // never forget!
-    playerCam.position.set(new Vector3(0, Constants.DEFAULT_PLAYER_CAM_Y, 0));
-    playerCam.lookAt(new Vector3(lookAt.x, Constants.DEFAULT_PLAYER_CAM_Y, lookAt.y));
-    createRect(position.cpy());
-    colliedTeleport.finish();
-    colliedTeleport = null;
+    Optional.ofNullable(colliedTeleport).ifPresentOrElse(teleport -> {
+      getScreen().getGame().getRectMan().removeRect(rect);
+      playerCam.position.set(new Vector3(0, Constants.DEFAULT_PLAYER_CAM_Y, 0));
+      playerCam.lookAt(new Vector3(lookAt.x, Constants.DEFAULT_PLAYER_CAM_Y, lookAt.y));
+      createRect(position.cpy());
+      colliedTeleport.finish();
+      colliedTeleport = null;
+    }, () -> LOG.warn("Can't teleport because collided teleport is null"));
   }
 
   public boolean isCollidedWithTeleport() {

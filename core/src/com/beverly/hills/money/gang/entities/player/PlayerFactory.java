@@ -56,7 +56,7 @@ public class PlayerFactory {
               .setGameId(gameBootstrapData.getCompleteJoinGameData().getGameRoomId())
               .setSequence(screen.getActionSequence().incrementAndGet())
               .setPingMls(
-                  Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
+                  Optional.ofNullable(gameConnection.getTCPNetworkStats().getPingMls())
                       .orElse(0))
               .setPlayerId(gameBootstrapData.getPlayerId())
               .setDirection(
@@ -107,7 +107,7 @@ public class PlayerFactory {
               .setGameId(gameBootstrapData.getCompleteJoinGameData().getGameRoomId())
               .setSequence(screen.getActionSequence().incrementAndGet())
               .setPingMls(
-                  Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
+                  Optional.ofNullable(gameConnection.getTCPNetworkStats().getPingMls())
                       .orElse(0))
               .setPlayerId(gameBootstrapData.getPlayerId())
               .setDirection(

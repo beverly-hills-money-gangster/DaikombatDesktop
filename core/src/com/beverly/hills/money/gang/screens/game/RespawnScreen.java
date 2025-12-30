@@ -64,7 +64,7 @@ public class RespawnScreen extends AbstractLoadingScreen {
       return;
     }
 
-    gameConnection.pollPrimaryConnectionResponse().ifPresent(response -> {
+    gameConnection.pollResponse().ifPresent(response -> {
       if (response.hasErrorEvent()) {
         errorMessage = response.getErrorEvent().getMessage();
       } else if (response.hasGameOver()) {

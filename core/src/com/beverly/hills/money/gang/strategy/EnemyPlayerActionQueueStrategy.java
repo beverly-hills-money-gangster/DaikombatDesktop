@@ -35,6 +35,7 @@ public class EnemyPlayerActionQueueStrategy {
 
   public void enqueue(
       final EnemyPlayerAction enemyPlayerAction, Vector2 currentPosition, boolean visible) {
+    // TODO make sure it's all UDP ready
     boolean inOrder = enemyPlayerAction.getEventSequenceId() > lastEventSequenceId;
     if (enemyPlayerAction.getEnemyPlayerActionType() == EnemyPlayerActionType.TELEPORT) {
       skipEventsAndTeleport(enemyPlayerAction);

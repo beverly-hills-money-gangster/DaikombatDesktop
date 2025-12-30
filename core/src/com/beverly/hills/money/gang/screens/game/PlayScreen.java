@@ -152,9 +152,8 @@ public class PlayScreen extends GameScreen {
     super(game, new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 
     this.gameConnection = gameConnection;
-    this.uiNetworkStats = new UINetworkStats(gameConnection.getPrimaryNetworkStats(),
-        gameConnection.getSecondaryNetworkStats(),
-        gameConnection.getVoiceChatNetworkStatsReader());
+    this.uiNetworkStats = new UINetworkStats(gameConnection.getTCPNetworkStats(),
+        gameConnection.getUDPNetworkStats());
     dingSound1 = getGame().getAssMan().getUserSettingSound(SoundRegistry.DING_1);
     playerGoingThroughTeleport = game.getAssMan()
         .getUserSettingSound(SoundRegistry.PLAYER_GOING_THROUGH_TELEPORT);
@@ -258,6 +257,7 @@ public class PlayScreen extends GameScreen {
   public void spawnTeleport(int teleportId, Vector2 position) {
     Teleport teleport = new Teleport(new Vector3(position.x, 0.0f, position.y), this, getPlayer(),
         teleportId, t -> {
+      // TODO make sure I don't teleport if I have already collided with a teleport
       playerGoingThroughTeleport.play(Constants.DEFAULT_SFX_VOLUME);
       LOG.info("Collide with teleport");
       var currentPosition = getPlayer().getCurrent2DPosition();
@@ -265,7 +265,7 @@ public class PlayScreen extends GameScreen {
       gameConnection.write(PushGameEventCommand.newBuilder()
           .setSequence(actionSequence.incrementAndGet())
           .setPingMls(
-              Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
+              Optional.ofNullable(gameConnection.getTCPNetworkStats().getPingMls())
                   .orElse(0))
           .setPlayerId(gameBootstrapData.getPlayerId())
           .setEventType(GameEventType.TELEPORT)
@@ -296,10 +296,11 @@ public class PlayScreen extends GameScreen {
           var currentDirection = getPlayer().getCurrent2DDirection();
           var command = PushGameEventCommand.newBuilder()
               .setSequence(actionSequence.incrementAndGet())
-              .setPingMls(Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls())
+              .setPingMls(Optional.ofNullable(gameConnection.getTCPNetworkStats().getPingMls())
                   .orElse(0))
               .setPlayerId(gameBootstrapData.getPlayerId())
-              .setEventType(powerUpType.getPickType())
+              .setEventType(GameEventType.POWER_UP_PICKUP)
+              .setPowerUp(powerUpType.getPickType())
               .setGameId(gameBootstrapData.getCompleteJoinGameData().getGameRoomId())
               .setPosition(Vector.newBuilder()
                   .setX(currentPosition.x).setY(currentPosition.y).build())
@@ -435,7 +436,7 @@ public class PlayScreen extends GameScreen {
     var currentDirection = getPlayer().getCurrent2DDirection();
     gameConnection.write(PushGameEventCommand.newBuilder()
         .setPingMls(
-            Optional.ofNullable(gameConnection.getPrimaryNetworkStats().getPingMls()).orElse(0))
+            Optional.ofNullable(gameConnection.getTCPNetworkStats().getPingMls()).orElse(0))
         .setSequence(actionSequence.incrementAndGet())
         .setPlayerId(gameBootstrapData.getPlayerId())
         .setEventType(PushGameEventCommand.GameEventType.MOVE)
